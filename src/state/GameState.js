@@ -32,6 +32,7 @@ export const GameState = {
   emblems: {
     // Populated as the player earns them.
     // Shape per emblem: { earned: true, shine: 0–100 }
+    // shine is a percentage: 0 = tarnished, 100 = fully polished
   },
   story: {
     act:             1,

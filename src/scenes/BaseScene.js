@@ -20,16 +20,33 @@ export class BaseScene extends Phaser.Scene {
 
   // Play a BGM track by ID, using loop points from bgm-loop-points.json.
   // BootScene loads the JSON and stores it on the registry as 'bgmLoopPoints'.
+  // If start/end loop points are set, uses Phaser markers for seamless looping.
   playBgm(trackId) {
     if (this._currentBgm) {
       this._currentBgm.stop()
       this._currentBgm = null
     }
-    if (!this.sound.get(trackId)) return
-    const loopPoints = this.registry.get('bgmLoopPoints') ?? {}
-    const loop = loopPoints[trackId] ?? { start: 0, end: 0 }
-    this._currentBgm = this.sound.add(trackId, { loop: true })
-    this._currentBgm.play({ seek: loop.start })
+    if (!this.cache.audio.exists(trackId)) return
+
+    const loopPoints    = this.registry.get('bgmLoopPoints') ?? {}
+    const loop          = loopPoints[trackId] ?? { start: 0, end: 0 }
+    const hasLoopPoints = typeof loop.start === 'number'
+      && typeof loop.end === 'number'
+      && loop.end > loop.start
+
+    if (hasLoopPoints) {
+      const markerName = `${trackId}__loop`
+      this._currentBgm = this.sound.add(trackId)
+      this._currentBgm.addMarker({
+        name:     markerName,
+        start:    loop.start,
+        duration: loop.end - loop.start,
+      })
+      this._currentBgm.play(markerName, { loop: true })
+    } else {
+      this._currentBgm = this.sound.add(trackId, { loop: true })
+      this._currentBgm.play()
+    }
   }
 
   // Delegate to the scene's DialogBox instance.
