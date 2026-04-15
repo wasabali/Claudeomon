@@ -66,8 +66,8 @@ function assessQuality(skill, opponent, domainRevealed) {
   if (skill.tier === 'nuclear')  return 'nuclear'
   if (skill.tier === 'cursed')   return 'cursed'
 
-  const correctDomain = skill.domain === DOMAIN_MATCHUPS[skill.domain]?.strong
-    ? skill.domain : null  // simplified — actual logic checks against opponent domain
+  const correctDomain = skill.domain === DOMAIN_MATCHUPS[opponent.domain]?.weak
+    ? skill.domain : null  // skill's domain beats opponent's domain
 
   if (correctDomain && domainRevealed) return 'optimal'
   if (correctDomain && !domainRevealed) return 'standard'

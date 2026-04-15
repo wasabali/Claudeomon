@@ -61,7 +61,7 @@ renderEvents(events) {
     switch (event.type) {
       case 'damage':   this.showDamageNumber(event.target, event.value); break
       case 'dialog':   this.dialogBox.show(event.text); break
-      case 'win':      this.scene.start('WorldScene'); break
+      case 'win':      this.fadeToScene('WorldScene'); break
     }
   })
 }
@@ -80,7 +80,7 @@ onSkillSelected(skillId) {
 Never create raw Phaser text objects for in-game dialogue. Always use `DialogBox`:
 
 ```js
-import { DialogBox } from '../ui/DialogBox.js'
+import { DialogBox } from '#ui/DialogBox.js'
 
 create() {
   this.dialog = new DialogBox(this)  // pass scene reference
