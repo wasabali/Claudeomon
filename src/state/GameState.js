@@ -55,6 +55,7 @@ export const GameState = {
     cursedTechniquesUsed: 0,
     totalDeployments:     0,
     longestUptime:        0,
+    skillUseCounts:       {},
   },
   _session: {
     isDirty:     false,  // true when there are unsaved changes
@@ -172,6 +173,7 @@ export function initNewGame(name, mascot) {
     cursedTechniquesUsed:  0,
     nuclearTechniquesUsed: 0,
     optimalSolutions:      0,
+    skillUseCounts:        {},
   }
   GameState._session = {
     isDirty:     true,

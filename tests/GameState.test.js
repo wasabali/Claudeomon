@@ -68,3 +68,9 @@ describe('GameState inventory helpers', () => {
     ])
   })
 })
+
+describe('GameState.stats', () => {
+  it('includes skillUseCounts map for skill tracking', () => {
+    expect(GameState.stats.skillUseCounts).toEqual({})
+  })
+})
