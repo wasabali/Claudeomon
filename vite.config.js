@@ -28,4 +28,8 @@ export default defineConfig({
     target: 'esnext',
     chunkSizeWarningLimit: 1000,
   },
+  test: {
+    environment: 'node',
+    include:     ['tests/**/*.test.js'],
+  },
 })
