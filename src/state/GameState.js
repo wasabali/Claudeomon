@@ -6,6 +6,7 @@ import { Overrides } from '../overrides.js'
 export const GameState = {
   player: {
     name:          '',
+    mascot:        null,
     title:         'Intern',
     level:         1,
     xp:            0,
@@ -15,7 +16,9 @@ export const GameState = {
     reputation:    50,    // 0–100, rebuildable
     shamePoints:   0,     // 0+, permanent, never decremented
     technicalDebt: 0,     // 0–10 stacks; each stack reduces maxHp by 2
+    title:         'Intern',
     location:      'localhost_town',
+    activeSlots:   4,
     playtime:      0,     // seconds elapsed
   },
   skills: {
@@ -108,6 +111,34 @@ export const hasItem = (tab, id) => {
   const item = items.find((entry) => normalizeInventoryEntry(entry).id === id)
   if (!item) return false
   return normalizeInventoryEntry(item).qty > 0
+}
+
+export const STARTING_ACTIVE_SKILLS = [
+  'kubectl_rollout_restart',
+  'read_the_docs',
+  'blame_dns',
+  'az_webapp_deploy',
+]
+
+export function initNewGame(name, mascot) {
+  Object.assign(GameState.player, {
+    name,
+    mascot,
+    level:         1,
+    xp:            0,
+    hp:            100,
+    maxHp:         100,
+    budget:        500,
+    reputation:    50,
+    shamePoints:   0,
+    technicalDebt: 0,
+    title:         'Intern',
+    location:      'localhost_town',
+    activeSlots:   4,
+  })
+  GameState.skills.active    = [...STARTING_ACTIVE_SKILLS]
+  GameState.skills.learned   = [...STARTING_ACTIVE_SKILLS]
+  GameState._session.isDirty = true
 }
 
 // Apply dev overrides at startup (dev mode only)
