@@ -1,15 +1,19 @@
 import { defineConfig } from 'vite'
-import { resolve } from 'path'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const src = (p) => resolve(__dirname, 'src', p)
 
 export default defineConfig({
   resolve: {
     alias: {
-      '#engine': resolve('./src/engine'),
-      '#data':   resolve('./src/data'),
-      '#scenes': resolve('./src/scenes'),
-      '#state':  resolve('./src/state'),
-      '#ui':     resolve('./src/ui'),
-      '#utils':  resolve('./src/utils'),
+      '#engine': src('engine'),
+      '#data':   src('data'),
+      '#scenes': src('scenes'),
+      '#state':  src('state'),
+      '#ui':     src('ui'),
+      '#utils':  src('utils'),
     },
   },
   server: {

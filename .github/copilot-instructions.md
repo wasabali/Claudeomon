@@ -9,7 +9,7 @@ A GameBoy Color-style RPG where the player is a cloud engineer using real CLI co
 - **Engine scripts** (`src/engine/`) must never import Phaser. Pure JS logic, unit-testable with Node.js only.
 - **Scenes** (`src/scenes/`) delegate all logic to engines. They receive events and render them. No game logic in scenes.
 - **All mutable state** lives in `GameState.js`. Never store persistent state in a scene, engine instance, or module-level variable.
-- **Data modules** (`src/data/`) export pure object definitions only. No logic, no imports from engine or scenes.
+- **Data modules** (`src/data/`) contain no game logic or conditionals — only plain object definitions plus the three required registry accessors (`getById`, `getAll`, `getBy`). No imports from engine or scenes.
 
 ## Folder Purpose
 
@@ -107,7 +107,8 @@ export const GameState = {
 
 ## Naming Conventions
 
-- Files: `camelCase.js`
+- Files exporting a class: `PascalCase.js` — scenes, engines, UI components, state managers (e.g. `BattleEngine.js`, `BaseScene.js`, `DialogBox.js`, `GameState.js`)
+- Files exporting functions or data: `camelCase.js` — utils, data modules, config (e.g. `skills.js`, `random.js`, `config.js`)
 - Classes / scenes: `PascalCase`
 - Constants: `SCREAMING_SNAKE_CASE` defined in `src/config.js`
 - Data IDs: `snake_case` strings that match their object key

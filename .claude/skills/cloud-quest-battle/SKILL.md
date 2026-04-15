@@ -66,8 +66,8 @@ function assessQuality(skill, opponent, domainRevealed) {
   if (skill.tier === 'nuclear')  return 'nuclear'
   if (skill.tier === 'cursed')   return 'cursed'
 
-  const correctDomain = skill.domain === DOMAIN_MATCHUPS[skill.domain]?.strong
-    ? skill.domain : null  // simplified — actual logic checks against opponent domain
+  const correctDomain = skill.domain === DOMAIN_MATCHUPS[opponent.domain]?.weak
+    ? skill.domain : null  // skill's domain beats opponent's domain
 
   if (correctDomain && domainRevealed) return 'optimal'
   if (correctDomain && !domainRevealed) return 'standard'
@@ -116,20 +116,21 @@ All engine functions return `BattleEvent[]`. BattleScene iterates and renders ea
 
 ```js
 {
-  type: 'damage'         // hp loss
-      | 'heal'           // hp gain
-      | 'status_apply'   // status effect added
-      | 'status_remove'  // status effect expired
-      | 'budget_drain'   // budget loss
-      | 'shame'          // shame point added
-      | 'dialog'         // show text in battle log
-      | 'sla_tick'       // SLA countdown updated
-      | 'reveal'         // enemy domain revealed
-      | 'win'            // battle won
-      | 'lose',          // battle lost
+  type: 'damage'              // hp loss
+      | 'heal'                // hp gain
+      | 'status_apply'        // status effect added
+      | 'status_remove'       // status effect expired
+      | 'budget_drain'        // budget loss
+      | 'shame'               // shame point added
+      | 'reputation_damage'   // reputation loss (SLA breach, cursed technique)
+      | 'dialog'              // show text in battle log
+      | 'sla_tick'            // SLA countdown updated
+      | 'reveal'              // enemy domain revealed
+      | 'win'                 // battle won
+      | 'lose',               // battle lost
   target: 'player' | 'opponent',
   value: Number,
-  text: String,          // for 'dialog' events only
+  text: String,               // for 'dialog' events only
 }
 ```
 
