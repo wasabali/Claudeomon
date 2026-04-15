@@ -8,22 +8,17 @@ import {
 } from '../src/config.js'
 
 describe('CONFIG', () => {
-  it('has 160×144 native resolution', () => {
-    expect(CONFIG.WIDTH).toBe(160)
-    expect(CONFIG.HEIGHT).toBe(144)
+  it('has 1920×1080 resolution', () => {
+    expect(CONFIG.WIDTH).toBe(1920)
+    expect(CONFIG.HEIGHT).toBe(1080)
   })
 
-  it('has integer scale factor of 4', () => {
-    expect(CONFIG.SCALE).toBe(4)
+  it('has 48px tile size', () => {
+    expect(CONFIG.TILE_SIZE).toBe(48)
   })
 
-  it('has 16px tile size', () => {
-    expect(CONFIG.TILE_SIZE).toBe(16)
-  })
-
-  it('display resolution is native × scale', () => {
-    expect(CONFIG.WIDTH  * CONFIG.SCALE).toBe(640)
-    expect(CONFIG.HEIGHT * CONFIG.SCALE).toBe(576)
+  it('limits active skills to 6', () => {
+    expect(CONFIG.MAX_ACTIVE_SKILLS).toBe(6)
   })
 })
 
