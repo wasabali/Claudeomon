@@ -121,7 +121,7 @@ export const STARTING_ACTIVE_SKILLS = [
 ]
 
 export function initNewGame(name, mascot) {
-  Object.assign(GameState.player, {
+  GameState.player = {
     name,
     mascot,
     level:         1,
@@ -135,10 +135,48 @@ export function initNewGame(name, mascot) {
     title:         'Intern',
     location:      'localhost_town',
     activeSlots:   4,
-  })
-  GameState.skills.active    = [...STARTING_ACTIVE_SKILLS]
-  GameState.skills.learned   = [...STARTING_ACTIVE_SKILLS]
-  GameState._session.isDirty = true
+    playtime:      0,
+  }
+  GameState.skills = {
+    active:  [...STARTING_ACTIVE_SKILLS],
+    learned: [...STARTING_ACTIVE_SKILLS],
+    cursed:  [],
+  }
+  GameState.inventory = {
+    tools:       [],
+    keyItems:    [],
+    credentials: [],
+    docs:        [],
+    junk:        [],
+  }
+  GameState.emblems = {
+    tux:       { earned: false, shine: 0, grime: 0 },
+    pipeline:  { earned: false, shine: 0, grime: 0 },
+    container: { earned: false, shine: 0, grime: 0 },
+    cloud:     { earned: false, shine: 0, grime: 0 },
+    vault:     { earned: false, shine: 0, grime: 0 },
+    helm:      { earned: false, shine: 0, grime: 0 },
+    finops:    { earned: false, shine: 0, grime: 0 },
+    sre:       { earned: false, shine: 0, grime: 0 },
+  }
+  GameState.story = {
+    act:             1,
+    completedQuests: [],
+    flags:           {},
+  }
+  GameState.stats = {
+    battlesWon:            0,
+    battlesLost:           0,
+    incidentsResolved:     0,
+    slaBreaches:           0,
+    cursedTechniquesUsed:  0,
+    nuclearTechniquesUsed: 0,
+    optimalSolutions:      0,
+  }
+  GameState._session = {
+    isDirty:     true,
+    lastSavedAt: null,
+  }
 }
 
 // Apply dev overrides at startup (dev mode only)
