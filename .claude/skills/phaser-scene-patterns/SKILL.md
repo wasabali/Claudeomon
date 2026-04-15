@@ -10,9 +10,9 @@ description: Reference for correctly structuring Phaser 3 scenes in Cloud Quest.
 Every scene in Cloud Quest follows this structure:
 
 ```js
-import { BaseScene }    from '#scenes/BaseScene.js'
+import { BaseScene } from '#scenes/BaseScene.js'
 import { BattleEngine } from '#engine/BattleEngine.js'
-import { GameState }    from '#state/GameState.js'
+import { GameState } from '#state/GameState.js'
 
 export class BattleScene extends BaseScene {
   constructor() {

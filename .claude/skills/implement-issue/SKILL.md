@@ -43,7 +43,7 @@ Engine code constraints:
 // BattleEvent shape — every engine function returns these
 {
   type: 'damage' | 'heal' | 'status_apply' | 'status_remove'
-      | 'budget_drain' | 'shame' | 'reputation_damage' | 'dialog' | 'sla_tick'
+      | 'budget_drain' | 'shame' | 'dialog' | 'sla_tick'
       | 'reveal' | 'win' | 'lose',
   target: 'player' | 'opponent',
   value: Number,

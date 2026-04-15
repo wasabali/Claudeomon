@@ -218,17 +218,17 @@ Fill in `start`/`end` values once tracks are finalized.
 
 ### Dev Overrides
 
-`src/overrides.js` lets you bypass grinding during development. Every override is commented out by default — uncomment what you need and recomment before committing. Never commit uncommented overrides to main.
+`src/overrides.js` lets you bypass grinding during development. Values are null by default (no effect). Uncomment what you need; never commit uncommented overrides.
 
 ```js
-// Uncomment to test the evil path without accumulating 7 shame manually:
-// SHAME_OVERRIDE: 7,
+// Test the evil path without accumulating 7 shame manually:
+SHAME_OVERRIDE: 7,
 
-// Uncomment to test cursed area without navigating there:
-// LOCATION_OVERRIDE: 'three_am_tavern',
+// Test cursed area without navigating there:
+LOCATION_OVERRIDE: 'three_am_tavern',
 ```
 
-`GameState.js` reads `Overrides` at startup in dev mode (`import.meta.env.DEV`). Commented-out keys have no effect.
+`GameState.js` reads `Overrides` at startup in dev mode (`import.meta.env.DEV`).
 
 ---
 

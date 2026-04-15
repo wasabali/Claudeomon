@@ -84,7 +84,7 @@ Every engine function returns an array of `BattleEvent` objects:
 ```js
 {
   type: 'damage' | 'heal' | 'status_apply' | 'status_remove'
-      | 'budget_drain' | 'shame' | 'reputation_damage' | 'dialog' | 'sla_tick'
+      | 'budget_drain' | 'shame' | 'dialog' | 'sla_tick'
       | 'reveal' | 'win' | 'lose',
   target: 'player' | 'opponent',
   value: Number,

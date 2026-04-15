@@ -1,19 +1,15 @@
 import { defineConfig } from 'vite'
-import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const src = (p) => resolve(__dirname, 'src', p)
+import { resolve } from 'path'
 
 export default defineConfig({
   resolve: {
     alias: {
-      '#engine': src('engine'),
-      '#data':   src('data'),
-      '#scenes': src('scenes'),
-      '#state':  src('state'),
-      '#ui':     src('ui'),
-      '#utils':  src('utils'),
+      '#engine': resolve('./src/engine'),
+      '#data':   resolve('./src/data'),
+      '#scenes': resolve('./src/scenes'),
+      '#state':  resolve('./src/state'),
+      '#ui':     resolve('./src/ui'),
+      '#utils':  resolve('./src/utils'),
     },
   },
   server: {
@@ -27,9 +23,5 @@ export default defineConfig({
   build: {
     target: 'esnext',
     chunkSizeWarningLimit: 1000,
-  },
-  test: {
-    environment: 'node',
-    include:     ['tests/**/*.test.js'],
   },
 })
