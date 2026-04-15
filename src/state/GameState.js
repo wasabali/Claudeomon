@@ -59,6 +59,56 @@ export const GameState = {
   },
 }
 
+export const markDirty = () => {
+  GameState._session.isDirty = true
+}
+
+const normalizeEntry = (entry) => (
+  typeof entry === 'string'
+    ? { id: entry, qty: 1 }
+    : entry
+)
+
+const getTabItems = (tab) => GameState.inventory[tab]
+
+export const addItem = (tab, id, qty = 1) => {
+  const items = getTabItems(tab)
+  const index = items.findIndex((entry) => normalizeEntry(entry).id === id)
+
+  if (index === -1) {
+    items.push({ id, qty })
+  } else {
+    const existing = normalizeEntry(items[index])
+    items[index] = { id: existing.id, qty: existing.qty + qty }
+  }
+
+  markDirty()
+}
+
+export const removeItem = (tab, id, qty = 1) => {
+  const items = getTabItems(tab)
+  const index = items.findIndex((entry) => normalizeEntry(entry).id === id)
+  if (index === -1) return false
+
+  const existing = normalizeEntry(items[index])
+  const nextQty  = existing.qty - qty
+
+  if (nextQty > 0) {
+    items[index] = { id: existing.id, qty: nextQty }
+  } else {
+    items.splice(index, 1)
+  }
+
+  markDirty()
+  return true
+}
+
+export const hasItem = (tab, id) => {
+  const items = getTabItems(tab)
+  const item  = items.find((entry) => normalizeEntry(entry).id === id)
+  return Boolean(item && normalizeEntry(item).qty > 0)
+}
+
 // Apply dev overrides at startup (dev mode only)
 if (import.meta.env?.DEV) {
   if (Overrides.SHAME_OVERRIDE != null)         GameState.player.shamePoints   = Overrides.SHAME_OVERRIDE
