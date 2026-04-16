@@ -232,15 +232,27 @@ export function incidentAttackPhase(state) {
       }
       break
 
-    case INCIDENT_ATTACKS.BUDGET_SPIKE:
-      state.player.budget = Math.max(0, (state.player.budget ?? 0) - BUDGET_SPIKE_VALUE)
-      events.push({ type: 'budget_drain', target: 'player', value: BUDGET_SPIKE_VALUE })
+    case INCIDENT_ATTACKS.BUDGET_SPIKE: {
+      const currentBudget = state.player.budget ?? 0
+      const nextBudget = Math.max(0, currentBudget - BUDGET_SPIKE_VALUE)
+      const drainedBudget = currentBudget - nextBudget
+      state.player.budget = nextBudget
+      if (drainedBudget > 0) {
+        events.push({ type: 'budget_drain', target: 'player', value: drainedBudget })
+      }
       break
+    }
 
-    case INCIDENT_ATTACKS.REPUTATION_LEAK:
-      state.player.reputation = Math.max(0, (state.player.reputation ?? 0) - REPUTATION_LEAK_VALUE)
-      events.push({ type: 'reputation', target: 'player', value: -REPUTATION_LEAK_VALUE })
+    case INCIDENT_ATTACKS.REPUTATION_LEAK: {
+      const previousReputation = state.player.reputation ?? 0
+      const nextReputation = Math.max(0, previousReputation - REPUTATION_LEAK_VALUE)
+      const reputationDelta = nextReputation - previousReputation
+      state.player.reputation = nextReputation
+      if (reputationDelta !== 0) {
+        events.push({ type: 'reputation', target: 'player', value: reputationDelta })
+      }
       break
+    }
 
     case INCIDENT_ATTACKS.SKILL_BLOCK: {
       const alreadyBlocked = state.playerStatuses.find(s => s.name === 'skill_block')
@@ -262,8 +274,12 @@ export function incidentAttackPhase(state) {
 
     case INCIDENT_ATTACKS.ESCALATION: {
       const currentDebt = state.player.technicalDebt ?? 0
-      state.player.technicalDebt = Math.min(10, currentDebt + 1)
-      events.push({ type: 'escalation', target: 'player', value: 1 })
+      const nextDebt = Math.min(10, currentDebt + 1)
+      const debtDelta = nextDebt - currentDebt
+      state.player.technicalDebt = nextDebt
+      if (debtDelta > 0) {
+        events.push({ type: 'escalation', target: 'player', value: debtDelta })
+      }
       break
     }
   }

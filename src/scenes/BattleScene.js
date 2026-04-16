@@ -378,7 +378,10 @@ export class BattleScene extends BaseScene {
 
     if (result === 'win') {
       GameState.stats.battlesWon++
-      GameState.stats.incidentsResolved = (GameState.stats.incidentsResolved ?? 0) + 1
+
+      if (this._battleState.mode === BATTLE_MODES.INCIDENT) {
+        GameState.stats.incidentsResolved = (GameState.stats.incidentsResolved ?? 0) + 1
+      }
 
       // Apply XP using the post-turn quality tier
       const xp = calculateXP(opponent.difficulty ?? 1, this._battleState.winningTier ?? 'standard')

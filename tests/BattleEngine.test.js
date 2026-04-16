@@ -615,8 +615,9 @@ describe('incidentAttackPhase', () => {
   it('technicalDebt is capped at 10 by escalation', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ technicalDebt: 10 }), makeAttackOpponent(['escalation']), { slaTimer: 5 })
     state.turn = 2
-    incidentAttackPhase(state)
+    const events = incidentAttackPhase(state)
     expect(state.player.technicalDebt).toBe(10)
+    expect(events.find(e => e.type === 'escalation')).toBeUndefined()
   })
 
   it('cycles attacks deterministically based on turn number', () => {
