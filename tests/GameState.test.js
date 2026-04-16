@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   GameState,
   addItem,
@@ -66,5 +66,27 @@ describe('GameState inventory helpers', () => {
       { id: 'red_bull', qty: 1 },
       { id: 'rollback_potion', qty: 1 },
     ])
+  })
+})
+
+let originalSkillUseCounts = {}
+
+beforeEach(() => {
+  originalSkillUseCounts = { ...GameState.stats.skillUseCounts }
+})
+
+afterEach(() => {
+  GameState.stats.skillUseCounts = { ...originalSkillUseCounts }
+})
+
+describe('GameState.stats', () => {
+  it('includes skillUseCounts map for skill tracking', () => {
+    expect(GameState.stats.skillUseCounts).toEqual({})
+  })
+
+  it('tracks per-skill usage values in the map', () => {
+    GameState.stats.skillUseCounts.kubectl_rollout_restart = 14
+
+    expect(GameState.stats.skillUseCounts.kubectl_rollout_restart).toBe(14)
   })
 })
