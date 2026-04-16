@@ -3,6 +3,7 @@ import { BaseScene } from '#scenes/BaseScene.js'
 import { DialogBox } from '#ui/DialogBox.js'
 import { CONFIG } from '../config.js'
 import { GameState } from '#state/GameState.js'
+import { getById as getStoryById } from '#data/story.js'
 
 const MAP_KEY     = 'localhost_town'
 const TILESET_KEY = 'stub_tiles'
@@ -10,17 +11,6 @@ const TILE_SIZE   = CONFIG.TILE_SIZE   // 48px
 
 const WALK_SPEED  = TILE_SIZE * 2     // 96 px/sec
 const RUN_SPEED   = TILE_SIZE * 4     // 192 px/sec
-
-const NPC_DIALOGS = {
-  margaret: [
-    "Oh! A new engineer! Welcome to Localhost Town.",
-    "The Azure Terminal is just east of here.\nUse it to manage your skill deck.",
-    "Be careful in the tall grass — incidents love\nto ambush young engineers.",
-  ],
-  azure_terminal: [
-    "> AZURE TERMINAL v2.0\n> Connecting to skill management...",
-  ],
-}
 
 export class WorldScene extends BaseScene {
   constructor() {
@@ -82,7 +72,6 @@ export class WorldScene extends BaseScene {
   }
 
   create(data = {}) {
-    this._returnTo    = data.returnTo ?? null
     this.dialog       = new DialogBox(this)
     this._interacting = false
     this._facing      = 'down'
@@ -232,14 +221,17 @@ export class WorldScene extends BaseScene {
     this._interacting = true
 
     if (npcName === 'azure_terminal') {
-      this.dialog.show(NPC_DIALOGS.azure_terminal, () => {
+      const pages = getStoryById('npc_azure_terminal')?.pages ?? ['> AZURE TERMINAL v2.0']
+      this.dialog.show(pages, () => {
         this._interacting = false
-        this.fadeToScene('SkillManagementScene', { returnTo: 'WorldScene' })
+        this.scene.pause()
+        this.scene.launch('SkillManagementScene', { returnScene: 'WorldScene' })
       })
       return
     }
 
-    const lines = NPC_DIALOGS[npcName] ?? ['???']
+    const entry = getStoryById(`npc_${npcName}`)
+    const lines = entry?.pages ?? ['???']
     this.dialog.show(lines, () => { this._interacting = false })
   }
 

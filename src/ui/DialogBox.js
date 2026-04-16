@@ -8,7 +8,7 @@
 
 import { CONFIG } from '../config.js'
 
-// Layout constants (absolute pixels — no CONFIG dependency for positioning).
+// Layout constants — positions derived from CONFIG.HEIGHT/WIDTH.
 const BOX_HEIGHT      = 216  // ~20% of 1080
 const BOX_Y           = CONFIG.HEIGHT - BOX_HEIGHT
 const BOX_PADDING_X   = 24
@@ -99,7 +99,12 @@ export class DialogBox {
 
   /** Clean up Phaser objects — call when scene shuts down. */
   destroy() {
+    this._active = false
     this._stopTyping()
+    if (this._blinkTimer) {
+      this._blinkTimer.remove()
+      this._blinkTimer = null
+    }
     this._container.destroy()
   }
 
