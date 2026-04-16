@@ -100,8 +100,9 @@ export function skillPhase(state, skill) {
 
   if (effect.type === 'instant_win_vs_legacy') {
     if (state.opponent.isLegacy) {
+      const originalHp = state.opponent.hp
       state.opponent.hp = 0
-      events.push({ type: 'damage', target: 'opponent', value: state.opponent.maxHp ?? state.opponent.hp })
+      events.push({ type: 'damage', target: 'opponent', value: originalHp })
     } else {
       const backfire = Math.abs(effect.fallbackDamage ?? 40)
       state.player.hp = Math.max(0, state.player.hp - backfire)
@@ -111,8 +112,9 @@ export function skillPhase(state, skill) {
 
   if (effect.type === 'instant_win_vs_containers') {
     if (state.opponent.domain === 'containers') {
+      const originalHp = state.opponent.hp
       state.opponent.hp = 0
-      events.push({ type: 'damage', target: 'opponent', value: state.opponent.maxHp ?? state.opponent.hp })
+      events.push({ type: 'damage', target: 'opponent', value: originalHp })
     } else {
       const dmg = calculateDamage(skill, state.opponent.domain)
       state.opponent.hp = Math.max(0, state.opponent.hp - dmg)

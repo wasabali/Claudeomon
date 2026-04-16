@@ -174,7 +174,7 @@ export function initNewGame(name, mascot) {
     completedQuests: [],
     flags:           {},
   }
-  GameState.stats = { ...DEFAULT_STATS, skillUseCounts: {} }
+  GameState.stats = { ...DEFAULT_STATS }
   GameState._session = {
     isDirty:     true,
     lastSavedAt: null,

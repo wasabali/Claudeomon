@@ -286,8 +286,11 @@ describe('skillPhase', () => {
       effect: { type: 'instant_win_vs_containers' },
       sideEffect: { shame: 1, reputation: -12, description: '' } }
     const events = skillPhase(state, skill)
-    // Fallback: emits a damage event against the opponent (0 base value since no fallback damage is defined)
-    expect(events).toContainEqual(expect.objectContaining({ type: 'damage', target: 'opponent' }))
+    // Fallback follows domain matchup rules; security vs cloud = neutral, but
+    // calculateDamage returns 0 because effect.type !== 'damage'. Damage event is still emitted.
+    const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
+    expect(dmgEvent).toBeDefined()
+    expect(dmgEvent.value).toBe(0)
   })
 })
 
