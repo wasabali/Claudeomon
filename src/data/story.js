@@ -49,8 +49,11 @@ const STORY = {
       "Ah, a new student! Study hard and use\nonly the approved techniques.",
       "There are no shortcuts worth taking\nin this profession.",
     ],
+    // Variants are evaluated top-to-bottom; first match wins.
+    // Most-specific conditions (multiple fields) come before less-specific ones.
     variants: [
       {
+        // High shame + still competent → "brilliant but dangerous"
         condition: { shameMin: 5, reputationMin: 60 },
         pages: [
           "Your work is impressive. I wish I could\nsay the same about your methods.",
@@ -58,6 +61,7 @@ const STORY = {
         ],
       },
       {
+        // High shame + low reputation → full disappointment
         condition: { shameMin: 5 },
         pages: [
           "*sighs*",
