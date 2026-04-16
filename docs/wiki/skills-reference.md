@@ -4,6 +4,8 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 
 **Active skill deck limit:** 6 skills. Choose wisely.
 
+> **Note:** Some skill effects described below (e.g., damage-over-time, reveal next moves, confuse, immunity, traps, reflection) are defined in the game data but **not yet fully resolved in battle**. The current BattleEngine processes `damage`, `heal`, and domain reveal effects. Other effect types will be implemented in future updates — for now, treat their descriptions as design intent.
+
 ---
 
 ## 🐧 Linux — "If you can't grep, you can't debug."

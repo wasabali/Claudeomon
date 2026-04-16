@@ -65,8 +65,7 @@ Other engineers challenge you to battle. These are more strategic — both sides
 **Key differences from incidents:**
 - No SLA timer (usually)
 - Engineers **telegraph their next move** one turn in advance — pay attention to their dialog
-- Winning with an **Optimal** solution means they teach you their **signature skill**
-- Winning with Standard or worse means you win, but you don't learn their best move
+- **Any win** teaches you the trainer's **signature skill** — aim for Optimal for the best XP bonus
 
 ---
 
@@ -74,13 +73,15 @@ Other engineers challenge you to battle. These are more strategic — both sides
 
 Every battle resolution is graded on quality. Better solutions = better rewards.
 
-| Tier | XP Multiplier | Reputation | Shame | What It Means |
-|---|---|---|---|---|
-| **Optimal** | ×2 | +10 | 0 | Right domain, diagnosed first. The textbook solution. |
-| **Standard** | ×1 | +3 | 0 | Right domain, no diagnosis. You knew what to do. |
-| **Shortcut** | ×0.5 | −5 | 0 | Wrong domain, but it worked. Effective, not elegant. |
-| **Cursed** | ×0.25 | −15 | +1 | Forbidden technique. It works. But at what cost? |
-| **Nuclear** | ×0 | −30 | +2 | Scorched earth. You won, but you lost something worse. |
+| Tier | XP Multiplier | Shame | What It Means |
+|---|---|---|---|
+| **Optimal** | ×2 | 0 | Right domain, diagnosed first. The textbook solution. |
+| **Standard** | ×1 | 0 | Right domain, no diagnosis. You knew what to do. |
+| **Shortcut** | ×0.5 | 0 | Wrong domain, but it worked. Effective, not elegant. |
+| **Cursed** | ×0.25 | +1 | Forbidden technique. It works. But at what cost? |
+| **Nuclear** | ×0 | +2 | Scorched earth. You won, but you lost something worse. |
+
+**Reputation impact:** Cursed and nuclear skills apply a variable reputation penalty defined per skill. SLA breaches cost −15 reputation. See [Reputation & Shame](reputation-and-shame.md) for full details.
 
 **The game never blocks you for a bad solution.** It just remembers. Shortcuts close doors that Optimal solutions open.
 
@@ -129,7 +130,7 @@ Budget-free skills (cost 0) are reliable staples. Budget skills are powerful bur
 1. **Always diagnose first** — Spend turn 1 using a reveal skill in incident battles. The ×2 damage from a correct matchup more than compensates for the lost turn.
 2. **Watch telegraphs** — In engineer battles, the enemy hints at their next move. Counter it.
 3. **Build a balanced deck** — Your 6 active skills should cover at least 3 domains plus one Observability skill.
-4. **Respect the SLA** — In SEV1 and SEV0 battles, you may not have time to diagnose. Know your common domains.
+4. **Respect the SLA** — In short-SLA encounters (2–3 turns), you may not have time to diagnose. Know your common domains per region.
 5. **Avoid cursed techniques** — They're powerful but the Shame is permanent. See [Reputation & Shame](reputation-and-shame.md).
 
 ---
