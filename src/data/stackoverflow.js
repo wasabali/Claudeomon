@@ -597,4 +597,10 @@ const STACKOVERFLOW = {
 export const getById = (id)           => STACKOVERFLOW[id]
 export const getAll  = ()             => Object.values(STACKOVERFLOW)
 export const getBy   = (field, value) => getAll().filter(x => x[field] === value)
-export const getByCommandId = (commandId) => getAll().find(t => t.commandId === commandId) ?? null
+
+const STACKOVERFLOW_BY_COMMAND_ID = Object.values(STACKOVERFLOW).reduce((index, thread) => {
+  index[thread.commandId] = thread
+  return index
+}, {})
+
+export const getByCommandId = (commandId) => STACKOVERFLOW_BY_COMMAND_ID[commandId] ?? null

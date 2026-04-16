@@ -1,9 +1,8 @@
 import { BaseScene } from '#scenes/BaseScene.js'
 import { CONFIG } from '../config.js'
-import { GameState, markDirty } from '#state/GameState.js'
+import { GameState, grantXpOnce } from '#state/GameState.js'
 import { getById as getThreadById, getByCommandId } from '#data/stackoverflow.js'
 import { getAll as getAllSkills } from '#data/skills.js'
-import { checkLevelUp } from '#engine/ProgressionEngine.js'
 
 // StackOverflowScene — in-game command wiki themed as Stack Overflow.
 //
@@ -161,29 +160,8 @@ export class StackOverflowScene extends BaseScene {
     this.mode = 'detail'
     this.detailScroll = 0
     this._buildDetailLines(threadId)
-    this._grantFirstReadXp(threadId)
+    grantXpOnce(`so_read_${threadId}`, 5)
     this._render()
-  }
-
-  _grantFirstReadXp(threadId) {
-    const flagKey = `so_read_${threadId}`
-    if (GameState.story.flags[flagKey]) return
-    GameState.story.flags[flagKey] = true
-    GameState.player.xp += 5
-    const events = checkLevelUp(GameState.player)
-    for (const event of events) {
-      if (event.type === 'level_up') {
-        GameState.player.level = event.payload.newLevel
-      }
-      if (event.type === 'stat_gain') {
-        GameState.player.maxHp = event.payload.maxHp
-        GameState.player.budget = event.payload.budget
-      }
-      if (event.type === 'slot_unlock') {
-        GameState.player.activeSlots = event.payload.activeSlots
-      }
-    }
-    markDirty()
   }
 
   _buildDetailLines(threadId) {
@@ -210,7 +188,7 @@ export class StackOverflowScene extends BaseScene {
     const MAX_CHARS = 25
 
     // Question header
-    lines.push({ text: `Q: ${thread.questionTitle}`, color: SO_DARK, bold: true })
+    lines.push({ text: `Q: ${thread.questionTitle}`, color: SO_DARK })
     lines.push({ text: `Asked by: ${thread.askedBy}`, color: SO_LIGHT })
     lines.push({ text: `Tags: ${thread.tags.join(' ')}`, color: SO_LIGHT })
     lines.push({ text: '────────────────────────', color: SO_MID })
