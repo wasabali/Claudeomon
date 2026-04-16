@@ -43,7 +43,7 @@ const SKILLS = {
   },
   grep_logs: {
     id: 'grep_logs',
-    displayName: 'grep -r "ERROR"',
+    displayName: 'grep "ERROR" /var/log/*',
     domain: 'linux',
     tier: 'standard',
     isCursed: false,
@@ -1003,7 +1003,7 @@ const SKILLS = {
   },
   kubectl_delete_ns: {
     id: 'kubectl_delete_ns',
-    displayName: 'kubectl delete ns production',
+    displayName: 'kubectl delete ns prod',
     domain: 'kubernetes',
     tier: 'cursed',
     isCursed: true,
