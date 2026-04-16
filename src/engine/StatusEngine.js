@@ -17,12 +17,14 @@ export function isStatusActive(battleState, target, statusId) {
 // - For technical_debt: always stacks (adds a new entry).
 // - For all other statuses: refreshes duration if already present.
 // - Unknown statusId: no-op, returns [].
-export function applyStatus(battleState, target, statusId) {
+// - randomFn: optional seeded random function (defaults to Math.random).
+//   Pass a seeded function (e.g. from utils/random.js) for reproducible replays.
+export function applyStatus(battleState, target, statusId, randomFn = Math.random) {
   const definition = STATUSES[statusId]
   if (!definition) return []
 
   const { duration } = definition
-  const remaining = _resolveInitialDuration(duration)
+  const remaining = _resolveInitialDuration(duration, randomFn)
 
   const statuses = battleState[target].statuses
 
@@ -85,10 +87,10 @@ export function tickStatuses(battleState, target) {
 
 // --- internal helpers ---
 
-function _resolveInitialDuration(duration) {
+function _resolveInitialDuration(duration, randomFn = Math.random) {
   if (duration === 'random') {
-    // in_review: 1–3 turns
-    return Math.floor(Math.random() * 3) + 1
+    // in_review: 1–3 turns — uses randomFn for reproducibility with seeded RNG
+    return Math.floor(randomFn() * 3) + 1
   }
   return duration
 }
