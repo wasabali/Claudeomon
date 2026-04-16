@@ -1,9 +1,10 @@
 // StackOverflow thread data — in-game command knowledge base.
 // Each thread maps to a skill via commandId.
-// Threads are shown locked (title visible, answers hidden) until the
-// player has learned the command.
+// Threads display as locked (title visible, answers hidden) until the
+// player has learned the command. Lock logic lives in StackOverflowScene.
 //
-// answer fields:  { text, author, score, isAccepted, isCursedHint, isCorrect }
+// thread fields: { id, commandId, questionTitle, askedBy, tags[], answers[], comments[] }
+// answer fields: { text, author, score, isAccepted, isCursedHint, isCorrect }
 // comment fields: { text, author }
 //
 // Registry pattern: no logic, no imports from engine or scenes.
@@ -16,7 +17,6 @@ const STACKOVERFLOW = {
     questionTitle: "My app is down, what's wrong?",
     askedBy: 'panicking_intern',
     tags: ['debugging', 'linux', 'networking'],
-    locked: false,
     answers: [
       {
         text: "It's always DNS. Check your DNS records first. Always DNS. DNS. Did I mention DNS?",
@@ -57,7 +57,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I deploy to Azure App Service?',
     askedBy: 'confused_intern_2019',
     tags: ['azure', 'cloud', 'deployment'],
-    locked: false,
     answers: [
       {
         text: "Just use `az webapp deploy`. Simple as that. One command.",
@@ -98,7 +97,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I restart Kubernetes pods without downtime?',
     askedBy: 'k8s_newbie_2022',
     tags: ['kubernetes', 'kubectl', 'deployment'],
-    locked: false,
     answers: [
       {
         text: "`kubectl rollout restart deployment/myapp` — rolling restart, zero downtime. This is the correct answer.",
@@ -139,7 +137,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I apply Terraform changes safely?',
     askedBy: 'new_to_iac',
     tags: ['terraform', 'iac', 'infrastructure'],
-    locked: false,
     answers: [
       {
         text: "Run `terraform plan` first to preview, then `terraform apply`. Type 'yes' to confirm. Don't touch the state file. I cannot stress this enough. Do not touch the state file.",
@@ -179,7 +176,6 @@ const STACKOVERFLOW = {
     questionTitle: "Container won't start, getting permission denied error",
     askedBy: 'container_confused',
     tags: ['docker', 'containers', 'permissions'],
-    locked: false,
     answers: [
       {
         text: "Just add `--privileged` to your `docker run` command. Fixes the permission error immediately.",
@@ -222,7 +218,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I fix a bad commit on main?',
     askedBy: 'git_panicker',
     tags: ['git', 'iac', 'version-control'],
-    locked: false,
     answers: [
       {
         text: "Use `git push --force`. Rewrites the remote branch with your local history. Problem solved.",
@@ -263,7 +258,6 @@ const STACKOVERFLOW = {
     questionTitle: "How do I clean up disk space fast?",
     askedBy: 'disk_full_panic',
     tags: ['linux', 'nuclear', 'do-not-try'],
-    locked: false,
     answers: [
       {
         text: "Use `du -sh /*` to find what's using space, then selectively remove with `rm`. Never use rm -rf / under any circumstances.",
@@ -302,7 +296,6 @@ const STACKOVERFLOW = {
     questionTitle: 'Helm vs raw manifests — which should I use?',
     askedBy: 'chart_confused',
     tags: ['kubernetes', 'helm', 'deployment'],
-    locked: false,
     answers: [
       {
         text: "Helm charts. Every time. Package management for Kubernetes. Reproducible deploys, rollback support, values files for env config. `helm install myapp ./chart` is the way.",
@@ -342,7 +335,6 @@ const STACKOVERFLOW = {
     questionTitle: 'Is it safe to chmod 777 everything?',
     askedBy: 'permission_confused',
     tags: ['linux', 'security', 'permissions'],
-    locked: false,
     answers: [
       {
         text: "Yes.",
@@ -375,7 +367,6 @@ const STACKOVERFLOW = {
     questionTitle: 'kubectl apply vs kubectl create — what is the difference?',
     askedBy: 'yaml_apprentice',
     tags: ['kubernetes', 'kubectl', 'yaml'],
-    locked: false,
     answers: [
       {
         text: "`kubectl apply` is declarative — applies the desired state, creates or updates resources. `kubectl create` is imperative — fails if the resource already exists. Always use `apply` in CI pipelines.",
@@ -407,7 +398,6 @@ const STACKOVERFLOW = {
     questionTitle: 'Where can I learn what commands actually do?',
     askedBy: 'lost_engineer',
     tags: ['learning', 'documentation', 'observability'],
-    locked: false,
     answers: [
       {
         text: "Read the official documentation. I know that sounds boring but it's the only reliable source. The docs reveal exactly what each tool does, its strengths, and its weaknesses.",
@@ -447,7 +437,6 @@ const STACKOVERFLOW = {
     questionTitle: 'Service keeps crashing — how do I fix it?',
     askedBy: 'service_broken',
     tags: ['linux', 'systemd', 'debugging'],
-    locked: false,
     answers: [
       {
         text: "`systemctl restart myservice` — restarts the service. Also check `journalctl -u myservice -f` for logs to find the actual root cause.",
@@ -479,7 +468,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I find errors in log files?',
     askedBy: 'log_lost',
     tags: ['linux', 'grep', 'debugging'],
-    locked: false,
     answers: [
       {
         text: "`grep 'ERROR' /var/log/*` — searches all logs for ERROR. Add `-r` for recursive. Add `-n` for line numbers. Reveals the domain of the problem.",
@@ -518,7 +506,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I deploy an Azure Function app?',
     askedBy: 'serverless_sara',
     tags: ['azure', 'serverless', 'functions'],
-    locked: false,
     answers: [
       {
         text: "`az functionapp deploy --resource-group myRG --name myFunc --src-path dist.zip` — the clean way. Damage scales with how many services the target has running.",
@@ -550,7 +537,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I remove a stuck Kubernetes namespace?',
     askedBy: 'ns_terminating_forever',
     tags: ['kubernetes', 'kubectl', 'namespaces'],
-    locked: false,
     answers: [
       {
         text: "Patch the namespace to remove its finalizers: `kubectl patch namespace stuck-ns -p '{\"metadata\":{\"finalizers\":[]}}' --type merge`. This is the correct answer.",
@@ -582,7 +568,6 @@ const STACKOVERFLOW = {
     questionTitle: 'How do I commit without running pre-commit hooks?',
     askedBy: 'hook_hater',
     tags: ['git', 'iac', 'ci'],
-    locked: false,
     answers: [
       {
         text: "`git commit --no-verify` skips all hooks. Use this when you need to commit fast and trust that CI will catch anything the hooks would have caught.",
