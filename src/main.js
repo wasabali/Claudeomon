@@ -5,6 +5,7 @@ import { BootScene } from '#scenes/BootScene.js'
 import { TitleScene } from '#scenes/TitleScene.js'
 import { WorldScene } from '#scenes/WorldScene.js'
 import { SaveScene } from '#scenes/SaveScene.js'
+import { NewGameScene } from '#scenes/NewGameScene.js'
 
 new Phaser.Game({
   type:   Phaser.AUTO,
@@ -15,7 +16,7 @@ new Phaser.Game({
     mode:       Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [ BootScene, TitleScene, WorldScene, SaveScene ],
+  scene: [ BootScene, TitleScene, NewGameScene, WorldScene, SaveScene ],
 })
 
 window.addEventListener('beforeunload', e => {
