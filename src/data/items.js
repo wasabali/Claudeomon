@@ -138,6 +138,7 @@ const ITEMS = {
     usableInBattle: false,
     battleAction:   'examine',
     worldActions:   ['examine', 'drop'],
+    canDrop:        false,
     cannotDropText: "47,000 files. Does nothing. Can't delete.",
     effect:         null,
   },
