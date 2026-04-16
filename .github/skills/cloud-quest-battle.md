@@ -86,20 +86,28 @@ function assessQuality(skill, opponent, domainRevealed) {
 
 ## SLA Timer
 
-Every incident has an `slaTimer` (turns remaining). Decrements each turn.
+Every incident has an `sla` field (turns remaining). Decrements each turn via `slaTickPhase`.
 
 ```js
-function tickSla(state) {
-  state.slaTimer--
-  if (state.slaTimer <= 0 && !state.slaBreached) {
-    state.slaBreached = true
-    return [
-      { type: 'dialog', text: 'SLA BREACHED. You\'ll hear about this.' },
-      { type: 'damage', target: 'player', value: 20 },
-      { type: 'reputation_damage', target: 'player', value: 10 },
-    ]
+function slaTickPhase(state) {
+  if (state.slaTimer === null || state.slaTimer <= 0) return []
+
+  state.slaTimer -= 1
+  const events = [{ type: 'sla_tick', value: state.slaTimer }]
+
+  if (state.slaTimer === 0) {
+    state.slaBreach = true
+    state.player.hp         = Math.max(0, state.player.hp - 20)
+    state.player.reputation = Math.max(0, state.player.reputation - 15)
+    events.push({
+      type:           'sla_breach',
+      target:         'player',
+      value:          20,
+      reputationLoss: 15,
+    })
   }
-  return [{ type: 'sla_tick', value: state.slaTimer }]
+
+  return events
 }
 ```
 
@@ -112,29 +120,74 @@ Resolving before breach gives an XP speed bonus. Resolving after breach still wi
 All engine functions return `BattleEvent[]`. BattleScene iterates and renders each.
 
 ```js
-// BattleEvent is a union. Not every event carries target/value.
+// BattleEvent is a union. Not every event carries the same fields.
+// Scene code should branch on `type` and read only the fields for that event.
 
 // Numeric events that affect one side directly.
 {
   type: 'damage'             // hp loss
       | 'heal'               // hp gain
       | 'status_apply'       // status effect added
-      | 'status_remove'      // status effect expired
+      | 'status_tick'        // ongoing status timer tick
+      | 'status_remove'      // status effect removed
       | 'budget_drain'       // budget loss
-      | 'shame'              // shame point added
-      | 'reputation_damage'  // reputation loss
+      | 'reputation'         // reputation change (includes shameDelta for cursed)
       | 'sla_tick'           // SLA countdown updated
-      | 'reveal'             // enemy domain revealed
-      | 'win'                // battle won
-      | 'lose',              // battle lost
+      | 'escalation',        // technical debt increased
   target: 'player' | 'opponent',
   value: Number,
 }
 
-// Text-only log event.
+// Domain reveal event.
 {
-  type: 'dialog',
-  text: String,
+  type: 'domain_reveal',
+  target: 'opponent',
+  value: String,             // the revealed domain name
+}
+
+// Status expired event.
+{
+  type: 'status_expired',
+  target: 'player' | 'opponent',
+  value: String,             // status ID that expired
+}
+
+// Progression / battle flow events.
+{
+  type: 'skill_used',
+  target: 'player' | 'opponent',
+  skillId: String,
+}
+
+{
+  type: 'xp_gain',
+  target: 'player',
+  value: Number,
+}
+
+{
+  type: 'teach_skill',
+  target: 'player',
+  value: String,             // skill ID taught
+}
+
+{
+  type: 'sla_breach',
+  target: 'player',
+  value: Number,             // HP penalty
+  reputationLoss: Number,    // reputation penalty
+}
+
+{
+  type: 'layer_transition',
+  target: 'opponent',
+  value: Object,             // next layer data
+}
+
+{
+  type: 'battle_end',
+  target: 'player',
+  value: 'win' | 'lose',
 }
 ```
 

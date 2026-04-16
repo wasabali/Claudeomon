@@ -8,7 +8,7 @@ Every scene in Cloud Quest follows this structure:
 
 ```js
 import { BaseScene } from '#scenes/BaseScene.js'
-import { BattleEngine } from '#engine/BattleEngine.js'
+import { createBattleState, resolveTurn } from '#engine/BattleEngine.js'
 import { GameState } from '#state/GameState.js'
 
 export class BattleScene extends BaseScene {
@@ -23,11 +23,12 @@ export class BattleScene extends BaseScene {
 
   create(data) {
     // Receive data passed from previous scene
-    // Set up engine instances
+    // Create battle state via engine function (pure logic, no Phaser)
     // Create all display objects
     // Register input handlers
-    this.engine = new BattleEngine(GameState.player, data.opponent)
-    this.engine.on('event', this.onBattleEvent, this)
+    this._battleState = createBattleState(data.mode, { ...GameState.player }, data.opponent, {
+      slaTimer: data.slaTimer,
+    })
   }
 
   update(time, delta) {
@@ -36,8 +37,7 @@ export class BattleScene extends BaseScene {
   }
 
   shutdown() {
-    // Clean up event listeners
-    this.engine.off('event', this.onBattleEvent, this)
+    // Clean up event listeners and timers
   }
 }
 ```
@@ -47,25 +47,24 @@ export class BattleScene extends BaseScene {
 Scenes receive player input and pass it to the engine. The engine returns events. The scene renders those events. No game logic in scenes.
 
 ```js
-// Correct
-onSkillSelected(skillId) {
-  const events = this.engine.useSkill(skillId)
+// Correct — call engine function, render returned events
+onSkillSelected(skill) {
+  const events = resolveTurn(this._battleState, skill)
   this.renderEvents(events)
 }
 
 renderEvents(events) {
   events.forEach(event => {
     switch (event.type) {
-      case 'damage':   this.showDamageNumber(event.target, event.value); break
-      case 'dialog':   this.dialogBox.show(event.text); break
-      case 'win':      this.fadeToScene('WorldScene'); break
+      case 'damage':      this.showDamageNumber(event.target, event.value); break
+      case 'domain_reveal': this.showDomainReveal(event.value); break
+      case 'battle_end':  this.onBattleEnd(event.value); break
     }
   })
 }
 
 // Wrong — game logic in scene
-onSkillSelected(skillId) {
-  const skill = getById(skillId)
+onSkillSelected(skill) {
   if (skill.domain === this.opponent.domain) {  // ← logic belongs in SkillEngine
     this.opponent.hp -= skill.effect.value * 2
   }
@@ -82,17 +81,11 @@ import { DialogBox } from '#ui/DialogBox.js'
 create() {
   this.dialog = new DialogBox(this)  // pass scene reference
 
-  // Show a line of text
+  // Show a single page of text
   this.dialog.show('Professor Pedersen: "Choose wisely."')
 
-  // Show text with a callback when dismissed
-  this.dialog.show('Are you sure?', () => this.confirmAction())
-
-  // Show a choice menu
-  this.dialog.showChoices([
-    { label: 'az webapp deploy', action: () => this.useSkill('az_webapp_deploy') },
-    { label: 'rm -rf /', action: () => this.useSkill('rm_rf') },
-  ])
+  // Show multiple pages with a callback when dismissed
+  this.dialog.show(['Page one text.', 'Page two text.'], () => this.confirmAction())
 }
 ```
 
@@ -137,9 +130,11 @@ Before committing any scene:
 ## Passing Data Between Scenes
 
 ```js
+import { getById as getTrainerById } from '#data/trainers.js'
+
 // Launching a battle from WorldScene
 this.scene.launch('BattleScene', {
-  opponent: Registry.getTrainer('kube_master'),
+  opponent: getTrainerById('kube_master'),
   mode: 'engineer',
   returnScene: 'WorldScene',
 })

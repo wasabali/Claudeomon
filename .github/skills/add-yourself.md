@@ -26,7 +26,7 @@ Either extract this from the invocation, or ask the developer:
 
 1. **Your name** (display name for the NPC, can be a handle)
 2. **Your job title / role** (e.g. "Platform Engineer", "DevOps Lead", "Cloud Architect")
-3. **Your primary domain** — pick one: `linux` `containers` `kubernetes` `cloud` `security` `iac` `serverless`
+3. **Your primary domain** — pick one: `linux` `containers` `kubernetes` `cloud` `security` `iac` `serverless` `observability`
 4. **3–5 real CLI commands you actually use** (the more specific the better — flags and all)
 5. **Your personality in one sentence** (how colleagues would describe you in a code review)
 6. **Your signature move** — the one command you reach for first, always
@@ -66,7 +66,7 @@ command_snake_case: {
 | Command type | Base power |
 |---|---|
 | Create / apply / deploy | 30–40 |
-| Observe / debug / inspect | 20–25 (or `{ type: 'reveal', value: 0 }` for observability) |
+| Observe / debug / inspect | 20–25 (or `{ type: 'reveal_domain', value: 0 }` for observability) |
 | Restart / rollout | 25–35 |
 | Delete / force / override | 40–60 |
 | Known-destructive (force push, rm, drop) | 50–80 — set `tier: 'cursed'` or `'nuclear'`, `domain: null`, `isCursed: true` |

@@ -16,13 +16,13 @@ You do NOT review `src/engine/`, `src/data/`, or `src/state/` — those are pure
 ### 1. Engine/Scene Separation (Critical)
 
 - [ ] No game logic in the scene — only rendering and event handling
-- [ ] All battle/encounter/skill logic delegated to engine classes
-- [ ] Scene only calls engine methods and renders the returned events
-- [ ] No direct manipulation of GameState from scenes — scenes call engines, engines write GameState
+- [ ] All battle/encounter/skill logic delegated to engine functions/modules
+- [ ] Scene only calls engine functions and renders the returned events/results
+- [ ] No direct manipulation of GameState from scenes except for simple property writes (e.g. `GameState.player.location`). Non-trivial logic should be delegated to engines.
 
 ```js
-// Correct — scene delegates to engine
-const events = this.battleEngine.useSkill(skillId)
+// Correct — scene delegates to engine function
+const events = resolveTurn(battleState, skill)
 events.forEach(event => this.renderEvent(event))
 
 // Wrong — scene contains game logic
@@ -48,7 +48,7 @@ if (skill.domain === opponent.domain) {
 ### 4. UI Components — Reuse Over Rebuild
 
 - [ ] Dialog text uses `DialogBox.js` — never raw Phaser text objects for game dialogue
-- [ ] Menu navigation uses `Menu.js` — never custom D-pad navigation reimplemented
+- [ ] Menu/navigation input uses existing shared UI utilities in `src/ui/` — never custom D-pad navigation reimplemented when reusable UI code already covers it
 - [ ] HP/budget bars use `HUD.js` components
 
 ### 5. Pixel Art Compliance
