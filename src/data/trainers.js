@@ -219,13 +219,13 @@ const TRAINERS = {
     name: 'West-EU-2 Wilhelm',
     vibe: "My region was sunset in 2019. I filed a support ticket. Still waiting.",
     domain: 'cloud',
-    isCursed: false,
+    isCursed: true,
     hidden: true,
     location: 'deprecated_azure_region',
     discoveryCondition: 'select_deprecated_region',
     discoveryFlag: 'deprecated_azure_region_found',
     clueText: "Coordinates to a server room in OldCorp's basement. It was already in his pocket.",
-    signatureSkill: 'az_feature_register_legacy',
+    cursedSkill: 'az_feature_register_legacy',
   },
 }
 
