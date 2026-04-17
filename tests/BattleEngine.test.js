@@ -245,6 +245,73 @@ describe('skillPhase', () => {
     skillPhase(state, skill)
     expect(state.player.hp).toBe(100)
   })
+
+  it('instant_win_vs_legacy defeats legacy opponents immediately', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ hp: 45, isLegacy: true }))
+    const skill = {
+      id: 'legacy_nuke',
+      domain: 'cloud',
+      tier: 'standard',
+      isCursed: false,
+      effect: { type: 'instant_win_vs_legacy', fallbackDamage: 20 },
+      sideEffect: null,
+    }
+    const events = skillPhase(state, skill)
+    expect(state.opponent.hp).toBe(0)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'damage', target: 'opponent', value: 45 }))
+  })
+
+  it('instant_win_vs_legacy backfires on non-legacy opponents', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ hp: 100 }), makeOpponent({ isLegacy: false }))
+    const skill = {
+      id: 'legacy_nuke',
+      domain: 'cloud',
+      tier: 'standard',
+      isCursed: false,
+      effect: { type: 'instant_win_vs_legacy', fallbackDamage: 22 },
+      sideEffect: null,
+    }
+    const events = skillPhase(state, skill)
+    expect(state.player.hp).toBe(78)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'damage', target: 'player', value: 22 }))
+  })
+
+  it('instant_win_vs_containers defeats container opponents immediately', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ domain: 'containers', hp: 33 }))
+    const skill = {
+      id: 'container_nuke',
+      domain: 'kubernetes',
+      tier: 'standard',
+      isCursed: false,
+      effect: { type: 'instant_win_vs_containers', fallbackDamage: 17 },
+      sideEffect: null,
+    }
+    const events = skillPhase(state, skill)
+    expect(state.opponent.hp).toBe(0)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'damage', target: 'opponent', value: 33 }))
+  })
+
+  it('instant_win_vs_containers uses fallbackDamage on non-container opponents', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ domain: 'cloud', hp: 60 }))
+    const skill = {
+      id: 'container_nuke',
+      domain: 'kubernetes',
+      tier: 'standard',
+      isCursed: false,
+      effect: { type: 'instant_win_vs_containers', fallbackDamage: 17 },
+      sideEffect: null,
+    }
+    const events = skillPhase(state, skill)
+    expect(state.opponent.hp).toBe(43)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'damage', target: 'opponent', value: 17 }))
+  })
+
+  it('does not emit no-op reputation event when reputation and shame are unchanged', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 100, shamePoints: 0 }), makeOpponent())
+    const skill = makeDamageSkill({ tier: 'standard' })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'reputation')).toBeUndefined()
+  })
 })
 
 // ---------------------------------------------------------------------------

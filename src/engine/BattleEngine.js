@@ -46,7 +46,6 @@ const SLA_BREACH_HP_PENALTY  = 20
 const SLA_BREACH_REP_PENALTY = 10
 
 // Reputation change on engineer battle outcomes
-const ENGINEER_WIN_REP_OPTIMAL = 8
 const ENGINEER_LOSE_REP_PENALTY = 5
 
 // Approximate enemy base attack power (used in enemyPhase)
@@ -156,9 +155,9 @@ export function skillPhase(state, skill) {
       state.opponent.hp = 0
       events.push({ type: 'damage', target: 'opponent', value: originalHp })
     } else {
-      const dmg = calculateDamage(skill, state.opponent.domain)
-      state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
-      events.push({ type: 'damage', target: 'opponent', value: dmg })
+      const fallbackDamage = Math.abs(effect.fallbackDamage ?? 40)
+      state.opponent.hp = Math.max(0, state.opponent.hp - fallbackDamage)
+      events.push({ type: 'damage', target: 'opponent', value: fallbackDamage })
     }
   }
 
@@ -180,7 +179,9 @@ export function skillPhase(state, skill) {
   const repDelta   = updated.reputation  - state.player.reputation
   state.player.shamePoints = updated.shamePoints
   state.player.reputation  = updated.reputation
-  events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
+  if (repDelta !== 0 || shameDelta !== 0) {
+    events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
+  }
 
   // Cursed/nuclear skills accumulate technical debt (capped at MAX_TECHNICAL_DEBT)
   if (skill.isCursed || skill.tier === 'cursed' || skill.tier === 'nuclear') {
