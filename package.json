@@ -6,8 +6,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest run --exclude tests/stress/**",
+    "test:stress": "vitest run tests/stress/",
+    "test:watch": "vitest --exclude tests/stress/**"
   },
   "dependencies": {
     "phaser": "3.90.0"
