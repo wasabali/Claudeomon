@@ -406,6 +406,41 @@ describe('skillPhase', () => {
     expect(dmgEvent).toBeDefined()
     expect(dmgEvent.value).toBe(0)
   })
+
+  it('blocks skill and returns skill_blocked event when shameRequired not met', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 5 }), makeOpponent())
+    const skill = makeDamageSkill({ shameRequired: 10 })
+    const events = skillPhase(state, skill)
+    expect(events).toHaveLength(1)
+    expect(events[0].type).toBe('skill_blocked')
+    expect(events[0].reason).toBe('shame_required')
+  })
+
+  it('allows skill when shameRequired is exactly met', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 10 }), makeOpponent())
+    const skill = makeDamageSkill({ shameRequired: 10 })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'skill_blocked')).toBeUndefined()
+    expect(events.find(e => e.type === 'skill_used')).toBeDefined()
+  })
+
+  it('emits emblems_updated event when shame is gained', () => {
+    const emblems = { tux: { earned: true, shine: 0, grime: 0 } }
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 0 }), makeOpponent(), { emblems })
+    const skill = makeDamageSkill({ tier: 'cursed', isCursed: true, sideEffect: { shame: 1, reputation: -8, description: '' } })
+    const events = skillPhase(state, skill)
+    const grimEvent = events.find(e => e.type === 'emblems_updated')
+    expect(grimEvent).toBeDefined()
+    expect(grimEvent.shameDelta).toBe(1)
+    expect(grimEvent.value.tux.grime).toBeCloseTo(0.05)
+  })
+
+  it('does not emit emblems_updated event when no shame is gained', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 0 }), makeOpponent())
+    const skill = makeDamageSkill({ tier: 'optimal' })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'emblems_updated')).toBeUndefined()
+  })
 })
 
 // ---------------------------------------------------------------------------

@@ -123,17 +123,17 @@ const STORY = {
         ],
       },
       {
-        condition: { reputationMax: -25 },
-        pages: [
-          "I see you again.",
-          "I've updated the curriculum.\nThere's now a case study titled 'What Not To Do.'\nI think you'll recognise the scenarios.",
-        ],
-      },
-      {
         condition: { reputationMax: -50 },
         pages: [
           "Ah. You.",
           "You know we have a runbook now.\nSection 4 is just your name.",
+        ],
+      },
+      {
+        condition: { reputationMax: -25 },
+        pages: [
+          "I see you again.",
+          "I've updated the curriculum.\nThere's now a case study titled 'What Not To Do.'\nI think you'll recognise the scenarios.",
         ],
       },
     ],

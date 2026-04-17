@@ -201,7 +201,7 @@ const ITEMS = {
     usableInBattle: false,
     battleAction:   null,
     worldActions:   ['use', 'examine'],
-    effect:         { type: 'reduceShame', value: 1, onceFlag: null },
+    effect:         { type: 'reduce_shame', value: 1, onceFlag: null },
   },
   post_mortem_published: {
     id:             'post_mortem_published',
@@ -211,7 +211,7 @@ const ITEMS = {
     usableInBattle: false,
     battleAction:   null,
     worldActions:   ['use', 'examine'],
-    effect:         { type: 'reduceShame', value: 1, onceFlag: null },
+    effect:         { type: 'reduce_shame', value: 1, onceFlag: null },
   },
 }
 

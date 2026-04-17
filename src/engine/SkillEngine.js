@@ -169,16 +169,32 @@ export function getShameTitle(shamePoints) {
 // Called after any shame gain (cursed/nuclear skill use).
 // ---------------------------------------------------------------------------
 export function applyShameGrime(emblems, shameGained) {
-  if (!shameGained || shameGained <= 0) return { ...emblems }
+  if (!shameGained || shameGained <= 0) return { ...(emblems ?? {}) }
   const result = {}
-  for (const [id, entry] of Object.entries(emblems)) {
+  for (const [id, entry] of Object.entries(emblems ?? {})) {
     if (entry.earned) {
-      result[id] = { ...entry, grime: Math.min(5, entry.grime + shameGained * GRIME_PER_SHAME) }
+      result[id] = { ...entry, grime: Math.min(5, (entry.grime ?? 0) + shameGained * GRIME_PER_SHAME) }
     } else {
       result[id] = { ...entry }
     }
   }
   return result
+}
+
+// ---------------------------------------------------------------------------
+// computeShameFlags
+// Returns an object mapping flag keys to true for every SHAME_THRESHOLD that
+// the player has reached or exceeded. Used to update GameState.story.flags
+// after shame is gained.
+// ---------------------------------------------------------------------------
+export function computeShameFlags(shamePoints) {
+  const flags = {}
+  for (const threshold of SHAME_THRESHOLDS) {
+    if (shamePoints >= threshold.shame) {
+      flags[threshold.flag] = true
+    }
+  }
+  return flags
 }
 
 // ---------------------------------------------------------------------------

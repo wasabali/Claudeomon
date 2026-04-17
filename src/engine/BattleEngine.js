@@ -76,6 +76,7 @@ export function createBattleState(mode, player, opponent, options = {}) {
     slaBreach:        false,
     winningTier:      options.winningTier ?? null,
     layers:           opponent.layers ? [...opponent.layers] : [],
+    emblems:          options.emblems ? { ...options.emblems } : {},
     log:              [],
   }
 }
@@ -121,6 +122,13 @@ export function statusTickPhase(state) {
 // ---------------------------------------------------------------------------
 export function skillPhase(state, skill) {
   const events = []
+
+  // Enforce shameRequired gate — skills that require a minimum shame level
+  // (e.g. kubectl_delete_production) cannot be used below that threshold.
+  if (skill.shameRequired !== undefined && state.player.shamePoints < skill.shameRequired) {
+    events.push({ type: 'skill_blocked', target: 'player', skillId: skill.id, reason: 'shame_required' })
+    return events
+  }
 
   events.push({ type: 'skill_used', target: 'opponent', skillId: skill.id })
 
@@ -175,9 +183,12 @@ export function skillPhase(state, skill) {
   state.player.shamePoints = updated.shamePoints
   state.player.reputation  = updated.reputation
 
-  // Apply grime to all earned emblems when shame is gained.
+  // Apply grime to all earned emblems when shame is gained and emit an event
+  // so BattleScene can sync GameState.emblems at battle end.
   if (shameDelta > 0) {
-    state.emblems = applyShameGrime(state.emblems ?? {}, shameDelta)
+    const nextEmblems = applyShameGrime(state.emblems ?? {}, shameDelta)
+    state.emblems = nextEmblems
+    events.push({ type: 'emblems_updated', target: 'player', value: nextEmblems, shameDelta })
   }
 
   events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })

@@ -22,7 +22,7 @@ Reputation represents how other engineers and NPCs perceive you. It goes up when
 | Cursed technique | Variable (typically −8 to −20) |
 | Nuclear technique | Variable (typically −13 to −30) |
 | SLA breach | −10 |
-| Engineer battle win (optimal) | +5 |
+| Engineer battle win (optimal) | +8 |
 | Engineer battle loss | −5 |
 
 ### Reputation Status Labels

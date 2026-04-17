@@ -9,6 +9,7 @@ import {
   getShameTitle,
   applyShameGrime,
   reduceShame,
+  computeShameFlags,
 } from '../src/engine/SkillEngine.js'
 
 // ---------------------------------------------------------------------------
@@ -480,5 +481,64 @@ describe('reduceShame', () => {
     const player = { shamePoints: 5, reputation: 42 }
     const result = reduceShame(player, 2)
     expect(result.reputation).toBe(42)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// computeShameFlags
+// ---------------------------------------------------------------------------
+
+describe('computeShameFlags', () => {
+  it('returns no flags when shame is 0', () => {
+    expect(computeShameFlags(0)).toEqual({})
+  })
+
+  it('returns pedersen flag when shame is 1', () => {
+    const flags = computeShameFlags(1)
+    expect(flags).toHaveProperty('pedersen_sighs_cursed_location_visible', true)
+  })
+
+  it('returns oneliners flag when shame is 3', () => {
+    const flags = computeShameFlags(3)
+    expect(flags).toHaveProperty('npc_oneliners_active', true)
+  })
+
+  it('returns shadow engineer flag when shame is 10', () => {
+    const flags = computeShameFlags(10)
+    expect(flags).toHaveProperty('shadow_engineer_title_unlocked', true)
+  })
+
+  it('returns all flags at or below the current shame level', () => {
+    const flags = computeShameFlags(10)
+    expect(flags).toHaveProperty('pedersen_sighs_cursed_location_visible', true)
+    expect(flags).toHaveProperty('npc_oneliners_active', true)
+    expect(flags).toHaveProperty('cursed_network_full_three_am_active', true)
+    expect(flags).toHaveProperty('shadow_engineer_title_unlocked', true)
+  })
+
+  it('does not return flags for thresholds not yet reached', () => {
+    const flags = computeShameFlags(5)
+    expect(flags).not.toHaveProperty('shadow_engineer_title_unlocked')
+    expect(flags).not.toHaveProperty('secret_ending_accessible')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// applyShameGrime — null safety
+// ---------------------------------------------------------------------------
+
+describe('applyShameGrime (null safety)', () => {
+  it('handles emblems with missing grime field using ?? 0', () => {
+    const emblems = { tux: { earned: true, shine: 0 } } // grime is undefined
+    const result = applyShameGrime(emblems, 1)
+    expect(result.tux.grime).toBeCloseTo(0.05)
+  })
+
+  it('returns empty object when emblems is null', () => {
+    expect(applyShameGrime(null, 1)).toEqual({})
+  })
+
+  it('returns empty object when emblems is undefined', () => {
+    expect(applyShameGrime(undefined, 1)).toEqual({})
   })
 })

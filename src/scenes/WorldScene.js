@@ -287,8 +287,11 @@ export class WorldScene extends BaseScene {
         if (Array.isArray(variant.pool)) {
           // NPC one-liner pools are intentionally non-deterministic — different
           // line each visit. No seeded RNG needed; this is presentation-layer only.
-          const idx = Math.floor(Math.random() * variant.pool.length)
-          return variant.pool[idx]
+          if (variant.pool.length > 0) {
+            const idx = Math.floor(Math.random() * variant.pool.length)
+            return variant.pool[idx]
+          }
+          return variant.pages ?? entry?.pages ?? ['???']
         }
         return variant.pages
       }

@@ -42,6 +42,7 @@ describe('skills registry', () => {
       'helm_upgrade',
       'kubectl_apply',
       'kubectl_delete_ns',
+      'kubectl_delete_production',
       'kubectl_drain',
       'kubectl_exec',
       'kubectl_logs',
@@ -51,7 +52,7 @@ describe('skills registry', () => {
   })
 
   it('all skills use valid domain and tier values', () => {
-    const validDomains = [...Object.keys(DOMAIN_MATCHUPS), null]
+    const validDomains = Object.keys(DOMAIN_MATCHUPS)
     getAllSkills().forEach(skill => {
       expect(validDomains).toContain(skill.domain)
       expect(VALID_TIERS).toContain(skill.tier)
