@@ -52,6 +52,11 @@ export const ENCOUNTER_POOLS = {
     rare:   [],
     cursed: [],
   },
+  oldcorp_basement: {
+    common: [],
+    rare:   [],
+    cursed: ['vb6_billing_horror'],
+  },
 }
 
 const ENCOUNTERS = {
@@ -482,6 +487,23 @@ const ENCOUNTERS = {
     difficulty: 3,
     attacks: ['reputation_leak'],
     optimalFix: 'vault_rotate',
+    layers: null,
+  },
+  vb6_billing_horror: {
+    id: 'vb6_billing_horror',
+    type: 'incident',
+    name: 'The VB6 Billing Horror',
+    symptomText: 'CRITICAL ERROR 0x80004005: Migration Detected.',
+    rootCauseText: 'A Visual Basic 6 billing system that has been running since 1998 does not want to stop.',
+    domain: 'linux',
+    immuneDomains: ['cloud', 'iac', 'kubernetes', 'containers'],
+    hp: 80,
+    sla: 5,
+    difficulty: 4,
+    attacks: ['uptime_drain', 'escalation'],
+    optimalFix: 'systemctl_restart',
+    encounterText: ['It was running since 1998.', 'It did not want to stop.'],
+    onDefeat: { learnSkill: 'exec_xp_cmdshell', shameDelta: 1 },
     layers: null,
   },
 }

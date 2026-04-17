@@ -205,6 +205,50 @@ describe('skillPhase', () => {
     expect(state.opponent.hp).toBe(0)
   })
 
+  it('immuneDomains: deals 0 damage when skill domain is immune', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({
+      domain: 'linux', hp: 80, immuneDomains: ['cloud', 'iac', 'kubernetes', 'containers'],
+    }))
+    const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
+    const events = skillPhase(state, skill)
+    const dmgEvent = events.find(e => e.type === 'damage')
+    expect(dmgEvent.value).toBe(0)
+    expect(state.opponent.hp).toBe(80)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'immune', target: 'opponent', value: 'cloud' }))
+  })
+
+  it('immuneDomains: deals normal damage from non-immune domain', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({
+      domain: 'linux', hp: 80, immuneDomains: ['cloud', 'iac', 'kubernetes', 'containers'],
+    }))
+    const skill = makeDamageSkill({ domain: 'linux', effect: { type: 'damage', value: 30 } })
+    const events = skillPhase(state, skill)
+    const dmgEvent = events.find(e => e.type === 'damage')
+    expect(dmgEvent.value).toBe(30)
+    expect(state.opponent.hp).toBe(50)
+    expect(events).not.toContainEqual(expect.objectContaining({ type: 'immune' }))
+  })
+
+  it('immuneDomains: security domain deals strong damage against linux opponent', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({
+      domain: 'linux', hp: 80, immuneDomains: ['cloud', 'iac', 'kubernetes', 'containers'],
+    }))
+    const skill = makeDamageSkill({ domain: 'security', effect: { type: 'damage', value: 30 } })
+    skillPhase(state, skill)
+    // linux is weak against security → but skill domain 'security' is not in immuneDomains
+    // security strong against serverless, not linux — linux strong against security
+    // Actually: security is WEAK against linux (linux→security is strong)
+    // So security vs linux = weak = 0.5 multiplier = 15 damage
+    expect(state.opponent.hp).toBe(65) // 80 - floor(30 * 0.5) = 65
+  })
+
+  it('immuneDomains: absent immuneDomains field has no effect', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ domain: 'cloud', hp: 60 }))
+    const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
+    skillPhase(state, skill)
+    expect(state.opponent.hp).toBe(30)
+  })
+
   it('emits domain_reveal event for reveal_domain effect', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent())
     const skill = {

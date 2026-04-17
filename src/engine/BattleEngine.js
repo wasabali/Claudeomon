@@ -135,9 +135,14 @@ export function skillPhase(state, skill) {
   const effect = skill.effect
 
   if (effect.type === 'damage') {
-    const dmg = calculateDamage(skill, state.opponent.domain) // always use true domain for calculation
+    const immuneDomains = state.opponent.immuneDomains ?? []
+    const isImmune = immuneDomains.includes(skill.domain)
+    const dmg = isImmune ? 0 : calculateDamage(skill, state.opponent.domain)
     state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
     events.push({ type: 'damage', target: 'opponent', value: dmg })
+    if (isImmune) {
+      events.push({ type: 'immune', target: 'opponent', value: skill.domain })
+    }
   }
 
   if (effect.type === 'instant_win_vs_legacy') {

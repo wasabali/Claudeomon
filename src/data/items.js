@@ -213,6 +213,26 @@ const ITEMS = {
     worldActions:   ['use', 'examine'],
     effect:         { type: 'reduce_shame', value: 1, onceFlag: null },
   },
+  legacy_migration_badge: {
+    id:             'legacy_migration_badge',
+    displayName:    'Legacy Migration Badge',
+    tab:            'keyItems',
+    description:    'Awarded for choosing the strangler fig pattern. Proof you respect legacy systems.',
+    usableInBattle: false,
+    battleAction:   'examine',
+    worldActions:   ['examine'],
+    effect:         null,
+  },
+  oldcorp_keycard: {
+    id:             'oldcorp_keycard',
+    displayName:    'OldCorp Keycard',
+    tab:            'keyItems',
+    description:    'A faded badge with a magnetic strip. Grants access to the OldCorp basement.',
+    usableInBattle: false,
+    battleAction:   'examine',
+    worldActions:   ['examine'],
+    effect:         null,
+  },
 }
 
 export const getById = (id)           => ITEMS[id]
