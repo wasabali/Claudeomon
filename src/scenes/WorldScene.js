@@ -4,6 +4,7 @@ import { DialogBox } from '#ui/DialogBox.js'
 import { CONFIG } from '../config.js'
 import { GameState, hasItem, markDirty } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
+import { getById as getTrainerById } from '#data/trainers.js'
 
 const MAP_KEY     = 'localhost_town'
 const TILESET_KEY = 'stub_tiles'
@@ -267,9 +268,51 @@ export class WorldScene extends BaseScene {
       return
     }
 
-    const entry = getStoryById(`npc_${npcName}`)
-    const lines = this._resolveNpcPages(entry)
+    const entry   = getStoryById(`npc_${npcName}`)
+    const trainer = getTrainerById(npcName)
+    const lines   = this._resolveNpcDialog(entry, trainer)
     this.dialog.show(lines, () => { this._interacting = false })
+  }
+
+  // 5-level dialog resolution priority chain:
+  // 1. techniqueUsedFlag  → cursed trainer first-use reaction (once, flag-gated)
+  // 2. followUpDialog     → post-quest completion
+  // 3. shameDialog        → shame threshold reaction
+  // 4. dialogByAct        → act-based dialog
+  // 5. variants / pages   → existing fallback (reputation/shame variants → default)
+  _resolveNpcDialog(entry, trainer) {
+    // 1. Cursed trainer technique acknowledgment — fires once per trainer.
+    if (trainer?.techniqueUsedFlag && !GameState.story.flags[trainer.techniqueUsedFlag]) {
+      const skillId = trainer.teachSkillId ?? trainer.cursedSkill
+      if (skillId && (GameState.stats.skillUseCounts?.[skillId] ?? 0) > 0) {
+        GameState.story.flags[trainer.techniqueUsedFlag] = true
+        markDirty()
+        if (Array.isArray(trainer.techniqueUsedDialog)) return trainer.techniqueUsedDialog
+      }
+    }
+
+    // 2. Follow-up dialog for completed side-quest NPCs.
+    if (Array.isArray(entry?.followUpDialog) && entry.questId) {
+      if (GameState.story.completedQuests.includes(entry.questId)) return entry.followUpDialog
+    }
+
+    // 3. Shame dialog — check thresholds in descending order.
+    const shameSource = entry?.shameDialog ?? trainer?.shameDialog
+    if (shameSource) {
+      const shame = GameState.player.shamePoints
+      for (const threshold of [10, 7, 3]) {
+        if (shame >= threshold && Array.isArray(shameSource[threshold])) return shameSource[threshold]
+      }
+    }
+
+    // 4. Act-based dialog.
+    const act = GameState.story.act
+    const actKey = GameState.story.flags.game_complete ? 'finale' : act
+    const actDialog = entry?.dialogByAct?.[actKey]
+    if (Array.isArray(actDialog)) return actDialog
+
+    // 5. Existing fallback — variants (reputation/shame) → default pages.
+    return this._resolveNpcPages(entry)
   }
 
   // Evaluates NPC dialogue variants top-to-bottom against the current player

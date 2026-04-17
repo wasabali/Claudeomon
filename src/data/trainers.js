@@ -28,6 +28,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'localhost_town',
+    rematchDeck: ['awk_one_liner', 'tail_f', 'grep_logs', 'systemctl_restart', 'crontab_e'],
+    shameDialog: {
+      3: ["Some people are talking about your techniques."],
+      7: ["I won't comment. But I heard things."],
+      10: ["You're not who I thought you were."],
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   tux_wizard: {
@@ -51,6 +58,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'shell_cavern',
+    rematchDeck: ['awk_one_liner', 'tail_f', 'systemctl_restart', 'crontab_e', 'grep_logs'],
+    shameDialog: {
+      3: ["I've heard about you\u2026"],
+      7: ["I've heard about you\u2026"],
+      10: null,
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   fatima_witch: {
@@ -74,6 +88,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'pipeline_pass',
+    rematchDeck: ['az_func_deploy', 'lambda_invoke', 'step_function', 'event_trigger', 'cold_start_ambush'],
+    shameDialog: {
+      3: ["I've heard about you\u2026"],
+      7: ["I've heard about you\u2026"],
+      10: null,
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   bjorn_breaker: {
@@ -97,6 +118,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'jira_dungeon',
+    rematchDeck: ['terraform_apply', 'bicep_deploy', 'az_pipelines_run', 'ansible_playbook', 'terraform_plan'],
+    shameDialog: {
+      3: ["I've heard about you\u2026"],
+      7: ["I've heard about you\u2026"],
+      10: null,
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   ingrid_iam: {
@@ -120,6 +148,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'security_vault',
+    rematchDeck: ['az_role_assignment_create', 'vault_rotate', 'nmap_scan', 'cert_renew', 'firewall_deny'],
+    shameDialog: {
+      3: ["I've heard about you\u2026"],
+      7: ["I've heard about you\u2026"],
+      10: null,
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   kube_master: {
@@ -143,6 +178,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'kubernetes_colosseum',
+    rematchDeck: ['kubectl_apply', 'kubectl_scale', 'kubectl_drain', 'kubectl_exec', 'helm_install'],
+    shameDialog: {
+      3: ["I've heard about you\u2026"],
+      7: ["I've heard about you\u2026"],
+      10: null,
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   helm_hansen: {
@@ -166,6 +208,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'helm_repository',
+    rematchDeck: ['helm_upgrade_install', 'multi_stage_build', 'container_scan', 'docker_compose_up', 'docker_build'],
+    shameDialog: {
+      3: ["I've heard about you\u2026"],
+      7: ["I've heard about you\u2026"],
+      10: null,
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   oracle_alice: {
@@ -189,6 +238,13 @@ const TRAINERS = {
     isCursed: false,
     shameRequired: 0,
     location: 'architecture_district',
+    rematchDeck: ['az_network_vnet_create', 'terraform_apply', 'ansible_playbook', 'bicep_deploy', 'terraform_plan'],
+    shameDialog: {
+      3: ["I've heard about you\u2026"],
+      7: ["I've heard about you\u2026"],
+      10: null,
+    },
+    rematchDialog: "You're back. Good. I've been training.",
   },
 
   // =========================================================================
@@ -217,6 +273,17 @@ const TRAINERS = {
     isCursed: true,
     shameRequired: 1,
     location: 'three_am_tavern',
+    techniqueUsedDialog: [
+      "Ah, you've found the path of least resistance.",
+      "Fewer approvals, more chaos.",
+      "Rules are for people who didn't write the code.",
+    ],
+    techniqueUsedFlag: 'acknowledged_force_pusher',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   hotfix_hakon: {
@@ -244,6 +311,16 @@ const TRAINERS = {
     shameRequired: 2,
     discoveryCondition: 'three_am_clock',
     clueText: "DO_NOT_TOUCH.exe. In the billing system. Someone named K left a comment. But you didn't hear that from me.",
+    techniqueUsedDialog: [
+      "You deployed to prod. Without a pipeline.",
+      "I'm so proud. And so scared.",
+    ],
+    techniqueUsedFlag: 'acknowledged_hotfix_hakon',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   merge_magda: {
@@ -268,6 +345,16 @@ const TRAINERS = {
     isCursed: true,
     shameRequired: 1,
     location: 'three_am_tavern',
+    techniqueUsedDialog: [
+      "You merged without review.",
+      "Beautiful. Terrifying. But beautiful.",
+    ],
+    techniqueUsedFlag: 'acknowledged_merge_magda',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   root_whisperer: {
@@ -292,6 +379,16 @@ const TRAINERS = {
     isCursed: true,
     shameRequired: 2,
     location: 'three_am_tavern',
+    techniqueUsedDialog: [
+      "You chmod'd 777. On production.",
+      "I've never been so proud.",
+    ],
+    techniqueUsedFlag: 'acknowledged_root_whisperer',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   kubectl_karen: {
@@ -316,6 +413,17 @@ const TRAINERS = {
     isCursed: true,
     shameRequired: 2,
     location: 'three_am_tavern',
+    techniqueUsedDialog: [
+      "You deleted all the pods.",
+      "Every. Single. One.",
+      "That's my girl.",
+    ],
+    techniqueUsedFlag: 'acknowledged_kubectl_karen',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   skip_sigrid: {
@@ -343,6 +451,16 @@ const TRAINERS = {
     shameRequired: 4,
     discoveryCondition: 'three_am_clock',
     clueText: "You know about DO_NOT_TOUCH.exe, right? In OldCorp. Obviously you do. Everyone who ends up here does.",
+    techniqueUsedDialog: [
+      "Tests. Are. Waste. Of. Time.",
+      "You understand now.",
+    ],
+    techniqueUsedFlag: 'acknowledged_skip_sigrid',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   hardcode_henrik: {
@@ -367,6 +485,17 @@ const TRAINERS = {
     isCursed: true,
     shameRequired: 1,
     location: 'three_am_tavern',
+    techniqueUsedDialog: [
+      "You hardcoded the secret.",
+      "In production. In plain text.",
+      "I've never been happier.",
+    ],
+    techniqueUsedFlag: 'acknowledged_hardcode_henrik',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   rebase_reverend: {
@@ -391,6 +520,17 @@ const TRAINERS = {
     isCursed: true,
     shameRequired: 2,
     location: 'three_am_tavern',
+    techniqueUsedDialog: [
+      "You rebased 999 commits.",
+      "The history is clean. The damage is done.",
+      "Beautiful.",
+    ],
+    techniqueUsedFlag: 'acknowledged_rebase_reverend',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   rmrf_rune: {
@@ -418,6 +558,17 @@ const TRAINERS = {
     shameRequired: 8,
     discoveryCondition: 'three_am_clock',
     clueText: "The exe. OldCorp basement. DO_NOT_TOUCH. Heh. Classic.",
+    techniqueUsedDialog: [
+      "You've used it.",
+      "There's no coming back from rm -rf.",
+      "Welcome.",
+    ],
+    techniqueUsedFlag: 'acknowledged_rmrf_rune',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   downtime_dealer: {
@@ -445,6 +596,17 @@ const TRAINERS = {
     shameRequired: 6,
     discoveryCondition: 'three_am_clock',
     clueText: "Someone built a whole billing system in Visual Basic 6. In OldCorp. It runs. DO NOT TOUCH IT.",
+    techniqueUsedDialog: [
+      "You restarted production without notice.",
+      "At 2am. On a Tuesday.",
+      "You're one of us now.",
+    ],
+    techniqueUsedFlag: 'acknowledged_downtime_dealer',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   deprecated_dagfinn: {
@@ -459,6 +621,16 @@ const TRAINERS = {
     discoveryFlag: 'server_graveyard_found',
     clueText: "There's a girl living inside the containers. Don't ask how. Just go in.",
     cursedSkill: 'terraform_destroy',
+    techniqueUsedDialog: [
+      "You destroyed the infrastructure.",
+      "Everything. Gone. As it should be.",
+    ],
+    techniqueUsedFlag: 'acknowledged_deprecated_dagfinn',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
   privileged_petra: {
     id: 'privileged_petra',
@@ -472,6 +644,16 @@ const TRAINERS = {
     discoveryFlag: 'node_modules_maze_found',
     clueText: "The void guy. He's somewhere you've already been. Or nowhere. Hard to say.",
     cursedSkill: 'curl_pipe_sudo_bash',
+    techniqueUsedDialog: [
+      "You piped curl to sudo bash.",
+      "Brave. Reckless. Perfect.",
+    ],
+    techniqueUsedFlag: 'acknowledged_privileged_petra',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
   null_pointer: {
     id: 'null_pointer',
@@ -485,6 +667,16 @@ const TRAINERS = {
     discoveryFlag: 'dev_null_void_found',
     clueText: "The tavern. You know when.",
     cursedSkill: 'history_clear',
+    techniqueUsedDialog: [
+      "You cleared the history.",
+      "No evidence. No trace. No regrets.",
+    ],
+    techniqueUsedFlag: 'acknowledged_null_pointer',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
   west_eu_2_wilhelm: {
     id: 'west_eu_2_wilhelm',
@@ -498,6 +690,16 @@ const TRAINERS = {
     discoveryFlag: 'deprecated_azure_region_found',
     clueText: "Coordinates to a server room in OldCorp's basement. It was already in his pocket.",
     cursedSkill: 'az_feature_register_legacy',
+    techniqueUsedDialog: [
+      "You registered a legacy feature.",
+      "In a deprecated region. Bold.",
+    ],
+    techniqueUsedFlag: 'acknowledged_west_eu_2_wilhelm',
+    shameDialog: {
+      3: ["You're finally learning the right way."],
+      7: ["I had a feeling about you."],
+      10: ["Welcome to the dark side.\nWe have root access."],
+    },
   },
 
   // =========================================================================
