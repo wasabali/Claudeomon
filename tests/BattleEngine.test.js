@@ -394,17 +394,69 @@ describe('skillPhase', () => {
     expect(state.opponent.hp).toBe(0)
   })
 
-  it('instant_win_vs_containers deals regular damage against non-container domain', () => {
+  it('instant_win_vs_containers uses fallbackDamage against non-container domain', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ hp: 60, domain: 'cloud' }))
     const skill = { id: 'curl_pipe_sudo_bash', domain: 'security', tier: 'cursed', isCursed: true,
-      effect: { type: 'instant_win_vs_containers' },
+      effect: { type: 'instant_win_vs_containers', fallbackDamage: 17 },
       sideEffect: { shame: 1, reputation: -12, description: '' } }
     const events = skillPhase(state, skill)
-    // Fallback follows domain matchup rules; security vs cloud = neutral, but
-    // calculateDamage returns 0 because effect.type !== 'damage'. Damage event is still emitted.
     const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
     expect(dmgEvent).toBeDefined()
-    expect(dmgEvent.value).toBe(0)
+    expect(dmgEvent.value).toBe(17)
+    expect(state.opponent.hp).toBe(43)
+  })
+
+  it('blocks skill and returns skill_blocked event when shameRequired not met', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 5 }), makeOpponent())
+    const skill = makeDamageSkill({ shameRequired: 10 })
+    const events = skillPhase(state, skill)
+    expect(events).toHaveLength(1)
+    expect(events[0].type).toBe('skill_blocked')
+    expect(events[0].reason).toBe('shame_required')
+  })
+
+  it('allows skill when shameRequired is exactly met', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 10 }), makeOpponent())
+    const skill = makeDamageSkill({ shameRequired: 10 })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'skill_blocked')).toBeUndefined()
+    expect(events.find(e => e.type === 'skill_used')).toBeDefined()
+  })
+
+  it('emits emblems_updated event when shame is gained', () => {
+    const emblems = { tux: { earned: true, shine: 0, grime: 0 } }
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 0 }), makeOpponent(), { emblems })
+    const skill = makeDamageSkill({ tier: 'cursed', isCursed: true, sideEffect: { shame: 1, reputation: -8, description: '' } })
+    const events = skillPhase(state, skill)
+    const grimEvent = events.find(e => e.type === 'emblems_updated')
+    expect(grimEvent).toBeDefined()
+    expect(grimEvent.shameDelta).toBe(1)
+    expect(grimEvent.value.tux.grime).toBeCloseTo(0.05)
+  })
+
+  it('does not emit emblems_updated event when no shame is gained', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 0 }), makeOpponent())
+    const skill = makeDamageSkill({ tier: 'optimal' })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'emblems_updated')).toBeUndefined()
+  })
+
+  it('does not emit no-op reputation event when reputation is capped and shame is unchanged', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 100, shamePoints: 0 }), makeOpponent())
+    const skill = makeDamageSkill({ tier: 'standard' })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'reputation')).toBeUndefined()
+  })
+
+  it('does not emit no-op reputation event for zero side-effect cursed skill', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 50, shamePoints: 3 }), makeOpponent())
+    const skill = makeDamageSkill({
+      tier: 'cursed',
+      isCursed: true,
+      sideEffect: { shame: 0, reputation: 0, description: '' },
+    })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'reputation')).toBeUndefined()
   })
 })
 
@@ -661,8 +713,8 @@ describe('turnEndPhase', () => {
     expect(events.find(e => e.type === 'teach_skill')).toBeUndefined()
   })
 
-  it('emits reputation event on win with positive delta for optimal tier', () => {
-    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 50 }), makeOpponent({ hp: 0 }))
+  it('emits reputation event on ENGINEER win with positive delta for optimal tier', () => {
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ reputation: 50 }), makeOpponent({ hp: 0 }))
     state.winningTier = 'optimal'
     const events = turnEndPhase(state)
     const repEvent = events.find(e => e.type === 'reputation')
@@ -670,20 +722,19 @@ describe('turnEndPhase', () => {
     expect(repEvent.value).toBeGreaterThan(0)
   })
 
-  it('emits reputation event on win with negative delta for shortcut tier', () => {
-    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 50 }), makeOpponent({ hp: 0 }))
-    state.winningTier = 'shortcut'
+  it('does not emit reputation event on ENGINEER win with non-optimal tier (standard)', () => {
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ reputation: 50 }), makeOpponent({ hp: 0 }))
+    state.winningTier = 'standard'
     const events = turnEndPhase(state)
     const repEvent = events.find(e => e.type === 'reputation')
-    expect(repEvent).toBeDefined()
-    expect(repEvent.value).toBeLessThan(0)
+    expect(repEvent).toBeUndefined()
   })
 
-  it('updates player reputation in state on win', () => {
-    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 50 }), makeOpponent({ hp: 0 }))
+  it('updates player reputation in state on ENGINEER optimal win', () => {
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ reputation: 50 }), makeOpponent({ hp: 0 }))
     state.winningTier = 'optimal'
     turnEndPhase(state)
-    expect(state.player.reputation).toBe(60)
+    expect(state.player.reputation).toBe(58)
   })
 
   it('does NOT emit teach_skill on ENGINEER win with standard tier', () => {
