@@ -257,11 +257,8 @@ export class WorldScene extends BaseScene {
 
     if (type === 'door') {
       const { requiresItem, flagKey, lockedDialog, unlockedDialog } = interaction
+      if (GameState.story.flags[flagKey]) return
       this._interacting = true
-      if (GameState.story.flags[flagKey]) {
-        this._interacting = false
-        return
-      }
       if (hasItem(requiresItem.tab, requiresItem.id)) {
         GameState.story.flags[flagKey] = true
         markDirty()
