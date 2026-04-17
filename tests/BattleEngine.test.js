@@ -490,7 +490,9 @@ describe('BattleEvent shape', () => {
   const VALID_TYPES = [
     'skill_used', 'damage', 'heal', 'domain_reveal',
     'sla_tick', 'sla_breach', 'status_tick', 'status_remove',
-    'status_apply', 'reputation', 'xp_gain', 'teach_skill', 'battle_end',
+    'status_apply', 'reputation', 'xp_gain', 'teach_skill', 'teach_hint',
+    'technical_debt', 'trainer_disgusted', 'warn_npcs', 'battle_end',
+    'telegraph', 'dialog',
     'budget_drain', 'escalation', 'layer_transition',
   ]
 

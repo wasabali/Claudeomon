@@ -49,13 +49,18 @@ export const GameState = {
     flags:           {},
   },
   stats: {
-    battlesWon:           0,
-    battlesLost:          0,
-    incidentsResolved:    0,
-    cursedTechniquesUsed: 0,
-    totalDeployments:     0,
-    longestUptime:        0,
-    skillUseCounts:       {},
+    battlesWon:            0,
+    battlesLost:           0,
+    incidentsResolved:     0,
+    slaBreaches:           0,
+    cursedTechniquesUsed:  0,
+    nuclearTechniquesUsed: 0,
+    optimalSolutions:      0,
+    totalDeployments:      0,
+    longestUptime:         0,
+    clockManipulated:      false,
+    devNullUseCount:       0,
+    skillUseCounts:        {},
   },
   _session: {
     isDirty:     false,  // true when there are unsaved changes
@@ -173,6 +178,10 @@ export function initNewGame(name, mascot) {
     cursedTechniquesUsed:  0,
     nuclearTechniquesUsed: 0,
     optimalSolutions:      0,
+    totalDeployments:      0,
+    longestUptime:         0,
+    clockManipulated:      false,
+    devNullUseCount:       0,
     skillUseCounts:        {},
   }
   GameState._session = {

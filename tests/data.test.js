@@ -70,7 +70,7 @@ describe('skills registry', () => {
 describe('other data registries', () => {
   it('defines all 10 cursed trainers with isCursed: true', () => {
     const cursedTrainers = getAllTrainers().filter(trainer => trainer.isCursed)
-    expect(cursedTrainers).toHaveLength(10)
+    expect(cursedTrainers).toHaveLength(14)
     cursedTrainers.forEach(trainer => expect(trainer.isCursed).toBe(true))
   })
 
