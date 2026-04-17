@@ -3,7 +3,7 @@
 // Scenes delegate all logic here; they only render the returned events.
 
 import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
-import { REPUTATION_MIN, REPUTATION_MAX } from '../config.js'
+import { REPUTATION_MIN, REPUTATION_MAX, EXECUTIVE_MODE_THRESHOLD, EXECUTIVE_MODE_MULTIPLIER } from '../config.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -76,6 +76,9 @@ export function createBattleState(mode, player, opponent, options = {}) {
     slaBreach:        false,
     winningTier:      options.winningTier ?? null,
     layers:           opponent.layers ? [...opponent.layers] : [],
+    bossPhases:       opponent.phases && opponent.phases.length > 0
+                        ? [...opponent.phases.slice(1)]
+                        : [],
     emblems:          options.emblems ? { ...options.emblems } : {},
     log:              [],
   }
@@ -259,9 +262,18 @@ export function enemyPhase(state) {
 
   events.push({ type: 'skill_used', target: 'player', skillId: moveId })
 
+  // Executive Mode activation — boss-only mechanic
+  if (state.opponent.isBoss && state.opponent.hp / state.opponent.maxHp <= EXECUTIVE_MODE_THRESHOLD) {
+    if (!state.executiveMode) {
+      state.executiveMode = true
+      events.push({ type: 'executive_mode', target: 'opponent' })
+    }
+  }
+
   // Enemy deals base power damage (domain matchup vs player not tracked since
   // the player has no fixed domain; difficulty scales enemy power).
-  const dmg = ENEMY_BASE_POWER
+  const baseDmg = ENEMY_BASE_POWER
+  const dmg = state.executiveMode ? Math.floor(baseDmg * EXECUTIVE_MODE_MULTIPLIER) : baseDmg
   state.player.hp = Math.max(0, state.player.hp - dmg)
   events.push({ type: 'damage', target: 'player', value: dmg })
 
@@ -389,6 +401,25 @@ export function turnEndPhase(state) {
   const slaLoss          = state.slaBreach && !opponentDefeated
 
   if (opponentDefeated) {
+    // Boss phase transition: takes priority over layer transitions
+    if (state.bossPhases && state.bossPhases.length > 0) {
+      const nextPhase = state.bossPhases.shift()
+      state.opponent.hp     = nextPhase.hp
+      state.opponent.maxHp  = nextPhase.maxHp
+      state.opponent.domain = nextPhase.domain
+      state.opponent.deck   = nextPhase.deck
+      state.opponent.name   = nextPhase.name
+      if (nextPhase.isLegacy !== undefined) {
+        state.opponent.isLegacy = nextPhase.isLegacy
+      }
+      events.push({ type: 'boss_phase_transition', target: 'opponent', value: nextPhase })
+      if (nextPhase.transitionDialog) {
+        events.push({ type: 'dialog', target: 'player', text: nextPhase.transitionDialog })
+      }
+      state.turn += 1
+      return events
+    }
+
     // Multi-layer incident: transition to next layer instead of ending the battle
     if (state.layers && state.layers.length > 0) {
       const nextLayer = state.layers.shift()
