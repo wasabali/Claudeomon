@@ -161,10 +161,10 @@ export class WorldScene extends BaseScene {
     let startY = 10 * TILE_SIZE + TILE_SIZE / 2
 
     // Entry direction: place player at the edge they entered from
-    if (this._entryDir === 'west')  { startX = TILE_SIZE + TILE_SIZE / 2; startY = mapH / 2 }
-    if (this._entryDir === 'east')  { startX = mapW - TILE_SIZE - TILE_SIZE / 2; startY = mapH / 2 }
-    if (this._entryDir === 'north') { startX = mapW / 2; startY = TILE_SIZE + TILE_SIZE / 2 }
-    if (this._entryDir === 'south') { startX = mapW / 2; startY = mapH - TILE_SIZE - TILE_SIZE / 2 }
+    if (this._entryDir === 'west')       { startX = TILE_SIZE + TILE_SIZE / 2; startY = mapH / 2 }
+    else if (this._entryDir === 'east')  { startX = mapW - TILE_SIZE - TILE_SIZE / 2; startY = mapH / 2 }
+    else if (this._entryDir === 'north') { startX = mapW / 2; startY = TILE_SIZE + TILE_SIZE / 2 }
+    else if (this._entryDir === 'south') { startX = mapW / 2; startY = mapH - TILE_SIZE - TILE_SIZE / 2 }
 
     this._player = this.physics.add.sprite(startX, startY, 'player')
     this._player.setDepth(5)
@@ -364,10 +364,10 @@ export class WorldScene extends BaseScene {
     const mapH = this._map.heightInPixels
 
     let direction = null
-    if (px <= EDGE_MARGIN)          direction = 'west'
-    else if (px >= mapW - EDGE_MARGIN) direction = 'east'
+    if (px <= EDGE_MARGIN)               direction = 'west'
+    else if (px >= mapW - EDGE_MARGIN)   direction = 'east'
     else if (py <= EDGE_MARGIN)          direction = 'north'
-    else if (py >= mapH - EDGE_MARGIN) direction = 'south'
+    else if (py >= mapH - EDGE_MARGIN)   direction = 'south'
 
     if (!direction) return
 
@@ -380,10 +380,10 @@ export class WorldScene extends BaseScene {
       this.dialog.show([result.reason], () => { this._interacting = false })
       // Push player back from edge so they don't re-trigger
       const pushback = TILE_SIZE
-      if (direction === 'west')  this._player.x += pushback
-      if (direction === 'east')  this._player.x -= pushback
-      if (direction === 'north') this._player.y += pushback
-      if (direction === 'south') this._player.y -= pushback
+      if (direction === 'west')       this._player.x += pushback
+      else if (direction === 'east')  this._player.x -= pushback
+      else if (direction === 'north') this._player.y += pushback
+      else if (direction === 'south') this._player.y -= pushback
       return
     }
 
