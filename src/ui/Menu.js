@@ -8,7 +8,6 @@
 //   ], { x: 10, y: 400, width: 600, onSelect: (item) => { ... }, onCancel: () => { ... } })
 //   menu.show()
 
-import Phaser from 'phaser'
 import { CONFIG } from '../config.js'
 
 const LINE_HEIGHT    = 40
@@ -159,15 +158,19 @@ export class Menu {
   }
 
   _moveUp() {
-    if (this._index > 0) {
-      this._index--
+    let next = this._index - 1
+    while (next >= 0 && this._items[next].disabled) next--
+    if (next >= 0) {
+      this._index = next
       this._refreshAll()
     }
   }
 
   _moveDown() {
-    if (this._index < this._items.length - 1) {
-      this._index++
+    let next = this._index + 1
+    while (next < this._items.length && this._items[next].disabled) next++
+    if (next < this._items.length) {
+      this._index = next
       this._refreshAll()
     }
   }

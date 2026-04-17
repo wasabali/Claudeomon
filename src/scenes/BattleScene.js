@@ -170,7 +170,7 @@ export class BattleScene extends BaseScene {
       label:    skill.displayName ?? skill.id,
       value:    skill.id,
       disabled: skill.budgetCost > 0 && budget < skill.budgetCost,
-      _skill:   skill,
+      skill,
     }))
 
     // FLEE option — disabled in ENGINEER mode
@@ -193,7 +193,7 @@ export class BattleScene extends BaseScene {
       this._onFlee()
       return
     }
-    const skill = item._skill
+    const skill = item.skill
     if (!skill) return
 
     if (skill.isCursed || skill.tier === 'cursed' || skill.tier === 'nuclear') {
