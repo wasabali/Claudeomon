@@ -59,15 +59,18 @@ export const WORLD_SCENE = {
 // Reputation thresholds — sorted highest first for threshold lookups.
 // Range is -100 to 100. Starts at 50. Fully rebuildable.
 // Use getReputationStatus() in SkillEngine to resolve the current label.
+// shopMod: price multiplier applied by shops at this reputation level.
+// teachOnAnyWin: if true, trainers teach their signature skill on ANY win (not just optimal).
 export const REPUTATION_THRESHOLDS = [
-  { min:  80,  status: 'Distinguished Engineer'          },
-  { min:  60,  status: 'Competent Engineer'              },
-  { min:  40,  status: 'Adequate Engineer'               },
-  { min:  20,  status: 'Liability'                       },
-  { min:   0,  status: 'Walking Incident'                },
-  { min: -25,  status: 'Known Incident'                  },
-  { min: -50,  status: 'Do Not Pair With'                },
-  { min: -100, status: 'The Reason We Have Runbooks'     },
+  { min:  90,  status: 'Distinguished Engineer',          shopMod: -0.20, teachOnAnyWin: true  },
+  { min:  80,  status: 'Senior Engineer',                 shopMod: -0.10, teachOnAnyWin: true  },
+  { min:  60,  status: 'Competent Engineer',              shopMod:  0,    teachOnAnyWin: false },
+  { min:  40,  status: 'Adequate Engineer',               shopMod:  0,    teachOnAnyWin: false },
+  { min:  20,  status: 'Liability',                       shopMod:  0.20, teachOnAnyWin: false },
+  { min:   0,  status: 'Walking Incident',                shopMod:  0.50, teachOnAnyWin: false },
+  { min: -25,  status: 'Known Incident',                  shopMod:  0.50, teachOnAnyWin: false },
+  { min: -50,  status: 'Do Not Pair With',                shopMod:  0.50, teachOnAnyWin: false },
+  { min: -100, status: 'The Reason We Have Runbooks',     shopMod:  0.50, teachOnAnyWin: false },
 ]
 
 export const REPUTATION_MIN = -100
@@ -88,6 +91,19 @@ export const SHAME_THRESHOLDS = [
 // How much grime each shame point adds to all earned emblems.
 export const GRIME_PER_SHAME = 0.05
 
+// Grime rate doubles at Shame 10+ (Shadow Engineer)
+export const GRIME_PER_SHAME_SHADOW = 0.10
+
+// Shadow Engineer passive constants (shame >= 10)
+export const SHADOW_ENGINEER = {
+  SHAME_THRESHOLD:          10,
+  OPTIMAL_BUDGET_SURCHARGE: 10,   // Optimal-tier skills cost +10 budget
+  CURSED_BUDGET_DISCOUNT:    5,   // Cursed-tier skills cost -5 budget
+  HEAL_REDUCTION:            0.20, // Heal items restore 20% less
+  COFFEE_SIP_HEAL:          15,   // ☕ Sip Coffee restores 15 HP
+  AUTO_LEARN_SKILL:         'exec_xp_cmdshell',
+}
+
 // Valid skill tiers — single source of truth for validation and data authoring.
 export const SKILL_TIERS = Object.freeze(['optimal', 'standard', 'shortcut', 'cursed', 'nuclear'])
 
@@ -100,6 +116,7 @@ export const STATUSES = {
   cost_alert:     { desc: 'Budget drains 2× faster',             duration: 3         },
   technical_debt: { desc: 'Max HP reduced by 2 per stack',       duration: -1        }, // permanent
   in_review:      { desc: 'Cannot act for 1–3 turns',            duration: 'random'  },
+  shadow_fatigue: { desc: 'Shadow Engineer passive — alters costs and healing', duration: -1 }, // permanent
 }
 
 // Cumulative XP required to reach each level (1-indexed; level 1 starts at 0 XP)

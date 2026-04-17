@@ -2,8 +2,8 @@
 // Owns the battle state and phase queue. Returns BattleEvent[] arrays.
 // Scenes delegate all logic here; they only render the returned events.
 
-import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
-import { REPUTATION_MIN, REPUTATION_MAX } from '../config.js'
+import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime, shouldTeachOnAnyWin } from './SkillEngine.js'
+import { REPUTATION_MIN, REPUTATION_MAX, SHADOW_ENGINEER } from '../config.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -60,11 +60,24 @@ const CONFUSION_DURATION    = 1
 // ---------------------------------------------------------------------------
 export function createBattleState(mode, player, opponent, options = {}) {
   const initialTelegraph = options.telegraphedMove ?? opponent.deck?.[0] ?? null
+  const shamePts = player.shamePoints ?? 0
+
+  // Shame 5+: trainers mirror cursed skills — add 1 random cursed skill to their deck
+  let mirroredOpponent = { ...opponent }
+  if (mode === BATTLE_MODES.ENGINEER && shamePts >= 5 && !opponent.isWildEncounter) {
+    const cursedPool = options.cursedSkillPool ?? []
+    if (cursedPool.length > 0) {
+      const pick = cursedPool[Math.floor((options.randomFn ?? Math.random)() * cursedPool.length)]
+      const newDeck = [...(opponent.deck ?? []), pick]
+      mirroredOpponent = { ...mirroredOpponent, deck: newDeck, cursedMirrorSkill: pick }
+    }
+  }
+
   return {
     mode,
     turn:             1,
     player:           { ...player, technicalDebt: player.technicalDebt ?? 0 },
-    opponent:         { ...opponent },
+    opponent:         mirroredOpponent,
     playerStatuses:   [],
     opponentStatuses: [],
     domainRevealed:   mode === BATTLE_MODES.ENGINEER,
@@ -123,11 +136,47 @@ export function statusTickPhase(state) {
 export function skillPhase(state, skill) {
   const events = []
 
+  // ☕ Sip Coffee — Shadow Engineer special action (shame 10+)
+  // Skips the turn, restores COFFEE_SIP_HEAL HP. No skill resolution.
+  if (skill.id === 'coffee_sip') {
+    const shamePts = state.player.shamePoints ?? 0
+    if (shamePts < SHADOW_ENGINEER.SHAME_THRESHOLD) {
+      events.push({ type: 'skill_blocked', target: 'player', skillId: 'coffee_sip', reason: 'shadow_engineer_required' })
+      return events
+    }
+    const healAmount = SHADOW_ENGINEER.COFFEE_SIP_HEAL
+    const healed = Math.min(healAmount, state.player.maxHp - state.player.hp)
+    state.player.hp = Math.min(state.player.maxHp, state.player.hp + healAmount)
+    events.push({ type: 'skill_used', target: 'player', skillId: 'coffee_sip' })
+    events.push({ type: 'heal', target: 'player', value: healed })
+    events.push({ type: 'dialog', target: 'player', text: '☕ *sips coffee*' })
+    return events
+  }
+
   // Enforce shameRequired gate — skills that require a minimum shame level
   // (e.g. kubectl_delete_production) cannot be used below that threshold.
   if (skill.shameRequired !== undefined && state.player.shamePoints < skill.shameRequired) {
     events.push({ type: 'skill_blocked', target: 'player', skillId: skill.id, reason: 'shame_required' })
     return events
+  }
+
+  // Shadow Engineer budget modifications (shame 10+)
+  const isShadow = (state.player.shamePoints ?? 0) >= SHADOW_ENGINEER.SHAME_THRESHOLD
+  if (isShadow && skill.budgetCost !== undefined && skill.budgetCost > 0) {
+    let budgetMod = 0
+    if (skill.tier === 'optimal') {
+      budgetMod = SHADOW_ENGINEER.OPTIMAL_BUDGET_SURCHARGE
+    } else if (skill.tier === 'cursed' || skill.tier === 'nuclear') {
+      budgetMod = -SHADOW_ENGINEER.CURSED_BUDGET_DISCOUNT
+    }
+    if (budgetMod !== 0) {
+      const adjustedCost = Math.max(0, skill.budgetCost + budgetMod)
+      const actualDrain = adjustedCost - skill.budgetCost
+      if (actualDrain !== 0) {
+        state.player.budget = Math.max(0, (state.player.budget ?? 0) - actualDrain)
+        events.push({ type: 'budget_drain', target: 'player', value: actualDrain, source: 'shadow_fatigue' })
+      }
+    }
   }
 
   events.push({ type: 'skill_used', target: 'opponent', skillId: skill.id })
@@ -165,8 +214,13 @@ export function skillPhase(state, skill) {
   }
 
   if (effect.type === 'heal') {
-    const healed = Math.min(effect.value, state.player.maxHp - state.player.hp)
-    state.player.hp = Math.min(state.player.maxHp, state.player.hp + effect.value)
+    let healValue = effect.value
+    // Shadow Engineer: heal items restore 20% less
+    if (isShadow) {
+      healValue = Math.floor(healValue * (1 - SHADOW_ENGINEER.HEAL_REDUCTION))
+    }
+    const healed = Math.min(healValue, state.player.maxHp - state.player.hp)
+    state.player.hp = Math.min(state.player.maxHp, state.player.hp + healValue)
     events.push({ type: 'heal', target: 'player', value: healed })
   }
 
@@ -185,8 +239,9 @@ export function skillPhase(state, skill) {
 
   // Apply grime to all earned emblems when shame is gained and emit an event
   // so BattleScene can sync GameState.emblems at battle end.
+  // Pass current shame to applyShameGrime for doubled rate at Shadow Engineer.
   if (shameDelta > 0) {
-    const nextEmblems = applyShameGrime(state.emblems ?? {}, shameDelta)
+    const nextEmblems = applyShameGrime(state.emblems ?? {}, shameDelta, state.player.shamePoints)
     state.emblems = nextEmblems
     events.push({ type: 'emblems_updated', target: 'player', value: nextEmblems, shameDelta })
   }
@@ -255,6 +310,12 @@ export function enemyPhase(state) {
   if (state.mode === BATTLE_MODES.INCIDENT) return []
 
   const events = []
+
+  // Shame 5+: announce cursed mirror on first enemy turn
+  if (state.turn === 1 && state.opponent.cursedMirrorSkill) {
+    events.push({ type: 'dialog', target: 'opponent', text: 'You taught me something. Watch this.' })
+  }
+
   const moveId = state.telegraphedMove ?? 'basic_attack'
 
   events.push({ type: 'skill_used', target: 'player', skillId: moveId })
@@ -416,8 +477,10 @@ export function turnEndPhase(state) {
     events.push({ type: 'xp_gain', target: 'player', value: xp })
 
     // ENGINEER mode: tier-based teacher reactions
+    // At high reputation (80+), trainers teach on ANY win tier (not just optimal).
     if (state.mode === BATTLE_MODES.ENGINEER) {
-      if (tier === 'optimal' && state.opponent.teachSkillId) {
+      const teachAny = shouldTeachOnAnyWin(state.player.reputation)
+      if ((tier === 'optimal' || teachAny) && state.opponent.teachSkillId) {
         events.push({ type: 'teach_skill', target: 'player', value: state.opponent.teachSkillId })
       } else if (tier === 'standard') {
         if (state.opponent.winDialog) {
@@ -429,6 +492,11 @@ export function turnEndPhase(state) {
         events.push({ type: 'trainer_disgusted', target: 'player' })
       } else if (tier === 'nuclear') {
         events.push({ type: 'warn_npcs', target: 'player' })
+      }
+
+      // Announce cursed mirror if the opponent has one
+      if (state.opponent.cursedMirrorSkill) {
+        events.push({ type: 'dialog', target: 'opponent', text: "Don't look at me like that. You started it." })
       }
     }
 
