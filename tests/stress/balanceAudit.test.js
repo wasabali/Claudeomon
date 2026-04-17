@@ -20,7 +20,7 @@ import { getAll as getAllStory }                           from '#data/story.js'
 import {
   DOMAIN_MATCHUPS, STRONG_MULTIPLIER, WEAK_MULTIPLIER,
   STATUSES, XP_TABLE, REPUTATION_THRESHOLDS, SHAME_THRESHOLDS,
-  GRIME_PER_SHAME,
+  GRIME_PER_SHAME, SKILL_TIERS,
 } from '../../src/config.js'
 import { calculateDamage, calculateXP, assessQuality, getDomainMultiplier, applyShameAndReputation } from '#engine/SkillEngine.js'
 import { createBattleState, resolveTurn, BATTLE_MODES }   from '#engine/BattleEngine.js'
@@ -33,8 +33,8 @@ import { STARTING_ACTIVE_SKILLS }                          from '#state/GameStat
 // Helpers
 // ---------------------------------------------------------------------------
 
-const VALID_DOMAINS = ['linux', 'containers', 'kubernetes', 'cloud', 'security', 'iac', 'serverless', 'observability']
-const VALID_TIERS   = ['optimal', 'standard', 'shortcut', 'cursed', 'nuclear']
+const VALID_DOMAINS = Object.freeze(Object.keys(DOMAIN_MATCHUPS))
+const VALID_TIERS   = SKILL_TIERS
 
 /** Create a mock player for battle simulation */
 function mockPlayer(overrides = {}) {
@@ -78,8 +78,15 @@ function simulateBattle(mode, player, opponent, playerSkills, seed = 42) {
 
 /** Run N simulated battles and return aggregate stats */
 function runBattleSimulation(mode, opponent, playerSkillIds, n = 500) {
-  const skills = playerSkillIds.map(id => getSkillById(id)).filter(Boolean)
-  if (skills.length === 0) return null
+  if (playerSkillIds.length === 0) return null
+
+  const resolved = playerSkillIds.map(id => ({ id, skill: getSkillById(id) }))
+  const missing = resolved.filter(({ skill }) => !skill).map(({ id }) => id)
+  if (missing.length > 0) {
+    throw new Error(`runBattleSimulation received unknown playerSkillIds: ${missing.join(', ')}`)
+  }
+
+  const skills = resolved.map(({ skill }) => skill)
 
   const results = { wins: 0, losses: 0, timeouts: 0, totalTurns: 0, totalHpRemaining: 0 }
 
@@ -420,10 +427,14 @@ describe('Battle Simulations', () => {
 
     it('early encounters (difficulty 1-2) have win rate > 20% with starter deck', () => {
       const failures = []
+      const hardButAcceptable = []
       for (const enc of earlyEncounters) {
         const stats = runBattleSimulation(BATTLE_MODES.INCIDENT, enc, STARTING_ACTIVE_SKILLS, 200)
-        if (stats && stats.winRate < 0.20) {
+        if (!stats) continue
+        if (stats.winRate < 0.20) {
           failures.push(`${enc.id} (diff=${enc.difficulty}): win rate ${(stats.winRate * 100).toFixed(1)}%`)
+        } else if (stats.winRate < 0.30) {
+          hardButAcceptable.push(`${enc.id} (diff=${enc.difficulty}): win rate ${(stats.winRate * 100).toFixed(1)}%`)
         }
       }
       // FINDING [MEDIUM]: high_cpu and disk_full encounters have ~21% win rate with
@@ -433,13 +444,6 @@ describe('Battle Simulations', () => {
       // acquire domain-appropriate skills before these encounters are comfortable.
       // These encounters appear in production_plains (not the starting area), so
       // encountering them early is unlikely but possible in three_am_tavern.
-      const hardButAcceptable = []
-      for (const enc of earlyEncounters) {
-        const stats = runBattleSimulation(BATTLE_MODES.INCIDENT, enc, STARTING_ACTIVE_SKILLS, 200)
-        if (stats && stats.winRate >= 0.20 && stats.winRate < 0.30) {
-          hardButAcceptable.push(`${enc.id} (diff=${enc.difficulty}): win rate ${(stats.winRate * 100).toFixed(1)}%`)
-        }
-      }
       if (hardButAcceptable.length > 0) {
         console.warn(`[MEDIUM] Encounters barely winnable with starter deck:\n${hardButAcceptable.join('\n')}`)
       }

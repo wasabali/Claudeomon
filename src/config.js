@@ -88,6 +88,9 @@ export const SHAME_THRESHOLDS = [
 // How much grime each shame point adds to all earned emblems.
 export const GRIME_PER_SHAME = 0.05
 
+// Valid skill tiers — single source of truth for validation and data authoring.
+export const SKILL_TIERS = Object.freeze(['optimal', 'standard', 'shortcut', 'cursed', 'nuclear'])
+
 // Status effects applied during battle
 export const STATUSES = {
   throttled:      { desc: 'Only 1 skill every 2 turns',          duration: 3         },

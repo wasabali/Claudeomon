@@ -15,10 +15,10 @@ npm test -- --reporter=verbose tests/stress/
 ## What You Check
 
 ### Battle Balance
-- Simulate 1000+ battles per encounter/trainer pairing with random skill selections
+- Simulate 200 battles per encounter/trainer pairing with random skill selections
 - Track win rates, average turns to win, HP remaining, budget spent
-- Flag encounters where player win rate is <30% (too hard) or >95% (too easy)
-- Flag trainer battles where specific skill combos guarantee trivial wins
+- Hard-fail encounters where player win rate is <20% (too hard), warn on 20–30%, and flag >95% win rate as too easy
+- Report trainer battles where specific skill combos guarantee trivial wins as balance issues
 
 ### Skill Balance
 - Compare DPT (damage per turn) across all skills, adjusted for domain matchups
