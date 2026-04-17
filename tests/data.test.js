@@ -11,6 +11,7 @@ import { getAll as getAllQuests } from '../src/data/quests.js'
 import { ENCOUNTER_POOLS, getAll as getAllEncounters } from '../src/data/encounters.js'
 import { getAll as getAllThreads, getByCommandId } from '../src/data/stackoverflow.js'
 import { getById as getGateById, getAll as getAllGates, getBy as getGatesBy } from '../src/data/gates.js'
+import { getById as getShopById, getAll as getAllShops, getBy as getShopsBy } from '../src/data/shops.js'
 
 const VALID_TIERS = ['optimal', 'standard', 'shortcut', 'cursed', 'nuclear']
 const VALID_GATE_TYPES = ['hard', 'soft', 'knowledge', 'reputation', 'shame']
@@ -23,6 +24,7 @@ const DATA_FILES = [
   'encounters.js',
   'stackoverflow.js',
   'gates.js',
+  'shops.js',
 ].map(file => path.join(process.cwd(), 'src', 'data', file))
 
 describe('skills registry', () => {
@@ -232,5 +234,53 @@ describe('gates registry', () => {
           expect(VALID_TIERS).toContain(step.tier)
         })
       })
+  })
+})
+
+describe('shops registry', () => {
+  it('follows the registry pattern with getById, getAll, getBy', () => {
+    const shop = getShopById('azure_marketplace')
+    expect(shop).toBeDefined()
+    expect(shop.id).toBe('azure_marketplace')
+
+    const allShops = getAllShops()
+    expect(allShops.length).toBeGreaterThanOrEqual(3)
+
+    expect(typeof getShopsBy).toBe('function')
+  })
+
+  it('all shops have required fields', () => {
+    getAllShops().forEach(shop => {
+      expect(typeof shop.id).toBe('string')
+      expect(typeof shop.name).toBe('string')
+      expect(typeof shop.location).toBe('string')
+      expect(typeof shop.priceMultiplier).toBe('number')
+      expect(Array.isArray(shop.inventory)).toBe(true)
+    })
+  })
+
+  it('all shop inventory entries reference valid items', () => {
+    getAllShops().forEach(shop => {
+      shop.inventory.forEach(entry => {
+        expect(getItemById(entry.itemId), `shop ${shop.id} references unknown item ${entry.itemId}`).toBeDefined()
+        expect(typeof entry.basePrice).toBe('number')
+        expect(entry.basePrice).toBeGreaterThan(0)
+        expect(typeof entry.stock).toBe('number')
+      })
+    })
+  })
+
+  it('three_am_vending requires shameMin 3 to unlock', () => {
+    const shop = getShopById('three_am_vending')
+    expect(shop.unlockCondition).toBeDefined()
+    expect(shop.unlockCondition.shameMin).toBe(3)
+  })
+
+  it('vending machines have markup or discount multipliers', () => {
+    const pipeline = getShopById('pipeline_vending')
+    expect(pipeline.priceMultiplier).toBeGreaterThan(1.0)
+
+    const threeAm = getShopById('three_am_vending')
+    expect(threeAm.priceMultiplier).toBeLessThan(1.0)
   })
 })
