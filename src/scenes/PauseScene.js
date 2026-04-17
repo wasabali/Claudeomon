@@ -13,6 +13,15 @@ const SLIDERS = [
 
 const MENU_ITEMS = [...SLIDERS.map(s => s.label), 'MUTE', 'RESUME']
 
+const LABEL_X      = Math.floor(CONFIG.WIDTH * 0.1)
+const VALUE_X      = Math.floor(CONFIG.WIDTH * 0.45)
+const ARROW_X      = Math.floor(CONFIG.WIDTH * 0.07)
+const TITLE_Y      = Math.floor(CONFIG.HEIGHT * 0.1)
+const START_Y      = Math.floor(CONFIG.HEIGHT * 0.2)
+const LINE_HEIGHT  = Math.floor(CONFIG.HEIGHT * 0.08)
+const TITLE_SIZE   = '36px'
+const MENU_SIZE    = '18px'
+
 export class PauseScene extends Phaser.Scene {
   constructor() {
     super({ key: 'PauseScene' })
@@ -24,36 +33,35 @@ export class PauseScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0.85)')
 
-    const textStyle = { fontFamily: CONFIG.FONT, fontSize: '18px', color: '#f8f8f8' }
-    const startY = 200
-
-    this.add.text(CONFIG.WIDTH / 2, 100, 'PAUSED', {
+    this.add.text(CONFIG.WIDTH / 2, TITLE_Y, 'PAUSED', {
       fontFamily: CONFIG.FONT,
-      fontSize: '36px',
+      fontSize: TITLE_SIZE,
       color: '#ffe066',
     }).setOrigin(0.5)
+
+    const textStyle = { fontFamily: CONFIG.FONT, fontSize: MENU_SIZE, color: '#f8f8f8' }
 
     this._menuTexts = []
     this._valueTexts = []
 
     for (let i = 0; i < MENU_ITEMS.length; i++) {
-      const y = startY + i * 80
+      const y = START_Y + i * LINE_HEIGHT
 
-      const label = this.add.text(200, y, MENU_ITEMS[i], textStyle)
+      const label = this.add.text(LABEL_X, y, MENU_ITEMS[i], textStyle)
       this._menuTexts.push(label)
 
       if (i < SLIDERS.length) {
-        const valueText = this.add.text(800, y, '', textStyle)
+        const valueText = this.add.text(VALUE_X, y, '', textStyle)
         this._valueTexts.push(valueText)
       } else if (MENU_ITEMS[i] === 'MUTE') {
-        const valueText = this.add.text(800, y, '', textStyle)
+        const valueText = this.add.text(VALUE_X, y, '', textStyle)
         this._valueTexts.push(valueText)
       }
     }
 
-    this._arrow = this.add.text(140, startY, '>', {
+    this._arrow = this.add.text(ARROW_X, START_Y, '>', {
       fontFamily: CONFIG.FONT,
-      fontSize: '18px',
+      fontSize: MENU_SIZE,
       color: '#ffe066',
     })
 
@@ -113,9 +121,7 @@ export class PauseScene extends Phaser.Scene {
   }
 
   _refreshDisplay() {
-    const startY = 200
-
-    this._arrow.setY(startY + this._selectedIndex * 80)
+    this._arrow.setY(START_Y + this._selectedIndex * LINE_HEIGHT)
 
     for (let i = 0; i < SLIDERS.length; i++) {
       const slider = SLIDERS[i]
