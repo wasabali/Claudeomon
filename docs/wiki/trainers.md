@@ -59,7 +59,7 @@ These engineers have gone to the dark side. They hang out in shady corners of th
 
 ## Gym Leaders
 
-Eight gym leaders guard the path to Principal Engineer. Each gym has **2 generic apprentices** + **1 named sub-leader** (who teaches a skill on defeat) + the boss. Every leader has unique pre/post-battle dialog that changes based on your Shame level.
+Eight gym leaders guard the path to Principal Engineer. Each gym typically has **2 generic apprentices** + **1 named sub-leader** (who teaches a skill on defeat) + the boss. *(Exception: The Executive Suite — CTO gym — has 3 apprentices + 2 sub-leaders, reflecting the gauntlet nature of the final gym.)* Every leader has unique pre/post-battle dialog that changes based on your Shame level.
 
 > **Shame ≥ 5:** Leaders add a wary pre-battle line ("I've heard about you…")
 > **Shame ≥ 10:** Leaders **refuse to teach** their signature skill after defeat.

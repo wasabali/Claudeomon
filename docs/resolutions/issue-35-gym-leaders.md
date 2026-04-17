@@ -22,7 +22,7 @@
 2. **Option B: Different characters, rename one** — creates confusion in a small cast.
 3. **Option C: Remove the Developer Gym, Fatima stays field trainer** — loses a gym, weakens Act 1–2 progression.
 
-**Winner: Option A.** The foreshadow-then-fight structure is a classic JRPG moment. She teaches you and then you have to beat her at her own game. This is perfect for Cloud Quest's "learn then apply" philosophy.
+**Winner: Option C.** Fatima is a field trainer only. The Developer Gym is removed from scope — it's been replaced by the current 8-gym layout. Fatima teaches `blue-green deploy` in Pipeline Pass; Captain Nines leads the Uptime Arena (Gym 2). The foreshadow-then-fight concept lives on: players meet Fatima, learn her technique, and later face Captain Nines who has adopted it.
 
 **Q8 — What is the Legacy Monolith?**
 
@@ -30,7 +30,7 @@
 2. **A human NPC named "Monty the Monolith"** — too on the nose, loses the horror.
 3. **An incident-type encounter, not an NPC at all** — no personality, just a difficult fight.
 
-**Winner: Option 1.** The Legacy Monolith is a server rack. It is the gym leader. It cannot be reasoned with. It communicates exclusively in Windows XP error dialogs. This is peak Cloud Quest.
+**Winner: Option 1.** The Legacy Monolith is a server rack. It is a special incident boss — **not a gym leader and not in the gym progression**. It does not award an emblem. It cannot be reasoned with. It communicates exclusively in Windows XP error dialogs. Defeating it drops the `oldcorp_keycard` key item required to access `DO_NOT_TOUCH.exe`. This is peak Cloud Quest.
 
 **Q1–Q4 — The six unnamed leaders**
 
@@ -142,9 +142,7 @@ The content bible already maps gym leaders to names/mechanics. The gap is person
 ---
 
 ### Function Witch Conflict — Resolved ✅
-**Fatima the Function Witch** is both a field trainer (Pipeline Pass, Act 1) and Gym 2's leader (Uptime Arena, Act 2, Production Plains). Wait — actually on re-reading the content bible, the Pipeline Dojo (Gym 1) is Bjørn, and the Uptime Arena (Gym 2) is Captain Nines. The "Developer Gym" with the Function Witch is an older iteration of the design that has been superseded.
-
-**Final ruling:** Fatima is a field trainer only. The "Developer Gym" is removed from scope — it's been replaced by the current 8-gym layout. Fatima teaches `blue-green deploy` in Pipeline Pass; Captain Nines leads the Uptime Arena. No conflict. The old reference to "The Function Witch" as gym leader is a stale entry. Close it.
+**Final ruling:** Fatima is a field trainer only. The "Developer Gym" is removed from scope — it's been replaced by the current 8-gym layout. Fatima teaches `blue-green deploy` in Pipeline Pass; Captain Nines leads the Uptime Arena. The old reference to "The Function Witch" as gym leader is a stale entry. Close it.
 
 ---
 

@@ -90,7 +90,7 @@ Wrong penalty: -10 HP (the app crashes harder on Steve's box)
 Prompt: "Someone is accessing our database. What do I do first?"
 A) "Change your passwords"           → standard (+80 XP, -5 rep, "Better late than never.")
 B) "Rotate all credentials and revoke access" → optimal (+120 XP, Security Scan badge, flag: nancy_quest_optimal)
-C) "Don't worry, it's probably fine" → nuclear (+0 XP, -2 shame, +30 rep loss, triggers mini incident battle: "Leaked Secret" encounter)
+C) "Don't worry, it's probably fine" → nuclear (+0 XP, +2 shame, -30 rep, triggers mini incident battle: "Leaked Secret" encounter)
 Wrong penalty on nuclear: immediate Leaked Secret battle (no SLA timer — Nancy panics, you must fight through it)
 ```
 
