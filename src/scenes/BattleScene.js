@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { BaseScene } from '#scenes/BaseScene.js'
-import { CONFIG } from '../config.js'
+import { CONFIG, ENDING_CONDITIONS } from '../config.js'
 import { GameState, markDirty } from '#state/GameState.js'
 import { getById as getSkillById } from '#data/skills.js'
 import {
@@ -373,6 +373,22 @@ export class BattleScene extends BaseScene {
         this.time.delayedCall(800, callback)
         break
 
+      case 'boss_phase_transition': {
+        const phase = event.value
+        const title = phase.title ? `${phase.name}: "${phase.title}"` : phase.name
+        this._showLog(title)
+        this._enemyNameText?.setText(phase.name ?? '???')
+        this._enemyDomainText?.setText(`[${phase.domain ?? '???'}]`)
+        this._refreshHUD()
+        this.time.delayedCall(1000, callback)
+        break
+      }
+
+      case 'executive_mode':
+        this._showLog('Executive Mode: ACTIVATED.\nDamage increased!')
+        this.time.delayedCall(800, callback)
+        break
+
       case 'battle_end':
         this._onBattleEnd(event.value)
         break
@@ -447,8 +463,29 @@ export class BattleScene extends BaseScene {
     markDirty()
     this._showLog(result === 'win' ? 'Victory!' : 'Defeated...')
     this.time.delayedCall(1200, () => {
+      // CTO boss defeat → set flag and route to credits
+      if (result === 'win' && opponent.isBoss && opponent.id === 'the_cto') {
+        GameState.story.flags.cto_defeated = true
+        markDirty()
+        const ending = this._resolveEnding()
+        this.fadeToScene('CreditsScene', { ending })
+        return
+      }
       this.fadeToScene(this._returnScene ?? 'WorldScene')
     })
+  }
+
+  _resolveEnding() {
+    const shame = GameState.player.shamePoints
+    const flags = GameState.story.flags
+    const c = ENDING_CONDITIONS
+    if (shame >= c.fork_the_company.minShame && flags[c.fork_the_company.requiredFlag]) {
+      return 'ending_fork_the_company'
+    }
+    if (shame >= c.shadow_post_mortem.minShame && shame <= c.shadow_post_mortem.maxShame && flags[c.shadow_post_mortem.requiredFlag]) {
+      return 'ending_shadow_post_mortem'
+    }
+    return 'ending_post_mortem'
   }
 
   // -------------------------------------------------------------------------
