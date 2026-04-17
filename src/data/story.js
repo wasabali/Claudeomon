@@ -134,13 +134,6 @@ const KRISTOFFER_LOCATIONS = {
   postgame: 'localhost_town',
 }
 
-const KRISTOFFER_SHAME_REACTIONS = [
-  { shameMin: 15, pages: ["You're going to join him, aren't you."] },
-  { shameMin: 10, pages: ["You're going down the same path\nKarsten did. Please stop."] },
-  { shameMin:  7, pages: ["THROTTLEMASTER contacted you,\ndidn't he. I can tell."] },
-  { shameMin:  3, pages: ["I've heard some… concerning things\nabout your methods."] },
-]
-
 // ---------------------------------------------------------------------------
 // NPC_APPEARANCES — new NPCs that appear in specific acts
 // ---------------------------------------------------------------------------
@@ -388,7 +381,6 @@ const STORY = {
       postgame: ["I'm sorry. That's all I can say."],
     },
     locationByAct: KRISTOFFER_LOCATIONS,
-    shameReactions: KRISTOFFER_SHAME_REACTIONS,
     variants: [
       {
         condition: { shameMin: 15 },
@@ -483,5 +475,8 @@ export const getNpcAppearance     = (id) => NPC_APPEARANCES[id]
 // ---------------------------------------------------------------------------
 // Kristoffer location/shame exports
 // ---------------------------------------------------------------------------
-export const getKristofferLocations     = () => KRISTOFFER_LOCATIONS
-export const getKristofferShameReactions = () => KRISTOFFER_SHAME_REACTIONS
+export const getKristofferLocations      = () => KRISTOFFER_LOCATIONS
+export const getKristofferShameReactions = () =>
+  (STORY.npc_kristoffer.variants ?? [])
+    .filter(v => v.condition.shameMin !== undefined)
+    .map(v => ({ shameMin: v.condition.shameMin, pages: v.pages }))

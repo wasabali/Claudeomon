@@ -260,7 +260,7 @@ describe('shouldTriggerThreeAmScene', () => {
 // getVisibleNpcs
 // ---------------------------------------------------------------------------
 describe('getVisibleNpcs', () => {
-  it('returns empty array for act 1 (all NPCs appear in act 2+)', () => {
+  it('returns empty array for act 1 (NPCs start appearing from act 2 onwards)', () => {
     const npcs = getVisibleNpcs(1)
     expect(npcs).toEqual([])
   })
