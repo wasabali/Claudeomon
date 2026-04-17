@@ -5,6 +5,7 @@ import { CONFIG, MOVEMENT, ENCOUNTER_BASE_CHANCE, ENCOUNTER_RUN_MULTIPLIER, ENCO
 import { GameState, hasItem, markDirty } from '#state/GameState.js'
 import { Overrides } from '../overrides.js'
 import { getById as getStoryById } from '#data/story.js'
+import { getById as getItemById } from '#data/items.js'
 import { seedRandom } from '#utils/random.js'
 
 const MAP_KEY     = 'localhost_town'
@@ -417,7 +418,7 @@ export class WorldScene extends BaseScene {
 
     const runMultiplier = this._isRunning ? ENCOUNTER_RUN_MULTIPLIER : 1.0
     const chance = ENCOUNTER_BASE_CHANCE * runMultiplier
-    const rng = seedRandom(Date.now() ^ this._stepCount)
+    const rng = seedRandom(this._stepCount * 0x9e3779b9)
     if (rng() < chance) {
       this._stepsSinceEncounter = 0
       // Wired to EncounterEngine.selectFromPool() — triggers battle scene transition
@@ -438,9 +439,11 @@ export class WorldScene extends BaseScene {
         for (const p of (obj.properties ?? [])) { props[p.name] = p.value }
 
         if (props.requiredItem && !hasItem('keyItems', props.requiredItem)) {
+          const itemDef = getItemById(props.requiredItem)
+          const itemName = itemDef?.displayName ?? props.requiredItem
           this._interacting = true
           this.dialog.show(
-            [`You need ${props.requiredItem} to proceed.\nThe path is blocked by a 403 Forbidden.`],
+            [`You need ${itemName} to proceed.\nThe path is blocked by a 403 Forbidden.`],
             () => { this._interacting = false }
           )
           return
@@ -468,10 +471,10 @@ export class WorldScene extends BaseScene {
       CONFIG.WIDTH, CONFIG.HEIGHT, 0x000000
     ).setDepth(100).setScrollFactor(0).setAlpha(0)
 
-    const steps = [0.33, 0.66, 1.0]
+    const steps = MOVEMENT.TRANSITION_FADE_STEPS
     let step = 0
     this.time.addEvent({
-      delay:    100,
+      delay:    MOVEMENT.TRANSITION_STEP_DELAY_MS,
       repeat:   steps.length - 1,
       callback: () => {
         overlay.setAlpha(steps[step])
