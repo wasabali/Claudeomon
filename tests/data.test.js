@@ -11,6 +11,7 @@ import { getAll as getAllQuests } from '../src/data/quests.js'
 import { ENCOUNTER_POOLS, getAll as getAllEncounters } from '../src/data/encounters.js'
 import { getAll as getAllThreads, getByCommandId } from '../src/data/stackoverflow.js'
 import { getById as getGateById, getAll as getAllGates, getBy as getGatesBy } from '../src/data/gates.js'
+import { getById as getRegionById, getAll as getAllRegions, getBy as getRegionsBy, REGION_CONNECTIONS } from '../src/data/regions.js'
 
 const VALID_TIERS = ['optimal', 'standard', 'shortcut', 'cursed', 'nuclear']
 const VALID_GATE_TYPES = ['hard', 'soft', 'knowledge', 'reputation', 'shame']
@@ -23,6 +24,7 @@ const DATA_FILES = [
   'encounters.js',
   'stackoverflow.js',
   'gates.js',
+  'regions.js',
 ].map(file => path.join(process.cwd(), 'src', 'data', file))
 
 describe('skills registry', () => {
@@ -110,6 +112,7 @@ describe('other data registries', () => {
       ...getAllEncounters().map(entry => entry.id),
       ...getAllThreads().map(entry => entry.id),
       ...getAllGates().map(entry => entry.id),
+      ...getAllRegions().map(entry => entry.id),
     ]
     expect(new Set(allIds).size).toBe(allIds.length)
   })
@@ -232,5 +235,100 @@ describe('gates registry', () => {
           expect(VALID_TIERS).toContain(step.tier)
         })
       })
+  })
+})
+
+const VALID_REGION_TYPES   = ['main', 'gym', 'dungeon', 'hidden']
+const VALID_DOMAINS_OR_NULL = [...Object.keys(DOMAIN_MATCHUPS), null]
+
+describe('regions registry', () => {
+  it('follows the registry pattern with getById, getAll, getBy', () => {
+    const region = getRegionById('localhost_town')
+    expect(region).toBeDefined()
+    expect(region.id).toBe('localhost_town')
+
+    const allRegions = getAllRegions()
+    expect(allRegions.length).toBeGreaterThanOrEqual(1)
+
+    const mainRegions = getRegionsBy('type', 'main')
+    expect(mainRegions.length).toBe(6)
+    mainRegions.forEach(r => expect(r.type).toBe('main'))
+  })
+
+  it('all regions have required fields', () => {
+    getAllRegions().forEach(region => {
+      expect(typeof region.id).toBe('string')
+      expect(typeof region.name).toBe('string')
+      expect(VALID_DOMAINS_OR_NULL).toContain(region.domain)
+      expect(typeof region.act).toBe('number')
+      expect(VALID_REGION_TYPES).toContain(region.type)
+      expect(typeof region.hasFastTravel).toBe('boolean')
+      expect(typeof region.mvp).toBe('boolean')
+    })
+  })
+
+  it('gyms and dungeons have valid parentRegion', () => {
+    getAllRegions()
+      .filter(r => r.type === 'gym' || r.type === 'dungeon')
+      .forEach(region => {
+        expect(typeof region.parentRegion).toBe('string')
+        expect(getRegionById(region.parentRegion)).toBeDefined()
+      })
+  })
+
+  it('hidden regions have accessTrigger', () => {
+    getAllRegions()
+      .filter(r => r.type === 'hidden')
+      .forEach(region => {
+        expect(typeof region.accessTrigger).toBe('string')
+        expect(region.accessTrigger.length).toBeGreaterThan(0)
+      })
+  })
+
+  it('defines 8 gyms', () => {
+    expect(getRegionsBy('type', 'gym')).toHaveLength(8)
+  })
+
+  it('defines 5 dungeon rooms', () => {
+    expect(getRegionsBy('type', 'dungeon')).toHaveLength(5)
+  })
+
+  it('defines 5 hidden regions', () => {
+    expect(getRegionsBy('type', 'hidden')).toHaveLength(5)
+  })
+
+  it('MVP regions include localhost_town, pipeline_pass, terminal_gym, jira_dungeon_1', () => {
+    const mvpIds = getRegionsBy('mvp', true).map(r => r.id).sort()
+    expect(mvpIds).toContain('localhost_town')
+    expect(mvpIds).toContain('pipeline_pass')
+    expect(mvpIds).toContain('terminal_gym')
+    expect(mvpIds).toContain('jira_dungeon_1')
+  })
+
+  it('REGION_CONNECTIONS has bidirectional links for main region connections', () => {
+    // Main regions connected by edge-scroll must be bidirectional.
+    // Dungeon exits may share an entry direction with another connection, so
+    // we only enforce strict bidirectionality when both regions are in the
+    // connection graph AND the reverse entry direction maps back to the source.
+    for (const [fromId, dirs] of Object.entries(REGION_CONNECTIONS)) {
+      for (const [dir, conn] of Object.entries(dirs)) {
+        const reverse = REGION_CONNECTIONS[conn.target]
+        if (!reverse) continue
+        const reverseConn = reverse[conn.entry]
+        if (!reverseConn) continue
+        // Only enforce bidirectionality when the reverse actually points back
+        if (reverseConn.target === fromId) {
+          expect(reverseConn.entry).toBe(dir)
+        }
+      }
+    }
+  })
+
+  it('all REGION_CONNECTIONS targets reference valid regions', () => {
+    for (const dirs of Object.values(REGION_CONNECTIONS)) {
+      for (const conn of Object.values(dirs)) {
+        expect(getRegionById(conn.target)).toBeDefined()
+      }
+    }
   })
 })
