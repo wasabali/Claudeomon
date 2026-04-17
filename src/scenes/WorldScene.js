@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import { BaseScene } from '#scenes/BaseScene.js'
 import { DialogBox } from '#ui/DialogBox.js'
 import { CONFIG } from '../config.js'
-import { GameState } from '#state/GameState.js'
+import { GameState, hasItem, markDirty } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
 
 const MAP_KEY     = 'localhost_town'
@@ -230,9 +230,64 @@ export class WorldScene extends BaseScene {
       return
     }
 
+    if (npcName === 'hosting_terminal') {
+      const hasCoop = hasItem('keyItems', 'cross_origin_opener_policy')
+      const hasCoep = hasItem('keyItems', 'cross_origin_embedder_policy')
+      if (!hasCoop || !hasCoep) {
+        this.dialog.show(['The terminal is behind a locked door.\nYou need the right credentials.'], () => {
+          this._interacting = false
+        })
+        return
+      }
+      if (!GameState.story.flags.found_hosting_terminal) {
+        const pages = getStoryById('terminal_hosting')?.pages ?? ['> ...']
+        this.dialog.show(pages, () => {
+          GameState.story.flags.found_hosting_terminal = true
+          markDirty()
+          this._interacting = false
+        })
+      } else {
+        const pages = getStoryById('terminal_hosting_pipeline')?.pages ?? ['> ...']
+        this.dialog.show(pages, () => {
+          GameState.story.flags.saw_deployment_pipeline = true
+          markDirty()
+          this._interacting = false
+        })
+      }
+      return
+    }
+
+    if (npcName === 'west_eu_2_wilhelm') {
+      const storyId = GameState.story.flags.found_hosting_terminal
+        ? 'npc_west_eu_2_wilhelm_post_terminal'
+        : 'npc_west_eu_2_wilhelm'
+      const entry = getStoryById(storyId)
+      const lines = entry?.pages ?? ['???']
+      this.dialog.show(lines, () => { this._interacting = false })
+      return
+    }
+
     const entry = getStoryById(`npc_${npcName}`)
-    const lines = entry?.pages ?? ['???']
+    const lines = this._resolveNpcPages(entry)
     this.dialog.show(lines, () => { this._interacting = false })
+  }
+
+  // Evaluates NPC dialogue variants top-to-bottom against the current player
+  // reputation and shamePoints, returning the first matching variant's pages.
+  // Falls back to entry.pages when no variant matches.
+  _resolveNpcPages(entry) {
+    const { reputation, shamePoints } = GameState.player
+    if (Array.isArray(entry?.variants)) {
+      for (const variant of entry.variants) {
+        const c = variant.condition ?? {}
+        if (c.reputationMin !== undefined && reputation < c.reputationMin) continue
+        if (c.reputationMax !== undefined && reputation > c.reputationMax) continue
+        if (c.shameMin      !== undefined && shamePoints < c.shameMin)     continue
+        if (c.shameMax      !== undefined && shamePoints > c.shameMax)     continue
+        return variant.pages
+      }
+    }
+    return entry?.pages ?? ['???']
   }
 
   _checkEncounterStep() {
