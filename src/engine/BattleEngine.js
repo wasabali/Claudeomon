@@ -2,8 +2,8 @@
 // Owns the battle state and phase queue. Returns BattleEvent[] arrays.
 // Scenes delegate all logic here; they only render the returned events.
 
-import { calculateDamage, calculateXP, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
-import { REPUTATION_MIN } from '../config.js'
+import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
+import { REPUTATION_MIN, REPUTATION_MAX } from '../config.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -13,6 +13,14 @@ export const BATTLE_MODES = {
   INCIDENT: 'INCIDENT', // Wild encounter — SLA timer, hidden domain
   ENGINEER: 'ENGINEER', // Trainer battle — enemy telegraphs next move
 }
+
+// Maximum stacks of technical debt a player can accumulate
+const MAX_TECHNICAL_DEBT = 10
+
+// Max HP penalty per technical debt stack
+const TECHNICAL_DEBT_HP_PENALTY = 2
+
+// Reputation deltas applied at win resolution, per solution quality tier.
 
 // Incident attack type identifiers (matches attacks[] entries in encounter data)
 export const INCIDENT_ATTACKS = {
@@ -51,10 +59,11 @@ const CONFUSION_DURATION    = 1
 // engine — phases read and write it, then return events describing the delta.
 // ---------------------------------------------------------------------------
 export function createBattleState(mode, player, opponent, options = {}) {
+  const initialTelegraph = options.telegraphedMove ?? opponent.deck?.[0] ?? null
   return {
     mode,
     turn:             1,
-    player:           { ...player },
+    player:           { ...player, technicalDebt: player.technicalDebt ?? 0 },
     opponent:         { ...opponent },
     playerStatuses:   [],
     opponentStatuses: [],
@@ -62,7 +71,8 @@ export function createBattleState(mode, player, opponent, options = {}) {
     slaTimer:         mode === BATTLE_MODES.INCIDENT
                         ? (options.slaTimer ?? DEFAULT_SLA_TIMER)
                         : null,
-    telegraphedMove:  options.telegraphedMove ?? null,
+    telegraphedMove:  initialTelegraph,
+    opponentDeckIndex: 0,
     slaBreach:        false,
     winningTier:      options.winningTier ?? null,
     layers:           opponent.layers ? [...opponent.layers] : [],
@@ -106,7 +116,8 @@ export function statusTickPhase(state) {
 // ---------------------------------------------------------------------------
 // Phase 2: SkillPhase
 // Resolves the player's chosen skill.
-// Emits skill_used, damage/heal/domain_reveal, and reputation events.
+// Emits skill_used, damage/heal/domain_reveal, reputation, and
+// technical_debt events. Also updates state.winningTier.
 // ---------------------------------------------------------------------------
 export function skillPhase(state, skill) {
   const events = []
@@ -121,13 +132,37 @@ export function skillPhase(state, skill) {
     events.push({ type: 'damage', target: 'opponent', value: dmg })
   }
 
+  if (effect.type === 'instant_win_vs_legacy') {
+    if (state.opponent.isLegacy) {
+      const originalHp = state.opponent.hp
+      state.opponent.hp = 0
+      events.push({ type: 'damage', target: 'opponent', value: originalHp })
+    } else {
+      const backfire = Math.abs(effect.fallbackDamage ?? 40)
+      state.player.hp = Math.max(0, state.player.hp - backfire)
+      events.push({ type: 'damage', target: 'player', value: backfire })
+    }
+  }
+
+  if (effect.type === 'instant_win_vs_containers') {
+    if (state.opponent.domain === 'containers') {
+      const originalHp = state.opponent.hp
+      state.opponent.hp = 0
+      events.push({ type: 'damage', target: 'opponent', value: originalHp })
+    } else {
+      const dmg = calculateDamage(skill, state.opponent.domain)
+      state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
+      events.push({ type: 'damage', target: 'opponent', value: dmg })
+    }
+  }
+
   if (effect.type === 'heal') {
     const healed = Math.min(effect.value, state.player.maxHp - state.player.hp)
     state.player.hp = Math.min(state.player.maxHp, state.player.hp + effect.value)
     events.push({ type: 'heal', target: 'player', value: healed })
   }
 
-  if (effect.type === 'reveal_domain' || effect.type === 'reveal_and_tag_weakness') {
+  if (effect.type === 'reveal_domain' || effect.type === 'reveal_and_tag_weakness' || effect.type === 'reveal') {
     state.domainRevealed = true
     events.push({ type: 'domain_reveal', target: 'opponent', value: state.opponent.domain })
   }
@@ -146,6 +181,19 @@ export function skillPhase(state, skill) {
   }
 
   events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
+
+  // Cursed/nuclear skills accumulate technical debt (capped at MAX_TECHNICAL_DEBT)
+  if (skill.isCursed || skill.tier === 'cursed' || skill.tier === 'nuclear') {
+    if (state.player.technicalDebt < MAX_TECHNICAL_DEBT) {
+      state.player.technicalDebt += 1
+      state.player.maxHp = Math.max(1, state.player.maxHp - TECHNICAL_DEBT_HP_PENALTY)
+      state.player.hp = Math.min(state.player.hp, state.player.maxHp)
+    }
+    events.push({ type: 'technical_debt', target: 'player', value: state.player.technicalDebt })
+  }
+
+  // Update winning tier based on the outcome of this skill
+  state.winningTier = assessQuality(skill, state.opponent, state.domainRevealed)
 
   return events
 }
@@ -187,7 +235,8 @@ export function slaTickPhase(state) {
 // Phase 4: EnemyPhase
 // Resolves enemy move.
 // - INCIDENT mode: no enemy turn (just environmental pressure via SLA).
-// - ENGINEER mode: enemy attacks the player.
+// - ENGINEER mode: enemy attacks the player using their telegraphed move,
+//   then advances to the next move in their deck and telegraphs it.
 // ---------------------------------------------------------------------------
 export function enemyPhase(state) {
   if (state.mode === BATTLE_MODES.INCIDENT) return []
@@ -197,11 +246,21 @@ export function enemyPhase(state) {
 
   events.push({ type: 'skill_used', target: 'player', skillId: moveId })
 
-  // Enemy deals base power damage (simplified — domain matchup not applied here
-  // since enemy domain vs player is resolved by difficulty in full implementation)
+  // Enemy deals base power damage (domain matchup vs player not tracked since
+  // the player has no fixed domain; difficulty scales enemy power).
   const dmg = ENEMY_BASE_POWER
   state.player.hp = Math.max(0, state.player.hp - dmg)
   events.push({ type: 'damage', target: 'player', value: dmg })
+
+  // Advance to the next move in the opponent's deck and telegraph it.
+  // Wild encounters do not telegraph — they attack unpredictably.
+  const deck = state.opponent.deck
+  if (deck && deck.length > 0 && !state.opponent.isWildEncounter) {
+    state.opponentDeckIndex = (state.opponentDeckIndex + 1) % deck.length
+    const nextMoveId = deck[state.opponentDeckIndex]
+    state.telegraphedMove = nextMoveId
+    events.push({ type: 'telegraph', target: 'player', value: nextMoveId })
+  }
 
   return events
 }
@@ -255,7 +314,7 @@ export function incidentAttackPhase(state) {
 
     case INCIDENT_ATTACKS.REPUTATION_LEAK: {
       const previousReputation = state.player.reputation ?? 0
-      const nextReputation = Math.max(0, previousReputation - REPUTATION_LEAK_VALUE)
+      const nextReputation = Math.max(REPUTATION_MIN, previousReputation - REPUTATION_LEAK_VALUE)
       const reputationDelta = nextReputation - previousReputation
       state.player.reputation = nextReputation
       if (reputationDelta !== 0) {
@@ -303,6 +362,11 @@ export function incidentAttackPhase(state) {
 // Win:  opponent.hp === 0 (with layer transition if multi-layer incident)
 // Lose: player.hp === 0 OR (slaBreach && opponent.hp > 0)
 // Also increments turn counter when battle continues.
+//
+// Engineer win rewards are tier-gated:
+//   optimal  → teach_skill (signature command)
+//   standard → dialog hint about a related command
+//   shortcut/cursed/nuclear → XP only (or XP penalty)
 // ---------------------------------------------------------------------------
 export function turnEndPhase(state) {
   const events = []
@@ -323,20 +387,38 @@ export function turnEndPhase(state) {
       return events
     }
 
-    const tier       = state.winningTier ?? 'standard'
-    const xp         = calculateXP(state.opponent.difficulty ?? 1, tier)
-    const hasTeach   = state.mode === BATTLE_MODES.ENGINEER && state.opponent.teachSkillId
+    const tier = state.winningTier ?? 'standard'
+    const xp   = calculateXP(state.opponent.difficulty ?? 1, tier)
 
-    // Bonus reputation for winning an engineer battle with an optimal solution
+    // ENGINEER mode only: apply reputation bonus for optimal win
     if (state.mode === BATTLE_MODES.ENGINEER && tier === 'optimal') {
-      state.player.reputation = Math.min(100, state.player.reputation + ENGINEER_WIN_REP_OPTIMAL)
-      events.push({ type: 'reputation', target: 'player', value: ENGINEER_WIN_REP_OPTIMAL, shameDelta: 0 })
+      const newRep = Math.min(REPUTATION_MAX, state.player.reputation + ENGINEER_WIN_REP_OPTIMAL)
+      const actualDelta = newRep - state.player.reputation
+      state.player.reputation = newRep
+      if (actualDelta !== 0) {
+        events.push({ type: 'reputation', target: 'player', value: actualDelta })
+      }
     }
 
-    events.push({ type: 'xp_gain',    target: 'player', value: xp })
-    if (hasTeach) {
-      events.push({ type: 'teach_skill', target: 'player', value: state.opponent.teachSkillId })
+    events.push({ type: 'xp_gain', target: 'player', value: xp })
+
+    // ENGINEER mode: tier-based teacher reactions
+    if (state.mode === BATTLE_MODES.ENGINEER) {
+      if (tier === 'optimal' && state.opponent.teachSkillId) {
+        events.push({ type: 'teach_skill', target: 'player', value: state.opponent.teachSkillId })
+      } else if (tier === 'standard') {
+        if (state.opponent.winDialog) {
+          events.push({ type: 'dialog', target: 'player', text: state.opponent.winDialog })
+        } else if (state.opponent.teachSkillId) {
+          events.push({ type: 'teach_hint', target: 'player', value: state.opponent.teachSkillId })
+        }
+      } else if (tier === 'cursed') {
+        events.push({ type: 'trainer_disgusted', target: 'player' })
+      } else if (tier === 'nuclear') {
+        events.push({ type: 'warn_npcs', target: 'player' })
+      }
     }
+
     events.push({ type: 'battle_end', target: 'player', value: 'win' })
     return events
   }

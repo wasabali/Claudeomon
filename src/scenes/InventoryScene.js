@@ -217,6 +217,15 @@ export class InventoryScene extends BaseScene {
       return { message: `You feel slightly less terrible about yourself.\nShame: −${effect.value}.`, consume: true }
     }
 
+    if (effect.type === 'enter_hidden_area') {
+      if (!GameState.story.flags[effect.discoveryFlag]) {
+        GameState.story.flags[effect.discoveryFlag] = true
+        markDirty()
+      }
+      this.events.emit('inventory:enterHiddenArea', { areaId: effect.areaId })
+      return { message: 'You fall in.', consume: false }
+    }
+
     return { message: item.description, consume: false }
   }
 
