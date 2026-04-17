@@ -399,13 +399,13 @@ describe('turnEndPhase', () => {
     )
   })
 
-  it('emits teach_skill event on ENGINEER win if opponent has a teach skill', () => {
+  it('emits teach_hint event on ENGINEER win if opponent has a teach skill', () => {
     const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(),
       makeOpponent({ hp: 0, teachSkillId: 'helm_upgrade' }))
     state.winningTier = 'standard'
     const events = turnEndPhase(state)
     expect(events).toContainEqual(
-      expect.objectContaining({ type: 'teach_skill', value: 'helm_upgrade' })
+      expect.objectContaining({ type: 'teach_hint', value: 'helm_upgrade' })
     )
   })
 
