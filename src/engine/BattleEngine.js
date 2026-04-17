@@ -12,6 +12,7 @@ import { REPUTATION_MIN, REPUTATION_MAX } from '../config.js'
 export const BATTLE_MODES = {
   INCIDENT: 'INCIDENT', // Wild encounter — SLA timer, hidden domain
   ENGINEER: 'ENGINEER', // Trainer battle — enemy telegraphs next move
+  SCRIPTED: 'SCRIPTED', // Scripted encounter — cannot be won, auto-escape on SLA expiry
 }
 
 // Maximum stacks of technical debt a player can accumulate
@@ -30,6 +31,7 @@ export const INCIDENT_ATTACKS = {
   SKILL_BLOCK:     'skill_block',     // Apply skill_block status for 1 turn
   CONFUSION:       'confusion',       // Apply confusion status for 1 turn
   ESCALATION:      'escalation',      // Add 1 technical debt stack
+  THROTTLE:        'throttle',        // Apply throttle status — reduces player damage output
 }
 
 // Default SLA timer when none specified
@@ -52,6 +54,7 @@ const REPUTATION_LEAK_VALUE = 3
 const UPTIME_DRAIN_EXTRA    = 1
 const SKILL_BLOCK_DURATION  = 1
 const CONFUSION_DURATION    = 1
+const THROTTLE_DURATION     = 2
 
 // ---------------------------------------------------------------------------
 // createBattleState
@@ -68,7 +71,7 @@ export function createBattleState(mode, player, opponent, options = {}) {
     playerStatuses:   [],
     opponentStatuses: [],
     domainRevealed:   mode === BATTLE_MODES.ENGINEER,
-    slaTimer:         mode === BATTLE_MODES.INCIDENT
+    slaTimer:         mode === BATTLE_MODES.INCIDENT || mode === BATTLE_MODES.SCRIPTED
                         ? (options.slaTimer ?? DEFAULT_SLA_TIMER)
                         : null,
     telegraphedMove:  initialTelegraph,
@@ -135,7 +138,11 @@ export function skillPhase(state, skill) {
   const effect = skill.effect
 
   if (effect.type === 'damage') {
-    const dmg = calculateDamage(skill, state.opponent.domain) // always use true domain for calculation
+    let dmg = calculateDamage(skill, state.opponent.domain) // always use true domain for calculation
+    // Throttle status halves outgoing damage
+    if (state.playerStatuses.find(s => s.name === 'throttle')) {
+      dmg = Math.max(1, Math.floor(dmg * 0.5))
+    }
     state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
     events.push({ type: 'damage', target: 'opponent', value: dmg })
   }
@@ -231,14 +238,17 @@ export function slaTickPhase(state) {
 
   if (state.slaTimer === 0) {
     state.slaBreach = true
-    state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
-    state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
-    events.push({
-      type:            'sla_breach',
-      target:          'player',
-      value:           SLA_BREACH_HP_PENALTY,
-      reputationLoss:  SLA_BREACH_REP_PENALTY,
-    })
+    // SCRIPTED encounters: no penalty on breach — escape handled in turnEndPhase
+    if (state.mode !== BATTLE_MODES.SCRIPTED) {
+      state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
+      state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
+      events.push({
+        type:            'sla_breach',
+        target:          'player',
+        value:           SLA_BREACH_HP_PENALTY,
+        reputationLoss:  SLA_BREACH_REP_PENALTY,
+      })
+    }
   }
 
   return events
@@ -286,7 +296,7 @@ export function enemyPhase(state) {
 // Only runs in INCIDENT mode.
 // ---------------------------------------------------------------------------
 export function incidentAttackPhase(state) {
-  if (state.mode !== BATTLE_MODES.INCIDENT) return []
+  if (state.mode !== BATTLE_MODES.INCIDENT && state.mode !== BATTLE_MODES.SCRIPTED) return []
   if (state.turn === 1) return [] // Phase 1 — no attack, just symptom display
 
   const attacks = state.opponent.attacks ?? []
@@ -364,6 +374,15 @@ export function incidentAttackPhase(state) {
       }
       break
     }
+
+    case INCIDENT_ATTACKS.THROTTLE: {
+      const alreadyThrottled = state.playerStatuses.find(s => s.name === 'throttle')
+      if (!alreadyThrottled) {
+        state.playerStatuses.push({ name: 'throttle', duration: THROTTLE_DURATION })
+      }
+      events.push({ type: 'status_apply', target: 'player', statusName: 'throttle', duration: THROTTLE_DURATION })
+      break
+    }
   }
 
   return events
@@ -403,6 +422,19 @@ export function turnEndPhase(state) {
     const tier = state.winningTier ?? 'standard'
     const xp   = calculateXP(state.opponent.difficulty ?? 1, tier)
 
+    // Boss encounters: shame-based outcome branching on win
+    if (state.opponent.type === 'boss' && state.opponent.shameThresholds) {
+      const shame      = state.player.shamePoints ?? 0
+      const thresholds = state.opponent.shameThresholds
+      let outcome = 'arrest'
+      if (shame >= (thresholds.recruitment ?? Infinity)) {
+        outcome = 'recruitment'
+      } else if (shame >= (thresholds.arrest ?? Infinity)) {
+        outcome = 'choice'
+      }
+      events.push({ type: 'boss_outcome', target: 'player', value: outcome, shame })
+    }
+
     // ENGINEER mode only: apply reputation bonus for optimal win
     if (state.mode === BATTLE_MODES.ENGINEER && tier === 'optimal') {
       const newRep = Math.min(REPUTATION_MAX, state.player.reputation + ENGINEER_WIN_REP_OPTIMAL)
@@ -437,6 +469,30 @@ export function turnEndPhase(state) {
   }
 
   if (playerDefeated || slaLoss) {
+    // SCRIPTED encounters: SLA breach triggers escape, not a loss
+    if (slaLoss && state.mode === BATTLE_MODES.SCRIPTED) {
+      events.push({
+        type:   'scripted_escape',
+        target: 'opponent',
+        value:  state.opponent.escapeLine ?? 'The enemy disconnected.',
+      })
+      events.push({ type: 'battle_end', target: 'player', value: 'escape' })
+      return events
+    }
+
+    // Boss encounters: shame-based outcome branching
+    if (state.opponent.type === 'boss' && state.opponent.shameThresholds) {
+      const shame      = state.player.shamePoints ?? 0
+      const thresholds = state.opponent.shameThresholds
+      let outcome = 'arrest' // default: < arrest threshold
+      if (shame >= (thresholds.recruitment ?? Infinity)) {
+        outcome = 'recruitment'
+      } else if (shame >= (thresholds.arrest ?? Infinity)) {
+        outcome = 'choice'
+      }
+      events.push({ type: 'boss_outcome', target: 'player', value: outcome, shame })
+    }
+
     // Reputation penalty for losing an engineer battle (not SLA — that is penalised in slaTickPhase)
     if (playerDefeated && state.mode === BATTLE_MODES.ENGINEER) {
       state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - ENGINEER_LOSE_REP_PENALTY)

@@ -3,6 +3,7 @@ import { BaseScene } from '#scenes/BaseScene.js'
 import { CONFIG } from '../config.js'
 import { GameState, markDirty } from '#state/GameState.js'
 import { getById as getSkillById } from '#data/skills.js'
+import { getById as getStoryById } from '#data/story.js'
 import {
   BATTLE_MODES,
   createBattleState,
@@ -77,13 +78,16 @@ export class BattleScene extends BaseScene {
     this._skillIndex = 0
     this._animating  = false
     this._eventQueue = []
+    this._taunts     = data.taunts ?? null
 
     this._buildHUD(mode, opponent)
     this._buildSkillMenu()
     this._buildLogBox()
     this._setupInput()
 
-    if (mode === BATTLE_MODES.INCIDENT) {
+    if (opponent.type === 'boss' || opponent.type === 'scripted') {
+      this.playBgm('battle_throttlemaster')
+    } else if (mode === BATTLE_MODES.INCIDENT) {
       this.playBgm('bgm_battle_incident')
     } else {
       this.playBgm('bgm_battle_engineer')
@@ -245,6 +249,14 @@ export class BattleScene extends BaseScene {
 
     const events = resolveTurn(this._battleState, skill)
 
+    // Mid-battle taunt injection for THROTTLEMASTER-style encounters
+    if (this._taunts && this._taunts.length > 0) {
+      const tauntIdx = (this._battleState.turn - 2) % this._taunts.length
+      if (tauntIdx >= 0) {
+        events.unshift({ type: 'dialog', target: 'player', text: this._taunts[tauntIdx] })
+      }
+    }
+
     // winningTier is now set inside skillPhase via assessQuality in the engine
     this._animateEvents(events)
   }
@@ -367,6 +379,15 @@ export class BattleScene extends BaseScene {
         this.time.delayedCall(500, callback)
         break
 
+      case 'scripted_escape':
+        this._showLog(event.value ?? 'The enemy disconnected.')
+        this.time.delayedCall(1000, callback)
+        break
+
+      case 'boss_outcome':
+        callback()
+        break
+
       case 'layer_transition':
         this._showLog('Root cause revealed! A deeper layer emerges...')
         this._enemyDomainText?.setText('[???]')
@@ -374,7 +395,11 @@ export class BattleScene extends BaseScene {
         break
 
       case 'battle_end':
-        this._onBattleEnd(event.value)
+        if (event.value === 'escape') {
+          this._onBattleEscape()
+        } else {
+          this._onBattleEnd(event.value)
+        }
         break
 
       case 'telegraph':
@@ -446,6 +471,16 @@ export class BattleScene extends BaseScene {
 
     markDirty()
     this._showLog(result === 'win' ? 'Victory!' : 'Defeated...')
+    this.time.delayedCall(1200, () => {
+      this.fadeToScene(this._returnScene ?? 'WorldScene')
+    })
+  }
+
+  // -------------------------------------------------------------------------
+  // _onBattleEscape — scripted encounters: no XP, no loss, no win
+  // -------------------------------------------------------------------------
+  _onBattleEscape() {
+    this._showLog('The enemy escaped...')
     this.time.delayedCall(1200, () => {
       this.fadeToScene(this._returnScene ?? 'WorldScene')
     })

@@ -484,6 +484,52 @@ const ENCOUNTERS = {
     optimalFix: 'vault_rotate',
     layers: null,
   },
+
+  // ── THROTTLEMASTER encounters ─────────────────────────────────────────────
+
+  throttlemaster_act2_escape: {
+    id: 'throttlemaster_act2_escape',
+    type: 'scripted',
+    name: 'THROTTLEMASTER',
+    symptomText: 'A hooded figure appears on your terminal.',
+    rootCauseText: 'Unknown — connection terminated before diagnosis.',
+    domain: null,
+    hp: 9999,
+    sla: 3,
+    difficulty: 0,
+    attacks: [],
+    optimalFix: null,
+    layers: null,
+    escapeLine: 'CONNECTION TIMEOUT — See you at the next incident.',
+    onSlaExpiry: 'throttlemaster_escape_sequence',
+  },
+  throttlemaster_act4_boss: {
+    id: 'throttlemaster_act4_boss',
+    type: 'boss',
+    name: 'THROTTLEMASTER',
+    symptomText: 'THROTTLEMASTER steps out of the shadows.',
+    rootCauseText: 'Karsten Ottesen. Ex-OmniCloud Corp. Passed over for promotion.',
+    domain: null,
+    hp: 80,
+    sla: 12,
+    difficulty: 5,
+    attacks: ['throttle', 'skill_block'],
+    optimalFix: null,
+    layers: [
+      {
+        domain: null,
+        hp: 60,
+        symptomText: 'Phase 2: Resource Exhaustion — budget and HP drain simultaneously.',
+        rootCauseText: 'THROTTLEMASTER is burning through your cloud budget.',
+        attacks: ['budget_spike', 'uptime_drain', 'reputation_leak'],
+        optimalFix: null,
+      },
+    ],
+    shameThresholds: {
+      arrest: 10,
+      recruitment: 15,
+    },
+  },
 }
 
 export const getById = (id)           => ENCOUNTERS[id]

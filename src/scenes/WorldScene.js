@@ -69,6 +69,18 @@ export class WorldScene extends BaseScene {
       g.generateTexture('azure_terminal', 48, 48)
       g.destroy()
     }
+
+    if (!this.textures.exists('throttlemaster_hooded')) {
+      const g = this.make.graphics({ add: false })
+      g.fillStyle(0x1a1a2e)
+      g.fillRect(8, 8, 16, 22)
+      g.fillStyle(0x16213e)
+      g.fillRect(8, 0, 16, 14)
+      g.fillStyle(0x00ff88, 0.6)
+      g.fillRect(10, 4, 12, 4)
+      g.generateTexture('throttlemaster_hooded', 32, 32)
+      g.destroy()
+    }
   }
 
   create(data = {}) {
@@ -87,6 +99,62 @@ export class WorldScene extends BaseScene {
 
     GameState.player.location = 'localhost_town'
     this.playBgm('town')
+
+    this._setupThrottlemasterGhost()
+  }
+
+  // -------------------------------------------------------------------------
+  // THROTTLEMASTER ghostly sprite — Act 2 crisis flicker appearance
+  // Shows a 2-tile hooded figure that vanishes on player approach.
+  // -------------------------------------------------------------------------
+  _setupThrottlemasterGhost() {
+    const act = GameState.story?.act ?? 1
+    const alreadySeen = GameState.story?.flags?.throttlemaster_act2_seen
+    if (act !== 2 || alreadySeen) {
+      this._ghostSprite = null
+      return
+    }
+
+    const ghostX = 8 * TILE_SIZE + TILE_SIZE / 2
+    const ghostY = 3 * TILE_SIZE + TILE_SIZE / 2
+    this._ghostSprite = this.add.image(ghostX, ghostY, 'throttlemaster_hooded').setDepth(5)
+    this._ghostSprite.setVisible(false)
+    this._ghostFlickerTimer = 0
+    this._ghostVisible = false
+  }
+
+  _updateThrottlemasterGhost() {
+    if (!this._ghostSprite) return
+
+    this._ghostFlickerTimer++
+
+    // Appear briefly every 180 frames (~3 seconds at 60fps)
+    if (!this._ghostVisible && this._ghostFlickerTimer >= 180) {
+      this._ghostSprite.setVisible(true)
+      this._ghostVisible = true
+      this._ghostFlickerTimer = 0
+    }
+
+    // Disappear after 30 frames (~0.5 seconds)
+    if (this._ghostVisible && this._ghostFlickerTimer >= 30) {
+      this._ghostSprite.setVisible(false)
+      this._ghostVisible = false
+      this._ghostFlickerTimer = 0
+    }
+
+    // Vanish permanently if player gets close
+    if (this._ghostVisible && this._player) {
+      const dist = Math.hypot(
+        this._player.x - this._ghostSprite.x,
+        this._player.y - this._ghostSprite.y,
+      )
+      if (dist < TILE_SIZE * 3) {
+        this._ghostSprite.setVisible(false)
+        this._ghostSprite.destroy()
+        this._ghostSprite = null
+        GameState.story.flags.throttlemaster_act2_seen = true
+      }
+    }
   }
 
   _setupMap() {
@@ -156,6 +224,7 @@ export class WorldScene extends BaseScene {
     }
     this._handleMovement()
     this._checkEncounterStep()
+    this._updateThrottlemasterGhost()
   }
 
   _handleMovement() {

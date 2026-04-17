@@ -912,6 +912,7 @@ describe('BattleEvent shape', () => {
     'technical_debt', 'trainer_disgusted', 'warn_npcs', 'battle_end',
     'telegraph', 'dialog',
     'budget_drain', 'escalation', 'layer_transition',
+    'scripted_escape', 'boss_outcome', 'emblems_updated', 'skill_blocked',
   ]
 
   it('all emitted events have recognised type strings', () => {
@@ -1149,5 +1150,168 @@ describe('multi-layer incident transitions', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ hp: 0 }), { slaTimer: 5 })
     const events = turnEndPhase(state)
     expect(events).toContainEqual(expect.objectContaining({ type: 'battle_end', value: 'win' }))
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SCRIPTED mode — THROTTLEMASTER phantom battle
+// ---------------------------------------------------------------------------
+
+describe('SCRIPTED mode — phantom battle', () => {
+  it('createBattleState initialises slaTimer in SCRIPTED mode', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer(), makeOpponent({ hp: 9999 }), { slaTimer: 3 })
+    expect(state.slaTimer).toBe(3)
+    expect(state.mode).toBe(BATTLE_MODES.SCRIPTED)
+  })
+
+  it('SLA breach in SCRIPTED mode does not penalise player HP or reputation', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer({ hp: 100, reputation: 50 }), makeOpponent({ hp: 9999 }), { slaTimer: 1 })
+    slaTickPhase(state)
+    expect(state.slaBreach).toBe(true)
+    expect(state.player.hp).toBe(100)
+    expect(state.player.reputation).toBe(50)
+  })
+
+  it('turnEndPhase emits scripted_escape and battle_end escape on SLA breach in SCRIPTED mode', () => {
+    const state = createBattleState(
+      BATTLE_MODES.SCRIPTED, makePlayer(),
+      makeOpponent({ hp: 9999, escapeLine: 'CONNECTION TIMEOUT' }),
+      { slaTimer: 3 },
+    )
+    state.slaBreach = true
+    const events = turnEndPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'scripted_escape', target: 'opponent', value: 'CONNECTION TIMEOUT' }))
+    expect(events).toContainEqual(expect.objectContaining({ type: 'battle_end', value: 'escape' }))
+  })
+
+  it('scripted_escape uses default text when escapeLine is not set', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer(), makeOpponent({ hp: 9999 }), { slaTimer: 3 })
+    state.slaBreach = true
+    const events = turnEndPhase(state)
+    const escapeEvent = events.find(e => e.type === 'scripted_escape')
+    expect(escapeEvent.value).toBe('The enemy disconnected.')
+  })
+
+  it('full 3-turn phantom battle: escape triggers after SLA expires', () => {
+    const state = createBattleState(
+      BATTLE_MODES.SCRIPTED, makePlayer(),
+      makeOpponent({ hp: 9999, escapeLine: 'See you next time.' }),
+      { slaTimer: 3 },
+    )
+    const skill = makeDamageSkill()
+    // Turn 1 — slaTimer 3 → 2
+    resolveTurn(state, skill)
+    expect(state.slaTimer).toBe(2)
+
+    // Turn 2 — slaTimer 2 → 1
+    resolveTurn(state, skill)
+    expect(state.slaTimer).toBe(1)
+
+    // Turn 3 — slaTimer 1 → 0, triggers escape
+    const events = resolveTurn(state, skill)
+    expect(state.slaBreach).toBe(true)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'scripted_escape' }))
+    expect(events).toContainEqual(expect.objectContaining({ type: 'battle_end', value: 'escape' }))
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Throttle attack type
+// ---------------------------------------------------------------------------
+
+describe('throttle attack', () => {
+  it('applies throttle status to player', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT, makePlayer(),
+      makeAttackOpponent(['throttle']),
+      { slaTimer: 5 },
+    )
+    state.turn = 2
+    const events = incidentAttackPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'status_apply', statusName: 'throttle' }))
+    expect(state.playerStatuses.some(s => s.name === 'throttle')).toBe(true)
+  })
+
+  it('throttle status halves outgoing damage', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT, makePlayer(),
+      makeOpponent({ hp: 100, domain: 'cloud' }),
+      { slaTimer: 5 },
+    )
+    // Apply throttle status manually
+    state.playerStatuses.push({ name: 'throttle', duration: 2 })
+    const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
+    const events = skillPhase(state, skill)
+    const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
+    expect(dmgEvent).toBeDefined()
+    // Damage should be halved (15 or adjusted by matchup) relative to unthrottled
+    expect(dmgEvent.value).toBeLessThan(30)
+  })
+
+  it('throttle does not stack — existing throttle prevents re-application', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT, makePlayer(),
+      makeAttackOpponent(['throttle']),
+      { slaTimer: 5 },
+    )
+    state.turn = 2
+    state.playerStatuses.push({ name: 'throttle', duration: 2 })
+    incidentAttackPhase(state)
+    const throttleCount = state.playerStatuses.filter(s => s.name === 'throttle').length
+    expect(throttleCount).toBe(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Boss outcome — shame-based branching
+// ---------------------------------------------------------------------------
+
+describe('boss outcome — shame-based branching', () => {
+  function makeBossOpponent(overrides = {}) {
+    return {
+      id: 'throttlemaster_act4_boss', name: 'THROTTLEMASTER',
+      type: 'boss', domain: null, hp: 0, maxHp: 80, difficulty: 5,
+      shameThresholds: { arrest: 10, recruitment: 15 },
+      ...overrides,
+    }
+  }
+
+  it('emits boss_outcome "arrest" when shame < 10 and opponent defeated', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 3 }), makeBossOpponent({ hp: 0 }), { slaTimer: 12 })
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('arrest')
+  })
+
+  it('emits boss_outcome "choice" when shame >= 10 and < 15', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 12 }), makeBossOpponent({ hp: 0 }), { slaTimer: 12 })
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('choice')
+  })
+
+  it('emits boss_outcome "recruitment" when shame >= 15', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 15 }), makeBossOpponent({ hp: 0 }), { slaTimer: 12 })
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('recruitment')
+  })
+
+  it('emits boss_outcome on player defeat (SLA breach)', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 10 }), makeBossOpponent({ hp: 50 }), { slaTimer: 12 })
+    state.slaBreach = true
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('choice')
+  })
+
+  it('does not emit boss_outcome for non-boss opponents', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 15 }), makeOpponent({ hp: 0 }), { slaTimer: 5 })
+    const events = turnEndPhase(state)
+    expect(events.find(e => e.type === 'boss_outcome')).toBeUndefined()
   })
 })
