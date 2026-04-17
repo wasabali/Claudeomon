@@ -158,9 +158,9 @@ export function skillPhase(state, skill) {
       state.opponent.hp = 0
       events.push({ type: 'damage', target: 'opponent', value: originalHp })
     } else {
-      const dmg = calculateDamage(skill, state.opponent.domain)
-      state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
-      events.push({ type: 'damage', target: 'opponent', value: dmg })
+      const fallbackDamage = Math.abs(effect.fallbackDamage ?? 40)
+      state.opponent.hp = Math.max(0, state.opponent.hp - fallbackDamage)
+      events.push({ type: 'damage', target: 'opponent', value: fallbackDamage })
     }
   }
 
@@ -191,7 +191,9 @@ export function skillPhase(state, skill) {
     events.push({ type: 'emblems_updated', target: 'player', value: nextEmblems, shameDelta })
   }
 
-  events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
+  if (repDelta !== 0 || shameDelta !== 0) {
+    events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
+  }
 
   // Cursed/nuclear skills accumulate technical debt (capped at MAX_TECHNICAL_DEBT)
   if (skill.isCursed || skill.tier === 'cursed' || skill.tier === 'nuclear') {

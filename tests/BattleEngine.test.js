@@ -394,17 +394,16 @@ describe('skillPhase', () => {
     expect(state.opponent.hp).toBe(0)
   })
 
-  it('instant_win_vs_containers deals regular damage against non-container domain', () => {
+  it('instant_win_vs_containers uses fallbackDamage against non-container domain', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ hp: 60, domain: 'cloud' }))
     const skill = { id: 'curl_pipe_sudo_bash', domain: 'security', tier: 'cursed', isCursed: true,
-      effect: { type: 'instant_win_vs_containers' },
+      effect: { type: 'instant_win_vs_containers', fallbackDamage: 17 },
       sideEffect: { shame: 1, reputation: -12, description: '' } }
     const events = skillPhase(state, skill)
-    // Fallback follows domain matchup rules; security vs cloud = neutral, but
-    // calculateDamage returns 0 because effect.type !== 'damage'. Damage event is still emitted.
     const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
     expect(dmgEvent).toBeDefined()
-    expect(dmgEvent.value).toBe(0)
+    expect(dmgEvent.value).toBe(17)
+    expect(state.opponent.hp).toBe(43)
   })
 
   it('blocks skill and returns skill_blocked event when shameRequired not met', () => {
@@ -440,6 +439,24 @@ describe('skillPhase', () => {
     const skill = makeDamageSkill({ tier: 'optimal' })
     const events = skillPhase(state, skill)
     expect(events.find(e => e.type === 'emblems_updated')).toBeUndefined()
+  })
+
+  it('does not emit no-op reputation event when reputation is capped and shame is unchanged', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 100, shamePoints: 0 }), makeOpponent())
+    const skill = makeDamageSkill({ tier: 'standard' })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'reputation')).toBeUndefined()
+  })
+
+  it('does not emit no-op reputation event for zero side-effect cursed skill', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 50, shamePoints: 3 }), makeOpponent())
+    const skill = makeDamageSkill({
+      tier: 'cursed',
+      isCursed: true,
+      sideEffect: { shame: 0, reputation: 0, description: '' },
+    })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'reputation')).toBeUndefined()
   })
 })
 
