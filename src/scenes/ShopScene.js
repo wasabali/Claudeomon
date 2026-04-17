@@ -134,7 +134,7 @@ export class ShopScene extends BaseScene {
 
     if (!isShopUnlocked(shop, GameState.player)) {
       this.headerText.setText('LOCKED')
-      this.detailText.setText('You lack the reputation\nto shop here.')
+      this.detailText.setText('You lack the required shame\nto shop here.')
       return
     }
 

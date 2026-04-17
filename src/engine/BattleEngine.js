@@ -377,7 +377,7 @@ export function incidentAttackPhase(state) {
 // Boss deals budget damage (not HP). At 0 budget player can still use 0-cost skills.
 // ---------------------------------------------------------------------------
 export function costSpiralPhase(state) {
-  if (!state.opponent.bossFlag || state.opponent.bossFlag !== 'cost_spiral_active') return []
+  if (state.opponent.bossFlag !== 'cost_spiral_active') return []
 
   const events = []
   const turn = state.turn
@@ -461,6 +461,13 @@ export function turnEndPhase(state) {
       events.push({ type: 'budget_gain', target: 'player', value: ECONOMY.OPTIMAL_WIN_BONUS, text: 'Optimal solution bonus!' })
     }
 
+    // Debt penalty at battle end: accumulate technical_debt stacks when in budget debt
+    const winDebtPenalty = calculateDebtPenalty(state.player.budget ?? 0)
+    if (winDebtPenalty > 0) {
+      state.player.technicalDebt = Math.min(10, (state.player.technicalDebt ?? 0) + winDebtPenalty)
+      events.push({ type: 'technical_debt', target: 'player', value: state.player.technicalDebt })
+    }
+
     // ENGINEER mode: tier-based teacher reactions
     if (state.mode === BATTLE_MODES.ENGINEER) {
       if (tier === 'optimal' && state.opponent.teachSkillId) {
@@ -505,13 +512,6 @@ export function turnEndPhase(state) {
 
     events.push({ type: 'battle_end', target: 'player', value: 'lose' })
     return events
-  }
-
-  // Budget debt penalty per battle when in debt
-  const debtPenalty = calculateDebtPenalty(state.player.budget ?? 0)
-  if (debtPenalty > 0) {
-    state.player.technicalDebt = Math.min(10, (state.player.technicalDebt ?? 0) + debtPenalty)
-    events.push({ type: 'technical_debt', target: 'player', value: state.player.technicalDebt })
   }
 
   // Battle continues — increment turn
