@@ -76,7 +76,7 @@ const QUESTS = {
     type: 'branch',
     requiresFlags: ['act_3_started', 'oldcorp_entered'],
     excludeFlags: ['do_not_touch_resolved'],
-    reminderDialog: ["There's one service I should warn you about…"],
+    reminderDialog: ['There\'s one service I should warn you about…'],
     branches: {
       open: {
         label: 'Open it anyway',
@@ -93,7 +93,7 @@ const QUESTS = {
         ],
         onOptimal: {
           setFlag: 'do_not_touch_migrated_optimal',
-          dagnyDialog: ["That's exactly right.", "Take this — you've earned it.", 'The migration badge. Wear it with pride.'],
+          dialog: ['That\'s exactly right.', 'Take this — you\'ve earned it.', 'The migration badge. Wear it with pride.'],
         },
         followUpLine: 'Can you also fix my home Wi-Fi?',
       },

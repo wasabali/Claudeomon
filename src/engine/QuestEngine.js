@@ -97,7 +97,7 @@ export function resolveQuizAnswer(questId, branchKey, answerIndex) {
   if (answer.result === 'optimal' && branch.onOptimal) {
     const o = branch.onOptimal
     if (o.setFlag) events.push({ type: 'set_flag', value: o.setFlag })
-    if (o.dagnyDialog) o.dagnyDialog.forEach(text => events.push({ type: 'dialog', target: 'player', text }))
+    if (o.dialog) o.dialog.forEach(text => events.push({ type: 'dialog', target: 'player', text }))
   }
 
   if (branch.followUpLine) {
