@@ -1266,6 +1266,58 @@ const SKILLS = {
     learnedAt: 'oldcorp_basement',
     availableInAct: 3,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TRAINER SIGNATURE SKILLS — taught by named engineers on Optimal win
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  az_role_assignment_create: {
+    id: 'az_role_assignment_create',
+    displayName: 'az role assignment create',
+    domain: 'security',
+    tier: 'optimal',
+    isCursed: false,
+    budgetCost: 0,
+    description: "Grant access with principle of least privilege. Lock down the attack surface for 40 damage.",
+    effect: { type: 'damage', value: 40 },
+    sideEffect: null,
+    warningText: null,
+    learnedFrom: 'Ingrid the IAM Inspector',
+    learnedAt: 'security_vault',
+    availableInAct: 2,
+  },
+
+  az_network_vnet_create: {
+    id: 'az_network_vnet_create',
+    displayName: 'az network vnet create',
+    domain: 'iac',
+    tier: 'optimal',
+    isCursed: false,
+    budgetCost: 10,
+    description: "Provision a private network. Route traffic safely and restore 40 HP.",
+    effect: { type: 'heal', value: 40 },
+    sideEffect: null,
+    warningText: null,
+    learnedFrom: 'The Solutions Oracle',
+    learnedAt: 'architecture_district',
+    availableInAct: 3,
+  },
+
+  helm_upgrade_install: {
+    id: 'helm_upgrade_install',
+    displayName: 'helm upgrade --install',
+    domain: 'containers',
+    tier: 'optimal',
+    isCursed: false,
+    budgetCost: 5,
+    description: "Install or upgrade a chart atomically. 40 damage. Rolls back automatically on failure.",
+    effect: { type: 'damage', value: 40 },
+    sideEffect: null,
+    warningText: null,
+    learnedFrom: 'Helm Hansen',
+    learnedAt: 'helm_repository',
+    availableInAct: 3,
+  },
 }
 
 export const getById = (id)           => SKILLS[id]

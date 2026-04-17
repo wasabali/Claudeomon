@@ -1,4 +1,5 @@
 import { Overrides } from '../overrides.js'
+import { checkLevelUp } from '#engine/ProgressionEngine.js'
 
 // Canonical stats schema — used in both the default GameState and initNewGame().
 // All fields must be present in both places to avoid undefined reads after save/load.
@@ -74,6 +75,24 @@ export const GameState = {
 
 export const markDirty = () => {
   GameState._session.isDirty = true
+}
+
+// Award XP once per flagKey. Resolves level-up events and mutates GameState.
+// Call from scenes instead of inlining progression logic there.
+export const grantXpOnce = (flagKey, amount) => {
+  if (GameState.story.flags[flagKey]) return
+  GameState.story.flags[flagKey] = true
+  GameState.player.xp += amount
+  const events = checkLevelUp(GameState.player)
+  for (const event of events) {
+    if (event.type === 'level_up')    GameState.player.level        = event.payload.newLevel
+    if (event.type === 'stat_gain') {
+      GameState.player.maxHp  = event.payload.maxHp
+      GameState.player.budget = event.payload.budget
+    }
+    if (event.type === 'slot_unlock') GameState.player.activeSlots  = event.payload.activeSlots
+  }
+  markDirty()
 }
 
 export const normalizeInventoryEntry = (entry) => (
