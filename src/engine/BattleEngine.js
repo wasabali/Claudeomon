@@ -28,14 +28,36 @@ const QUALITY_REP_DELTAS = {
   nuclear:  -30,
 }
 
+// Incident attack type identifiers (matches attacks[] entries in encounter data)
+export const INCIDENT_ATTACKS = {
+  UPTIME_DRAIN:    'uptime_drain',    // Accelerate SLA timer by 1 extra per turn
+  BUDGET_SPIKE:    'budget_spike',    // Drain player budget
+  REPUTATION_LEAK: 'reputation_leak', // Drain player reputation
+  SKILL_BLOCK:     'skill_block',     // Apply skill_block status for 1 turn
+  CONFUSION:       'confusion',       // Apply confusion status for 1 turn
+  ESCALATION:      'escalation',      // Add 1 technical debt stack
+}
+
+// Default SLA timer when none specified
 const DEFAULT_SLA_TIMER = 10
 
 // Penalty applied on SLA breach
 const SLA_BREACH_HP_PENALTY  = 20
-const SLA_BREACH_REP_PENALTY = 15
+const SLA_BREACH_REP_PENALTY = 10
+
+// Reputation change on engineer battle outcomes
+const ENGINEER_WIN_REP_OPTIMAL = 8
+const ENGINEER_LOSE_REP_PENALTY = 5
 
 // Approximate enemy base attack power (used in enemyPhase)
 const ENEMY_BASE_POWER = 15
+
+// Incident attack magnitudes
+const BUDGET_SPIKE_VALUE    = 15
+const REPUTATION_LEAK_VALUE = 3
+const UPTIME_DRAIN_EXTRA    = 1
+const SKILL_BLOCK_DURATION  = 1
+const CONFUSION_DURATION    = 1
 
 // ---------------------------------------------------------------------------
 // createBattleState
@@ -43,6 +65,7 @@ const ENEMY_BASE_POWER = 15
 // engine — phases read and write it, then return events describing the delta.
 // ---------------------------------------------------------------------------
 export function createBattleState(mode, player, opponent, options = {}) {
+  const initialTelegraph = options.telegraphedMove ?? opponent.deck?.[0] ?? null
   return {
     mode,
     turn:             1,
@@ -54,9 +77,11 @@ export function createBattleState(mode, player, opponent, options = {}) {
     slaTimer:         mode === BATTLE_MODES.INCIDENT
                         ? (options.slaTimer ?? DEFAULT_SLA_TIMER)
                         : null,
-    telegraphedMove:  options.telegraphedMove ?? null,
+    telegraphedMove:  initialTelegraph,
+    opponentDeckIndex: 0,
     slaBreach:        false,
     winningTier:      options.winningTier ?? null,
+    layers:           opponent.layers ? [...opponent.layers] : [],
     log:              [],
   }
 }
@@ -124,16 +149,17 @@ export function skillPhase(state, skill) {
     events.push({ type: 'domain_reveal', target: 'opponent', value: state.opponent.domain })
   }
 
-  // Cursed/nuclear side effects — shame, reputation, and technical debt
-  if (skill.isCursed || skill.tier === 'cursed' || skill.tier === 'nuclear') {
-    const updated = applyShameAndReputation(state.player, skill)
-    const shameDelta = updated.shamePoints - state.player.shamePoints
-    const repDelta   = updated.reputation  - state.player.reputation
-    state.player.shamePoints = updated.shamePoints
-    state.player.reputation  = updated.reputation
-    events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
+  // Apply shame and reputation changes for this skill use (all tiers).
+  // Non-cursed skills always have shameDelta=0; reputation delta varies by tier.
+  const updated    = applyShameAndReputation(state.player, skill)
+  const shameDelta = updated.shamePoints - state.player.shamePoints
+  const repDelta   = updated.reputation  - state.player.reputation
+  state.player.shamePoints = updated.shamePoints
+  state.player.reputation  = updated.reputation
+  events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
 
-    // Accumulate technical debt (capped at MAX_TECHNICAL_DEBT)
+  // Cursed/nuclear skills accumulate technical debt (capped at MAX_TECHNICAL_DEBT)
+  if (skill.isCursed || skill.tier === 'cursed' || skill.tier === 'nuclear') {
     if (state.player.technicalDebt < MAX_TECHNICAL_DEBT) {
       state.player.technicalDebt += 1
       state.player.maxHp = Math.max(1, state.player.maxHp - TECHNICAL_DEBT_HP_PENALTY)
@@ -185,7 +211,8 @@ export function slaTickPhase(state) {
 // Phase 4: EnemyPhase
 // Resolves enemy move.
 // - INCIDENT mode: no enemy turn (just environmental pressure via SLA).
-// - ENGINEER mode: enemy attacks the player.
+// - ENGINEER mode: enemy attacks the player using their telegraphed move,
+//   then advances to the next move in their deck and telegraphs it.
 // ---------------------------------------------------------------------------
 export function enemyPhase(state) {
   if (state.mode === BATTLE_MODES.INCIDENT) return []
@@ -195,11 +222,112 @@ export function enemyPhase(state) {
 
   events.push({ type: 'skill_used', target: 'player', skillId: moveId })
 
-  // Enemy deals base power damage (simplified — domain matchup not applied here
-  // since enemy domain vs player is resolved by difficulty in full implementation)
+  // Enemy deals base power damage (domain matchup vs player not tracked since
+  // the player has no fixed domain; difficulty scales enemy power).
   const dmg = ENEMY_BASE_POWER
   state.player.hp = Math.max(0, state.player.hp - dmg)
   events.push({ type: 'damage', target: 'player', value: dmg })
+
+  // Advance to the next move in the opponent's deck and telegraph it.
+  // Wild encounters do not telegraph — they attack unpredictably.
+  const deck = state.opponent.deck
+  if (deck && deck.length > 0 && !state.opponent.isWildEncounter) {
+    state.opponentDeckIndex = (state.opponentDeckIndex + 1) % deck.length
+    const nextMoveId = deck[state.opponentDeckIndex]
+    state.telegraphedMove = nextMoveId
+    events.push({ type: 'telegraph', target: 'player', value: nextMoveId })
+  }
+
+  return events
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4b: IncidentAttackPhase
+// Incidents are passive on turn 1 (Phase 1 — symptom display only).
+// From turn 2 onward the incident performs its cyclic attack pattern.
+// Attack type is taken from opponent.attacks[] and cycled deterministically.
+// Only runs in INCIDENT mode.
+// ---------------------------------------------------------------------------
+export function incidentAttackPhase(state) {
+  if (state.mode !== BATTLE_MODES.INCIDENT) return []
+  if (state.turn === 1) return [] // Phase 1 — no attack, just symptom display
+
+  const attacks = state.opponent.attacks ?? []
+  if (attacks.length === 0) return []
+
+  const events = []
+  const attack = attacks[(state.turn - 2) % attacks.length]
+
+  switch (attack) {
+    case INCIDENT_ATTACKS.UPTIME_DRAIN:
+      if (state.slaTimer !== null && state.slaTimer > 0) {
+        state.slaTimer = Math.max(0, state.slaTimer - UPTIME_DRAIN_EXTRA)
+        events.push({ type: 'sla_tick', value: state.slaTimer, source: 'uptime_drain' })
+        if (state.slaTimer === 0 && !state.slaBreach) {
+          state.slaBreach = true
+          state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
+          state.player.reputation = Math.max(0, state.player.reputation - SLA_BREACH_REP_PENALTY)
+          events.push({
+            type:           'sla_breach',
+            target:         'player',
+            value:          SLA_BREACH_HP_PENALTY,
+            reputationLoss: SLA_BREACH_REP_PENALTY,
+          })
+        }
+      }
+      break
+
+    case INCIDENT_ATTACKS.BUDGET_SPIKE: {
+      const currentBudget = state.player.budget ?? 0
+      const nextBudget = Math.max(0, currentBudget - BUDGET_SPIKE_VALUE)
+      const drainedBudget = currentBudget - nextBudget
+      state.player.budget = nextBudget
+      if (drainedBudget > 0) {
+        events.push({ type: 'budget_drain', target: 'player', value: drainedBudget })
+      }
+      break
+    }
+
+    case INCIDENT_ATTACKS.REPUTATION_LEAK: {
+      const previousReputation = state.player.reputation ?? 0
+      const nextReputation = Math.max(0, previousReputation - REPUTATION_LEAK_VALUE)
+      const reputationDelta = nextReputation - previousReputation
+      state.player.reputation = nextReputation
+      if (reputationDelta !== 0) {
+        events.push({ type: 'reputation', target: 'player', value: reputationDelta })
+      }
+      break
+    }
+
+    case INCIDENT_ATTACKS.SKILL_BLOCK: {
+      const alreadyBlocked = state.playerStatuses.find(s => s.name === 'skill_block')
+      if (!alreadyBlocked) {
+        state.playerStatuses.push({ name: 'skill_block', duration: SKILL_BLOCK_DURATION })
+      }
+      events.push({ type: 'status_apply', target: 'player', statusName: 'skill_block', duration: SKILL_BLOCK_DURATION })
+      break
+    }
+
+    case INCIDENT_ATTACKS.CONFUSION: {
+      const alreadyConfused = state.playerStatuses.find(s => s.name === 'confusion')
+      if (!alreadyConfused) {
+        state.playerStatuses.push({ name: 'confusion', duration: CONFUSION_DURATION })
+      }
+      events.push({ type: 'status_apply', target: 'player', statusName: 'confusion', duration: CONFUSION_DURATION })
+      break
+    }
+
+    case INCIDENT_ATTACKS.ESCALATION: {
+      const currentDebt = state.player.technicalDebt ?? 0
+      const nextDebt = Math.min(10, currentDebt + 1)
+      const debtDelta = nextDebt - currentDebt
+      state.player.technicalDebt = nextDebt
+      if (debtDelta > 0) {
+        events.push({ type: 'escalation', target: 'player', value: debtDelta })
+      }
+      break
+    }
+  }
 
   return events
 }
@@ -207,9 +335,14 @@ export function enemyPhase(state) {
 // ---------------------------------------------------------------------------
 // Phase 5: TurnEndPhase
 // Checks win/lose conditions and awards XP.
-// Win:  opponent.hp === 0
+// Win:  opponent.hp === 0 (with layer transition if multi-layer incident)
 // Lose: player.hp === 0 OR (slaBreach && opponent.hp > 0)
 // Also increments turn counter when battle continues.
+//
+// Engineer win rewards are tier-gated:
+//   optimal  → teach_skill (signature command)
+//   standard → dialog hint about a related command
+//   shortcut/cursed/nuclear → XP only (or XP penalty)
 // ---------------------------------------------------------------------------
 export function turnEndPhase(state) {
   const events = []
@@ -219,9 +352,19 @@ export function turnEndPhase(state) {
   const slaLoss          = state.slaBreach && !opponentDefeated
 
   if (opponentDefeated) {
+    // Multi-layer incident: transition to next layer instead of ending the battle
+    if (state.layers && state.layers.length > 0) {
+      const nextLayer = state.layers.shift()
+      Object.assign(state.opponent, nextLayer, { maxHp: nextLayer.hp })
+      state.opponent.hp    = nextLayer.hp
+      state.domainRevealed = false // New layer's domain is hidden until diagnosed
+      events.push({ type: 'layer_transition', target: 'opponent', value: nextLayer })
+      state.turn += 1
+      return events
+    }
+
     const tier = state.winningTier ?? 'standard'
     const xp   = calculateXP(state.opponent.difficulty ?? 1, tier)
-    events.push({ type: 'xp_gain', target: 'player', value: xp })
 
     // Apply quality-based reputation delta at win resolution
     const repDelta    = QUALITY_REP_DELTAS[tier] ?? 0
@@ -231,6 +374,8 @@ export function turnEndPhase(state) {
     if (actualDelta !== 0) {
       events.push({ type: 'reputation', target: 'player', value: actualDelta })
     }
+
+    events.push({ type: 'xp_gain', target: 'player', value: xp })
 
     // ENGINEER mode: tier-based teacher reactions
     if (state.mode === BATTLE_MODES.ENGINEER) {
@@ -250,6 +395,11 @@ export function turnEndPhase(state) {
   }
 
   if (playerDefeated || slaLoss) {
+    // Reputation penalty for losing an engineer battle (not SLA — that is penalised in slaTickPhase)
+    if (playerDefeated && state.mode === BATTLE_MODES.ENGINEER) {
+      state.player.reputation = Math.max(0, state.player.reputation - ENGINEER_LOSE_REP_PENALTY)
+      events.push({ type: 'reputation', target: 'player', value: -ENGINEER_LOSE_REP_PENALTY, shameDelta: 0 })
+    }
     events.push({ type: 'battle_end', target: 'player', value: 'lose' })
     return events
   }
@@ -261,14 +411,15 @@ export function turnEndPhase(state) {
 
 // ---------------------------------------------------------------------------
 // resolveTurn
-// Runs all 5 phases in order and returns the concatenated BattleEvent[].
-// Phase order: StatusTick → Skill → SlaTick → Enemy → TurnEnd
+// Runs all phases in order and returns the concatenated BattleEvent[].
+// Phase order: StatusTick → Skill → SlaTick → IncidentAttack → Enemy → TurnEnd
 // ---------------------------------------------------------------------------
 export function resolveTurn(state, skill) {
   const events = [
     ...statusTickPhase(state),
     ...skillPhase(state, skill),
     ...slaTickPhase(state),
+    ...incidentAttackPhase(state),
     ...enemyPhase(state),
     ...turnEndPhase(state),
   ]

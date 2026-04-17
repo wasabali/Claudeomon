@@ -106,11 +106,16 @@ export class BattleScene extends BaseScene {
       ...textStyle, color: '#9bc5ff',
     })
 
-    // In ENGINEER mode, show telegraphed move
-    if (mode === BATTLE_MODES.ENGINEER && this._battleState.telegraphedMove) {
-      this.add.text(4, 22, `Preparing: ${this._battleState.telegraphedMove}`, {
+    // In ENGINEER mode, show telegraphed move (stored as instance var for live updates)
+    if (mode === BATTLE_MODES.ENGINEER) {
+      const telegraphLabel = this._battleState.telegraphedMove
+        ? `Preparing: ${this._battleState.telegraphedMove}`
+        : ''
+      this._telegraphText = this.add.text(4, 22, telegraphLabel, {
         ...textStyle, color: '#ffe066',
       })
+    } else {
+      this._telegraphText = null
     }
 
     // Player HP
@@ -349,8 +354,39 @@ export class BattleScene extends BaseScene {
         this.time.delayedCall(600, callback)
         break
 
+      case 'budget_drain':
+        this._showLog(`Budget drained by ${event.value}!`)
+        this._refreshHUD()
+        this.time.delayedCall(400, callback)
+        break
+
+      case 'escalation':
+        this._showLog('Technical debt increased! The incident is escalating.')
+        this.time.delayedCall(500, callback)
+        break
+
+      case 'layer_transition':
+        this._showLog('Root cause revealed! A deeper layer emerges...')
+        this._enemyDomainText?.setText('[???]')
+        this.time.delayedCall(800, callback)
+        break
+
       case 'battle_end':
         this._onBattleEnd(event.value)
+        break
+
+      case 'telegraph':
+        if (this._battleState.mode === BATTLE_MODES.ENGINEER) {
+          if (this._telegraphText) {
+            this._telegraphText.setText(`Preparing: ${event.value}`)
+          }
+        }
+        this.time.delayedCall(400, callback)
+        break
+
+      case 'dialog':
+        this._showLog(event.text ?? '')
+        this.time.delayedCall(800, callback)
         break
 
       default:
@@ -369,10 +405,20 @@ export class BattleScene extends BaseScene {
     GameState.player.maxHp         = player.maxHp
     GameState.player.reputation    = player.reputation
     GameState.player.shamePoints   = player.shamePoints
-    GameState.player.technicalDebt = player.technicalDebt
+    GameState.player.technicalDebt = player.technicalDebt ?? GameState.player.technicalDebt
+    GameState.player.budget        = player.budget !== undefined ? player.budget : GameState.player.budget
+
+    // Track SLA breach in persistent stats
+    if (this._battleState.slaBreach) {
+      GameState.stats.slaBreaches = (GameState.stats.slaBreaches ?? 0) + 1
+    }
 
     if (result === 'win') {
       GameState.stats.battlesWon++
+
+      if (this._battleState.mode === BATTLE_MODES.INCIDENT) {
+        GameState.stats.incidentsResolved = (GameState.stats.incidentsResolved ?? 0) + 1
+      }
 
       // Apply XP using the post-turn quality tier
       const xp = calculateXP(opponent.difficulty ?? 1, this._battleState.winningTier ?? 'standard')
