@@ -76,6 +76,7 @@ export function createBattleState(mode, player, opponent, options = {}) {
     slaBreach:        false,
     winningTier:      options.winningTier ?? null,
     layers:           opponent.layers ? [...opponent.layers] : [],
+    // Phase 0 is the initial opponent state; remaining phases are queued for transitions
     bossPhases:       opponent.phases && opponent.phases.length > 0
                         ? [...opponent.phases.slice(1)]
                         : [],
