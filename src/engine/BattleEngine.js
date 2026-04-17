@@ -50,6 +50,7 @@ const CONFUSION_DURATION    = 1
 // engine — phases read and write it, then return events describing the delta.
 // ---------------------------------------------------------------------------
 export function createBattleState(mode, player, opponent, options = {}) {
+  const initialTelegraph = options.telegraphedMove ?? opponent.deck?.[0] ?? null
   return {
     mode,
     turn:             1,
@@ -61,7 +62,8 @@ export function createBattleState(mode, player, opponent, options = {}) {
     slaTimer:         mode === BATTLE_MODES.INCIDENT
                         ? (options.slaTimer ?? DEFAULT_SLA_TIMER)
                         : null,
-    telegraphedMove:  options.telegraphedMove ?? null,
+    telegraphedMove:  initialTelegraph,
+    opponentDeckIndex: 0,
     slaBreach:        false,
     winningTier:      options.winningTier ?? null,
     layers:           opponent.layers ? [...opponent.layers] : [],
@@ -180,7 +182,8 @@ export function slaTickPhase(state) {
 // Phase 4: EnemyPhase
 // Resolves enemy move.
 // - INCIDENT mode: no enemy turn (just environmental pressure via SLA).
-// - ENGINEER mode: enemy attacks the player.
+// - ENGINEER mode: enemy attacks the player using their telegraphed move,
+//   then advances to the next move in their deck and telegraphs it.
 // ---------------------------------------------------------------------------
 export function enemyPhase(state) {
   if (state.mode === BATTLE_MODES.INCIDENT) return []
@@ -190,11 +193,21 @@ export function enemyPhase(state) {
 
   events.push({ type: 'skill_used', target: 'player', skillId: moveId })
 
-  // Enemy deals base power damage (simplified — domain matchup not applied here
-  // since enemy domain vs player is resolved by difficulty in full implementation)
+  // Enemy deals base power damage (domain matchup vs player not tracked since
+  // the player has no fixed domain; difficulty scales enemy power).
   const dmg = ENEMY_BASE_POWER
   state.player.hp = Math.max(0, state.player.hp - dmg)
   events.push({ type: 'damage', target: 'player', value: dmg })
+
+  // Advance to the next move in the opponent's deck and telegraph it.
+  // Wild encounters do not telegraph — they attack unpredictably.
+  const deck = state.opponent.deck
+  if (deck && deck.length > 0 && !state.opponent.isWildEncounter) {
+    state.opponentDeckIndex = (state.opponentDeckIndex + 1) % deck.length
+    const nextMoveId = deck[state.opponentDeckIndex]
+    state.telegraphedMove = nextMoveId
+    events.push({ type: 'telegraph', target: 'player', value: nextMoveId })
+  }
 
   return events
 }
@@ -296,6 +309,11 @@ export function incidentAttackPhase(state) {
 // Win:  opponent.hp === 0 (with layer transition if multi-layer incident)
 // Lose: player.hp === 0 OR (slaBreach && opponent.hp > 0)
 // Also increments turn counter when battle continues.
+//
+// Engineer win rewards are tier-gated:
+//   optimal  → teach_skill (signature command)
+//   standard → dialog hint about a related command
+//   shortcut/cursed/nuclear → XP only (or XP penalty)
 // ---------------------------------------------------------------------------
 export function turnEndPhase(state) {
   const events = []
@@ -316,9 +334,8 @@ export function turnEndPhase(state) {
       return events
     }
 
-    const tier       = state.winningTier ?? 'standard'
-    const xp         = calculateXP(state.opponent.difficulty ?? 1, tier)
-    const hasTeach   = state.mode === BATTLE_MODES.ENGINEER && state.opponent.teachSkillId
+    const tier = state.winningTier ?? 'standard'
+    const xp   = calculateXP(state.opponent.difficulty ?? 1, tier)
 
     // Bonus reputation for winning an engineer battle with an optimal solution
     if (state.mode === BATTLE_MODES.ENGINEER && tier === 'optimal') {
@@ -326,10 +343,16 @@ export function turnEndPhase(state) {
       events.push({ type: 'reputation', target: 'player', value: ENGINEER_WIN_REP_OPTIMAL, shameDelta: 0 })
     }
 
-    events.push({ type: 'xp_gain',    target: 'player', value: xp })
-    if (hasTeach) {
-      events.push({ type: 'teach_skill', target: 'player', value: state.opponent.teachSkillId })
+    events.push({ type: 'xp_gain', target: 'player', value: xp })
+
+    if (state.mode === BATTLE_MODES.ENGINEER) {
+      if (tier === 'optimal' && state.opponent.teachSkillId) {
+        events.push({ type: 'teach_skill', target: 'player', value: state.opponent.teachSkillId })
+      } else if (tier === 'standard' && state.opponent.winDialog) {
+        events.push({ type: 'dialog', target: 'player', text: state.opponent.winDialog })
+      }
     }
+
     events.push({ type: 'battle_end', target: 'player', value: 'win' })
     return events
   }
