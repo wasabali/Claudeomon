@@ -77,9 +77,9 @@ describe('other data registries', () => {
     cursedTrainers.forEach(trainer => expect(trainer.isCursed).toBe(true))
   })
 
-  it('defines all 8 emblems with grimeDescription and passiveBonus', () => {
+  it('defines all 9 emblems with grimeDescription and passiveBonus', () => {
     const emblems = getAllEmblems()
-    expect(emblems).toHaveLength(8)
+    expect(emblems).toHaveLength(9)
     emblems.forEach(emblem => {
       expect(typeof emblem.grimeDescription).toBe('string')
       expect(emblem.grimeDescription.length).toBeGreaterThan(0)

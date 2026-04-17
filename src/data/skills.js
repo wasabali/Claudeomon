@@ -1340,6 +1340,21 @@ const SKILLS = {
     learnedAt: 'helm_repository',
     availableInAct: 3,
   },
+  az_monitor_metrics: {
+    id: 'az_monitor_metrics',
+    displayName: 'az monitor metrics list',
+    domain: 'observability',
+    tier: 'standard',
+    isCursed: false,
+    budgetCost: 0,
+    description: "Pull live metrics from Azure Monitor. Reveals enemy domain and current status effects.",
+    effect: { type: 'reveal', value: 1 },
+    sideEffect: null,
+    warningText: null,
+    learnedFrom: 'Metrics Maja',
+    learnedAt: 'architecture_district',
+    availableInAct: 3,
+  },
 }
 
 export const getById = (id)           => SKILLS[id]
