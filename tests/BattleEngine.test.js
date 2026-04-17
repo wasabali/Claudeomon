@@ -261,7 +261,7 @@ describe('skillPhase', () => {
     expect(events).toContainEqual(expect.objectContaining({ type: 'damage', target: 'opponent', value: 45 }))
   })
 
-  it('instant_win_vs_legacy backfires on non-legacy opponents', () => {
+  it('instant_win_vs_legacy damages player on non-legacy opponents', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ hp: 100 }), makeOpponent({ isLegacy: false }))
     const skill = {
       id: 'legacy_nuke',
@@ -309,6 +309,20 @@ describe('skillPhase', () => {
   it('does not emit no-op reputation event when reputation and shame are unchanged', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 100, shamePoints: 0 }), makeOpponent())
     const skill = makeDamageSkill({ tier: 'standard' })
+    const events = skillPhase(state, skill)
+    expect(events.find(e => e.type === 'reputation')).toBeUndefined()
+  })
+
+  it('does not emit no-op reputation event for cursed skill with zero side effects', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ reputation: 50, shamePoints: 3 }), makeOpponent())
+    const skill = {
+      id: 'zero_side_effect_curse',
+      domain: null,
+      tier: 'cursed',
+      isCursed: true,
+      effect: { type: 'damage', value: 15 },
+      sideEffect: { shame: 0, reputation: 0 },
+    }
     const events = skillPhase(state, skill)
     expect(events.find(e => e.type === 'reputation')).toBeUndefined()
   })
