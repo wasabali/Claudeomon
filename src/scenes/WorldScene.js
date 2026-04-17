@@ -284,6 +284,10 @@ export class WorldScene extends BaseScene {
         if (c.reputationMax !== undefined && reputation > c.reputationMax) continue
         if (c.shameMin      !== undefined && shamePoints < c.shameMin)     continue
         if (c.shameMax      !== undefined && shamePoints > c.shameMax)     continue
+        if (Array.isArray(variant.pool)) {
+          const idx = Math.floor(Math.random() * variant.pool.length)
+          return variant.pool[idx]
+        }
         return variant.pages
       }
     }

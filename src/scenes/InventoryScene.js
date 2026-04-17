@@ -8,6 +8,7 @@ import {
   normalizeInventoryEntry,
   removeItem,
 } from '#state/GameState.js'
+import { reduceShame } from '#engine/SkillEngine.js'
 
 const TABS = [
   { key: 'tools',       label: 'TOOLS', allowInBattle: true  },
@@ -204,6 +205,16 @@ export class InventoryScene extends BaseScene {
         return { message: `You learned from failure. +${effect.value} XP.`, consume: false }
       }
       return { message: 'Nothing new to learn right now.', consume: false }
+    }
+
+    if (effect.type === 'reduceShame') {
+      if (GameState.player.shamePoints <= 0) {
+        return { message: 'Your conscience is already clear.\n(Relatively speaking.)', consume: false }
+      }
+      const updated = reduceShame(GameState.player, effect.value)
+      GameState.player.shamePoints = updated.shamePoints
+      markDirty()
+      return { message: `You feel slightly less terrible about yourself.\nShame: −${effect.value}.`, consume: true }
     }
 
     return { message: item.description, consume: false }

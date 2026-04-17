@@ -1171,6 +1171,28 @@ const SKILLS = {
     learnedAt: 'jira_dungeon',
     availableInAct: 3,
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SHADOW ENGINEER — The holy grail. Unlocked at Shame 10.
+  // You look tired. You always want coffee. This is your legacy now.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  kubectl_delete_production: {
+    id: 'kubectl_delete_production',
+    displayName: 'kubectl delete ns production --grace-period=0 --force',
+    domain: null,
+    tier: 'nuclear',
+    isCursed: true,
+    budgetCost: 0,
+    description: "The move that ends careers and starts legends. Deletes the entire production namespace. Instantly. No grace period. No survivors. No rollback. Somewhere a runbook is being written with your name in the title.",
+    effect: { type: 'instant_win', value: 1 },
+    sideEffect: { shame: 3, reputation: -50, description: 'Production is gone. You win the battle. Everyone knows it was you.' },
+    warningText: '☠ SHADOW TECHNIQUE: Only Shadow Engineers can use this. The nuclear option has a nuclear option. Your career flashed before your eyes.',
+    learnedFrom: 'Shadow Engineer title — unlocked at 10 Shame Points',
+    learnedAt: 'shadow_realm',
+    availableInAct: 4,
+    shameRequired: 10,
+  },
 }
 
 export const getById = (id)           => SKILLS[id]

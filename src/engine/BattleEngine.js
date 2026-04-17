@@ -2,7 +2,8 @@
 // Owns the battle state and phase queue. Returns BattleEvent[] arrays.
 // Scenes delegate all logic here; they only render the returned events.
 
-import { calculateDamage, calculateXP, applyShameAndReputation } from './SkillEngine.js'
+import { calculateDamage, calculateXP, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
+import { REPUTATION_MIN } from '../config.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -138,6 +139,12 @@ export function skillPhase(state, skill) {
   const repDelta   = updated.reputation  - state.player.reputation
   state.player.shamePoints = updated.shamePoints
   state.player.reputation  = updated.reputation
+
+  // Apply grime to all earned emblems when shame is gained.
+  if (shameDelta > 0) {
+    state.emblems = applyShameGrime(state.emblems ?? {}, shameDelta)
+  }
+
   events.push({ type: 'reputation', target: 'player', value: repDelta, shameDelta })
 
   return events
@@ -164,7 +171,7 @@ export function slaTickPhase(state) {
   if (state.slaTimer === 0) {
     state.slaBreach = true
     state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
-    state.player.reputation = Math.max(0, state.player.reputation - SLA_BREACH_REP_PENALTY)
+    state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
     events.push({
       type:            'sla_breach',
       target:          'player',
@@ -224,7 +231,7 @@ export function incidentAttackPhase(state) {
         if (state.slaTimer === 0 && !state.slaBreach) {
           state.slaBreach = true
           state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
-          state.player.reputation = Math.max(0, state.player.reputation - SLA_BREACH_REP_PENALTY)
+          state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
           events.push({
             type:           'sla_breach',
             target:         'player',
@@ -337,7 +344,7 @@ export function turnEndPhase(state) {
   if (playerDefeated || slaLoss) {
     // Reputation penalty for losing an engineer battle (not SLA — that is penalised in slaTickPhase)
     if (playerDefeated && state.mode === BATTLE_MODES.ENGINEER) {
-      state.player.reputation = Math.max(0, state.player.reputation - ENGINEER_LOSE_REP_PENALTY)
+      state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - ENGINEER_LOSE_REP_PENALTY)
       events.push({ type: 'reputation', target: 'player', value: -ENGINEER_LOSE_REP_PENALTY, shameDelta: 0 })
     }
     events.push({ type: 'battle_end', target: 'player', value: 'lose' })

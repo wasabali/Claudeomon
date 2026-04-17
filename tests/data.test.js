@@ -49,7 +49,7 @@ describe('skills registry', () => {
   })
 
   it('all skills use valid domain and tier values', () => {
-    const validDomains = Object.keys(DOMAIN_MATCHUPS)
+    const validDomains = [...Object.keys(DOMAIN_MATCHUPS), null]
     getAllSkills().forEach(skill => {
       expect(validDomains).toContain(skill.domain)
       expect(VALID_TIERS).toContain(skill.tier)
