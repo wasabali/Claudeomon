@@ -2,8 +2,9 @@ import Phaser from 'phaser'
 import { BaseScene } from '#scenes/BaseScene.js'
 import { DialogBox } from '#ui/DialogBox.js'
 import { CONFIG } from '../config.js'
-import { GameState, hasItem, markDirty } from '#state/GameState.js'
+import { GameState, hasItem, addItem, markDirty } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
+import { getBy as getInteractionsBy } from '#data/interactions.js'
 
 const MAP_KEY     = 'localhost_town'
 const TILESET_KEY = 'stub_tiles'
@@ -84,6 +85,7 @@ export class WorldScene extends BaseScene {
     this._setupPlayer()
     this._setupInput()
     this._setupCamera()
+    this._buildInteractionLookup()
 
     GameState.player.location = 'localhost_town'
     this.playBgm('town')
@@ -180,6 +182,7 @@ export class WorldScene extends BaseScene {
         this._lastTileX = tx
         this._lastTileY = ty
         this._stepCount++
+        this._checkDoorInteraction()
       }
     }
 
@@ -214,6 +217,67 @@ export class WorldScene extends BaseScene {
         this._interactWithNpc(def.name)
         return
       }
+    }
+
+    const tileX = Math.floor(checkX / TILE_SIZE)
+    const tileY = Math.floor(checkY / TILE_SIZE)
+    const interaction = this._interactionLookup?.get(`${tileX},${tileY}`)
+    if (interaction && interaction.type !== 'door') {
+      this._resolveInteraction(interaction)
+    }
+  }
+
+  _buildInteractionLookup() {
+    this._interactionLookup = new Map()
+    const region = GameState.player.location
+    const regionInteractions = getInteractionsBy('region', region)
+    for (const interaction of regionInteractions) {
+      this._interactionLookup.set(`${interaction.tileX},${interaction.tileY}`, interaction)
+    }
+  }
+
+  _resolveInteraction(interaction) {
+    const { type } = interaction
+
+    if (type === 'sign' || type === 'flavor') {
+      this._interacting = true
+      this.dialog.show(interaction.dialog, () => { this._interacting = false })
+      return
+    }
+
+    if (type === 'chest') {
+      if (GameState.story.flags[interaction.flagKey]) return
+      this._interacting = true
+      GameState.story.flags[interaction.flagKey] = true
+      addItem(interaction.item.tab, interaction.item.id, interaction.item.qty)
+      markDirty()
+      this.dialog.show(interaction.dialog, () => { this._interacting = false })
+      return
+    }
+
+    if (type === 'door') {
+      const { requiresItem, flagKey, lockedDialog, unlockedDialog } = interaction
+      this._interacting = true
+      if (GameState.story.flags[flagKey]) {
+        this._interacting = false
+        return
+      }
+      if (hasItem(requiresItem.tab, requiresItem.id)) {
+        GameState.story.flags[flagKey] = true
+        markDirty()
+        this.dialog.show(unlockedDialog, () => { this._interacting = false })
+      } else {
+        this.dialog.show(lockedDialog, () => { this._interacting = false })
+      }
+    }
+  }
+
+  _checkDoorInteraction() {
+    const tileX = Math.floor(this._player.x / TILE_SIZE)
+    const tileY = Math.floor(this._player.y / TILE_SIZE)
+    const interaction = this._interactionLookup?.get(`${tileX},${tileY}`)
+    if (interaction && interaction.type === 'door') {
+      this._resolveInteraction(interaction)
     }
   }
 

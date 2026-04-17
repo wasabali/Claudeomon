@@ -11,6 +11,7 @@ import { getAll as getAllQuests } from '../src/data/quests.js'
 import { ENCOUNTER_POOLS, getAll as getAllEncounters } from '../src/data/encounters.js'
 import { getAll as getAllThreads, getByCommandId } from '../src/data/stackoverflow.js'
 import { getById as getGateById, getAll as getAllGates, getBy as getGatesBy } from '../src/data/gates.js'
+import { getById as getInteractionById, getAll as getAllInteractions, getBy as getInteractionsBy } from '../src/data/interactions.js'
 
 const VALID_TIERS = ['optimal', 'standard', 'shortcut', 'cursed', 'nuclear']
 const VALID_GATE_TYPES = ['hard', 'soft', 'knowledge', 'reputation', 'shame']
@@ -23,6 +24,7 @@ const DATA_FILES = [
   'encounters.js',
   'stackoverflow.js',
   'gates.js',
+  'interactions.js',
 ].map(file => path.join(process.cwd(), 'src', 'data', file))
 
 describe('skills registry', () => {
@@ -110,6 +112,7 @@ describe('other data registries', () => {
       ...getAllEncounters().map(entry => entry.id),
       ...getAllThreads().map(entry => entry.id),
       ...getAllGates().map(entry => entry.id),
+      ...getAllInteractions().map(entry => entry.id),
     ]
     expect(new Set(allIds).size).toBe(allIds.length)
   })
@@ -232,5 +235,95 @@ describe('gates registry', () => {
           expect(VALID_TIERS).toContain(step.tier)
         })
       })
+  })
+})
+
+const VALID_INTERACTION_TYPES = ['sign', 'chest', 'door', 'flavor']
+
+describe('interactions registry', () => {
+  it('follows the registry pattern with getById, getAll, getBy', () => {
+    const interaction = getInteractionById('localhost_sign_welcome')
+    expect(interaction).toBeDefined()
+    expect(interaction.id).toBe('localhost_sign_welcome')
+
+    const allInteractions = getAllInteractions()
+    expect(allInteractions.length).toBeGreaterThanOrEqual(1)
+
+    expect(typeof getInteractionsBy).toBe('function')
+    const signs = getInteractionsBy('type', 'sign')
+    expect(signs.length).toBeGreaterThanOrEqual(1)
+    signs.forEach(s => expect(s.type).toBe('sign'))
+  })
+
+  it('all interactions have required base fields', () => {
+    getAllInteractions().forEach(interaction => {
+      expect(typeof interaction.id).toBe('string')
+      expect(VALID_INTERACTION_TYPES).toContain(interaction.type)
+      expect(typeof interaction.region).toBe('string')
+      expect(typeof interaction.tileX).toBe('number')
+      expect(typeof interaction.tileY).toBe('number')
+    })
+  })
+
+  it('signs and flavor objects have dialog[] and repeatable: true', () => {
+    getAllInteractions()
+      .filter(i => i.type === 'sign' || i.type === 'flavor')
+      .forEach(interaction => {
+        expect(Array.isArray(interaction.dialog)).toBe(true)
+        expect(interaction.dialog.length).toBeGreaterThan(0)
+        expect(interaction.repeatable).toBe(true)
+      })
+  })
+
+  it('chests have item, dialog, flagKey, and repeatable: false', () => {
+    getAllInteractions()
+      .filter(i => i.type === 'chest')
+      .forEach(interaction => {
+        expect(interaction.repeatable).toBe(false)
+        expect(typeof interaction.flagKey).toBe('string')
+        expect(Array.isArray(interaction.dialog)).toBe(true)
+        expect(interaction.item).toBeDefined()
+        expect(typeof interaction.item.tab).toBe('string')
+        expect(typeof interaction.item.id).toBe('string')
+        expect(typeof interaction.item.qty).toBe('number')
+      })
+  })
+
+  it('doors have requiresItem, lockedDialog, unlockedDialog, and flagKey', () => {
+    getAllInteractions()
+      .filter(i => i.type === 'door')
+      .forEach(interaction => {
+        expect(typeof interaction.flagKey).toBe('string')
+        expect(interaction.requiresItem).toBeDefined()
+        expect(typeof interaction.requiresItem.tab).toBe('string')
+        expect(typeof interaction.requiresItem.id).toBe('string')
+        expect(Array.isArray(interaction.lockedDialog)).toBe(true)
+        expect(Array.isArray(interaction.unlockedDialog)).toBe(true)
+      })
+  })
+
+  it('has all four interaction types defined', () => {
+    const types = new Set(getAllInteractions().map(i => i.type))
+    VALID_INTERACTION_TYPES.forEach(t => expect(types.has(t)).toBe(true))
+  })
+
+  it('has all 7 environmental storytelling entries', () => {
+    const storyIds = [
+      'pipeline_terminal_todo',
+      'staging_env_file',
+      'shell_cavern_bash_history',
+      'oldcorp_nameplate',
+      'azure_town_vending_machine',
+      'kubernetes_colosseum_locker',
+      'architecture_whiteboard',
+    ]
+    storyIds.forEach(id => {
+      expect(getInteractionById(id)).toBeDefined()
+    })
+  })
+
+  it('has Localhost Town objects interactable', () => {
+    const localhostInteractions = getInteractionsBy('region', 'localhost_town')
+    expect(localhostInteractions.length).toBeGreaterThanOrEqual(7)
   })
 })
