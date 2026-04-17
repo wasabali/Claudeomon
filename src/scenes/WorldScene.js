@@ -283,8 +283,8 @@ export class WorldScene extends BaseScene {
   _resolveNpcDialog(entry, trainer) {
     // 1. Cursed trainer technique acknowledgment — fires once per trainer.
     if (trainer?.techniqueUsedFlag && !GameState.story.flags[trainer.techniqueUsedFlag]) {
-      const skillId = trainer.teachSkillId ?? trainer.cursedSkill
-      if (skillId && (GameState.stats.skillUseCounts?.[skillId] ?? 0) > 0) {
+      const techniqueId = trainer.teachSkillId ?? trainer.cursedSkill
+      if (techniqueId && (GameState.stats.skillUseCounts?.[techniqueId] ?? 0) > 0) {
         GameState.story.flags[trainer.techniqueUsedFlag] = true
         markDirty()
         if (Array.isArray(trainer.techniqueUsedDialog)) return trainer.techniqueUsedDialog

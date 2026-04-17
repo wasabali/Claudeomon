@@ -61,7 +61,7 @@ const TRAINERS = {
     rematchDeck: ['awk_one_liner', 'tail_f', 'systemctl_restart', 'crontab_e', 'grep_logs'],
     shameDialog: {
       3: ["I've heard about you\u2026"],
-      7: ["I've heard about you\u2026"],
+      7: ["Your commit history is in the man page\nunder 'what not to do.'"],
       10: null,
     },
     rematchDialog: "You're back. Good. I've been training.",
@@ -91,7 +91,7 @@ const TRAINERS = {
     rematchDeck: ['az_func_deploy', 'lambda_invoke', 'step_function', 'event_trigger', 'cold_start_ambush'],
     shameDialog: {
       3: ["I've heard about you\u2026"],
-      7: ["I've heard about you\u2026"],
+      7: ["My functions trigger on events.\nYour reputation triggers on incidents."],
       10: null,
     },
     rematchDialog: "You're back. Good. I've been training.",
@@ -121,7 +121,7 @@ const TRAINERS = {
     rematchDeck: ['terraform_apply', 'bicep_deploy', 'az_pipelines_run', 'ansible_playbook', 'terraform_plan'],
     shameDialog: {
       3: ["I've heard about you\u2026"],
-      7: ["I've heard about you\u2026"],
+      7: ["Even my pipelines don't break things\nthat badly."],
       10: null,
     },
     rematchDialog: "You're back. Good. I've been training.",
@@ -151,7 +151,7 @@ const TRAINERS = {
     rematchDeck: ['az_role_assignment_create', 'vault_rotate', 'nmap_scan', 'cert_renew', 'firewall_deny'],
     shameDialog: {
       3: ["I've heard about you\u2026"],
-      7: ["I've heard about you\u2026"],
+      7: ["Your access should have been revoked\nby now. I'm watching."],
       10: null,
     },
     rematchDialog: "You're back. Good. I've been training.",
@@ -181,7 +181,7 @@ const TRAINERS = {
     rematchDeck: ['kubectl_apply', 'kubectl_scale', 'kubectl_drain', 'kubectl_exec', 'helm_install'],
     shameDialog: {
       3: ["I've heard about you\u2026"],
-      7: ["I've heard about you\u2026"],
+      7: ["Your pods are stable.\nYour reputation is not."],
       10: null,
     },
     rematchDialog: "You're back. Good. I've been training.",
@@ -211,7 +211,7 @@ const TRAINERS = {
     rematchDeck: ['helm_upgrade_install', 'multi_stage_build', 'container_scan', 'docker_compose_up', 'docker_build'],
     shameDialog: {
       3: ["I've heard about you\u2026"],
-      7: ["I've heard about you\u2026"],
+      7: ["I'd roll back your access\nif I could."],
       10: null,
     },
     rematchDialog: "You're back. Good. I've been training.",
@@ -241,7 +241,7 @@ const TRAINERS = {
     rematchDeck: ['az_network_vnet_create', 'terraform_apply', 'ansible_playbook', 'bicep_deploy', 'terraform_plan'],
     shameDialog: {
       3: ["I've heard about you\u2026"],
-      7: ["I've heard about you\u2026"],
+      7: ["Your architecture has more single points\nof failure than I can count."],
       10: null,
     },
     rematchDialog: "You're back. Good. I've been training.",
