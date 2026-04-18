@@ -30,6 +30,8 @@
 
     @media (max-width: 768px) {
       :root {
+        --gbc-width-to-height-ratio: 1.7778;
+        --gbc-height-to-width-ratio: 0.5625;
         --mobile-app-height: 100vh;
         --safe-top: env(safe-area-inset-top, 0px);
         --safe-right: env(safe-area-inset-right, 0px);
@@ -39,8 +41,10 @@
         --mobile-controls-height: 250px;
         --mobile-available-width: calc(100vw - var(--mobile-shell-padding) - var(--safe-left) - var(--safe-right));
         --mobile-available-height: calc(var(--mobile-app-height) - var(--mobile-controls-height) - var(--safe-top) - var(--safe-bottom));
-        --gbc-screen-width: clamp(220px, min(var(--mobile-available-width), calc(var(--mobile-available-height) * 1.7778)), 430px);
-        --gbc-screen-height: calc(var(--gbc-screen-width) * 0.5625);
+        --mobile-width-constraint: var(--mobile-available-width);
+        --mobile-height-constraint: calc(var(--mobile-available-height) * var(--gbc-width-to-height-ratio));
+        --gbc-screen-width: clamp(220px, min(var(--mobile-width-constraint), var(--mobile-height-constraint)), 430px);
+        --gbc-screen-height: calc(var(--gbc-screen-width) * var(--gbc-height-to-width-ratio));
       }
 
       @supports (height: 100dvh) {
@@ -297,6 +301,8 @@
     const MOBILE_QUERY = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`)
     const app = document.getElementById('app')
     const gameScreen = document.getElementById('game-screen')
+    const ASCII_PRINTABLE_START = 32
+    const ASCII_PRINTABLE_END = 126
     const keyMap = {
       ArrowUp: { code: 'ArrowUp', keyCode: 38 },
       ArrowDown: { code: 'ArrowDown', keyCode: 40 },
@@ -310,13 +316,15 @@
 
     const assignLegacyKeyCodes = (event, keyCode) => {
       if (!keyCode) return
-      const charCode = keyCode >= 32 && keyCode <= 126 ? keyCode : 0
+      const charCode = keyCode >= ASCII_PRINTABLE_START && keyCode <= ASCII_PRINTABLE_END ? keyCode : 0
       const defineKey = (prop, value) => {
         try {
           Object.defineProperty(event, prop, {
             get: () => value,
           })
-        } catch (_) {}
+        } catch (_) {
+          // Some browsers disallow redefining event properties; fallback is safe.
+        }
       }
       defineKey('keyCode', keyCode)
       defineKey('which', keyCode)
