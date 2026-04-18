@@ -32,17 +32,22 @@
       :root {
         --gbc-screen-width: 160px;
         --gbc-screen-height: 144px;
+        --mobile-app-height: 100vh;
         --safe-top: env(safe-area-inset-top, 0px);
         --safe-right: env(safe-area-inset-right, 0px);
         --safe-bottom: env(safe-area-inset-bottom, 0px);
         --safe-left: env(safe-area-inset-left, 0px);
       }
 
+      @supports (height: 100dvh) {
+        :root {
+          --mobile-app-height: 100dvh;
+        }
+      }
+
       body {
-        height: 100vh;
-        height: 100dvh;
-        min-height: 100vh;
-        min-height: 100dvh;
+        height: var(--mobile-app-height);
+        min-height: var(--mobile-app-height);
         padding-top: calc(12px + var(--safe-top));
         padding-right: calc(12px + var(--safe-right));
         padding-bottom: calc(12px + var(--safe-bottom));
@@ -202,6 +207,10 @@
       }
 
       @media (max-width: 430px) {
+        :root {
+          --gbc-dpad-compact-offset: 37px;
+        }
+
         .gbc-shell {
           border-radius: 22px;
           padding: 12px;
@@ -231,10 +240,10 @@
           height: 34px;
         }
 
-        .gbc-dpad-btn.up { left: 37px; }
-        .gbc-dpad-btn.down { left: 37px; }
-        .gbc-dpad-btn.left { top: 37px; }
-        .gbc-dpad-btn.right { top: 37px; }
+        .gbc-dpad-btn.up { left: var(--gbc-dpad-compact-offset); }
+        .gbc-dpad-btn.down { left: var(--gbc-dpad-compact-offset); }
+        .gbc-dpad-btn.left { top: var(--gbc-dpad-compact-offset); }
+        .gbc-dpad-btn.right { top: var(--gbc-dpad-compact-offset); }
 
         .gbc-ab .gbc-btn {
           width: 52px;
@@ -253,7 +262,7 @@
 </head>
 <body>
   <div id="app">
-    <div class="gbc-shell" aria-label="GameBoy Color shell">
+    <div class="gbc-shell" role="region" aria-label="GameBoy Color shell">
       <div class="gbc-screen-bezel">
         <div id="game-screen" class="gbc-screen"></div>
       </div>
@@ -316,6 +325,22 @@
       }
     }
 
+    const addMobileQueryListener = (listener) => {
+      if (typeof MOBILE_QUERY.addEventListener === 'function') {
+        MOBILE_QUERY.addEventListener('change', listener)
+      } else if (typeof MOBILE_QUERY.addListener === 'function') {
+        MOBILE_QUERY.addListener(listener)
+      }
+    }
+
+    const removeMobileQueryListener = (listener) => {
+      if (typeof MOBILE_QUERY.removeEventListener === 'function') {
+        MOBILE_QUERY.removeEventListener('change', listener)
+      } else if (typeof MOBILE_QUERY.removeListener === 'function') {
+        MOBILE_QUERY.removeListener(listener)
+      }
+    }
+
     const shellButtons = app.querySelectorAll('.gbc-btn[data-key]')
     const releaseButton = (button) => {
       const key = button.dataset.key
@@ -332,27 +357,19 @@
         if (!key) return
         button.classList.add('is-pressed')
         dispatchGameKey('keydown', key)
-      });
+      })
       ['pointerup', 'pointerleave', 'pointercancel'].forEach((eventName) => {
         button.addEventListener(eventName, onRelease)
       })
     })
 
     const handleMobileQueryChange = () => syncCanvasHost()
-    if (typeof MOBILE_QUERY.addEventListener === 'function') {
-      MOBILE_QUERY.addEventListener('change', handleMobileQueryChange)
-    } else if (typeof MOBILE_QUERY.addListener === 'function') {
-      MOBILE_QUERY.addListener(handleMobileQueryChange)
-    }
+    addMobileQueryListener(handleMobileQueryChange)
     const observer = new MutationObserver(syncCanvasHost)
     observer.observe(app, { childList: true })
     window.addEventListener('beforeunload', () => {
       observer.disconnect()
-      if (typeof MOBILE_QUERY.removeEventListener === 'function') {
-        MOBILE_QUERY.removeEventListener('change', handleMobileQueryChange)
-      } else if (typeof MOBILE_QUERY.removeListener === 'function') {
-        MOBILE_QUERY.removeListener(handleMobileQueryChange)
-      }
+      removeMobileQueryListener(handleMobileQueryChange)
     })
     syncCanvasHost()
   </script>
