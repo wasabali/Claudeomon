@@ -29,8 +29,21 @@ const game = new Phaser.Game({
     mode:       Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [ BootScene, TitleScene, NewGameScene, WorldScene, SaveScene, ServiceCatalogScene, SkillManagementScene, EmblemScene, StackOverflowScene, BattleScene, PauseScene, CreditsScene ],
-  scene: [ BootScene, TitleScene, NewGameScene, WorldScene, SaveScene, ServiceCatalogScene, SkillManagementScene, EmblemScene, StackOverflowScene, ShopScene ],
+  scene: [
+    BootScene,
+    TitleScene,
+    NewGameScene,
+    WorldScene,
+    SaveScene,
+    ServiceCatalogScene,
+    SkillManagementScene,
+    EmblemScene,
+    StackOverflowScene,
+    BattleScene,
+    PauseScene,
+    CreditsScene,
+    ShopScene,
+  ],
 })
 
 window.addEventListener('beforeunload', e => {

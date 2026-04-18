@@ -387,7 +387,7 @@
         if (!key) return
         button.classList.add('is-pressed')
         dispatchGameKey('keydown', key)
-      })
+      });
       ['pointerup', 'pointerleave', 'pointercancel'].forEach((eventName) => {
         button.addEventListener(eventName, onRelease)
       })
