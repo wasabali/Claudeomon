@@ -12,6 +12,7 @@ import {
   canOpenCloudConsoleDoor,
   getEndgameModifier,
   isMvpRegion,
+  DENIAL_REASONS,
 } from '../src/engine/RegionEngine.js'
 
 // ---------------------------------------------------------------------------
@@ -30,6 +31,22 @@ function makeGameState(overrides = {}) {
 function makeStoryFlags(overrides = {}) {
   return { ...overrides }
 }
+
+// ===========================================================================
+// DENIAL_REASONS
+// ===========================================================================
+
+describe('DENIAL_REASONS', () => {
+  it('exports all three denial reason constants', () => {
+    expect(DENIAL_REASONS.ACT_GATE).toBe('act_gate')
+    expect(DENIAL_REASONS.DUNGEON_POINTS).toBe('dungeon_points')
+    expect(DENIAL_REASONS.RESOURCE_LOCKS).toBe('resource_locks')
+  })
+
+  it('is frozen', () => {
+    expect(Object.isFrozen(DENIAL_REASONS)).toBe(true)
+  })
+})
 
 // ===========================================================================
 // getConnections
@@ -65,7 +82,8 @@ describe('canTravel', () => {
     const result = canTravel('localhost_town', 'north', gs)
     expect(result).toEqual({
       allowed: false,
-      reason: null,
+      reasonId: null,
+      reasonParams: null,
       target: null,
       entry: null,
     })
@@ -76,7 +94,8 @@ describe('canTravel', () => {
     const result = canTravel('localhost_town', 'east', gs)
     expect(result).toEqual({
       allowed: true,
-      reason: null,
+      reasonId: null,
+      reasonParams: null,
       target: 'pipeline_pass',
       entry: 'west',
     })
@@ -88,9 +107,8 @@ describe('canTravel', () => {
     const gs = makeGameState({ act: 1 })
     const result = canTravel('pipeline_pass', 'east', gs)
     expect(result.allowed).toBe(false)
-    expect(result.reason).toBe(
-      'The path ahead is under construction. Come back in the next sprint.'
-    )
+    expect(result.reasonId).toBe(DENIAL_REASONS.ACT_GATE)
+    expect(result.reasonParams).toEqual({ requiredAct: 2 })
     expect(result.target).toBe('production_plains')
     expect(result.entry).toBe('west')
   })
@@ -99,7 +117,7 @@ describe('canTravel', () => {
     const gs = makeGameState({ act: 2 })
     const result = canTravel('pipeline_pass', 'east', gs)
     expect(result.allowed).toBe(true)
-    expect(result.reason).toBeNull()
+    expect(result.reasonId).toBeNull()
     expect(result.target).toBe('production_plains')
   })
 
@@ -115,9 +133,8 @@ describe('canTravel', () => {
     const gs = makeGameState({ flags: { jira_dungeon_story_points: 5 } })
     const result = canTravel('jira_dungeon_1', 'north', gs)
     expect(result.allowed).toBe(false)
-    expect(result.reason).toBe(
-      'You need 13 story points to open this door.'
-    )
+    expect(result.reasonId).toBe(DENIAL_REASONS.DUNGEON_POINTS)
+    expect(result.reasonParams).toEqual({ required: 13, current: 5 })
     expect(result.target).toBe('jira_dungeon_2')
   })
 
@@ -125,16 +142,15 @@ describe('canTravel', () => {
     const gs = makeGameState()
     const result = canTravel('jira_dungeon_1', 'north', gs)
     expect(result.allowed).toBe(false)
-    expect(result.reason).toBe(
-      'You need 13 story points to open this door.'
-    )
+    expect(result.reasonId).toBe(DENIAL_REASONS.DUNGEON_POINTS)
+    expect(result.reasonParams).toEqual({ required: 13, current: 0 })
   })
 
   it('allows travel when dungeon points meet requirement', () => {
     const gs = makeGameState({ flags: { jira_dungeon_story_points: 13 } })
     const result = canTravel('jira_dungeon_1', 'north', gs)
     expect(result.allowed).toBe(true)
-    expect(result.reason).toBeNull()
+    expect(result.reasonId).toBeNull()
   })
 
   it('allows travel when dungeon points exceed requirement', () => {
@@ -149,9 +165,8 @@ describe('canTravel', () => {
     const gs = makeGameState({ flags: { cloud_console_locks_opened: 1 } })
     const result = canTravel('cloud_console_1', 'north', gs)
     expect(result.allowed).toBe(false)
-    expect(result.reason).toBe(
-      'Unlock all 3 resource terminals to proceed.'
-    )
+    expect(result.reasonId).toBe(DENIAL_REASONS.RESOURCE_LOCKS)
+    expect(result.reasonParams).toEqual({ required: 3, current: 1 })
     expect(result.target).toBe('cloud_console_2')
   })
 
@@ -159,16 +174,15 @@ describe('canTravel', () => {
     const gs = makeGameState()
     const result = canTravel('cloud_console_1', 'north', gs)
     expect(result.allowed).toBe(false)
-    expect(result.reason).toBe(
-      'Unlock all 3 resource terminals to proceed.'
-    )
+    expect(result.reasonId).toBe(DENIAL_REASONS.RESOURCE_LOCKS)
+    expect(result.reasonParams).toEqual({ required: 3, current: 0 })
   })
 
   it('allows travel when resource locks meet requirement', () => {
     const gs = makeGameState({ flags: { cloud_console_locks_opened: 3 } })
     const result = canTravel('cloud_console_1', 'north', gs)
     expect(result.allowed).toBe(true)
-    expect(result.reason).toBeNull()
+    expect(result.reasonId).toBeNull()
   })
 
   it('allows travel when resource locks exceed requirement', () => {
@@ -184,7 +198,8 @@ describe('canTravel', () => {
     const result = canTravel('nonexistent', 'east', gs)
     expect(result).toEqual({
       allowed: false,
-      reason: null,
+      reasonId: null,
+      reasonParams: null,
       target: null,
       entry: null,
     })

@@ -5,7 +5,7 @@ import { CONFIG } from '../config.js'
 import { GameState, hasItem, markDirty } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
 import { getById as getRegionById } from '#data/regions.js'
-import { canTravel, getDiscoveredTerminals, canFastTravel } from '#engine/RegionEngine.js'
+import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS } from '#engine/RegionEngine.js'
 
 const TILESET_KEY = 'stub_tiles'
 const TILE_SIZE   = CONFIG.TILE_SIZE   // 48px
@@ -13,8 +13,8 @@ const TILE_SIZE   = CONFIG.TILE_SIZE   // 48px
 const WALK_SPEED  = TILE_SIZE * 2     // 96 px/sec
 const RUN_SPEED   = TILE_SIZE * 4     // 192 px/sec
 
-// 4-frame stepped fade for region transitions (no smooth tweening)
-const FADE_STEPS     = [1.0, 0.66, 0.33, 0.0]
+// 4-frame stepped fade for region transitions (overlay alpha per step)
+const FADE_STEPS     = [0.0, 0.34, 0.67, 1.0]
 const FADE_STEP_MS   = 50
 
 // Map edge detection margin (in pixels)
@@ -377,7 +377,8 @@ export class WorldScene extends BaseScene {
     if (!result.allowed) {
       this._player.setVelocity(0, 0)
       this._interacting = true
-      this.dialog.show([result.reason], () => { this._interacting = false })
+      const denialText = this._resolveDenialText(result.reasonId, result.reasonParams)
+      this.dialog.show([denialText], () => { this._interacting = false })
       // Push player back from edge so they don't re-trigger
       const pushback = TILE_SIZE
       if (direction === 'west')       this._player.x += pushback
@@ -390,23 +391,36 @@ export class WorldScene extends BaseScene {
     this._transitionToRegion(result.target, result.entry)
   }
 
-  // 4-frame stepped fade (100% → 66% → 33% → 0%), not smooth
+  // Resolve a denial reasonId from the engine into display text via the story
+  // registry. Falls back to a generic message if the story entry is missing.
+  _resolveDenialText(reasonId, reasonParams) {
+    const REASON_TO_STORY = {
+      [DENIAL_REASONS.ACT_GATE]:       'region_under_construction',
+      [DENIAL_REASONS.DUNGEON_POINTS]: 'dungeon_points_required',
+      [DENIAL_REASONS.RESOURCE_LOCKS]: 'resource_locks_required',
+    }
+    const storyId = REASON_TO_STORY[reasonId]
+    const entry   = storyId ? getStoryById(storyId) : null
+    return entry?.pages?.[0] ?? 'You cannot go this way.'
+  }
+
+  // 4-frame stepped fade (0% → 34% → 67% → 100% black), not smooth
   _transitionToRegion(targetRegionId, entryDirection) {
     this._transitioning = true
     this._player.setVelocity(0, 0)
 
     const overlay = this.add.rectangle(
-      this.cameras.main.scrollX + CONFIG.WIDTH / 2,
-      this.cameras.main.scrollY + CONFIG.HEIGHT / 2,
+      CONFIG.WIDTH / 2,
+      CONFIG.HEIGHT / 2,
       CONFIG.WIDTH, CONFIG.HEIGHT, 0x000000, 0,
     ).setDepth(100).setScrollFactor(0)
 
     let step = 0
-    const fade = this.time.addEvent({
+    this.time.addEvent({
       delay: FADE_STEP_MS,
       repeat: FADE_STEPS.length - 1,
       callback: () => {
-        overlay.setAlpha(1 - FADE_STEPS[step])
+        overlay.setAlpha(FADE_STEPS[step])
         step++
         if (step >= FADE_STEPS.length) {
           GameState.player.location = targetRegionId
@@ -435,20 +449,30 @@ export class WorldScene extends BaseScene {
       return region ? region.name : id
     })
 
-    // Show terminal names as dialog pages, then travel to selected
-    // For now, travel to the first discovered terminal (Menu component
-    // integration will replace this once the Menu UI is wired up)
+    // D-pad selectable fast travel menu via dialog pages.
+    // Each page shows one destination; player advances to confirm selection.
     const pages = [
-      '> AZURE TERMINAL — FAST TRAVEL',
-      ...menuItems.map((name, i) => `  ${i + 1}. ${name}`),
-      `Traveling to ${menuItems[0]}...`,
+      '> AZURE TERMINAL — FAST TRAVEL\n> Use Z to select a destination.',
+      ...menuItems.map((name) => `> ${name}`),
     ]
+
+    let pageIndex = 0
     this.dialog.show(pages, () => {
+      // Dialog completed — the last page shown is the selected destination.
+      // pageIndex tracks which destination page we're on (0-indexed after header).
+      const selectedIdx = Math.max(0, Math.min(pageIndex - 1, destinations.length - 1))
       this._interacting = false
-      if (canFastTravel(destinations[0], GameState.story.flags)) {
-        this._transitionToRegion(destinations[0], null)
+      if (canFastTravel(destinations[selectedIdx], GameState.story.flags)) {
+        this._transitionToRegion(destinations[selectedIdx], null)
       }
     })
+
+    // Track page advances to know which destination was selected
+    const origAdvance = this.dialog.advance.bind(this.dialog)
+    this.dialog.advance = () => {
+      pageIndex++
+      origAdvance()
+    }
   }
 
   _checkEncounterStep() {

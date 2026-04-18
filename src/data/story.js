@@ -261,7 +261,19 @@ const STORY = {
   region_under_construction: {
     id:    'region_under_construction',
     pages: [
-      "The path ahead is under construction.\nCome back in the next sprint.",
+      "The path ahead is under construction. Come back in the next sprint.",
+    ],
+  },
+  dungeon_points_required: {
+    id:    'dungeon_points_required',
+    pages: [
+      "You need 13 story points to open this door.",
+    ],
+  },
+  resource_locks_required: {
+    id:    'resource_locks_required',
+    pages: [
+      "Unlock all 3 resource terminals to proceed.",
     ],
   },
   fast_travel_prompt: {

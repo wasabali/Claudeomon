@@ -4,6 +4,17 @@
 import { getById, REGION_CONNECTIONS } from '#data/regions.js'
 
 // ===========================================================================
+// Denial reason IDs — returned by canTravel so the scene layer can resolve
+// display text via the story registry. Keeps messaging out of the engine.
+// ===========================================================================
+
+export const DENIAL_REASONS = Object.freeze({
+  ACT_GATE:           'act_gate',
+  DUNGEON_POINTS:     'dungeon_points',
+  RESOURCE_LOCKS:     'resource_locks',
+})
+
+// ===========================================================================
 // Region connections
 // ===========================================================================
 
@@ -20,15 +31,18 @@ export function getConnections(regionId) {
 // Travel gate checks
 // ===========================================================================
 
-/** @type {{ allowed: false, reason: null, target: null, entry: null }} */
-const NO_CONNECTION = Object.freeze({ allowed: false, reason: null, target: null, entry: null })
+/** @type {{ allowed: false, reasonId: null, reasonParams: null, target: null, entry: null }} */
+const NO_CONNECTION = Object.freeze({ allowed: false, reasonId: null, reasonParams: null, target: null, entry: null })
 
 /**
  * Checks whether the player can travel in a direction from a region.
+ * Returns a reasonId (not display text) when travel is blocked — the scene
+ * layer resolves the final message via the story registry.
+ *
  * @param {string} regionId — current region
  * @param {string} direction — cardinal direction (north/south/east/west)
  * @param {Object} gameState — full game state with story.act and story.flags
- * @returns {{ allowed: boolean, reason: string|null, target: string|null, entry: string|null }}
+ * @returns {{ allowed: boolean, reasonId: string|null, reasonParams: Object|null, target: string|null, entry: string|null }}
  */
 export function canTravel(regionId, direction, gameState) {
   const conns = REGION_CONNECTIONS[regionId]
@@ -43,7 +57,8 @@ export function canTravel(regionId, direction, gameState) {
     if (requires.act != null && gameState.story.act < requires.act) {
       return {
         allowed: false,
-        reason: 'The path ahead is under construction. Come back in the next sprint.',
+        reasonId: DENIAL_REASONS.ACT_GATE,
+        reasonParams: { requiredAct: requires.act },
         target,
         entry,
       }
@@ -54,7 +69,8 @@ export function canTravel(regionId, direction, gameState) {
       if (pts < requires.dungeonPoints) {
         return {
           allowed: false,
-          reason: `You need ${requires.dungeonPoints} story points to open this door.`,
+          reasonId: DENIAL_REASONS.DUNGEON_POINTS,
+          reasonParams: { required: requires.dungeonPoints, current: pts },
           target,
           entry,
         }
@@ -66,7 +82,8 @@ export function canTravel(regionId, direction, gameState) {
       if (locks < requires.resourceLocks) {
         return {
           allowed: false,
-          reason: `Unlock all ${requires.resourceLocks} resource terminals to proceed.`,
+          reasonId: DENIAL_REASONS.RESOURCE_LOCKS,
+          reasonParams: { required: requires.resourceLocks, current: locks },
           target,
           entry,
         }
@@ -74,7 +91,7 @@ export function canTravel(regionId, direction, gameState) {
     }
   }
 
-  return { allowed: true, reason: null, target, entry }
+  return { allowed: true, reasonId: null, reasonParams: null, target, entry }
 }
 
 // ===========================================================================
@@ -114,6 +131,13 @@ export function canFastTravel(toRegionId, storyFlags) {
 // Jira dungeon points
 // ===========================================================================
 
+// Derive the required story-point threshold from the connection graph so the
+// helper always matches the travel gate (single source of truth).
+const JIRA_DOOR_THRESHOLD = (() => {
+  const conn = REGION_CONNECTIONS.jira_dungeon_1?.north
+  return conn?.requires?.dungeonPoints ?? 13
+})()
+
 /**
  * Returns the current dungeon story points from storyFlags.
  * @param {Object} storyFlags
@@ -136,16 +160,23 @@ export function addDungeonPoints(storyFlags, amount) {
 
 /**
  * Returns true if the player has enough story points to open the Jira dungeon door.
+ * Threshold is derived from REGION_CONNECTIONS to stay consistent with canTravel.
  * @param {Object} storyFlags
  * @returns {boolean}
  */
 export function canOpenJiraDoor(storyFlags) {
-  return getDungeonPoints(storyFlags) >= 13
+  return getDungeonPoints(storyFlags) >= JIRA_DOOR_THRESHOLD
 }
 
 // ===========================================================================
 // Cloud console resource locks
 // ===========================================================================
+
+// Derive the required resource-lock threshold from the connection graph.
+const RESOURCE_LOCK_THRESHOLD = (() => {
+  const conn = REGION_CONNECTIONS.cloud_console_1?.north
+  return conn?.requires?.resourceLocks ?? 3
+})()
 
 /**
  * Returns the current resource lock count from storyFlags.
@@ -168,11 +199,12 @@ export function addResourceLock(storyFlags) {
 
 /**
  * Returns true if the player has opened enough resource locks.
+ * Threshold is derived from REGION_CONNECTIONS to stay consistent with canTravel.
  * @param {Object} storyFlags
  * @returns {boolean}
  */
 export function canOpenCloudConsoleDoor(storyFlags) {
-  return getResourceLocks(storyFlags) >= 3
+  return getResourceLocks(storyFlags) >= RESOURCE_LOCK_THRESHOLD
 }
 
 // ===========================================================================

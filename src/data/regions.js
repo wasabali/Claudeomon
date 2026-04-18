@@ -280,7 +280,12 @@ const REGIONS = {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// REGION CONNECTIONS — directed world graph
+// REGION CONNECTIONS — directed world graph (edge-scroll transitions only)
+//
+// Only regions connected by edge-scroll map boundaries are listed here.
+// Gyms and hidden regions are accessed via NPC doors / special triggers
+// inside their parent regions and do not use the edge-scroll system.
+//
 // Each key is a region ID; each value maps a cardinal direction to a target
 // region, the entry direction at that target, and optional gate requirements.
 //
