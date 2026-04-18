@@ -372,23 +372,33 @@ const STORY = {
     },
     followUpDialog: null,
     shameDialog: {
-      3: ["Some\u2026 concerning reports about your methods."],
+      3: ["Some… concerning reports about your methods."],
       7: ["THROTTLEMASTER reached out to you?\nI can tell."],
       10: ["You're going down Karsten's path.\nPlease stop."],
     },
     variants: [
       {
-        condition: { shameMin: 10 },
+        condition: { shameMin: 15 },
         pages: [
-          "I don't know what to say to you anymore.",
-          "You're going down Karsten's path.\nPlease stop.",
+          "You're going to join him, aren't you.",
         ],
       },
       {
-        condition: { shameMin: 5 },
+        condition: { shameMin: 10 },
         pages: [
-          "People are talking about your methods.",
-          "I'm worried about you.",
+          "You're going down the same path\nKarsten did. Please stop.",
+        ],
+      },
+      {
+        condition: { shameMin: 7 },
+        pages: [
+          "THROTTLEMASTER contacted you,\ndidn't he. I can tell.",
+        ],
+      },
+      {
+        condition: { shameMin: 3 },
+        pages: [
+          "I've heard some… concerning things\nabout your methods.",
         ],
       },
       {
@@ -749,49 +759,6 @@ const STORY = {
         pages: [
           "You migrated it properly.\nI've never seen anyone do that.",
           "Here. This is a rare item.\nYou've earned it.",
-        ],
-      },
-    ],
-  },
-  npc_kristoffer: {
-    id:    'npc_kristoffer',
-    pages: [
-      "Welcome to NorCloud! I'm Kristoffer,\nyour team lead.",
-      "Let me know if you need anything.",
-    ],
-    dialogByAct: {
-      1: ["Good to have you on the team.", "Head out and handle some incidents.\nI'll be here if you need me."],
-      2: ["Did you see the traffic numbers?", "This is getting out of hand.\nI'm… I'm sure it'll be fine."],
-      3: ["OldCorp is… complicated.", "Just don't touch anything they told\nus not to touch. Please."],
-      4: ["We need to talk.", "I should have told you sooner.\nAbout Karsten. About everything."],
-      5: ["..."],
-      postgame: ["I'm sorry. That's all I can say."],
-    },
-    locationByAct: KRISTOFFER_LOCATIONS,
-    variants: [
-      {
-        condition: { shameMin: 15 },
-        pages: [
-          "You're going to join him, aren't you.",
-        ],
-      },
-      {
-        condition: { shameMin: 10 },
-        pages: [
-          "You're going down the same path\nKarsten did. Please stop.",
-        ],
-      },
-      {
-        condition: { shameMin: 7 },
-        pages: [
-          "THROTTLEMASTER contacted you,\ndidn't he. I can tell.",
-        ],
-      },
-      {
-        condition: { shameMin: 3 },
-        pages: [
-          "I've heard some… concerning things\nabout your methods.",
-
         ],
       },
     ],

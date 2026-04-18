@@ -1857,6 +1857,17 @@ const TRAINERS = {
     discoveryFlag: 'yolo_yaml_found',
     clueText: 'Someone has been applying YAML directly from their clipboard. The cluster logs show chaos.',
     cursedSkill: 'kubectl_apply_yolo',
+    techniqueUsedDialog: [
+      "Ah. You applied YAML without reading it first.",
+      "It's fine. Probably. The cluster will sort it out.",
+      "Welcome to the YOLO school of Kubernetes.",
+    ],
+    techniqueUsedFlag: 'acknowledged_yolo_yaml',
+    shameDialog: {
+      3: ["Someone said you've been applying YAML blindly."],
+      7: ["Your cluster state is… undefined. Like your YAML."],
+      10: ["You've surpassed me. That's terrifying."],
+    },
   },
 
   sudo_su_saga: {
@@ -1886,6 +1897,17 @@ const TRAINERS = {
     discoveryFlag: 'sudo_su_saga_found',
     clueText: 'Deep in the Shell Cavern, someone has been running as root. All the file owners say root.',
     cursedSkill: 'sudo_su',
+    techniqueUsedDialog: [
+      "You escalated privileges. I respect that.",
+      "With great sudo comes great root access.",
+      "There is no sudo. There is only su.",
+    ],
+    techniqueUsedFlag: 'acknowledged_sudo_su_saga',
+    shameDialog: {
+      3: ["Word is you've been running things as root."],
+      7: ["chmod 777? Really? Really??"],
+      10: ["You've become the admin. The only admin."],
+    },
   },
 
   env_var_erik: {
@@ -1915,6 +1937,17 @@ const TRAINERS = {
     discoveryFlag: 'env_var_erik_found',
     clueText: 'Someone has been committing .env files to public repos. The secret scanner found 47 matches.',
     cursedSkill: 'git_add_env',
+    techniqueUsedDialog: [
+      "git add . You committed a secret. You know you did.",
+      "It's fine. Who reads public repos anyway?",
+      "Rotate the credentials later. Maybe.",
+    ],
+    techniqueUsedFlag: 'acknowledged_env_var_erik',
+    shameDialog: {
+      3: ["I heard you hardcoded a value you shouldn't have."],
+      7: ["The secret scanner has your name in the report."],
+      10: ["You've out-committed me. GitHub is angry at both of us."],
+    },
   },
 
   cron_catastrophe: {
@@ -1944,6 +1977,17 @@ const TRAINERS = {
     discoveryFlag: 'cron_kristina_found',
     clueText: 'The server graveyard crontab is running something every minute. No one set it up.',
     cursedSkill: 'cron_star_star',
+    techniqueUsedDialog: [
+      "*/1 * * * * — you've scheduled something cursed.",
+      "The cron doesn't judge. The cron just runs.",
+      "Set it and forget it. Forever.",
+    ],
+    techniqueUsedFlag: 'acknowledged_cron_catastrophe',
+    shameDialog: {
+      3: ["Something is running on a schedule that shouldn't be."],
+      7: ["The cron logs are full of your entries."],
+      10: ["You've automated the chaos. I'm almost proud."],
+    },
   },
 
   legacy_leif: {
@@ -1973,6 +2017,17 @@ const TRAINERS = {
     discoveryFlag: 'legacy_leif_found',
     clueText: 'West-EU-2 Wilhelm mentions someone who never migrated. Someone named Leif. "He is the code."',
     cursedSkill: 'legacy_summon',
+    techniqueUsedDialog: [
+      "You summoned the legacy. It will never fully leave.",
+      "This code was written before Azure existed. It remembers.",
+      "Don't touch anything. It's load-bearing.",
+    ],
+    techniqueUsedFlag: 'acknowledged_legacy_leif',
+    shameDialog: {
+      3: ["Leif says you've been in the legacy systems."],
+      7: ["You smell like deprecated dependencies."],
+      10: ["You are the legacy now. You always were."],
+    },
   },
 
   // =========================================================================

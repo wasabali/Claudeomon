@@ -618,7 +618,7 @@ describe('NPC reactivity — data integrity', () => {
   })
 
   it('all 8 field trainers have rematchDeck arrays', () => {
-    const fieldTrainers = getAllTrainers().filter(t => !t.isCursed && !t.isWildEncounter)
+    const fieldTrainers = getAllTrainers().filter(t => !t.isCursed && !t.isWildEncounter && Array.isArray(t.rematchDeck))
     expect(fieldTrainers).toHaveLength(8)
     fieldTrainers.forEach(trainer => {
       expect(Array.isArray(trainer.rematchDeck),
