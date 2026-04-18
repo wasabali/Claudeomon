@@ -18,7 +18,7 @@ import { Menu } from '#ui/Menu.js'
 import { DialogBox } from '#ui/DialogBox.js'
 
 // ---------------------------------------------------------------------------
-// Layout constants — positions derived from CONFIG.WIDTH/HEIGHT
+// Layout constants — positions derived from CONFIG.WIDTH/HEIGHT (1920×1080)
 // ---------------------------------------------------------------------------
 const ENEMY_HP_BAR_X   = Math.floor(CONFIG.WIDTH / 2)
 const ENEMY_HP_BAR_Y   = 10
