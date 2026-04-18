@@ -18,6 +18,7 @@ Emblems can accumulate "grime" — visual dirt and wear from your adventures. Yo
 | ☸️ **Helm Emblem** | Kubernetes | Kubernetes skills +5% effectiveness | CrashLoopBackOff soot |
 | ☁️ **FinOps Emblem** | Cloud | Budget restored +10% after each battle | Billing alert residue |
 | 📊 **SRE Emblem** | Observability | Max HP +10 | 3am coffee ring stains |
+| ⚡ **Serverless Emblem** | Serverless | Serverless skills +5% effectiveness | Cold start frost residue |
 
 ---
 
