@@ -3,7 +3,7 @@
 // Scenes delegate all logic here; they only render the returned events.
 
 import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
-import { REPUTATION_MIN, REPUTATION_MAX, DOMAIN_MATCHUPS } from '../config.js'
+import { REPUTATION_MIN, REPUTATION_MAX, DOMAIN_MATCHUPS, GYM_MECHANICS } from '../config.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -61,7 +61,8 @@ const CONFUSION_DURATION    = 1
 export function createBattleState(mode, player, opponent, options = {}) {
   const initialTelegraph = options.telegraphedMove ?? opponent.deck?.[0] ?? null
   const gymMechanic       = options.gymMechanic ?? null
-  const gymMechanicConfig = options.gymMechanicConfig ?? null
+  // Fall back to GYM_MECHANICS defaults so callers don't have to re-specify config
+  const gymMechanicConfig = options.gymMechanicConfig ?? (gymMechanic ? (GYM_MECHANICS[gymMechanic] ?? null) : null)
 
   // sla_timer gym mechanic overrides the default SLA timer
   let slaTimer = null
@@ -209,6 +210,14 @@ export function skillPhase(state, skill) {
   if (state.gymMechanic === 'flaky_pipeline' && state.gymMechanicConfig) {
     if (Math.random() < state.gymMechanicConfig.failChance) {
       events.push({ type: 'skill_failed', target: 'player', skillId: skill.id, reason: 'flaky_pipeline' })
+      return events
+    }
+  }
+
+  // --- Gym mechanic: rbac_deny — IAM randomly blocks skill execution ---
+  if (state.gymMechanic === 'rbac_deny' && state.gymMechanicConfig) {
+    if (Math.random() < state.gymMechanicConfig.denyChance) {
+      events.push({ type: 'skill_blocked', target: 'player', skillId: skill.id, reason: 'rbac_deny' })
       return events
     }
   }
@@ -571,7 +580,10 @@ export function turnEndPhase(state) {
     const cfg = state.gymMechanicConfig
     state.opponent.hp = Math.min(state.opponent.maxHp, state.opponent.hp + cfg.hpPerTurn)
     if (state.gymSpiralTurns >= cfg.spiralThreshold) {
-      events.push({ type: 'budget_drain', target: 'player', value: 30 })
+      const drainAmount = cfg.attackPerTurn ?? 0
+      const appliedDrain = Math.min(state.player.budget, drainAmount)
+      state.player.budget -= appliedDrain
+      events.push({ type: 'budget_drain', target: 'player', value: appliedDrain })
     }
   }
 
@@ -584,8 +596,12 @@ export function turnEndPhase(state) {
     const shouldSwitch = state.gymExecutiveMode
       || ((state.turn - 1) % cfg.switchInterval === 0)
     if (shouldSwitch) {
+      const previousDomain = state.opponent.domain
       state.gymDomainIndex  = (state.gymDomainIndex + 1) % state.gymDomainOrder.length
       state.opponent.domain = state.gymDomainOrder[state.gymDomainIndex]
+      if (state.opponent.domain !== previousDomain) {
+        events.push({ type: 'domain_reveal', target: 'opponent', value: state.opponent.domain })
+      }
     }
   }
 

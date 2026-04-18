@@ -1174,6 +1174,14 @@ describe('gym mechanics', () => {
       expect(state.gymMechanicConfig).toBeNull()
     })
 
+    it('falls back to GYM_MECHANICS defaults when gymMechanicConfig is omitted', () => {
+      const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), makeOpponent(), {
+        gymMechanic: 'rbac_deny',
+      })
+      expect(state.gymMechanic).toBe('rbac_deny')
+      expect(state.gymMechanicConfig).toEqual(expect.objectContaining({ denyChance: 0.25 }))
+    })
+
     it('stores rbac_deny config for scene access without additional state fields', () => {
       const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), makeOpponent(), {
         gymMechanic:       'rbac_deny',
@@ -1445,7 +1453,45 @@ describe('gym mechanics', () => {
     })
   })
 
-  // ── cost_spiral ───────────────────────────────────────────────────────────
+  // ── rbac_deny ─────────────────────────────────────────────────────────────
+  describe('rbac_deny', () => {
+    it('blocks skill and emits skill_blocked with rbac_deny reason when roll < denyChance', () => {
+      const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), makeOpponent(), {
+        gymMechanic:       'rbac_deny',
+        gymMechanicConfig: { denyChance: 1.0 }, // always deny
+      })
+      const skill  = makeDamageSkill()
+      const events = skillPhase(state, skill)
+      expect(events).toContainEqual(expect.objectContaining({ type: 'skill_blocked', target: 'player', reason: 'rbac_deny' }))
+    })
+
+    it('does not block skill when roll >= denyChance', () => {
+      const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), makeOpponent(), {
+        gymMechanic:       'rbac_deny',
+        gymMechanicConfig: { denyChance: 0.0 }, // never deny
+      })
+      const skill  = makeDamageSkill()
+      const events = skillPhase(state, skill)
+      expect(events).not.toContainEqual(expect.objectContaining({ type: 'skill_blocked', reason: 'rbac_deny' }))
+      expect(events).toContainEqual(expect.objectContaining({ type: 'skill_used' }))
+    })
+
+    it('denied skill does not deal damage to opponent', () => {
+      const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), makeOpponent({ hp: 60 }), {
+        gymMechanic:       'rbac_deny',
+        gymMechanicConfig: { denyChance: 1.0 },
+      })
+      const hpBefore = state.opponent.hp
+      skillPhase(state, makeDamageSkill())
+      expect(state.opponent.hp).toBe(hpBefore)
+    })
+
+    it('does not activate without gymMechanic set', () => {
+      const state  = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), makeOpponent())
+      const events = skillPhase(state, makeDamageSkill())
+      expect(events).not.toContainEqual(expect.objectContaining({ reason: 'rbac_deny' }))
+    })
+  })
   describe('cost_spiral', () => {
     function makeSpiralState(threshold = 3, hpPerTurn = 5) {
       return createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), makeOpponent({ hp: 30, maxHp: 60 }), {
@@ -1483,7 +1529,24 @@ describe('gym mechanics', () => {
       turnEndPhase(state) // turn 1 — gymSpiralTurns = 1, no drain
       turnEndPhase(state) // turn 2 — gymSpiralTurns = 2, drain fires
       const events = turnEndPhase(state) // turn 3 — still draining
-      expect(events).toContainEqual(expect.objectContaining({ type: 'budget_drain', target: 'player', value: 30 }))
+      // attackPerTurn = 3 in makeSpiralState config
+      expect(events).toContainEqual(expect.objectContaining({ type: 'budget_drain', target: 'player', value: 3 }))
+    })
+
+    it('decrements player budget by attackPerTurn on drain', () => {
+      const state = makeSpiralState(1, 5) // threshold = 1, attackPerTurn = 3
+      const budgetBefore = state.player.budget
+      turnEndPhase(state) // gymSpiralTurns = 1, threshold reached
+      expect(state.player.budget).toBe(budgetBefore - 3)
+    })
+
+    it('does not drain player budget below 0', () => {
+      const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ budget: 2 }), makeOpponent({ hp: 30, maxHp: 60 }), {
+        gymMechanic:       'cost_spiral',
+        gymMechanicConfig: { hpPerTurn: 5, attackPerTurn: 10, spiralThreshold: 1 },
+      })
+      turnEndPhase(state)
+      expect(state.player.budget).toBe(0)
     })
 
     it('does not emit budget_drain before reaching spiralThreshold', () => {
@@ -1547,6 +1610,21 @@ describe('gym mechanics', () => {
       const initialDomain = state.opponent.domain
       turnEndPhase(state) // turn 1→2
       expect(state.opponent.domain).toBe(initialDomain)
+    })
+
+    it('emits domain_reveal event when domain switches', () => {
+      const state = makeDomainState(2)
+      turnEndPhase(state) // turn 1→2 — no switch
+      const events = turnEndPhase(state) // turn 2→3 — switch fires
+      expect(events).toContainEqual(expect.objectContaining({ type: 'domain_reveal', target: 'opponent' }))
+      const domainEvt = events.find(e => e.type === 'domain_reveal')
+      expect(domainEvt.value).toBe(state.opponent.domain)
+    })
+
+    it('does not emit domain_reveal when no switch occurs', () => {
+      const state = makeDomainState(3) // switch every 3 turns
+      const events = turnEndPhase(state) // turn 1→2 — no switch
+      expect(events).not.toContainEqual(expect.objectContaining({ type: 'domain_reveal', target: 'opponent' }))
     })
   })
 })

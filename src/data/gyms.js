@@ -95,7 +95,7 @@ const GYMS = {
   cto_office: {
     id: 'cto_office',
     name: 'The CTO Office',
-    domain: null,
+    domain: 'cloud',
     leader: 'the_cto',
     subLeaders: ['deploy_diana', 'incident_ivan'],
     apprenticeCount: 3,

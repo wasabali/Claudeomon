@@ -235,7 +235,7 @@ const TRAINERS = {
   the_cto: {
     id: 'the_cto',
     name: 'The CTO',
-    domain: null,
+    domain: 'cloud',
     hp: 150,
     maxHp: 150,
     difficulty: 7,
