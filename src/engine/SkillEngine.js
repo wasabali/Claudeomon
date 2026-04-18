@@ -210,7 +210,7 @@ export function reduceShame(player, amount) {
 // ---------------------------------------------------------------------------
 // resolveShopPrice
 // Returns the adjusted shop price based on the player's reputation.
-// Rep ≥ 80: −15% discount. Rep 60–79: base price. Rep < 40: +15% surcharge.
+// Rep ≥ 80: −15% discount. Rep 40–79: base price. Rep < 40: +15% surcharge.
 // ---------------------------------------------------------------------------
 export function resolveShopPrice(basePrice, reputation) {
   if (reputation >= SHOP_PRICING.DISCOUNT_THRESHOLD)  return Math.round(basePrice * SHOP_PRICING.DISCOUNT_MULTIPLIER)

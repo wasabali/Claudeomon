@@ -86,7 +86,7 @@ export const SHAME_THRESHOLDS = [
 ]
 
 // Shop reputation pricing — multiplied against base price.
-// Rep ≥ 80: discount; 60–79: base; < 40: surcharge; < 20: refused.
+// Rep ≥ 80: discount; 40–79: base; < 40: surcharge; < 20: refused.
 export const SHOP_PRICING = {
   DISCOUNT_THRESHOLD:  80,
   DISCOUNT_MULTIPLIER: 0.85,

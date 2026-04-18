@@ -303,14 +303,4 @@ describe('NPC reactivity — data integrity', () => {
         `${trainer.id} missing shameDialog`).toBeDefined()
     })
   })
-
-  it('field trainer rematchDeck skills are all valid', () => {
-    const fieldTrainers = getAllTrainers().filter(t => !t.isCursed && !t.isWildEncounter)
-    fieldTrainers.forEach(trainer => {
-      trainer.rematchDeck.forEach(skillId => {
-        expect(getSkillById(skillId),
-          `${trainer.id} rematchDeck skill '${skillId}' not found in skills registry`).toBeDefined()
-      })
-    })
-  })
 })

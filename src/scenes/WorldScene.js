@@ -5,6 +5,7 @@ import { CONFIG } from '../config.js'
 import { GameState, hasItem, markDirty } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
 import { getById as getTrainerById } from '#data/trainers.js'
+import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
 
 const MAP_KEY     = 'localhost_town'
 const TILESET_KEY = 'stub_tiles'
@@ -262,8 +263,9 @@ export class WorldScene extends BaseScene {
       const storyId = GameState.story.flags.found_hosting_terminal
         ? 'npc_west_eu_2_wilhelm_post_terminal'
         : 'npc_west_eu_2_wilhelm'
-      const entry = getStoryById(storyId)
-      const lines = entry?.pages ?? ['???']
+      const entry   = getStoryById(storyId)
+      const trainer = getTrainerById(npcName)
+      const lines   = this._resolveNpcDialog(entry, trainer)
       this.dialog.show(lines, () => { this._interacting = false })
       return
     }
@@ -274,72 +276,21 @@ export class WorldScene extends BaseScene {
     this.dialog.show(lines, () => { this._interacting = false })
   }
 
-  // 5-level dialog resolution priority chain:
-  // 1. techniqueUsedFlag  → cursed trainer first-use reaction (once, flag-gated)
-  // 2. followUpDialog     → post-quest completion
-  // 3. shameDialog        → shame threshold reaction
-  // 4. dialogByAct        → act-based dialog
-  // 5. variants / pages   → existing fallback (reputation/shame variants → default)
+  // Delegates to the pure StoryEngine resolver, then applies any state mutation
+  // the engine flagged (technique acknowledgment flag). All decision logic lives
+  // in StoryEngine — this method is rendering-layer glue only.
   _resolveNpcDialog(entry, trainer) {
-    // 1. Cursed trainer technique acknowledgment — fires once per trainer.
-    if (trainer?.techniqueUsedFlag && !GameState.story.flags[trainer.techniqueUsedFlag]) {
-      const techniqueId = trainer.teachSkillId ?? trainer.cursedSkill
-      if (techniqueId && (GameState.stats.skillUseCounts?.[techniqueId] ?? 0) > 0) {
-        GameState.story.flags[trainer.techniqueUsedFlag] = true
-        markDirty()
-        if (Array.isArray(trainer.techniqueUsedDialog)) return trainer.techniqueUsedDialog
-      }
+    const { pages, setFlag } = resolveNpcDialog(entry, trainer, GameState)
+    if (setFlag) {
+      GameState.story.flags[setFlag] = true
+      markDirty()
     }
-
-    // 2. Follow-up dialog for completed side-quest NPCs.
-    if (Array.isArray(entry?.followUpDialog) && entry.questId) {
-      if (GameState.story.completedQuests.includes(entry.questId)) return entry.followUpDialog
-    }
-
-    // 3. Shame dialog — check thresholds in descending order.
-    const shameSource = entry?.shameDialog ?? trainer?.shameDialog
-    if (shameSource) {
-      const shame = GameState.player.shamePoints
-      for (const threshold of [10, 7, 3]) {
-        if (shame >= threshold && Array.isArray(shameSource[threshold])) return shameSource[threshold]
-      }
-    }
-
-    // 4. Act-based dialog.
-    const act = GameState.story.act
-    const actKey = GameState.story.flags.game_complete ? 'finale' : act
-    const actDialog = entry?.dialogByAct?.[actKey]
-    if (Array.isArray(actDialog)) return actDialog
-
-    // 5. Existing fallback — variants (reputation/shame) → default pages.
-    return this._resolveNpcPages(entry)
+    return pages
   }
 
-  // Evaluates NPC dialogue variants top-to-bottom against the current player
-  // reputation and shamePoints, returning the first matching variant's pages.
-  // Falls back to entry.pages when no variant matches.
+  // Delegates variant/page selection to the pure StoryEngine helper.
   _resolveNpcPages(entry) {
-    const { reputation, shamePoints } = GameState.player
-    if (Array.isArray(entry?.variants)) {
-      for (const variant of entry.variants) {
-        const c = variant.condition ?? {}
-        if (c.reputationMin !== undefined && reputation < c.reputationMin) continue
-        if (c.reputationMax !== undefined && reputation > c.reputationMax) continue
-        if (c.shameMin      !== undefined && shamePoints < c.shameMin)     continue
-        if (c.shameMax      !== undefined && shamePoints > c.shameMax)     continue
-        if (Array.isArray(variant.pool)) {
-          // NPC one-liner pools are intentionally non-deterministic — different
-          // line each visit. No seeded RNG needed; this is presentation-layer only.
-          if (variant.pool.length > 0) {
-            const idx = Math.floor(Math.random() * variant.pool.length)
-            return variant.pool[idx]
-          }
-          return variant.pages ?? entry?.pages ?? ['???']
-        }
-        return variant.pages
-      }
-    }
-    return entry?.pages ?? ['???']
+    return resolveNpcPages(entry, GameState.player)
   }
 
   _checkEncounterStep() {
