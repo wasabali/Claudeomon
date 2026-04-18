@@ -16,6 +16,7 @@ export const DEFAULT_STATS = {
   clockManipulated:      false,
   devNullUseCount:       0,
   skillUseCounts:        {},
+  stepsTaken:            0,
 }
 
 // The single mutable state object for the entire game.

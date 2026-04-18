@@ -2,10 +2,12 @@ import Phaser from 'phaser'
 import { BaseScene } from '#scenes/BaseScene.js'
 import { DialogBox } from '#ui/DialogBox.js'
 import { CONFIG, MOVEMENT, ENCOUNTER_BASE_CHANCE, ENCOUNTER_RUN_MULTIPLIER, ENCOUNTER_COOLDOWN_STEPS } from '../config.js'
-import { GameState, hasItem, markDirty } from '#state/GameState.js'
+import { GameState, hasItem, addItem, markDirty, grantXpOnce } from '#state/GameState.js'
 import { Overrides } from '../overrides.js'
 import { getById as getStoryById } from '#data/story.js'
 import { getById as getItemById } from '#data/items.js'
+import { getById as getQuestById } from '#data/quests.js'
+import { resolveChoice, isQuestCompleted, getCompletedDialog } from '#engine/QuestEngine.js'
 import { seedRandom } from '#utils/random.js'
 
 const MAP_KEY     = 'localhost_town'
@@ -77,7 +79,7 @@ export class WorldScene extends BaseScene {
       g.fillStyle(0x50c8ff)
       g.fillRect(8, 8, 32, 8)
       g.fillRect(8, 20, 20, 4)
-      g.generateTexture('azure_terminal', 48, 48)
+      g.generateTexture('azure_terminal', TILE_SIZE, TILE_SIZE)
       g.destroy()
     }
   }
@@ -86,7 +88,6 @@ export class WorldScene extends BaseScene {
     this.dialog       = new DialogBox(this)
     this._interacting = false
     this._facing      = 'down'
-    this._stepCount   = 0
     this._stepsSinceEncounter = 0
 
     // Tile-step state machine
@@ -114,7 +115,6 @@ export class WorldScene extends BaseScene {
     this._setupInput()
     this._setupCamera()
 
-    GameState.player.location = 'localhost_town'
     this.playBgm('town')
   }
 
@@ -220,6 +220,7 @@ export class WorldScene extends BaseScene {
     this._tileY        = targetTileY
     GameState.player.tileX = targetTileX
     GameState.player.tileY = targetTileY
+    markDirty()
   }
 
   _updateMovement(delta) {
@@ -253,6 +254,7 @@ export class WorldScene extends BaseScene {
       if (t >= 1) {
         this._moveState = 'idle'
         this._onStepComplete()
+        if (this._transitioning) return
         if (this._bufferedDir) {
           const dir = this._bufferedDir
           this._bufferedDir = null
@@ -301,13 +303,21 @@ export class WorldScene extends BaseScene {
   }
 
   _onStepComplete() {
-    this._stepCount++
+    GameState.stats.stepsTaken++
     this._stepsSinceEncounter++
     this._checkEncounterStep()
     this._checkTransitionTile()
   }
 
   _handleDialogInput() {
+    if (this.dialog.isChoiceMode) {
+      if (Phaser.Input.Keyboard.JustDown(this._cursors.up))   this.dialog.moveChoice(-1)
+      if (Phaser.Input.Keyboard.JustDown(this._cursors.down)) this.dialog.moveChoice(1)
+      const confirm = Phaser.Input.Keyboard.JustDown(this._keyZ)
+        || Phaser.Input.Keyboard.JustDown(this._keyEnter)
+      if (confirm) this.dialog.confirmChoice()
+      return
+    }
     const confirm = Phaser.Input.Keyboard.JustDown(this._keyZ)
       || Phaser.Input.Keyboard.JustDown(this._keyEnter)
     if (confirm)                                         this.dialog.advance()
@@ -333,6 +343,11 @@ export class WorldScene extends BaseScene {
 
   _interactWithNpc(npcName) {
     this._interacting = true
+
+    if (npcName === 'margaret') {
+      this._interactMargaret()
+      return
+    }
 
     if (npcName === 'azure_terminal') {
       const pages = getStoryById('npc_azure_terminal')?.pages ?? ['> AZURE TERMINAL v2.0']
@@ -418,7 +433,7 @@ export class WorldScene extends BaseScene {
 
     const runMultiplier = this._isRunning ? ENCOUNTER_RUN_MULTIPLIER : 1.0
     const chance = ENCOUNTER_BASE_CHANCE * runMultiplier
-    const rng = seedRandom(this._stepCount * 0x9e3779b9)
+    const rng = seedRandom(GameState.stats.stepsTaken * 0x9e3779b9)
     if (rng() < chance) {
       this._stepsSinceEncounter = 0
       // Wired to EncounterEngine.selectFromPool() — triggers battle scene transition
@@ -487,6 +502,36 @@ export class WorldScene extends BaseScene {
           this.scene.restart({ fromTransition: true })
         }
       },
+    })
+  }
+
+  _interactMargaret() {
+    if (isQuestCompleted('margaret_website', GameState.story.completedQuests)) {
+      const lines = getCompletedDialog('margaret_website')
+      this.dialog.show(lines, () => { this._interacting = false })
+      return
+    }
+
+    const quest   = getQuestById('margaret_website')
+    const stage   = quest.stages[0]
+    const choices = stage.choices.map(c => c.text)
+
+    this.dialog.show(stage.dialog, () => {
+      this.dialog.showChoices('What do you suggest?', choices, (idx) => {
+        const result = resolveChoice('margaret_website', idx)
+        if (result.correct) {
+          grantXpOnce('margaret_website_xp', result.xp)
+          for (const reward of result.items) {
+            addItem(reward.tab, reward.id, reward.qty)
+          }
+          GameState.story.completedQuests.push('margaret_website')
+          markDirty()
+        } else {
+          GameState.player.hp = Math.max(1, GameState.player.hp - result.hpLoss)
+          markDirty()
+        }
+        this.dialog.show(result.dialog, () => { this._interacting = false })
+      })
     })
   }
 

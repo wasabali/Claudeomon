@@ -120,6 +120,7 @@ describe('initNewGame', () => {
       clockManipulated: false,
       devNullUseCount: 0,
       skillUseCounts: {},
+      stepsTaken: 0,
     })
   })
 })
