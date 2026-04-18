@@ -12,9 +12,9 @@ import {
 // checkActTransition
 // ---------------------------------------------------------------------------
 describe('checkActTransition', () => {
-  it('returns prologue_to_1 when all trigger flags are true and act is 0', () => {
+  it('returns prologue_to_1 when all trigger flags are true and act is 1', () => {
     const flags = { starter_deck_chosen: true, first_battle_won: true }
-    const result = checkActTransition(0, flags)
+    const result = checkActTransition(1, flags)
     expect(result).not.toBeNull()
     expect(result.id).toBe('prologue_to_1')
     expect(result.newAct).toBe(1)
@@ -23,18 +23,18 @@ describe('checkActTransition', () => {
 
   it('returns null when not all trigger flags are true', () => {
     const flags = { starter_deck_chosen: true, first_battle_won: false }
-    expect(checkActTransition(0, flags)).toBeNull()
+    expect(checkActTransition(1, flags)).toBeNull()
   })
 
   it('returns null when a trigger flag is missing entirely', () => {
     const flags = { starter_deck_chosen: true }
-    expect(checkActTransition(0, flags)).toBeNull()
+    expect(checkActTransition(1, flags)).toBeNull()
   })
 
   it('returns null when fromAct does not match currentAct', () => {
-    // prologue_to_1 requires fromAct 0, but we pass act 1
+    // prologue_to_1 requires fromAct 1, but we pass act 0
     const flags = { starter_deck_chosen: true, first_battle_won: true }
-    expect(checkActTransition(1, flags)).toBeNull()
+    expect(checkActTransition(0, flags)).toBeNull()
   })
 
   it('returns act1_to_2 when act is 1 and all flags are met', () => {
@@ -77,25 +77,25 @@ describe('checkActTransition', () => {
   })
 
   it('returns null with empty flags object', () => {
-    expect(checkActTransition(0, {})).toBeNull()
+    expect(checkActTransition(1, {})).toBeNull()
   })
 
   it('does not match a different acts transition even if flags overlap', () => {
-    // act1_to_2 flags set, but currentAct is 0 — should not match
-    const flags = { margaret_quest_complete: true, gym_1_beaten: true }
-    expect(checkActTransition(0, flags)).toBeNull()
+    // act2_to_3 flags set, but currentAct is 1 — should not match
+    const flags = { gym_2_beaten: true, gym_3_beaten: true, staging_deployed: true }
+    expect(checkActTransition(1, flags)).toBeNull()
   })
 
   it('returns the transition object with narration array', () => {
     const flags = { starter_deck_chosen: true, first_battle_won: true }
-    const result = checkActTransition(0, flags)
+    const result = checkActTransition(1, flags)
     expect(Array.isArray(result.narration)).toBe(true)
     expect(result.narration.length).toBeGreaterThan(0)
   })
 
   it('transition includes titleSub field', () => {
     const flags = { starter_deck_chosen: true, first_battle_won: true }
-    const result = checkActTransition(0, flags)
+    const result = checkActTransition(1, flags)
     expect(result.titleSub).toBe('"Push to Production"')
   })
 })

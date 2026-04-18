@@ -10,9 +10,9 @@
 // `pages`. When matched, a random entry from the pool is selected. This is
 // used for shame-3 one-liners so players see different reactions each time.
 //
-// dialogByAct: optional per-act dialog overrides. When the player's current
-// act matches a key, those pages replace the default `pages` (before variants
-// are evaluated). Keys are act numbers (1–5) or 'finale'/'postgame'.
+// dialogByAct: optional per-act dialog override data keyed by act number
+// (1–5) or 'finale'/'postgame'. This file defines the schema only; current
+// dialogue resolution uses `variants` and default `pages`.
 
 // ---------------------------------------------------------------------------
 // ACT_TRANSITIONS — flag-triggered act advancement definitions
@@ -21,7 +21,7 @@ const ACT_TRANSITIONS = {
   prologue_to_1: {
     id:           'prologue_to_1',
     triggerFlags: ['starter_deck_chosen', 'first_battle_won'],
-    fromAct:      0,
+    fromAct:      1,
     newAct:       1,
     titleCard:    'ACT 1',
     titleSub:     '"Push to Production"',
@@ -95,9 +95,9 @@ const VIRAL_WAVE = {
   triggerFlag:  'viral_wave_complete',
   location:     'production_plains',
   encounters: [
-    { id: 'high_cpu_incident',        description: 'High CPU incident' },
-    { id: 'disk_full_incident',       description: 'Disk Full incident' },
-    { id: 'cascading_failure_incident', description: 'Cascading failure incident' },
+    { id: 'high_cpu',    description: 'High CPU incident' },
+    { id: 'disk_full',   description: 'Disk Full incident' },
+    { id: '503_error',   description: 'Cascading failure incident' },
   ],
   rewardFlag:   'viral_wave_complete',
   rewardNpc:    'sla_signe',
@@ -141,7 +141,7 @@ const NPC_APPEARANCES = {
   sla_signe:         { appearsInAct: 2, location: 'production_plains' },
   dagny_the_dba:     { appearsInAct: 3, location: 'oldcorp_basement' },
   compliance_carina: { appearsInAct: 4, location: 'azure_town' },
-  pedersen_finale:   { appearsInAct: 5, location: 'cloud_console' },
+  pedersen_finale:   { appearsInAct: 5, location: 'the_cloud_console' },
 }
 
 // ---------------------------------------------------------------------------
@@ -443,7 +443,7 @@ const STORY = {
       "Everything I taught you leads to this.",
     ],
     appearsInAct: 5,
-    location: 'cloud_console',
+    location: 'the_cloud_console',
   },
 }
 
