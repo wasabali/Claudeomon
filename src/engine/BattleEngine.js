@@ -3,9 +3,7 @@
 // Scenes delegate all logic here; they only render the returned events.
 
 import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime, shouldTeachOnAnyWin } from './SkillEngine.js'
-import { REPUTATION_MIN, REPUTATION_MAX, EXECUTIVE_MODE_THRESHOLD, EXECUTIVE_MODE_MULTIPLIER, DOMAIN_MATCHUPS, GYM_MECHANICS, GYM_SHAME_THRESHOLDS, SHADOW_ENGINEER } from '../config.js'
-import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
-import { REPUTATION_MIN, REPUTATION_MAX, ECONOMY } from '../config.js'
+import { REPUTATION_MIN, REPUTATION_MAX, EXECUTIVE_MODE_THRESHOLD, EXECUTIVE_MODE_MULTIPLIER, DOMAIN_MATCHUPS, GYM_MECHANICS, GYM_SHAME_THRESHOLDS, SHADOW_ENGINEER, ECONOMY } from '../config.js'
 import { calculateBattleReward, calculateBudgetRestore, calculateCostSpiralSurcharge, calculateCostSpiralHpGain, calculateDebtPenalty } from './EconomyEngine.js'
 
 // ---------------------------------------------------------------------------

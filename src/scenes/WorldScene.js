@@ -259,14 +259,12 @@ export class WorldScene extends BaseScene {
   _setupPlayer() {
     const tileX  = GameState.player.tileX
     const tileY  = GameState.player.tileY
-    const startX = tileX * TILE_SIZE + TILE_SIZE / 2
-    const startY = tileY * TILE_SIZE + TILE_SIZE / 2
     const mapW = this._map.widthInPixels
     const mapH = this._map.heightInPixels
 
-    // Default spawn: center of map
-    let startX = 5 * TILE_SIZE + TILE_SIZE / 2
-    let startY = 10 * TILE_SIZE + TILE_SIZE / 2
+    // Default spawn: use saved position or center of map
+    let startX = tileX != null ? tileX * TILE_SIZE + TILE_SIZE / 2 : 5 * TILE_SIZE + TILE_SIZE / 2
+    let startY = tileY != null ? tileY * TILE_SIZE + TILE_SIZE / 2 : 10 * TILE_SIZE + TILE_SIZE / 2
 
     // Entry direction: place player at the edge they entered from
     if (this._entryDir === 'west')       { startX = TILE_SIZE + TILE_SIZE / 2; startY = mapH / 2 }
@@ -277,8 +275,8 @@ export class WorldScene extends BaseScene {
     this._player = this.add.sprite(startX, startY, 'player')
     this._player.setDepth(5)
 
-    this._tileX = tileX
-    this._tileY = tileY
+    this._tileX = tileX ?? 5
+    this._tileY = tileY ?? 10
     this.physics.add.collider(this._player, this._collisionLayer)
     this.physics.world.setBounds(0, 0, mapW, mapH)
   }
