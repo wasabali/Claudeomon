@@ -16,6 +16,7 @@ export const DEFAULT_STATS = {
   clockManipulated:      false,
   devNullUseCount:       0,
   skillUseCounts:        {},
+  stepsTaken:            0,
   gymReplays:            {},
 }
 
@@ -37,6 +38,8 @@ export const GameState = {
     technicalDebt: 0,     // 0–10 stacks; each stack reduces maxHp by 2
     title:         'Intern',
     location:      'localhost_town',
+    tileX:         5,
+    tileY:         10,
     activeSlots:   4,
     playtime:      0,     // seconds elapsed
   },
@@ -165,6 +168,8 @@ export function initNewGame(name, mascot) {
     technicalDebt: 0,
     title:         'Intern',
     location:      'localhost_town',
+    tileX:         5,
+    tileY:         10,
     activeSlots:   4,
     playtime:      0,
   }
