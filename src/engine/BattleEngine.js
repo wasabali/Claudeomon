@@ -2,8 +2,9 @@
 // Owns the battle state and phase queue. Returns BattleEvent[] arrays.
 // Scenes delegate all logic here; they only render the returned events.
 
-import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime } from './SkillEngine.js'
-import { REPUTATION_MIN, REPUTATION_MAX, EXECUTIVE_MODE_THRESHOLD, EXECUTIVE_MODE_MULTIPLIER, DOMAIN_MATCHUPS, GYM_MECHANICS } from '../config.js'
+import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime, shouldTeachOnAnyWin } from './SkillEngine.js'
+import { REPUTATION_MIN, REPUTATION_MAX, EXECUTIVE_MODE_THRESHOLD, EXECUTIVE_MODE_MULTIPLIER, DOMAIN_MATCHUPS, GYM_MECHANICS, GYM_SHAME_THRESHOLDS, SHADOW_ENGINEER, ECONOMY } from '../config.js'
+import { calculateBattleReward, calculateBudgetRestore, calculateCostSpiralSurcharge, calculateCostSpiralHpGain, calculateDebtPenalty } from './EconomyEngine.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -12,6 +13,7 @@ import { REPUTATION_MIN, REPUTATION_MAX, EXECUTIVE_MODE_THRESHOLD, EXECUTIVE_MOD
 export const BATTLE_MODES = {
   INCIDENT: 'INCIDENT', // Wild encounter — SLA timer, hidden domain
   ENGINEER: 'ENGINEER', // Trainer battle — enemy telegraphs next move
+  SCRIPTED: 'SCRIPTED', // Scripted encounter — cannot be won, auto-escape on SLA expiry
 }
 
 // Maximum stacks of technical debt a player can accumulate
@@ -30,6 +32,7 @@ export const INCIDENT_ATTACKS = {
   SKILL_BLOCK:     'skill_block',     // Apply skill_block status for 1 turn
   CONFUSION:       'confusion',       // Apply confusion status for 1 turn
   ESCALATION:      'escalation',      // Add 1 technical debt stack
+  THROTTLE:        'throttle',        // Apply throttle status — reduces player damage output
 }
 
 // Default SLA timer when none specified
@@ -52,6 +55,14 @@ const REPUTATION_LEAK_VALUE = 3
 const UPTIME_DRAIN_EXTRA    = 1
 const SKILL_BLOCK_DURATION  = 1
 const CONFUSION_DURATION    = 1
+const THROTTLE_DURATION     = 2
+
+// Calculates boss outcome based on shame thresholds (arrest / choice / recruitment)
+function bossOutcome(shame, thresholds) {
+  if (shame >= (thresholds.recruitment ?? Infinity)) return 'recruitment'
+  if (shame >= (thresholds.arrest ?? Infinity))      return 'choice'
+  return 'arrest'
+}
 
 // ---------------------------------------------------------------------------
 // createBattleState
@@ -66,7 +77,7 @@ export function createBattleState(mode, player, opponent, options = {}) {
 
   // sla_timer gym mechanic overrides the default SLA timer
   let slaTimer = null
-  if (mode === BATTLE_MODES.INCIDENT) {
+  if (mode === BATTLE_MODES.INCIDENT || mode === BATTLE_MODES.SCRIPTED) {
     if (gymMechanic === 'sla_timer' && gymMechanicConfig?.slaTimer != null) {
       slaTimer = gymMechanicConfig.slaTimer
     } else {
@@ -91,11 +102,30 @@ export function createBattleState(mode, player, opponent, options = {}) {
     opponentCopy.domain = domains[0]
   }
 
+  // Shame 5+: trainers mirror cursed skills — add 1 random cursed skill to their deck
+  const shamePts = player.shamePoints ?? 0
+  if (mode === BATTLE_MODES.ENGINEER && shamePts >= 5 && !opponent.isWildEncounter) {
+    const cursedPool = options.cursedSkillPool ?? []
+    if (cursedPool.length > 0) {
+      const randomValue = (options.randomFn ?? Math.random)()
+      const pickIndex = Math.min(cursedPool.length - 1, Math.floor(randomValue * cursedPool.length))
+      const pick = cursedPool[pickIndex]
+      opponentCopy.deck = [...(opponentCopy.deck ?? []), pick]
+      opponentCopy.cursedMirrorSkill = pick
+    }
+  }
+
   const state = {
     mode,
     turn:             1,
     player:           { ...player, technicalDebt: player.technicalDebt ?? 0 },
     opponent:         opponentCopy,
+    player:           {
+                        ...player,
+                        technicalDebt: player.technicalDebt ?? 0,
+                        maxBudget: Math.max(0, player.maxBudget ?? player.budget ?? 500),
+                      },
+    opponent:         { ...opponent },
     playerStatuses:   [],
     opponentStatuses: [],
     domainRevealed:   mode === BATTLE_MODES.ENGINEER,
@@ -142,6 +172,36 @@ export function createBattleState(mode, player, opponent, options = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// getPreBattleEvents
+// Returns dialog events to show before the first turn of an ENGINEER battle.
+// Gym leaders use shame-aware dialog: high-shame players get wary lines.
+// Non-gym trainers use introDialog.
+// ---------------------------------------------------------------------------
+export function getPreBattleEvents(state) {
+  const events = []
+  const opponent = state.opponent
+
+  if (state.mode !== BATTLE_MODES.ENGINEER) return events
+
+  const shame = state.player.shamePoints ?? 0
+  const isGymLeader = opponent.role === 'gym_leader'
+
+  if (isGymLeader && shame >= GYM_SHAME_THRESHOLDS.wary && opponent.preBattleDialog_highShame) {
+    for (const line of opponent.preBattleDialog_highShame) {
+      events.push({ type: 'dialog', target: 'player', text: line })
+    }
+  } else if (isGymLeader && opponent.preBattleDialog) {
+    for (const line of opponent.preBattleDialog) {
+      events.push({ type: 'dialog', target: 'player', text: line })
+    }
+  } else if (opponent.introDialog) {
+    events.push({ type: 'dialog', target: 'player', text: opponent.introDialog })
+  }
+
+  return events
+}
+
+// ---------------------------------------------------------------------------
 // Phase 1: StatusTickPhase
 // Decrements duration of all active player and opponent statuses.
 // Permanent statuses (duration === -1) are never decremented.
@@ -183,11 +243,51 @@ export function statusTickPhase(state) {
 export function skillPhase(state, skill) {
   const events = []
 
+  // ☕ Sip Coffee — Shadow Engineer special action (shame 10+)
+  // Skips the turn, restores COFFEE_SIP_HEAL HP. No skill resolution.
+  if (skill.id === 'coffee_sip') {
+    const shamePts = state.player.shamePoints ?? 0
+    if (shamePts < SHADOW_ENGINEER.SHAME_THRESHOLD) {
+      events.push({ type: 'skill_blocked', target: 'player', skillId: 'coffee_sip', reason: 'shadow_engineer_required' })
+      return events
+    }
+    const healAmount = SHADOW_ENGINEER.COFFEE_SIP_HEAL
+    const healed = Math.min(healAmount, state.player.maxHp - state.player.hp)
+    state.player.hp = Math.min(state.player.maxHp, state.player.hp + healAmount)
+    events.push({ type: 'skill_used', target: 'player', skillId: 'coffee_sip' })
+    events.push({ type: 'heal', target: 'player', value: healed })
+    events.push({ type: 'dialog', target: 'player', text: '☕ *sips coffee*' })
+    return events
+  }
+
   // Enforce shameRequired gate — skills that require a minimum shame level
   // (e.g. kubectl_delete_production) cannot be used below that threshold.
   if (skill.shameRequired !== undefined && state.player.shamePoints < skill.shameRequired) {
     events.push({ type: 'skill_blocked', target: 'player', skillId: skill.id, reason: 'shame_required' })
     return events
+  }
+
+  // Shadow Engineer budget modifications (shame 10+)
+  const isShadow = (state.player.shamePoints ?? 0) >= SHADOW_ENGINEER.SHAME_THRESHOLD
+  if (isShadow && skill.budgetCost !== undefined && skill.budgetCost > 0) {
+    let budgetMod = 0
+    if (skill.tier === 'optimal') {
+      budgetMod = SHADOW_ENGINEER.OPTIMAL_BUDGET_SURCHARGE
+    } else if (skill.tier === 'cursed' || skill.tier === 'nuclear') {
+      budgetMod = -SHADOW_ENGINEER.CURSED_BUDGET_DISCOUNT
+    }
+    if (budgetMod !== 0) {
+      const adjustedCost = Math.max(0, skill.budgetCost + budgetMod)
+      const budgetDelta = adjustedCost - skill.budgetCost
+      if (budgetDelta > 0) {
+        state.player.budget = Math.max(0, (state.player.budget ?? 0) - budgetDelta)
+        events.push({ type: 'budget_drain', target: 'player', value: budgetDelta, source: 'shadow_fatigue' })
+      } else if (budgetDelta < 0) {
+        const refundAmount = Math.abs(budgetDelta)
+        state.player.budget = (state.player.budget ?? 0) + refundAmount
+        events.push({ type: 'budget_refund', target: 'player', value: refundAmount, source: 'shadow_fatigue' })
+      }
+    }
   }
 
   // --- Gym mechanic: legacy_only — block skills from blocked acts ---
@@ -231,20 +331,26 @@ export function skillPhase(state, skill) {
   const effect = skill.effect
 
   if (effect.type === 'damage') {
-    // --- immuneDomains: encounter-level domain immunity ---
+    // Check immuneDomains — opponent takes 0 damage from immune domains
     const immuneDomains = state.opponent.immuneDomains ?? []
-    const isImmune = immuneDomains.includes(skill.domain)
-    // --- Gym mechanic: legacy_only — blocked domains deal 0 damage ---
-    const gymBlocked = state.gymMechanic === 'legacy_only' && state.gymMechanicConfig
-        && state.gymMechanicConfig.blockedDomains && state.gymMechanicConfig.blockedDomains.includes(skill.domain)
-    let dmg
-    if (isImmune || gymBlocked) {
-      dmg = 0
+    if (immuneDomains.includes(skill.domain)) {
+      events.push({ type: 'damage', target: 'opponent', value: 0, immune: true, isImmune: true, domain: skill.domain })
     } else {
-      dmg = calculateDamage(skill, state.opponent.domain)
+      // --- Gym mechanic: legacy_only — blocked domains deal 0 damage ---
+      let dmg
+      if (state.gymMechanic === 'legacy_only' && state.gymMechanicConfig
+          && state.gymMechanicConfig.blockedDomains && state.gymMechanicConfig.blockedDomains.includes(skill.domain)) {
+        dmg = 0
+      } else {
+        dmg = calculateDamage(skill, state.opponent.domain)
+      }
+      // Throttle status halves outgoing damage while preserving legitimate zero-damage results
+      if (state.playerStatuses.find(s => s.name === 'throttle')) {
+        dmg = Math.max(0, Math.floor(dmg * 0.5))
+      }
+      state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
+      events.push({ type: 'damage', target: 'opponent', value: dmg, isImmune: false, domain: skill.domain })
     }
-    state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
-    events.push({ type: 'damage', target: 'opponent', value: dmg, isImmune, domain: skill.domain })
   }
 
   if (effect.type === 'instant_win_vs_legacy') {
@@ -272,8 +378,13 @@ export function skillPhase(state, skill) {
   }
 
   if (effect.type === 'heal') {
-    const healed = Math.min(effect.value, state.player.maxHp - state.player.hp)
-    state.player.hp = Math.min(state.player.maxHp, state.player.hp + effect.value)
+    let healValue = effect.value
+    // Shadow Engineer: healing effects restore 20% less
+    if (isShadow) {
+      healValue = Math.floor(healValue * (1 - SHADOW_ENGINEER.HEAL_REDUCTION))
+    }
+    const healed = Math.min(healValue, state.player.maxHp - state.player.hp)
+    state.player.hp = Math.min(state.player.maxHp, state.player.hp + healValue)
     events.push({ type: 'heal', target: 'player', value: healed })
   }
 
@@ -292,8 +403,9 @@ export function skillPhase(state, skill) {
 
   // Apply grime to all earned emblems when shame is gained and emit an event
   // so BattleScene can sync GameState.emblems at battle end.
+  // Pass current shame to applyShameGrime for doubled rate at Shadow Engineer.
   if (shameDelta > 0) {
-    const nextEmblems = applyShameGrime(state.emblems ?? {}, shameDelta)
+    const nextEmblems = applyShameGrime(state.emblems ?? {}, shameDelta, state.player.shamePoints)
     state.emblems = nextEmblems
     events.push({ type: 'emblems_updated', target: 'player', value: nextEmblems, shameDelta })
   }
@@ -338,21 +450,24 @@ export function slaTickPhase(state) {
 
   if (state.slaTimer === 0) {
     state.slaBreach = true
-    // Use gym-specific breach penalties if sla_timer mechanic is active
-    const hpPenalty  = (state.gymMechanic === 'sla_timer' && state.gymMechanicConfig?.breachHpPenalty != null)
-      ? state.gymMechanicConfig.breachHpPenalty
-      : SLA_BREACH_HP_PENALTY
-    const repPenalty = (state.gymMechanic === 'sla_timer' && state.gymMechanicConfig?.breachRepPenalty != null)
-      ? state.gymMechanicConfig.breachRepPenalty
-      : SLA_BREACH_REP_PENALTY
-    state.player.hp         = Math.max(0, state.player.hp - hpPenalty)
-    state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - repPenalty)
-    events.push({
-      type:            'sla_breach',
-      target:          'player',
-      value:           hpPenalty,
-      reputationLoss:  repPenalty,
-    })
+    // SCRIPTED encounters: no penalty on breach — escape handled in turnEndPhase
+    if (state.mode !== BATTLE_MODES.SCRIPTED) {
+      // Use gym-specific breach penalties if sla_timer mechanic is active
+      const hpPenalty  = (state.gymMechanic === 'sla_timer' && state.gymMechanicConfig?.breachHpPenalty != null)
+        ? state.gymMechanicConfig.breachHpPenalty
+        : SLA_BREACH_HP_PENALTY
+      const repPenalty = (state.gymMechanic === 'sla_timer' && state.gymMechanicConfig?.breachRepPenalty != null)
+        ? state.gymMechanicConfig.breachRepPenalty
+        : SLA_BREACH_REP_PENALTY
+      state.player.hp         = Math.max(0, state.player.hp - hpPenalty)
+      state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - repPenalty)
+      events.push({
+        type:            'sla_breach',
+        target:          'player',
+        value:           hpPenalty,
+        reputationLoss:  repPenalty,
+      })
+    }
   }
 
   return events
@@ -366,10 +481,15 @@ export function slaTickPhase(state) {
 //   then advances to the next move in their deck and telegraphs it.
 // ---------------------------------------------------------------------------
 export function enemyPhase(state) {
-  if (state.mode === BATTLE_MODES.INCIDENT) return []
+  if (state.mode === BATTLE_MODES.INCIDENT || state.mode === BATTLE_MODES.SCRIPTED) return []
   if (state.opponent.hp <= 0) return []
 
   const events = []
+
+  // Shame 5+: announce cursed mirror on first enemy turn
+  if (state.turn === 1 && state.opponent.cursedMirrorSkill) {
+    events.push({ type: 'dialog', target: 'opponent', text: 'You taught me something. Watch this.' })
+  }
 
   // --- Gym mechanic: flaky_pipeline — random skill failure for enemy ---
   if (state.gymMechanic === 'flaky_pipeline' && state.gymMechanicConfig) {
@@ -420,7 +540,7 @@ export function enemyPhase(state) {
 // Only runs in INCIDENT mode.
 // ---------------------------------------------------------------------------
 export function incidentAttackPhase(state) {
-  if (state.mode !== BATTLE_MODES.INCIDENT) return []
+  if (state.mode !== BATTLE_MODES.INCIDENT && state.mode !== BATTLE_MODES.SCRIPTED) return []
   if (state.turn === 1) return [] // Phase 1 — no attack, just symptom display
 
   const attacks = state.opponent.attacks ?? []
@@ -436,14 +556,17 @@ export function incidentAttackPhase(state) {
         events.push({ type: 'sla_tick', value: state.slaTimer, source: 'uptime_drain' })
         if (state.slaTimer === 0 && !state.slaBreach) {
           state.slaBreach = true
-          state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
-          state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
-          events.push({
-            type:           'sla_breach',
-            target:         'player',
-            value:          SLA_BREACH_HP_PENALTY,
-            reputationLoss: SLA_BREACH_REP_PENALTY,
-          })
+          // SCRIPTED encounters: no penalty on breach — escape handled in turnEndPhase
+          if (state.mode !== BATTLE_MODES.SCRIPTED) {
+            state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
+            state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
+            events.push({
+              type:           'sla_breach',
+              target:         'player',
+              value:          SLA_BREACH_HP_PENALTY,
+              reputationLoss: SLA_BREACH_REP_PENALTY,
+            })
+          }
         }
       }
       break
@@ -498,6 +621,46 @@ export function incidentAttackPhase(state) {
       }
       break
     }
+
+    case INCIDENT_ATTACKS.THROTTLE: {
+      const alreadyThrottled = state.playerStatuses.find(s => s.name === 'throttle')
+      if (!alreadyThrottled) {
+        state.playerStatuses.push({ name: 'throttle', duration: THROTTLE_DURATION })
+      }
+      events.push({ type: 'status_apply', target: 'player', statusName: 'throttle', duration: THROTTLE_DURATION })
+      break
+    }
+  }
+
+  return events
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4c: CostSpiralPhase
+// Only runs when opponent has bossFlag === 'cost_spiral_active' (Azure Bill).
+// Each turn: boss gains +20 HP, and a budget drain of (5×N) is applied.
+// Boss deals budget damage (not HP). At 0 budget player can still use 0-cost skills.
+// ---------------------------------------------------------------------------
+export function costSpiralPhase(state) {
+  if (state.opponent.bossFlag !== 'cost_spiral_active') return []
+
+  const events = []
+  const turn = state.turn
+
+  // Boss gains HP each turn
+  const hpGain = calculateCostSpiralHpGain()
+  const currentHp = state.opponent.hp
+  const currentMaxHp = state.opponent.maxHp ?? currentHp
+  state.opponent.hp = currentHp + hpGain
+  state.opponent.maxHp = currentMaxHp + hpGain
+  events.push({ type: 'heal', target: 'opponent', value: hpGain, text: `Cost spiral: boss gains ${hpGain} HP` })
+
+  // Budget drain escalation — boss deals budget damage
+  const surcharge = calculateCostSpiralSurcharge(turn)
+  const currentBudget = state.player.budget ?? 0
+  state.player.budget = currentBudget - surcharge
+  if (surcharge > 0) {
+    events.push({ type: 'budget_drain', target: 'player', value: surcharge, text: `Cost spiral: -${surcharge} budget` })
   }
 
   return events
@@ -572,6 +735,12 @@ export function turnEndPhase(state) {
     const tier = state.winningTier ?? 'standard'
     const xp   = calculateXP(state.opponent.difficulty ?? 1, tier)
 
+    // Boss encounters: shame-based outcome branching on win
+    if (state.opponent.type === 'boss' && state.opponent.shameThresholds) {
+      const shame = state.player.shamePoints ?? 0
+      events.push({ type: 'boss_outcome', target: 'player', value: bossOutcome(shame, state.opponent.shameThresholds), shame })
+    }
+
     // ENGINEER mode only: apply reputation bonus for optimal win
     if (state.mode === BATTLE_MODES.ENGINEER && tier === 'optimal') {
       const newRep = Math.min(REPUTATION_MAX, state.player.reputation + ENGINEER_WIN_REP_OPTIMAL)
@@ -584,12 +753,61 @@ export function turnEndPhase(state) {
 
     events.push({ type: 'xp_gain', target: 'player', value: xp })
 
+    // Drop item on win (e.g. Legacy Monolith drops oldcorp_keycard)
+    if (state.opponent.dropItem) {
+      events.push({ type: 'item_drop', target: 'player', value: state.opponent.dropItem })
+    }
+
+    // ENGINEER mode: tier-based teacher reactions with shame awareness
+    // At high reputation (80+), trainers teach on ANY win tier (not just optimal).
+    // Budget rewards: flat credit based on mode/tier + percentage restore
+    const mode = state.mode === BATTLE_MODES.INCIDENT ? 'incident' : 'trainer'
+    const rewardKey = state.mode === BATTLE_MODES.INCIDENT ? tier : 'win'
+    const rewardCredits = calculateBattleReward(mode, rewardKey)
+    const restore       = calculateBudgetRestore(true, state.player.maxBudget ?? state.player.budget ?? 500)
+    const budgetGain    = rewardCredits + restore
+    if (budgetGain > 0) {
+      state.player.budget = (state.player.budget ?? 0) + budgetGain
+      events.push({ type: 'budget_gain', target: 'player', value: budgetGain })
+    }
+
+    // Optimal win bonus (flat +25 on top of tier reward)
+    if (tier === 'optimal') {
+      state.player.budget = (state.player.budget ?? 0) + ECONOMY.OPTIMAL_WIN_BONUS
+      events.push({ type: 'budget_gain', target: 'player', value: ECONOMY.OPTIMAL_WIN_BONUS, text: 'Optimal solution bonus!' })
+    }
+
+    // Debt penalty at battle end: accumulate technical_debt stacks when in budget debt
+    const winDebtPenalty = calculateDebtPenalty(state.player.budget ?? 0)
+    if (winDebtPenalty > 0) {
+      state.player.technicalDebt = Math.min(MAX_TECHNICAL_DEBT, (state.player.technicalDebt ?? 0) + winDebtPenalty)
+      events.push({ type: 'technical_debt', target: 'player', value: state.player.technicalDebt })
+    }
+
     // ENGINEER mode: tier-based teacher reactions
     if (state.mode === BATTLE_MODES.ENGINEER) {
-      if (tier === 'optimal' && state.opponent.teachSkillId) {
+      const shame = state.player.shamePoints ?? 0
+      const isGymLeader = state.opponent.role === 'gym_leader'
+      const teachAny = shouldTeachOnAnyWin(state.player.reputation)
+
+      // Gym leader shame-aware dialog: use high-shame post-defeat dialog when shame ≥ teachRefusal
+      if (isGymLeader && shame >= GYM_SHAME_THRESHOLDS.teachRefusal && state.opponent.postDefeatDialog_highShame) {
+        for (const line of state.opponent.postDefeatDialog_highShame) {
+          events.push({ type: 'dialog', target: 'player', text: line })
+        }
+      } else if (isGymLeader && state.opponent.postDefeatDialog) {
+        for (const line of state.opponent.postDefeatDialog) {
+          events.push({ type: 'dialog', target: 'player', text: line })
+        }
+      }
+
+      // Teach refusal: gym leaders refuse to teach at shame ≥ teachRefusal
+      if (isGymLeader && shame >= GYM_SHAME_THRESHOLDS.teachRefusal) {
+        events.push({ type: 'teach_refused', target: 'player', reason: 'shame' })
+      } else if ((tier === 'optimal' || teachAny) && state.opponent.teachSkillId) {
         events.push({ type: 'teach_skill', target: 'player', value: state.opponent.teachSkillId })
       } else if (tier === 'standard') {
-        if (state.opponent.winDialog) {
+        if (!isGymLeader && state.opponent.winDialog) {
           events.push({ type: 'dialog', target: 'player', text: state.opponent.winDialog })
         } else if (state.opponent.teachSkillId) {
           events.push({ type: 'teach_hint', target: 'player', value: state.opponent.teachSkillId })
@@ -599,6 +817,11 @@ export function turnEndPhase(state) {
       } else if (tier === 'nuclear') {
         events.push({ type: 'warn_npcs', target: 'player' })
       }
+
+      // Announce cursed mirror if the opponent has one
+      if (state.opponent.cursedMirrorSkill) {
+        events.push({ type: 'dialog', target: 'opponent', text: "Don't look at me like that. You started it." })
+      }
     }
 
     events.push({ type: 'battle_end', target: 'player', value: 'win' })
@@ -606,11 +829,43 @@ export function turnEndPhase(state) {
   }
 
   if (playerDefeated || slaLoss) {
+    // SCRIPTED encounters: SLA breach triggers escape, not a loss
+    if (slaLoss && state.mode === BATTLE_MODES.SCRIPTED) {
+      events.push({
+        type:   'scripted_escape',
+        target: 'opponent',
+        value:  state.opponent.escapeLine ?? 'The enemy disconnected.',
+      })
+      events.push({ type: 'battle_end', target: 'player', value: 'escape' })
+      return events
+    }
+
+    // Boss encounters: shame-based outcome branching
+    if (state.opponent.type === 'boss' && state.opponent.shameThresholds) {
+      const shame = state.player.shamePoints ?? 0
+      events.push({ type: 'boss_outcome', target: 'player', value: bossOutcome(shame, state.opponent.shameThresholds), shame })
+    }
+
     // Reputation penalty for losing an engineer battle (not SLA — that is penalised in slaTickPhase)
     if (playerDefeated && state.mode === BATTLE_MODES.ENGINEER) {
       state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - ENGINEER_LOSE_REP_PENALTY)
       events.push({ type: 'reputation', target: 'player', value: -ENGINEER_LOSE_REP_PENALTY, shameDelta: 0 })
     }
+
+    // Budget restore on loss (smaller percentage)
+    const loseRestore = calculateBudgetRestore(false, state.player.maxBudget ?? state.player.budget ?? 500)
+    if (loseRestore > 0) {
+      state.player.budget = (state.player.budget ?? 0) + loseRestore
+      events.push({ type: 'budget_gain', target: 'player', value: loseRestore })
+    }
+
+    // Debt penalty: accumulate technical_debt stacks when budget is negative
+    const debtPenalty = calculateDebtPenalty(state.player.budget ?? 0)
+    if (debtPenalty > 0) {
+      state.player.technicalDebt = Math.min(MAX_TECHNICAL_DEBT, (state.player.technicalDebt ?? 0) + debtPenalty)
+      events.push({ type: 'technical_debt', target: 'player', value: state.player.technicalDebt })
+    }
+
     events.push({ type: 'battle_end', target: 'player', value: 'lose' })
     return events
   }
@@ -655,7 +910,7 @@ export function turnEndPhase(state) {
 // ---------------------------------------------------------------------------
 // resolveTurn
 // Runs all phases in order and returns the concatenated BattleEvent[].
-// Phase order: StatusTick → Skill → SlaTick → IncidentAttack → Enemy → TurnEnd
+// Phase order: StatusTick → Skill → SlaTick → IncidentAttack → CostSpiral → Enemy → TurnEnd
 // ---------------------------------------------------------------------------
 export function resolveTurn(state, skill) {
   const events = [
@@ -663,6 +918,7 @@ export function resolveTurn(state, skill) {
     ...skillPhase(state, skill),
     ...slaTickPhase(state),
     ...incidentAttackPhase(state),
+    ...costSpiralPhase(state),
     ...enemyPhase(state),
     ...turnEndPhase(state),
   ]

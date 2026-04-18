@@ -10,6 +10,13 @@ import {
   applyShameGrime,
   reduceShame,
   computeShameFlags,
+  getShopMod,
+  shouldTeachOnAnyWin,
+  isShadowEngineer,
+  getGrimeRate,
+  resolveShopPrice,
+  canUseShop,
+  getRematchXp,
 } from '../src/engine/SkillEngine.js'
 
 // ---------------------------------------------------------------------------
@@ -319,10 +326,15 @@ describe('applyShameAndReputation', () => {
 // ---------------------------------------------------------------------------
 
 describe('getReputationStatus', () => {
-  it('returns Distinguished Engineer for 80–100', () => {
-    expect(getReputationStatus(80)).toBe('Distinguished Engineer')
+  it('returns Distinguished Engineer for 90–100', () => {
+    expect(getReputationStatus(90)).toBe('Distinguished Engineer')
     expect(getReputationStatus(100)).toBe('Distinguished Engineer')
     expect(getReputationStatus(99)).toBe('Distinguished Engineer')
+  })
+
+  it('returns Senior Engineer for 80–89', () => {
+    expect(getReputationStatus(80)).toBe('Senior Engineer')
+    expect(getReputationStatus(89)).toBe('Senior Engineer')
   })
 
   it('returns Competent Engineer for 60–79', () => {
@@ -544,5 +556,203 @@ describe('applyShameGrime (null safety)', () => {
 
   it('returns empty object when emblems is undefined', () => {
     expect(applyShameGrime(undefined, 1)).toEqual({})
+  })
+})
+
+// ---------------------------------------------------------------------------
+// applyShameGrime — Shadow Engineer doubled rate
+// ---------------------------------------------------------------------------
+
+describe('applyShameGrime (Shadow Engineer doubled rate)', () => {
+  it('uses standard rate (0.05) when currentShame is below 10', () => {
+    const emblems = { tux: { earned: true, shine: 0, grime: 0 } }
+    const result = applyShameGrime(emblems, 1, 9)
+    expect(result.tux.grime).toBeCloseTo(0.05)
+  })
+
+  it('uses doubled rate (0.10) when currentShame is 10 or more', () => {
+    const emblems = { tux: { earned: true, shine: 0, grime: 0 } }
+    const result = applyShameGrime(emblems, 1, 10)
+    expect(result.tux.grime).toBeCloseTo(0.10)
+  })
+
+  it('uses doubled rate for shame well above 10', () => {
+    const emblems = { tux: { earned: true, shine: 0, grime: 0 } }
+    const result = applyShameGrime(emblems, 2, 15)
+    expect(result.tux.grime).toBeCloseTo(0.20)
+  })
+
+  it('defaults to standard rate when currentShame is omitted', () => {
+    const emblems = { tux: { earned: true, shine: 0, grime: 0 } }
+    const result = applyShameGrime(emblems, 1)
+    expect(result.tux.grime).toBeCloseTo(0.05)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// resolveShopPrice
+// ---------------------------------------------------------------------------
+
+describe('resolveShopPrice', () => {
+  it('applies −15% discount when reputation ≥ 80', () => {
+    expect(resolveShopPrice(100, 80)).toBe(85)
+    expect(resolveShopPrice(100, 90)).toBe(85)
+    expect(resolveShopPrice(200, 100)).toBe(170)
+  })
+
+  it('returns base price when reputation is 60–79', () => {
+    expect(resolveShopPrice(100, 60)).toBe(100)
+    expect(resolveShopPrice(100, 79)).toBe(100)
+  })
+
+  it('returns base price when reputation is 40–59', () => {
+    expect(resolveShopPrice(100, 40)).toBe(100)
+    expect(resolveShopPrice(100, 50)).toBe(100)
+  })
+
+  it('applies +15% surcharge when reputation < 40', () => {
+    expect(resolveShopPrice(100, 39)).toBe(115)
+    expect(resolveShopPrice(100, 0)).toBe(115)
+    expect(resolveShopPrice(200, 10)).toBe(230)
+  })
+
+  it('rounds to nearest integer', () => {
+    expect(resolveShopPrice(33, 80)).toBe(28)   // 33 * 0.85 = 28.05 → 28
+    expect(resolveShopPrice(33, 10)).toBe(38)   // 33 * 1.15 = 37.95 → 38
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getShopMod
+// ---------------------------------------------------------------------------
+
+describe('getShopMod', () => {
+  it('returns -0.20 for Distinguished Engineer (90+)', () => {
+    expect(getShopMod(90)).toBe(-0.20)
+    expect(getShopMod(100)).toBe(-0.20)
+  })
+
+  it('returns -0.10 for Senior Engineer (80-89)', () => {
+    expect(getShopMod(80)).toBe(-0.10)
+    expect(getShopMod(89)).toBe(-0.10)
+  })
+
+  it('returns 0 for Competent Engineer (60-79)', () => {
+    expect(getShopMod(60)).toBe(0)
+    expect(getShopMod(79)).toBe(0)
+  })
+
+  it('returns 0 for Adequate Engineer (40-59)', () => {
+    expect(getShopMod(50)).toBe(0)
+  })
+
+  it('returns 0.20 for Liability (20-39)', () => {
+    expect(getShopMod(20)).toBe(0.20)
+    expect(getShopMod(39)).toBe(0.20)
+  })
+
+  it('returns 0.50 for Walking Incident (0-19)', () => {
+    expect(getShopMod(0)).toBe(0.50)
+    expect(getShopMod(19)).toBe(0.50)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// canUseShop
+// ---------------------------------------------------------------------------
+
+describe('canUseShop', () => {
+  it('returns true when reputation ≥ 20', () => {
+    expect(canUseShop(20)).toBe(true)
+    expect(canUseShop(50)).toBe(true)
+    expect(canUseShop(100)).toBe(true)
+  })
+
+  it('returns false when reputation < 20', () => {
+    expect(canUseShop(19)).toBe(false)
+    expect(canUseShop(0)).toBe(false)
+    expect(canUseShop(-10)).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// shouldTeachOnAnyWin
+// ---------------------------------------------------------------------------
+
+describe('shouldTeachOnAnyWin', () => {
+  it('returns true for Distinguished Engineer (90+)', () => {
+    expect(shouldTeachOnAnyWin(90)).toBe(true)
+    expect(shouldTeachOnAnyWin(100)).toBe(true)
+  })
+
+  it('returns true for Senior Engineer (80-89)', () => {
+    expect(shouldTeachOnAnyWin(80)).toBe(true)
+    expect(shouldTeachOnAnyWin(89)).toBe(true)
+  })
+
+  it('returns false for Competent Engineer (60-79)', () => {
+    expect(shouldTeachOnAnyWin(60)).toBe(false)
+    expect(shouldTeachOnAnyWin(79)).toBe(false)
+  })
+
+  it('returns false for Adequate Engineer (40-59)', () => {
+    expect(shouldTeachOnAnyWin(50)).toBe(false)
+  })
+
+  it('returns false for Walking Incident (0-19)', () => {
+    expect(shouldTeachOnAnyWin(0)).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// isShadowEngineer
+// ---------------------------------------------------------------------------
+
+describe('isShadowEngineer', () => {
+  it('returns false below shame 10', () => {
+    expect(isShadowEngineer(0)).toBe(false)
+    expect(isShadowEngineer(9)).toBe(false)
+  })
+
+  it('returns true at shame 10', () => {
+    expect(isShadowEngineer(10)).toBe(true)
+  })
+
+  it('returns true above shame 10', () => {
+    expect(isShadowEngineer(15)).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getGrimeRate
+// ---------------------------------------------------------------------------
+
+describe('getGrimeRate', () => {
+  it('returns 0.05 below shame 10', () => {
+    expect(getGrimeRate(0)).toBe(0.05)
+    expect(getGrimeRate(9)).toBe(0.05)
+  })
+
+  it('returns 0.10 at shame 10', () => {
+    expect(getGrimeRate(10)).toBe(0.10)
+  })
+
+  it('returns 0.10 above shame 10', () => {
+    expect(getGrimeRate(15)).toBe(0.10)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getRematchXp
+// ---------------------------------------------------------------------------
+
+describe('getRematchXp', () => {
+  it('returns base XP × 1.5', () => {
+    expect(getRematchXp(100)).toBe(150)
+    expect(getRematchXp(200)).toBe(300)
+  })
+
+  it('rounds to nearest integer', () => {
+    expect(getRematchXp(33)).toBe(50)   // 33 * 1.5 = 49.5 → 50
   })
 })

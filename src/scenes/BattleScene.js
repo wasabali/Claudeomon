@@ -82,16 +82,27 @@ export class BattleScene extends BaseScene {
     this._animating  = false
     this._eventQueue = []
     this._cursedConfirmMenu = null
+    this._taunts     = data.taunts ?? null
 
     this._buildHUD(mode, opponent)
     this._buildSkillMenu()
     this._buildLogBox()
     this._setupInput()
+    this.setupPauseKey()
 
-    if (mode === BATTLE_MODES.INCIDENT) {
-      this.playBgm('bgm_battle_incident')
+    if (opponent.type === 'boss' || opponent.type === 'scripted') {
+      this.playBgm('battle_throttlemaster')
+    } else if (mode === BATTLE_MODES.INCIDENT) {
+      this.playBgm('battle_incident')
     } else {
-      this.playBgm('bgm_battle_engineer')
+      const gymBattle  = !!data.gymBattle
+      if (opponent.id === 'throttlemaster') {
+        this.playBgm('battle_throttlemaster')
+      } else if (opponent.isCursed || gymBattle) {
+        this.playBgm('battle_cursed')
+      } else {
+        this.playBgm('battle_engineer')
+      }
     }
   }
 
@@ -135,8 +146,8 @@ export class BattleScene extends BaseScene {
     this._budgetBarBg = this.add.rectangle(BUDGET_METER_X + 8, BUDGET_METER_Y + 2, BUDGET_BAR_W, BUDGET_BAR_H, 0x333300).setOrigin(0, 0)
     this._budgetBar   = this.add.rectangle(BUDGET_METER_X + 8, BUDGET_METER_Y + 2, BUDGET_BAR_W, BUDGET_BAR_H, 0xffe066).setOrigin(0, 0)
 
-    // SLA timer (INCIDENT only)
-    if (mode === BATTLE_MODES.INCIDENT) {
+    // SLA timer (INCIDENT and SCRIPTED modes)
+    if (mode === BATTLE_MODES.INCIDENT || mode === BATTLE_MODES.SCRIPTED) {
       this._slaText = this.add.text(SLA_TIMER_X, SLA_TIMER_Y, this._slaLabel(), {
         ...textStyle, color: '#ff6666',
       })
@@ -322,6 +333,14 @@ export class BattleScene extends BaseScene {
 
     const events = resolveTurn(this._battleState, skill)
 
+    // Mid-battle taunt injection for THROTTLEMASTER-style encounters
+    if (this._taunts && this._taunts.length > 0) {
+      const tauntIdx = (this._battleState.turn - 2) % this._taunts.length
+      if (tauntIdx >= 0) {
+        events.unshift({ type: 'dialog', target: 'player', text: this._taunts[tauntIdx] })
+      }
+    }
+
     // winningTier is now set inside skillPhase via assessQuality in the engine
     this._animateEvents(events)
   }
@@ -357,7 +376,9 @@ export class BattleScene extends BaseScene {
         this.time.delayedCall(300, callback)
         break
 
-      case 'damage':
+      case 'damage': {
+        const isCritical = (event.multiplier ?? 1) >= 2
+        this.playSfx(isCritical ? 'sfx_damage_critical' : 'sfx_damage_hit')
         if (event.target === 'opponent') {
           this._showLog(`Dealt ${event.value} damage!`)
         } else {
@@ -366,8 +387,10 @@ export class BattleScene extends BaseScene {
         this._refreshHUD()
         this.time.delayedCall(400, callback)
         break
+      }
 
       case 'heal':
+        this.playSfx('sfx_heal')
         this._showLog(`Restored ${event.value} HP!`)
         this._refreshHUD()
         this.time.delayedCall(400, callback)
@@ -380,11 +403,13 @@ export class BattleScene extends BaseScene {
         break
 
       case 'sla_tick':
+        this.playSfx('sfx_sla_tick')
         if (this._slaText) this._slaText.setText(this._slaLabel())
         callback()
         break
 
       case 'sla_breach':
+        this.playSfx('sfx_sla_breach')
         this._showLog('SLA BREACH! Penalty applied.')
         if (this._slaText) this._slaText.setColor('#ff0000')
         this.time.delayedCall(600, callback)
@@ -396,9 +421,11 @@ export class BattleScene extends BaseScene {
         break
 
       case 'reputation':
+        this.playSfx('sfx_reputation_change')
         this._showLog(event.value < 0
           ? `Reputation -${Math.abs(event.value)}. Shame +${event.shameDelta ?? 0}.`
           : `Reputation +${event.value}.`)
+        if (event.shameDelta > 0) this.playSfx('sfx_shame')
         this.time.delayedCall(400, callback)
         break
 
@@ -435,7 +462,14 @@ export class BattleScene extends BaseScene {
 
 
       case 'budget_drain':
+        this.playSfx('sfx_budget_drain')
         this._showLog(`Budget drained by ${event.value}!`)
+        this._refreshHUD()
+        this.time.delayedCall(400, callback)
+        break
+
+      case 'budget_gain':
+        this._showLog(event.text ?? `Budget +${event.value}`)
         this._refreshHUD()
         this.time.delayedCall(400, callback)
         break
@@ -444,6 +478,20 @@ export class BattleScene extends BaseScene {
         this._showLog('Technical debt increased! The incident is escalating.')
         this.time.delayedCall(500, callback)
         break
+
+      case 'scripted_escape':
+        this._showLog(event.value ?? 'The enemy disconnected.')
+        this.time.delayedCall(1000, callback)
+        break
+
+      case 'boss_outcome': {
+        GameState.story.flags = GameState.story.flags || {}
+        GameState.story.flags.lastBossOutcome = event.value
+        markDirty()
+        this._showLog(`Outcome: ${event.value}`)
+        this.time.delayedCall(600, callback)
+        break
+      }
 
       case 'layer_transition':
         this._showLog('Root cause revealed! A deeper layer emerges...')
@@ -468,7 +516,11 @@ export class BattleScene extends BaseScene {
         break
 
       case 'battle_end':
-        this._onBattleEnd(event.value)
+        if (event.value === 'escape') {
+          this._onBattleEscape()
+        } else {
+          this._onBattleEnd(event.value)
+        }
         break
 
       case 'telegraph':
@@ -570,6 +622,16 @@ export class BattleScene extends BaseScene {
       return 'ending_shadow_post_mortem'
     }
     return 'ending_post_mortem'
+  }
+
+  // -------------------------------------------------------------------------
+  // _onBattleEscape — scripted encounters: no XP, no loss, no win
+  // -------------------------------------------------------------------------
+  _onBattleEscape() {
+    this._showLog('The enemy escaped...')
+    this.time.delayedCall(1200, () => {
+      this.fadeToScene(this._returnScene ?? 'WorldScene')
+    })
   }
 
   // -------------------------------------------------------------------------

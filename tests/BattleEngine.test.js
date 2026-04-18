@@ -8,6 +8,7 @@ import {
   incidentAttackPhase,
   turnEndPhase,
   resolveTurn,
+  getPreBattleEvents,
   BATTLE_MODES,
   INCIDENT_ATTACKS,
 } from '../src/engine/BattleEngine.js'
@@ -955,6 +956,8 @@ describe('BattleEvent shape', () => {
     'technical_debt', 'trainer_disgusted', 'warn_npcs', 'battle_end',
     'telegraph', 'dialog',
     'budget_drain', 'escalation', 'layer_transition',
+    'scripted_escape', 'boss_outcome', 'emblems_updated', 'skill_blocked',
+    'budget_drain', 'budget_gain', 'escalation', 'layer_transition',
   ]
 
   it('all emitted events have recognised type strings', () => {
@@ -1196,6 +1199,252 @@ describe('multi-layer incident transitions', () => {
 })
 
 // ---------------------------------------------------------------------------
+// immuneDomains — opponent immunity in skillPhase
+// ---------------------------------------------------------------------------
+describe('immuneDomains', () => {
+  it('deals 0 damage when skill domain is in opponent immuneDomains', () => {
+    const opponent = makeOpponent({
+      hp: 200,
+      immuneDomains: ['cloud', 'iac', 'kubernetes', 'containers'],
+    })
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), opponent, { slaTimer: 10 })
+    const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
+    const events = skillPhase(state, skill)
+    const damageEvent = events.find(e => e.type === 'damage')
+    expect(damageEvent.value).toBe(0)
+    expect(damageEvent.immune).toBe(true)
+    expect(state.opponent.hp).toBe(200)
+  })
+
+  it('deals normal damage when skill domain is NOT in opponent immuneDomains', () => {
+    const opponent = makeOpponent({
+      hp: 200,
+      immuneDomains: ['cloud', 'iac', 'kubernetes', 'containers'],
+    })
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), opponent, { slaTimer: 10 })
+    const skill = makeDamageSkill({ domain: 'linux', effect: { type: 'damage', value: 30 } })
+    const events = skillPhase(state, skill)
+    const damageEvent = events.find(e => e.type === 'damage')
+    expect(damageEvent.value).toBeGreaterThan(0)
+    expect(damageEvent.immune).toBeUndefined()
+    expect(state.opponent.hp).toBeLessThan(200)
+  })
+
+  it('deals normal damage when opponent has no immuneDomains', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent({ hp: 60 }), { slaTimer: 10 })
+    const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
+    const events = skillPhase(state, skill)
+    const damageEvent = events.find(e => e.type === 'damage')
+    expect(damageEvent.value).toBe(30)
+    expect(state.opponent.hp).toBe(30)
+  })
+})
+
+// Shadow Engineer — Coffee Sip action
+// ---------------------------------------------------------------------------
+
+describe('skillPhase — ☕ coffee sip action', () => {
+  const coffeeSip = { id: 'coffee_sip', effect: { type: 'skip' } }
+
+  it('heals 15 HP at shame 10+ (Shadow Engineer)', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 10, hp: 50 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    const events = skillPhase(state, coffeeSip)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'heal', target: 'player', value: 15 }))
+    expect(state.player.hp).toBe(65)
+  })
+
+  it('is blocked when shame is below 10', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 5, hp: 50 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    const events = skillPhase(state, coffeeSip)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'skill_blocked', reason: 'shadow_engineer_required' }))
+    expect(state.player.hp).toBe(50)
+  })
+
+  it('does not overheal beyond maxHp', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 10, hp: 95, maxHp: 100 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    skillPhase(state, coffeeSip)
+    expect(state.player.hp).toBe(100)
+  })
+
+  it('emits a coffee sip dialog', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 10, hp: 50 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    const events = skillPhase(state, coffeeSip)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'dialog', text: '☕ *sips coffee*' }))
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Shadow Engineer — budget modifications
+// ---------------------------------------------------------------------------
+
+describe('skillPhase — Shadow Engineer budget modifications', () => {
+  it('charges +10 budget for optimal-tier skills at shame 10+', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 10, budget: 100 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    const optimalSkill = makeDamageSkill({ tier: 'optimal', budgetCost: 10 })
+    const events = skillPhase(state, optimalSkill)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'budget_drain', source: 'shadow_fatigue' }))
+    // Budget should be reduced by the +10 surcharge (on top of normal cost handled elsewhere)
+    expect(state.player.budget).toBe(90)
+  })
+
+  it('does NOT modify budget for optimal-tier skills below shame 10', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 5, budget: 100 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    const optimalSkill = makeDamageSkill({ tier: 'optimal', budgetCost: 10 })
+    skillPhase(state, optimalSkill)
+    expect(state.player.budget).toBe(100) // no shadow surcharge applied
+  })
+
+  it('reduces heal values by 20% for Shadow Engineer', () => {
+    const healSkill = {
+      id: 'systemctl_restart',
+      domain: 'linux',
+      tier: 'standard',
+      isCursed: false,
+      budgetCost: 0,
+      effect: { type: 'heal', value: 20 },
+      sideEffect: null,
+    }
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 10, hp: 50 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    skillPhase(state, healSkill)
+    // 20 * (1 - 0.20) = 16
+    expect(state.player.hp).toBe(66)
+  })
+
+  it('does NOT reduce heal values below shame 10', () => {
+    const healSkill = {
+      id: 'systemctl_restart',
+      domain: 'linux',
+      tier: 'standard',
+      isCursed: false,
+      budgetCost: 0,
+      effect: { type: 'heal', value: 20 },
+      sideEffect: null,
+    }
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 5, hp: 50 }),
+      makeOpponent(),
+      { slaTimer: 5 },
+    )
+    skillPhase(state, healSkill)
+    expect(state.player.hp).toBe(70)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Trainer cursed mirror at Shame 5+
+// ---------------------------------------------------------------------------
+
+describe('createBattleState — trainer cursed mirror at Shame 5+', () => {
+  it('adds a cursed skill to trainer deck when shame >= 5 and cursedSkillPool is provided', () => {
+    const trainer = makeOpponent({
+      deck: ['basic_attack'],
+      isWildEncounter: false,
+    })
+    const state = createBattleState(
+      BATTLE_MODES.ENGINEER,
+      makePlayer({ shamePoints: 5 }),
+      trainer,
+      { cursedSkillPool: ['cursed_kubectl'], randomFn: () => 0 },
+    )
+    expect(state.opponent.deck).toContain('cursed_kubectl')
+    expect(state.opponent.deck).toHaveLength(2)
+    expect(state.opponent.cursedMirrorSkill).toBe('cursed_kubectl')
+  })
+
+  it('does NOT add cursed skill when shame is below 5', () => {
+    const trainer = makeOpponent({
+      deck: ['basic_attack'],
+      isWildEncounter: false,
+    })
+    const state = createBattleState(
+      BATTLE_MODES.ENGINEER,
+      makePlayer({ shamePoints: 4 }),
+      trainer,
+      { cursedSkillPool: ['cursed_kubectl'] },
+    )
+    expect(state.opponent.deck).toHaveLength(1)
+    expect(state.opponent.cursedMirrorSkill).toBeUndefined()
+  })
+
+  it('does NOT add cursed skill to wild encounters', () => {
+    const wildTrainer = makeOpponent({
+      deck: ['basic_attack'],
+      isWildEncounter: true,
+    })
+    const state = createBattleState(
+      BATTLE_MODES.ENGINEER,
+      makePlayer({ shamePoints: 10 }),
+      wildTrainer,
+      { cursedSkillPool: ['cursed_kubectl'] },
+    )
+    expect(state.opponent.deck).toHaveLength(1)
+  })
+
+  it('does NOT add cursed skill in INCIDENT mode', () => {
+    const opponent = makeOpponent({
+      deck: ['basic_attack'],
+    })
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT,
+      makePlayer({ shamePoints: 10 }),
+      opponent,
+      { slaTimer: 5, cursedSkillPool: ['cursed_kubectl'] },
+    )
+    expect(state.opponent.deck).toHaveLength(1)
+  })
+
+  it('does NOT add cursed skill when cursedSkillPool is empty', () => {
+    const trainer = makeOpponent({
+      deck: ['basic_attack'],
+      isWildEncounter: false,
+    })
+    const state = createBattleState(
+      BATTLE_MODES.ENGINEER,
+      makePlayer({ shamePoints: 10 }),
+      trainer,
+      { cursedSkillPool: [] },
+    )
+    expect(state.opponent.deck).toHaveLength(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Boss fight helpers
 // ---------------------------------------------------------------------------
 
@@ -1361,6 +1610,25 @@ describe('Boss fight — phase transitions', () => {
 })
 
 // ---------------------------------------------------------------------------
+// dropItem — item_drop event on win
+// ---------------------------------------------------------------------------
+describe('dropItem', () => {
+  it('emits item_drop when opponent has dropItem and is defeated', () => {
+    const opponent = makeOpponent({ hp: 0, dropItem: 'oldcorp_keycard' })
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), opponent, { slaTimer: 5 })
+    const events = turnEndPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'item_drop', value: 'oldcorp_keycard' }))
+  })
+
+  it('does not emit item_drop when opponent has no dropItem', () => {
+    const opponent = makeOpponent({ hp: 0 })
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), opponent, { slaTimer: 5 })
+    const events = turnEndPhase(state)
+    expect(events.find(e => e.type === 'item_drop')).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Executive Mode
 // ---------------------------------------------------------------------------
 
@@ -1440,6 +1708,166 @@ describe('Executive Mode', () => {
     // enemyPhase returns [] in INCIDENT mode
     expect(events).toHaveLength(0)
     expect(state.executiveMode).toBeUndefined()
+  })
+})
+
+// Enemy phase — cursed mirror announcement
+// ---------------------------------------------------------------------------
+
+describe('enemyPhase — cursed mirror announcement', () => {
+  it('emits mirror dialog on first enemy turn when opponent has cursedMirrorSkill', () => {
+    const trainer = makeOpponent({
+      deck: ['basic_attack'],
+      isWildEncounter: false,
+      cursedMirrorSkill: 'cursed_kubectl',
+    })
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ shamePoints: 5 }), trainer)
+    const events = enemyPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'dialog', text: 'You taught me something. Watch this.' }))
+  })
+
+  it('does NOT emit mirror dialog on subsequent turns', () => {
+    const trainer = makeOpponent({
+      deck: ['basic_attack'],
+      isWildEncounter: false,
+      cursedMirrorSkill: 'cursed_kubectl',
+    })
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ shamePoints: 5 }), trainer)
+    state.turn = 2
+    const events = enemyPhase(state)
+    const mirrorDialogs = events.filter(e => e.type === 'dialog' && e.text.includes('Watch this'))
+    expect(mirrorDialogs).toHaveLength(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getPreBattleEvents — shame-aware pre-battle dialog
+// ---------------------------------------------------------------------------
+describe('getPreBattleEvents', () => {
+  it('returns gym leader preBattleDialog for normal shame', () => {
+    const opponent = makeOpponent({
+      role: 'gym_leader',
+      preBattleDialog: ['Normal line 1', 'Normal line 2'],
+      preBattleDialog_highShame: ['Wary line 1'],
+      introDialog: 'Intro fallback',
+    })
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ shamePoints: 0 }), opponent)
+    const events = getPreBattleEvents(state)
+    expect(events).toHaveLength(2)
+    expect(events[0].text).toBe('Normal line 1')
+    expect(events[1].text).toBe('Normal line 2')
+  })
+
+  it('returns gym leader preBattleDialog_highShame when shame ≥ wary threshold (5)', () => {
+    const opponent = makeOpponent({
+      role: 'gym_leader',
+      preBattleDialog: ['Normal line'],
+      preBattleDialog_highShame: ['Wary line 1', 'Wary line 2'],
+      introDialog: 'Intro fallback',
+    })
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ shamePoints: 5 }), opponent)
+    const events = getPreBattleEvents(state)
+    expect(events).toHaveLength(2)
+    expect(events[0].text).toBe('Wary line 1')
+    expect(events[1].text).toBe('Wary line 2')
+  })
+
+  it('returns introDialog for non-gym trainers', () => {
+    const opponent = makeOpponent({ introDialog: 'I am a regular trainer.' })
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer(), opponent)
+    const events = getPreBattleEvents(state)
+    expect(events).toHaveLength(1)
+    expect(events[0].text).toBe('I am a regular trainer.')
+  })
+
+  it('returns empty events for INCIDENT mode', () => {
+    const opponent = makeOpponent({ introDialog: 'Should not appear' })
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), opponent, { slaTimer: 5 })
+    const events = getPreBattleEvents(state)
+    expect(events).toHaveLength(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Gym leader shame-aware post-defeat dialog and teach refusal
+// ---------------------------------------------------------------------------
+describe('gym leader shame reactions in turnEndPhase', () => {
+  it('emits postDefeatDialog for gym leader on normal win', () => {
+    const opponent = makeOpponent({
+      hp: 0,
+      role: 'gym_leader',
+      deck: ['az_webapp_deploy'],
+      teachSkillId: 'az_webapp_deploy',
+      postDefeatDialog: ['You won.', 'Well done.'],
+      postDefeatDialog_highShame: ['You win but I refuse.'],
+    })
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ shamePoints: 0 }), opponent)
+    state.winningTier = 'optimal'
+    const events = turnEndPhase(state)
+    const dialogs = events.filter(e => e.type === 'dialog')
+    expect(dialogs).toHaveLength(2)
+    expect(dialogs[0].text).toBe('You won.')
+    expect(dialogs[1].text).toBe('Well done.')
+    expect(events).toContainEqual(expect.objectContaining({ type: 'teach_skill' }))
+  })
+
+  it('emits postDefeatDialog_highShame and teach_refused when shame ≥ 10', () => {
+    const opponent = makeOpponent({
+      hp: 0,
+      role: 'gym_leader',
+      deck: ['az_webapp_deploy'],
+      teachSkillId: 'az_webapp_deploy',
+      postDefeatDialog: ['Normal line'],
+      postDefeatDialog_highShame: ['Shame line 1', 'Shame line 2'],
+    })
+    const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ shamePoints: 10 }), opponent)
+    state.winningTier = 'optimal'
+    const events = turnEndPhase(state)
+    const dialogs = events.filter(e => e.type === 'dialog')
+    expect(dialogs).toHaveLength(2)
+    expect(dialogs[0].text).toBe('Shame line 1')
+    expect(dialogs[1].text).toBe('Shame line 2')
+    expect(events).toContainEqual(expect.objectContaining({ type: 'teach_refused', reason: 'shame' }))
+    expect(events.find(e => e.type === 'teach_skill')).toBeUndefined()
+  })
+
+  it('non-gym trainers still emit winDialog without shame logic', () => {
+    const opponent = makeOpponent({
+      hp: 0,
+      deck: ['az_webapp_deploy'],
+      winDialog: 'Good fight.',
+    })
+        const state = createBattleState(BATTLE_MODES.ENGINEER, makePlayer({ shamePoints: 15 }), opponent)
+    state.winningTier = 'standard'
+    const events = turnEndPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'dialog', text: 'Good fight.' }))
+  })
+})
+
+// turnEndPhase — teach on any win at high reputation
+// ---------------------------------------------------------------------------
+
+describe('turnEndPhase — teachOnAnyWin at high reputation', () => {
+  it('emits teach_skill on standard-tier win when reputation is 80+', () => {
+    const state = createBattleState(
+      BATTLE_MODES.ENGINEER,
+      makePlayer({ reputation: 80 }),
+      makeOpponent({ hp: 0, teachSkillId: 'helm_upgrade' }),
+    )
+    state.winningTier = 'standard'
+    const events = turnEndPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'teach_skill', value: 'helm_upgrade' }))
+  })
+
+  it('does NOT emit teach_skill on standard-tier win when reputation is 60', () => {
+    const state = createBattleState(
+      BATTLE_MODES.ENGINEER,
+      makePlayer({ reputation: 60 }),
+      makeOpponent({ hp: 0, teachSkillId: 'helm_upgrade' }),
+    )
+    state.winningTier = 'standard'
+    const events = turnEndPhase(state)
+    expect(events.find(e => e.type === 'teach_skill')).toBeUndefined()
   })
 })
 
@@ -1917,5 +2345,189 @@ describe('gym mechanics', () => {
       const events = turnEndPhase(state) // turn 1→2 — no switch
       expect(events).not.toContainEqual(expect.objectContaining({ type: 'domain_reveal', target: 'opponent' }))
     })
+  })
+})
+
+// SCRIPTED mode — THROTTLEMASTER phantom battle
+// ---------------------------------------------------------------------------
+
+describe('SCRIPTED mode — phantom battle', () => {
+  it('createBattleState initialises slaTimer in SCRIPTED mode', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer(), makeOpponent({ hp: 9999 }), { slaTimer: 3 })
+    expect(state.slaTimer).toBe(3)
+    expect(state.mode).toBe(BATTLE_MODES.SCRIPTED)
+  })
+
+  it('SLA breach in SCRIPTED mode does not penalise player HP or reputation', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer({ hp: 100, reputation: 50 }), makeOpponent({ hp: 9999 }), { slaTimer: 1 })
+    slaTickPhase(state)
+    expect(state.slaBreach).toBe(true)
+    expect(state.player.hp).toBe(100)
+    expect(state.player.reputation).toBe(50)
+  })
+
+  it('turnEndPhase emits scripted_escape and battle_end escape on SLA breach in SCRIPTED mode', () => {
+    const state = createBattleState(
+      BATTLE_MODES.SCRIPTED, makePlayer(),
+      makeOpponent({ hp: 9999, escapeLine: 'CONNECTION TIMEOUT' }),
+      { slaTimer: 3 },
+    )
+    state.slaBreach = true
+    const events = turnEndPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'scripted_escape', target: 'opponent', value: 'CONNECTION TIMEOUT' }))
+    expect(events).toContainEqual(expect.objectContaining({ type: 'battle_end', value: 'escape' }))
+  })
+
+  it('scripted_escape uses default text when escapeLine is not set', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer(), makeOpponent({ hp: 9999 }), { slaTimer: 3 })
+    state.slaBreach = true
+    const events = turnEndPhase(state)
+    const escapeEvent = events.find(e => e.type === 'scripted_escape')
+    expect(escapeEvent.value).toBe('The enemy disconnected.')
+  })
+
+  it('full 3-turn phantom battle: escape triggers after SLA expires', () => {
+    const state = createBattleState(
+      BATTLE_MODES.SCRIPTED, makePlayer(),
+      makeOpponent({ hp: 9999, escapeLine: 'See you next time.' }),
+      { slaTimer: 3 },
+    )
+    const skill = makeDamageSkill()
+    // Turn 1 — slaTimer 3 → 2
+    resolveTurn(state, skill)
+    expect(state.slaTimer).toBe(2)
+
+    // Turn 2 — slaTimer 2 → 1
+    resolveTurn(state, skill)
+    expect(state.slaTimer).toBe(1)
+
+    // Turn 3 — slaTimer 1 → 0, triggers escape
+    const events = resolveTurn(state, skill)
+    expect(state.slaBreach).toBe(true)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'scripted_escape' }))
+    expect(events).toContainEqual(expect.objectContaining({ type: 'battle_end', value: 'escape' }))
+  })
+
+  it('enemyPhase returns empty array in SCRIPTED mode (no active enemy turn)', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer(), makeOpponent({ hp: 9999 }), { slaTimer: 3 })
+    state.turn = 2
+    const events = enemyPhase(state)
+    expect(events).toHaveLength(0)
+  })
+
+  it('UPTIME_DRAIN in SCRIPTED mode does not penalise HP or reputation on breach', () => {
+    const state = createBattleState(
+      BATTLE_MODES.SCRIPTED, makePlayer({ hp: 100, reputation: 50 }),
+      makeAttackOpponent(['uptime_drain']),
+      { slaTimer: 1 },
+    )
+    state.turn = 2
+    const events = incidentAttackPhase(state)
+    expect(state.slaBreach).toBe(true)
+    expect(state.player.hp).toBe(100)
+    expect(state.player.reputation).toBe(50)
+    expect(events.find(e => e.type === 'sla_breach')).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Throttle attack type
+// ---------------------------------------------------------------------------
+
+describe('throttle attack', () => {
+  it('applies throttle status to player', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT, makePlayer(),
+      makeAttackOpponent(['throttle']),
+      { slaTimer: 5 },
+    )
+    state.turn = 2
+    const events = incidentAttackPhase(state)
+    expect(events).toContainEqual(expect.objectContaining({ type: 'status_apply', statusName: 'throttle' }))
+    expect(state.playerStatuses.some(s => s.name === 'throttle')).toBe(true)
+  })
+
+  it('throttle status halves outgoing damage', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT, makePlayer(),
+      makeOpponent({ hp: 100, domain: 'cloud' }),
+      { slaTimer: 5 },
+    )
+    // Apply throttle status manually
+    state.playerStatuses.push({ name: 'throttle', duration: 2 })
+    const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
+    const events = skillPhase(state, skill)
+    const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
+    expect(dmgEvent).toBeDefined()
+    // Damage should be halved (15 or adjusted by matchup) relative to unthrottled
+    expect(dmgEvent.value).toBeLessThan(30)
+  })
+
+  it('throttle does not stack — existing throttle prevents re-application', () => {
+    const state = createBattleState(
+      BATTLE_MODES.INCIDENT, makePlayer(),
+      makeAttackOpponent(['throttle']),
+      { slaTimer: 5 },
+    )
+    state.turn = 2
+    state.playerStatuses.push({ name: 'throttle', duration: 2 })
+    incidentAttackPhase(state)
+    const throttleCount = state.playerStatuses.filter(s => s.name === 'throttle').length
+    expect(throttleCount).toBe(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Boss outcome — shame-based branching
+// ---------------------------------------------------------------------------
+
+describe('boss outcome — shame-based branching', () => {
+  function makeBossOpponent(overrides = {}) {
+    return {
+      id: 'throttlemaster_act4_boss', name: 'THROTTLEMASTER',
+      type: 'boss', domain: null, hp: 0, maxHp: 80, difficulty: 5,
+      shameThresholds: { arrest: 10, recruitment: 15 },
+      ...overrides,
+    }
+  }
+
+  it('emits boss_outcome "arrest" when shame < 10 and opponent defeated', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 3 }), makeBossOpponent({ hp: 0 }), { slaTimer: 12 })
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('arrest')
+  })
+
+  it('emits boss_outcome "choice" when shame >= 10 and < 15', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 12 }), makeBossOpponent({ hp: 0 }), { slaTimer: 12 })
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('choice')
+  })
+
+  it('emits boss_outcome "recruitment" when shame >= 15', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 15 }), makeBossOpponent({ hp: 0 }), { slaTimer: 12 })
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('recruitment')
+  })
+
+  it('emits boss_outcome on player defeat (SLA breach)', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 10 }), makeBossOpponent({ hp: 50 }), { slaTimer: 12 })
+    state.slaBreach = true
+    const events = turnEndPhase(state)
+    const outcome = events.find(e => e.type === 'boss_outcome')
+    expect(outcome).toBeDefined()
+    expect(outcome.value).toBe('choice')
+  })
+
+  it('does not emit boss_outcome for non-boss opponents', () => {
+    const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer({ shamePoints: 15 }), makeOpponent({ hp: 0 }), { slaTimer: 5 })
+    const events = turnEndPhase(state)
+    expect(events.find(e => e.type === 'boss_outcome')).toBeUndefined()
+
   })
 })

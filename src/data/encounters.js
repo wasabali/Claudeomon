@@ -17,6 +17,36 @@ export const ENCOUNTER_POOLS = {
     rare:   ['scope_creep', 'infinite_sprint'],
     cursed: ['the_gantt_chart'],
   },
+  jira_dungeon_1: {
+    common: ['stale_ticket', 'missing_acceptance_criteria', 'blocked_by_qa'],
+    rare:   ['scope_creep'],
+    cursed: [],
+  },
+  jira_dungeon_2: {
+    common: ['flaky_ci_pipeline', 'config_drift', 'stale_ticket'],
+    rare:   ['scope_creep', 'infinite_sprint'],
+    cursed: [],
+  },
+  jira_dungeon_3: {
+    common: ['config_drift', 'missing_acceptance_criteria'],
+    rare:   ['infinite_sprint'],
+    cursed: ['the_gantt_chart'],
+  },
+  azure_town: {
+    common: ['503_error', 'config_drift'],
+    rare:   ['azure_bill_spike'],
+    cursed: [],
+  },
+  cloud_console_1: {
+    common: ['config_drift', 'flaky_ci_pipeline'],
+    rare:   ['azure_bill_spike'],
+    cursed: [],
+  },
+  cloud_console_2: {
+    common: ['config_drift', '503_error'],
+    rare:   ['azure_bill_spike', 'cold_start_cascade'],
+    cursed: [],
+  },
   production_plains: {
     common: ['high_cpu', 'disk_full', '503_error'],
     rare:   ['prod_incident', 'runaway_process'],
@@ -59,7 +89,7 @@ export const ENCOUNTER_POOLS = {
   },
   oldcorp_basement: {
     common: [],
-    rare:   [],
+    rare:   ['legacy_monolith'],
     cursed: ['vb6_billing_horror'],
   },
   shell_cavern: {
@@ -467,14 +497,15 @@ const ENCOUNTERS = {
     id: 'azure_bill_spike',
     type: 'incident',
     name: 'Azure Bill Spike',
-    symptomText: 'Monthly Azure cost is 4× the forecast.',
-    rootCauseText: 'Dev environment was left running over a bank holiday weekend with autoscale enabled.',
+    symptomText: 'A cost alert has been triggered. The bill is... growing.',
+    rootCauseText: 'Someone left 47 GPU instances running over the weekend.',
     domain: 'cloud',
-    hp: 42,
-    sla: 3,
-    difficulty: 3,
-    attacks: ['budget_spike', 'budget_spike'], // double frequency — bill spikes drain budget twice per cycle
+    hp: 100,
+    sla: 8,
+    difficulty: 4,
+    attacks: ['budget_spike', 'skill_block'],
     optimalFix: 'cost_optimization',
+    bossFlag: 'cost_spiral_active',
     layers: null,
   },
   null_pointer_exception: {
@@ -549,7 +580,26 @@ const ENCOUNTERS = {
     encounterText: ['It was running since 1998.', 'It did not want to stop.'],
     layers: null,
   },
-  // ── New incidents from content bible ───────────────────────────────────── ─────────────────────────────────────
+
+  legacy_monolith: {
+    id: 'legacy_monolith',
+    type: 'incident',
+    name: 'The Legacy Monolith',
+    symptomText: 'A 1994 server rack. Windows XP error dialogs. Still running VB6.',
+    rootCauseText: 'Nobody has dared touch this system in 30 years. It communicates via BSOD error codes.',
+    domain: null,
+    hp: 200,
+    sla: null,
+    difficulty: 5,
+    attacks: ['escalation', 'confusion', 'skill_block'],
+    optimalFix: null,
+    immuneDomains: ['cloud', 'iac', 'kubernetes', 'containers'],
+    vulnerableDomains: ['linux', 'security'],
+    dropItem: 'oldcorp_keycard',
+    layers: null,
+  },
+
+  // ── New incidents from content bible ─────────────────────────────────────
 
   '404_not_found': {
     id: '404_not_found',
@@ -713,6 +763,53 @@ const ENCOUNTERS = {
     attacks: ['budget_spike'],
     optimalFix: 'docker_build',
     layers: null,
+  },
+
+  // ── THROTTLEMASTER encounters ─────────────────────────────────────────────
+
+  throttlemaster_act2_escape: {
+    id: 'throttlemaster_act2_escape',
+    type: 'scripted',
+    name: 'THROTTLEMASTER',
+    symptomText: 'A hooded figure appears on your terminal.',
+    rootCauseText: 'Unknown — connection terminated before diagnosis.',
+    domain: null,
+    hp: 9999,
+    sla: 3,
+    difficulty: 0,
+    attacks: [],
+    optimalFix: null,
+    layers: null,
+    escapeLine: 'CONNECTION TIMEOUT — See you at the next incident.',
+    onSlaExpiry: 'throttlemaster_escape_sequence',
+  },
+  throttlemaster_act4_boss: {
+    id: 'throttlemaster_act4_boss',
+    type: 'boss',
+    name: 'THROTTLEMASTER',
+    symptomText: 'THROTTLEMASTER steps out of the shadows.',
+    rootCauseText: 'Karsten Ottesen. Ex-OmniCloud Corp. Passed over for promotion.',
+    domain: null,
+    hp: 80,
+    sla: 12,
+    difficulty: 5,
+    attacks: ['throttle', 'skill_block'],
+    optimalFix: null,
+    layers: [
+      {
+        domain: null,
+        hp: 60,
+        symptomText: 'Phase 2: Resource Exhaustion — budget and HP drain simultaneously.',
+        rootCauseText: 'THROTTLEMASTER is burning through your cloud budget.',
+        attacks: ['budget_spike', 'uptime_drain', 'reputation_leak'],
+        optimalFix: null,
+      },
+    ],
+    shameThresholds: {
+      arrest: 10,
+      recruitment: 15,
+    },
+
   },
 }
 

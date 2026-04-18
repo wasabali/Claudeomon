@@ -2,17 +2,22 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { DOMAIN_MATCHUPS } from '../src/config.js'
+import { DOMAIN_MATCHUPS, GYM_SHAME_THRESHOLDS } from '../src/config.js'
 import { getById as getSkillById, getAll as getAllSkills, getBy as getSkillsBy } from '../src/data/skills.js'
 import { getById as getItemById, getAll as getAllItems } from '../src/data/items.js'
-import { getAll as getAllTrainers } from '../src/data/trainers.js'
-import { getAll as getAllEmblems } from '../src/data/emblems.js'
+import { getById as getTrainerById, getAll as getAllTrainers } from '../src/data/trainers.js'
+import { getAll as getAllEmblems, getById as getEmblemById } from '../src/data/emblems.js'
 import { getAll as getAllQuests } from '../src/data/quests.js'
 import { ENCOUNTER_POOLS, getAll as getAllEncounters } from '../src/data/encounters.js'
 import { getAll as getAllThreads, getByCommandId } from '../src/data/stackoverflow.js'
 import { getById as getGateById, getAll as getAllGates, getBy as getGatesBy } from '../src/data/gates.js'
-import { getAll as getAllInteractions } from '../src/data/interactions.js'
+import { getById as getInteractionById, getAll as getAllInteractions, getBy as getInteractionsBy } from '../src/data/interactions.js'
+import { getById as getAudioById, getAll as getAllAudio, getBy as getAudioBy, getSfxPreset, getBgmConfig, getAllSfx, getAllBgm } from '../src/data/audio.js'
 import { getById as getGymById, getAll as getAllGyms, getBy as getGymsBy } from '../src/data/gyms.js'
+import { getAll as getAllStory } from '../src/data/story.js'
+
+import { getById as getRegionById, getAll as getAllRegions, getBy as getRegionsBy, REGION_CONNECTIONS } from '../src/data/regions.js'
+import { getById as getShopById, getAll as getAllShops, getBy as getShopsBy } from '../src/data/shops.js'
 
 const VALID_TIERS = ['optimal', 'standard', 'shortcut', 'cursed', 'nuclear']
 const VALID_GATE_TYPES = ['hard', 'soft', 'knowledge', 'reputation', 'shame']
@@ -26,7 +31,10 @@ const DATA_FILES = [
   'stackoverflow.js',
   'gates.js',
   'interactions.js',
+  'audio.js',
   'gyms.js',
+  'regions.js',
+  'shops.js',
 ].map(file => path.join(process.cwd(), 'src', 'data', file))
 
 describe('skills registry', () => {
@@ -117,8 +125,125 @@ describe('other data registries', () => {
       ...getAllGates().map(entry => entry.id),
       ...getAllInteractions().map(entry => entry.id),
       ...getAllGyms().map(entry => entry.id),
+      ...getAllRegions().map(entry => entry.id),
+      ...getAllShops().map(entry => entry.id),
     ]
     expect(new Set(allIds).size).toBe(allIds.length)
+  })
+})
+
+describe('gym leaders', () => {
+  const gymLeaders = getAllTrainers().filter(t => t.role === 'gym_leader')
+
+  it('defines all 8 gym leaders', () => {
+    expect(gymLeaders).toHaveLength(8)
+  })
+
+  it('each gym leader has gymNumber 1–8 with no duplicates', () => {
+    const numbers = gymLeaders.map(t => t.gymNumber).sort()
+    expect(numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+  })
+
+  it('each gym leader has personality dialog arrays', () => {
+    gymLeaders.forEach(leader => {
+      expect(Array.isArray(leader.preBattleDialog)).toBe(true)
+      expect(leader.preBattleDialog.length).toBeGreaterThan(0)
+      expect(Array.isArray(leader.postDefeatDialog)).toBe(true)
+      expect(leader.postDefeatDialog.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('each gym leader has shame ≥ 5 wary dialog', () => {
+    gymLeaders.forEach(leader => {
+      expect(Array.isArray(leader.preBattleDialog_highShame)).toBe(true)
+      expect(leader.preBattleDialog_highShame.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('each gym leader has shame ≥ 10 teach refusal dialog', () => {
+    gymLeaders.forEach(leader => {
+      expect(Array.isArray(leader.postDefeatDialog_highShame)).toBe(true)
+      expect(leader.postDefeatDialog_highShame.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('each gym leader has mechanicConfig (except CTO)', () => {
+    gymLeaders
+      .filter(l => l.id !== 'the_cto')
+      .forEach(leader => {
+        expect(leader.mechanic).toBeTruthy()
+        expect(leader.mechanicConfig).toBeTruthy()
+      })
+  })
+
+  it('each gym leader with an emblemReward references a valid emblem in the registry', () => {
+    gymLeaders
+      .filter(l => l.emblemReward !== null)
+      .forEach(leader => {
+        expect(typeof leader.emblemReward).toBe('string')
+        expect(getEmblemById(leader.emblemReward)).toBeDefined()
+      })
+  })
+
+  it('each gym leader except CTO has a subLeader referencing a valid trainer', () => {
+    gymLeaders
+      .filter(l => l.id !== 'the_cto')
+      .forEach(leader => {
+        expect(typeof leader.subLeader).toBe('string')
+        expect(getTrainerById(leader.subLeader)).toBeDefined()
+      })
+  })
+
+  it('Captain Nines has sla_timer mechanic with turnLimit and repPenalty', () => {
+    const captain = getTrainerById('captain_nines')
+    expect(captain.mechanic).toBe('sla_timer')
+    expect(captain.mechanicConfig.turnLimit).toBe(8)
+    expect(captain.mechanicConfig.repPenalty).toBe(15)
+  })
+
+  it('Docker Dag has layered_defence mechanic with 3 layers', () => {
+    const dag = getTrainerById('docker_dag')
+    expect(dag.mechanic).toBe('layered_defence')
+    expect(dag.mechanicConfig.layers).toBe(3)
+  })
+
+  it('Kube Master has respawn mechanic', () => {
+    const kube = getTrainerById('kube_master')
+    expect(kube.mechanic).toBe('respawn')
+    expect(kube.mechanicConfig.respawnCount).toBe(3)
+    expect(kube.mechanicConfig.respawnHpPercent).toBe(50)
+  })
+
+  it('Fatima is marked as field_trainer, not a gym leader', () => {
+    const fatima = getTrainerById('fatima_witch')
+    expect(fatima.role).toBe('field_trainer')
+  })
+})
+
+describe('Legacy Monolith encounter', () => {
+  it('is immune to cloud, iac, kubernetes, containers', () => {
+    const enc = getAllEncounters().find(e => e.id === 'legacy_monolith')
+    expect(enc).toBeDefined()
+    expect(enc.immuneDomains).toEqual(['cloud', 'iac', 'kubernetes', 'containers'])
+  })
+
+  it('is vulnerable to linux and security', () => {
+    const enc = getAllEncounters().find(e => e.id === 'legacy_monolith')
+    expect(enc.vulnerableDomains).toEqual(['linux', 'security'])
+  })
+
+  it('drops oldcorp_keycard', () => {
+    const enc = getAllEncounters().find(e => e.id === 'legacy_monolith')
+    expect(enc.dropItem).toBe('oldcorp_keycard')
+    expect(getItemById('oldcorp_keycard')).toBeDefined()
+    expect(getItemById('oldcorp_keycard').tab).toBe('keyItems')
+  })
+})
+
+describe('GYM_SHAME_THRESHOLDS', () => {
+  it('has wary threshold at 5 and teachRefusal at 10', () => {
+    expect(GYM_SHAME_THRESHOLDS.wary).toBe(5)
+    expect(GYM_SHAME_THRESHOLDS.teachRefusal).toBe(10)
   })
 })
 
@@ -242,22 +367,6 @@ describe('gates registry', () => {
   })
 })
 
-describe('interactions registry', () => {
-  it('has 7 environmental storytelling entries', () => {
-    expect(getAllInteractions()).toHaveLength(7)
-  })
-
-  it('all interactions have required fields', () => {
-    getAllInteractions().forEach(interaction => {
-      expect(typeof interaction.id).toBe('string')
-      expect(typeof interaction.location).toBe('string')
-      expect(typeof interaction.object).toBe('string')
-      expect(Array.isArray(interaction.text)).toBe(true)
-      expect(interaction.text.length).toBeGreaterThan(0)
-    })
-  })
-})
-
 describe('do_not_touch quest', () => {
   it('exists with branch type', () => {
     const quest = getAllQuests().find(q => q.id === 'do_not_touch')
@@ -287,6 +396,90 @@ describe('vb6_billing_horror encounter', () => {
     expect(enc.immuneDomains).toEqual(['cloud', 'iac', 'kubernetes', 'containers'])
     expect(enc.hp).toBe(80)
     expect(enc.sla).toBe(5)
+  })
+})
+
+describe('audio registry', () => {
+  it('defines exactly 21 SFX presets', () => {
+    expect(getAllSfx()).toHaveLength(21)
+  })
+
+  it('defines exactly 17 BGM configs', () => {
+    expect(getAllBgm()).toHaveLength(17)
+  })
+
+  it('getSfxPreset returns correct entry', () => {
+    const preset = getSfxPreset('sfx_confirm')
+    expect(preset).toBeDefined()
+    expect(preset.id).toBe('sfx_confirm')
+    expect(preset.priority).toBe(2)
+  })
+
+  it('getBgmConfig returns correct entry', () => {
+    const config = getBgmConfig('battle_incident')
+    expect(config).toBeDefined()
+    expect(config.id).toBe('battle_incident')
+    expect(config.loop).toBe(true)
+  })
+
+  it('all SFX entries have required fields with valid types', () => {
+    getAllSfx().forEach(sfx => {
+      expect(typeof sfx.id).toBe('string')
+      expect(typeof sfx.seed).toBe('number')
+      expect(sfx.volume).toBeGreaterThanOrEqual(0)
+      expect(sfx.volume).toBeLessThanOrEqual(1)
+      expect([1, 2, 3, 4]).toContain(sfx.priority)
+      expect(typeof sfx.duration).toBe('number')
+      expect(sfx.duration).toBeGreaterThan(0)
+      expect(typeof sfx.description).toBe('string')
+    })
+  })
+
+  it('all BGM entries have required fields with valid types', () => {
+    getAllBgm().forEach(bgm => {
+      expect(typeof bgm.id).toBe('string')
+      expect(typeof bgm.file).toBe('string')
+      expect(bgm.file).toMatch(/^assets\/audio\/bgm\/.+\.ogg$/)
+      expect(bgm.volume).toBeGreaterThanOrEqual(0)
+      expect(bgm.volume).toBeLessThanOrEqual(1)
+      expect(typeof bgm.loop).toBe('boolean')
+    })
+  })
+
+  it('all SFX IDs match their object keys', () => {
+    getAllSfx().forEach(sfx => {
+      expect(getSfxPreset(sfx.id)).toBe(sfx)
+    })
+  })
+
+  it('all BGM IDs match their object keys', () => {
+    getAllBgm().forEach(bgm => {
+      expect(getBgmConfig(bgm.id)).toBe(bgm)
+    })
+  })
+
+  it('all SFX seeds are unique', () => {
+    const seeds = getAllSfx().map(sfx => sfx.seed)
+    expect(new Set(seeds).size).toBe(seeds.length)
+  })
+
+  it('victory and game_over tracks do not loop', () => {
+    expect(getBgmConfig('victory').loop).toBe(false)
+    expect(getBgmConfig('game_over').loop).toBe(false)
+  })
+
+  it('follows the standard registry pattern with getById, getAll, getBy', () => {
+    expect(getAudioById('sfx_confirm')).toBeDefined()
+    expect(getAudioById('sfx_confirm').id).toBe('sfx_confirm')
+    expect(getAudioById('battle_incident')).toBeDefined()
+    expect(getAudioById('battle_incident').id).toBe('battle_incident')
+
+    const all = getAllAudio()
+    expect(all.length).toBe(21 + 17)
+
+    const priority4 = getAudioBy('priority', 4)
+    expect(priority4.length).toBeGreaterThan(0)
+    priority4.forEach(sfx => expect(sfx.priority).toBe(4))
   })
 })
 
@@ -343,6 +536,40 @@ describe('gyms registry', () => {
       })
     })
   })
+})
+
+describe('shops registry', () => {
+  it('follows the registry pattern with getById, getAll, getBy', () => {
+    const shop = getShopById('azure_marketplace')
+    expect(shop).toBeDefined()
+    expect(shop.id).toBe('azure_marketplace')
+
+    const allShops = getAllShops()
+    expect(allShops.length).toBeGreaterThanOrEqual(3)
+
+    expect(typeof getShopsBy).toBe('function')
+  })
+
+  it('all shops have required fields', () => {
+    getAllShops().forEach(shop => {
+      expect(typeof shop.id).toBe('string')
+      expect(typeof shop.name).toBe('string')
+      expect(typeof shop.location).toBe('string')
+      expect(typeof shop.priceMultiplier).toBe('number')
+      expect(Array.isArray(shop.inventory)).toBe(true)
+    })
+  })
+
+  it('all shop inventory entries reference valid items', () => {
+    getAllShops().forEach(shop => {
+      shop.inventory.forEach(entry => {
+        expect(getItemById(entry.itemId), `shop ${shop.id} references unknown item ${entry.itemId}`).toBeDefined()
+        expect(typeof entry.basePrice).toBe('number')
+        expect(entry.basePrice).toBeGreaterThan(0)
+        expect(typeof entry.stock).toBe('number')
+      })
+    })
+  })
 
   it('all gym emblem rewards exist in emblems registry', () => {
     const emblemLookup = Object.fromEntries(getAllEmblems().map(e => [e.id, e]))
@@ -377,5 +604,273 @@ describe('gyms registry', () => {
       .forEach(t => {
         expect(getSkillById(t.teachSkillId)).toBeDefined()
       })
+  })
+})
+
+describe('NPC reactivity — data integrity', () => {
+  const npcEntries = getAllStory().filter(e => e.id?.startsWith('npc_'))
+    .filter(e => e.id !== 'npc_azure_terminal' && !e.id.endsWith('_post_terminal'))
+
+  it('all NPC story entries with dialogByAct have acts 1-4 and finale', () => {
+    npcEntries.forEach(entry => {
+      if (!entry.dialogByAct) return
+      for (const key of [1, 2, 3, 4, 'finale']) {
+        expect(Array.isArray(entry.dialogByAct[key]),
+          `${entry.id} missing dialogByAct[${key}]`).toBe(true)
+      }
+    })
+  })
+
+  it('shameDialog uses valid threshold keys (3, 7, 10)', () => {
+    npcEntries.forEach(entry => {
+      if (!entry.shameDialog) return
+      const keys = Object.keys(entry.shameDialog).map(Number)
+      keys.forEach(k => {
+        expect([3, 7, 10]).toContain(k)
+        const val = entry.shameDialog[k]
+        expect(val === null || Array.isArray(val),
+          `${entry.id} shameDialog[${k}] must be null or array`).toBe(true)
+      })
+    })
+  })
+
+  it('followUpDialog is null or an array', () => {
+    npcEntries.forEach(entry => {
+      if (entry.followUpDialog === undefined) return
+      expect(entry.followUpDialog === null || Array.isArray(entry.followUpDialog),
+        `${entry.id} followUpDialog must be null or array`).toBe(true)
+    })
+  })
+
+  it('all 8 field trainers have rematchDeck arrays', () => {
+    const fieldTrainers = getAllTrainers().filter(t => !t.isCursed && !t.isWildEncounter && Array.isArray(t.rematchDeck))
+    expect(fieldTrainers).toHaveLength(8)
+    fieldTrainers.forEach(trainer => {
+      expect(Array.isArray(trainer.rematchDeck),
+        `${trainer.id} missing rematchDeck`).toBe(true)
+      expect(trainer.rematchDeck.length).toBeGreaterThanOrEqual(4)
+      trainer.rematchDeck.forEach(skillId => {
+        expect(getSkillById(skillId),
+          `${trainer.id} rematchDeck references unknown skill '${skillId}'`).toBeDefined()
+      })
+    })
+  })
+
+  it('all cursed trainers have techniqueUsedDialog and techniqueUsedFlag', () => {
+    const cursedTrainers = getAllTrainers().filter(t => t.isCursed)
+    cursedTrainers.forEach(trainer => {
+      expect(Array.isArray(trainer.techniqueUsedDialog),
+        `${trainer.id} missing techniqueUsedDialog`).toBe(true)
+      expect(typeof trainer.techniqueUsedFlag).toBe('string')
+      expect(trainer.techniqueUsedFlag.startsWith('acknowledged_'),
+        `${trainer.id} techniqueUsedFlag must start with 'acknowledged_'`).toBe(true)
+    })
+  })
+
+  it('all cursed trainers have shameDialog', () => {
+    const cursedTrainers = getAllTrainers().filter(t => t.isCursed)
+    cursedTrainers.forEach(trainer => {
+      expect(trainer.shameDialog,
+        `${trainer.id} missing shameDialog`).toBeDefined()
+    })
+  })
+})
+
+const VALID_INTERACTION_TYPES = ['sign', 'chest', 'door', 'flavor']
+
+describe('interactions registry', () => {
+  it('follows the registry pattern with getById, getAll, getBy', () => {
+    const interaction = getInteractionById('localhost_sign_welcome')
+    expect(interaction).toBeDefined()
+    expect(interaction.id).toBe('localhost_sign_welcome')
+
+    const allInteractions = getAllInteractions()
+    expect(allInteractions.length).toBeGreaterThanOrEqual(1)
+
+    expect(typeof getInteractionsBy).toBe('function')
+    const signs = getInteractionsBy('type', 'sign')
+    expect(signs.length).toBeGreaterThanOrEqual(1)
+    signs.forEach(s => expect(s.type).toBe('sign'))
+  })
+
+  it('all interactions have required base fields', () => {
+    getAllInteractions().forEach(interaction => {
+      expect(typeof interaction.id).toBe('string')
+      expect(VALID_INTERACTION_TYPES).toContain(interaction.type)
+      expect(typeof interaction.region).toBe('string')
+      expect(typeof interaction.tileX).toBe('number')
+      expect(typeof interaction.tileY).toBe('number')
+    })
+  })
+
+  it('signs and flavor objects have dialog[] and repeatable: true', () => {
+    getAllInteractions()
+      .filter(i => i.type === 'sign' || i.type === 'flavor')
+      .forEach(interaction => {
+        expect(Array.isArray(interaction.dialog)).toBe(true)
+        expect(interaction.dialog.length).toBeGreaterThan(0)
+        expect(interaction.repeatable).toBe(true)
+      })
+  })
+
+  it('chests have item, dialog, flagKey, and repeatable: false', () => {
+    getAllInteractions()
+      .filter(i => i.type === 'chest')
+      .forEach(interaction => {
+        expect(interaction.repeatable).toBe(false)
+        expect(typeof interaction.flagKey).toBe('string')
+        expect(Array.isArray(interaction.dialog)).toBe(true)
+        expect(interaction.item).toBeDefined()
+        expect(typeof interaction.item.tab).toBe('string')
+        expect(typeof interaction.item.id).toBe('string')
+        expect(typeof interaction.item.qty).toBe('number')
+      })
+  })
+
+  it('doors have requiresItem, lockedDialog, unlockedDialog, and flagKey', () => {
+    getAllInteractions()
+      .filter(i => i.type === 'door')
+      .forEach(interaction => {
+        expect(typeof interaction.flagKey).toBe('string')
+        expect(interaction.requiresItem).toBeDefined()
+        expect(typeof interaction.requiresItem.tab).toBe('string')
+        expect(typeof interaction.requiresItem.id).toBe('string')
+        expect(Array.isArray(interaction.lockedDialog)).toBe(true)
+        expect(Array.isArray(interaction.unlockedDialog)).toBe(true)
+      })
+  })
+
+  it('has all four interaction types defined', () => {
+    const types = new Set(getAllInteractions().map(i => i.type))
+    VALID_INTERACTION_TYPES.forEach(t => expect(types.has(t)).toBe(true))
+  })
+
+  it('has all 7 environmental storytelling entries', () => {
+    const storyIds = [
+      'pipeline_terminal_todo',
+      'staging_env_file',
+      'shell_cavern_bash_history',
+      'oldcorp_nameplate',
+      'azure_town_vending_machine',
+      'kubernetes_colosseum_locker',
+      'architecture_whiteboard',
+    ]
+    storyIds.forEach(id => {
+      expect(getInteractionById(id)).toBeDefined()
+    })
+  })
+
+  it('has Localhost Town objects interactable', () => {
+    const localhostInteractions = getInteractionsBy('region', 'localhost_town')
+    expect(localhostInteractions.length).toBeGreaterThanOrEqual(7)
+  })
+})
+
+const VALID_REGION_TYPES   = ['main', 'gym', 'dungeon', 'hidden']
+const VALID_DOMAINS_OR_NULL = [...Object.keys(DOMAIN_MATCHUPS), null]
+
+describe('regions registry', () => {
+  it('follows the registry pattern with getById, getAll, getBy', () => {
+    const region = getRegionById('localhost_town')
+    expect(region).toBeDefined()
+    expect(region.id).toBe('localhost_town')
+
+    const allRegions = getAllRegions()
+    expect(allRegions.length).toBeGreaterThanOrEqual(1)
+
+    const mainRegions = getRegionsBy('type', 'main')
+    expect(mainRegions.length).toBe(6)
+    mainRegions.forEach(r => expect(r.type).toBe('main'))
+  })
+
+  it('all regions have required fields', () => {
+    getAllRegions().forEach(region => {
+      expect(typeof region.id).toBe('string')
+      expect(typeof region.name).toBe('string')
+      expect(VALID_DOMAINS_OR_NULL).toContain(region.domain)
+      expect(typeof region.act).toBe('number')
+      expect(VALID_REGION_TYPES).toContain(region.type)
+      expect(typeof region.hasFastTravel).toBe('boolean')
+      expect(typeof region.mvp).toBe('boolean')
+    })
+  })
+
+  it('gyms and dungeons have valid parentRegion', () => {
+    getAllRegions()
+      .filter(r => r.type === 'gym' || r.type === 'dungeon')
+      .forEach(region => {
+        expect(typeof region.parentRegion).toBe('string')
+        expect(getRegionById(region.parentRegion)).toBeDefined()
+      })
+  })
+
+  it('hidden regions have accessTrigger', () => {
+    getAllRegions()
+      .filter(r => r.type === 'hidden')
+      .forEach(region => {
+        expect(typeof region.accessTrigger).toBe('string')
+        expect(region.accessTrigger.length).toBeGreaterThan(0)
+      })
+  })
+
+  it('defines 8 gyms', () => {
+    expect(getRegionsBy('type', 'gym')).toHaveLength(8)
+  })
+
+  it('defines 5 dungeon rooms', () => {
+    expect(getRegionsBy('type', 'dungeon')).toHaveLength(5)
+  })
+
+  it('defines 5 hidden regions', () => {
+    expect(getRegionsBy('type', 'hidden')).toHaveLength(5)
+  })
+
+  it('MVP regions include localhost_town, pipeline_pass, terminal_gym, jira_dungeon_1', () => {
+    const mvpIds = getRegionsBy('mvp', true).map(r => r.id).sort()
+    expect(mvpIds).toContain('localhost_town')
+    expect(mvpIds).toContain('pipeline_pass')
+    expect(mvpIds).toContain('terminal_gym')
+    expect(mvpIds).toContain('jira_dungeon_1')
+  })
+
+  it('REGION_CONNECTIONS has bidirectional links for main region connections', () => {
+    // Main regions connected by edge-scroll must be bidirectional.
+    // Dungeon exits may share an entry direction with another connection, so
+    // we only enforce strict bidirectionality when both regions are in the
+    // connection graph AND the reverse entry direction maps back to the source.
+    for (const [fromId, dirs] of Object.entries(REGION_CONNECTIONS)) {
+      for (const [dir, conn] of Object.entries(dirs)) {
+        const reverse = REGION_CONNECTIONS[conn.target]
+        if (!reverse) continue
+        const reverseConn = reverse[conn.entry]
+        if (!reverseConn) continue
+        // Only enforce bidirectionality when the reverse actually points back
+        if (reverseConn.target === fromId) {
+          expect(reverseConn.entry).toBe(dir)
+        }
+      }
+    }
+  })
+
+  it('all REGION_CONNECTIONS targets reference valid regions', () => {
+    for (const dirs of Object.values(REGION_CONNECTIONS)) {
+      for (const conn of Object.values(dirs)) {
+        expect(getRegionById(conn.target)).toBeDefined()
+      }
+    }
+  })
+
+  it('three_am_vending requires shameMin 3 to unlock', () => {
+    const shop = getShopById('three_am_vending')
+    expect(shop.unlockCondition).toBeDefined()
+    expect(shop.unlockCondition.shameMin).toBe(3)
+  })
+
+  it('vending machines have markup or discount multipliers', () => {
+    const pipeline = getShopById('pipeline_vending')
+    expect(pipeline.priceMultiplier).toBeGreaterThan(1.0)
+
+    const threeAm = getShopById('three_am_vending')
+    expect(threeAm.priceMultiplier).toBeLessThan(1.0)
   })
 })

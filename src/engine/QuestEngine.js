@@ -1,48 +1,198 @@
-// QuestEngine.js — pure quest outcome logic, zero Phaser imports.
-// Resolves quest choice outcomes and returns events for scenes to render.
-// Also handles branch quest type: presents two paths with different outcomes.
-
-import { getById as getQuestById } from '#data/quests.js'
-import { getById as getItemById } from '#data/items.js'
-
-const DEFAULT_HP_LOSS = 10
-
-// ---------------------------------------------------------------------------
-// resolveChoice
-// Given a quest ID and the player's chosen index, returns a QuestEvent
-// describing what happened. The scene renders these; the engine never
-// mutates GameState directly.
+// QuestEngine.js — pure quest evaluation logic, zero Phaser imports.
+// Evaluates quest availability, resolves choices, advances stages,
+// and provides Ivan/Alice-specific helpers.
 //
-// Returns:
-//   { correct, xp, items: [{ id, tab, qty }], hpLoss, questId, dialog }
-// ---------------------------------------------------------------------------
-export function resolveChoice(questId, choiceIndex) {
-  const quest = getQuestById(questId)
-  const stage = quest.stages[0]
-  const chosen = stage.choices[choiceIndex]
+// Quest types:
+//   quiz        — single-stage NPC quiz
+//   branch      — single-stage with branching outcomes
+//   multi_stage — multiple sequential stages (Ivan, Alice)
 
-  if (chosen.correct) {
-    const items = (quest.rewards.items ?? []).map(reward => {
-      const itemDef = getItemById(reward.id)
-      return { id: reward.id, tab: itemDef?.tab ?? 'tools', qty: reward.qty }
-    })
-    return {
-      correct:  true,
-      xp:       quest.rewards.xp,
-      items,
-      hpLoss:   0,
-      questId,
-      dialog:   stage.correctDialog,
+import { getById } from '#data/quests.js'
+
+// ---------------------------------------------------------------------------
+// normalizeStory
+// Ensures storyState.flags and storyState.activeQuests exist, so old save
+// files that predate these fields don't cause runtime errors.
+// ---------------------------------------------------------------------------
+function normalizeStory(storyState) {
+  if (!storyState.flags) storyState.flags = {}
+  if (!storyState.activeQuests) storyState.activeQuests = {}
+}
+
+// ---------------------------------------------------------------------------
+// isQuestAvailable
+// Returns { available: boolean, reason: string | null } describing whether
+// the player can start or interact with this quest.
+// ---------------------------------------------------------------------------
+export function isQuestAvailable(questId, storyState) {
+  normalizeStory(storyState)
+  const quest = getById(questId)
+  if (!quest) return { available: false, reason: `Quest "${questId}" not found.` }
+
+  // Already complete (completionFlag is set in flags)
+  if (quest.completionFlag && storyState.flags[quest.completionFlag]) {
+    return { available: false, reason: 'Quest is already complete.' }
+  }
+
+  // Already active and completed
+  const active = storyState.activeQuests[questId]
+  if (active && active.complete) {
+    return { available: false, reason: 'Quest is already complete.' }
+  }
+
+  // Act check — quest requires a minimum act
+  if (quest.act != null && storyState.act < quest.act) {
+    return { available: false, reason: `Requires act ${quest.act}, currently in act ${storyState.act}.` }
+  }
+
+  // Required flags check
+  if (quest.requiresFlags && !quest.requiresFlags.every(flag => storyState.flags[flag])) {
+    const missing = quest.requiresFlags.find(flag => !storyState.flags[flag])
+    return { available: false, reason: `Missing required flag: ${missing}.` }
+  }
+
+  // Exclude flags check
+  if (quest.excludeFlags) {
+    const blocking = quest.excludeFlags.find(flag => storyState.flags[flag])
+    if (blocking) {
+      return { available: false, reason: `Excluded by flag: ${blocking}.` }
     }
   }
 
+  return { available: true, reason: null }
+}
+
+// ---------------------------------------------------------------------------
+// getQuestStatus
+// Returns 'available' | 'active' | 'complete' | 'followed_up' | 'unavailable'
+// ---------------------------------------------------------------------------
+export function getQuestStatus(questId, storyState) {
+  normalizeStory(storyState)
+  const quest = getById(questId)
+  if (!quest) return 'unavailable'
+
+  // Check followed_up first (more specific than complete)
+  if (quest.completionFlag && storyState.flags[quest.completionFlag]) {
+    if (storyState.flags[`quest_${questId}_followed_up`]) {
+      return 'followed_up'
+    }
+    return 'complete'
+  }
+
+  // Check if active
+  if (storyState.activeQuests[questId]) {
+    return 'active'
+  }
+
+  // Check if available
+  const { available } = isQuestAvailable(questId, storyState)
+  if (available) return 'available'
+
+  return 'unavailable'
+}
+
+// ---------------------------------------------------------------------------
+// startQuest
+// Adds quest to storyState.activeQuests with { stage: 0, attempts: 1 }.
+// Returns { started: boolean, questData: object | null }
+// ---------------------------------------------------------------------------
+export function startQuest(questId, storyState) {
+  normalizeStory(storyState)
+  const quest = getById(questId)
+  if (!quest) return { started: false, questData: null }
+
+  // Already active
+  if (storyState.activeQuests[questId]) {
+    return { started: false, questData: quest }
+  }
+
+  // Already complete
+  if (quest.completionFlag && storyState.flags[quest.completionFlag]) {
+    return { started: false, questData: quest }
+  }
+
+  storyState.activeQuests[questId] = { stage: 0, attempts: 1 }
+  return { started: true, questData: quest }
+}
+
+// ---------------------------------------------------------------------------
+// getCurrentStage
+// Returns the current stage data from the quest's stages array, or null.
+// ---------------------------------------------------------------------------
+export function getCurrentStage(questId, storyState) {
+  normalizeStory(storyState)
+  const quest = getById(questId)
+  if (!quest) return null
+
+  const active = storyState.activeQuests[questId]
+  if (!active) return null
+
+  const stage = quest.stages[active.stage]
+  return stage || null
+}
+
+// ---------------------------------------------------------------------------
+// resolveChoice
+// Takes the quest ID, chosen answer index, story state, and player state.
+// Returns a QuestEvent object or null if the quest/choice is invalid.
+// ---------------------------------------------------------------------------
+export function resolveChoice(questId, choiceIndex, storyState, playerState) {
+  normalizeStory(storyState)
+  const quest = getById(questId)
+  if (!quest) return null
+
+  const active = storyState.activeQuests[questId]
+  if (!active) return null
+
+  const stageIndex = active.stage
+  const stage = quest.stages[stageIndex]
+  if (!stage) return null
+
+  const choice = stage.choices[choiceIndex]
+  if (!choice) return null
+
+  const isLastStage = stageIndex >= quest.stages.length - 1
+  const isCorrect = choice.correct !== false
+  const questComplete = isCorrect && isLastStage
+
+  // Build penalty — handle both new-style { type, value } and legacy hpLoss
+  // (margaret_website uses hpLoss; newer quests use { type, value })
+  let penalty = choice.penalty || null
+  if (!penalty && choice.hpLoss) {
+    penalty = { type: 'hp', value: -choice.hpLoss }
+  }
+
+  // HP floor at 1: clamp HP penalty so player can't die from wrong answers.
+  // Only HP penalties are clamped — budget/reputation have no floor by design.
+  if (penalty && penalty.type === 'hp' && penalty.value < 0) {
+    const currentHp = playerState.hp ?? 100
+    const maxLoss = Math.max(0, currentHp - 1)
+    if (-penalty.value > maxLoss) {
+      penalty = { ...penalty, value: maxLoss === 0 ? 0 : -maxLoss }
+    }
+  }
+
+  // stage_reset penalty: the scene resets the player to redo the current
+  // stage. The engine flags it here; the scene applies it via startQuest
+  // or by resetting activeQuests[questId].stage to the current value.
+  const stageReset = penalty != null && penalty.type === 'stage_reset'
+
   return {
-    correct:  false,
-    xp:       0,
-    items:    [],
-    hpLoss:   chosen.hpLoss ?? DEFAULT_HP_LOSS,
     questId,
-    dialog:   stage.wrongDialog,
+    stageIndex,
+    choiceIndex,
+    correct:          choice.correct ?? false,
+    xp:               choice.xp ?? 0,
+    repDelta:         choice.repDelta ?? 0,
+    shameDelta:       choice.shameDelta ?? 0,
+    penalty,
+    itemReward:       choice.itemReward || null,
+    flag:             choice.flag || null,
+    triggerEncounter: choice.triggerEncounter || null,
+    responseDialog:   choice.responseDialog || [],
+    stageReset,
+    questComplete:    stageReset ? false : questComplete,
+    completionFlag:   (stageReset ? false : questComplete) ? (quest.completionFlag || null) : null,
   }
 }
 
@@ -59,7 +209,7 @@ export function isQuestCompleted(questId, completedQuests) {
 // Returns the revisit dialog for a completed quest.
 // ---------------------------------------------------------------------------
 export function getCompletedDialog(questId) {
-  const quest = getQuestById(questId)
+  const quest = getById(questId)
   return quest?.completedDialog ?? ['...']
 }
 
@@ -72,7 +222,7 @@ export function getCompletedDialog(questId) {
 // For 'migrate' branch: returns quiz_start with the quiz choices.
 // ---------------------------------------------------------------------------
 export function resolveBranchChoice(questId, branchKey) {
-  const quest = getQuestById(questId)
+  const quest = getById(questId)
   if (!quest || quest.type !== 'branch') return []
   const branch = quest.branches[branchKey]
   if (!branch) return []
@@ -96,7 +246,7 @@ export function resolveBranchChoice(questId, branchKey) {
 // `won` is true/false. Returns events for the outcome.
 // ---------------------------------------------------------------------------
 export function resolveBranchBattleOutcome(questId, branchKey, won) {
-  const quest = getQuestById(questId)
+  const quest = getById(questId)
   if (!quest || quest.type !== 'branch') return []
   const branch = quest.branches[branchKey]
   if (!branch) return []
@@ -134,7 +284,7 @@ export function resolveBranchBattleOutcome(questId, branchKey, won) {
 // Returns events describing the outcome.
 // ---------------------------------------------------------------------------
 export function resolveQuizAnswer(questId, branchKey, answerIndex) {
-  const quest = getQuestById(questId)
+  const quest = getById(questId)
   if (!quest || quest.type !== 'branch') return []
   const branch = quest.branches[branchKey]
   if (!branch || !branch.quiz) return []
@@ -179,11 +329,64 @@ export function resolveQuizAnswer(questId, branchKey, answerIndex) {
 // Used by scenes to display the choice UI.
 // ---------------------------------------------------------------------------
 export function getBranchLabels(questId) {
-  const quest = getQuestById(questId)
+  const quest = getById(questId)
   if (!quest || quest.type !== 'branch') return []
 
   return Object.entries(quest.branches).map(([key, branch]) => ({
     key,
     label: branch.label,
   }))
+}
+
+// advanceStage
+// Increments storyState.activeQuests[questId].stage.
+// If stage >= quest stages length, marks quest complete.
+// Returns { advanced: boolean, newStage: number, questComplete: boolean }
+// ---------------------------------------------------------------------------
+export function advanceStage(questId, storyState) {
+  normalizeStory(storyState)
+  const quest = getById(questId)
+  if (!quest) return { advanced: false, newStage: 0, questComplete: false }
+
+  const active = storyState.activeQuests[questId]
+  if (!active) return { advanced: false, newStage: 0, questComplete: false }
+
+  active.stage += 1
+  const newStage = active.stage
+  const questComplete = newStage >= quest.stages.length
+
+  if (questComplete && quest.completionFlag) {
+    storyState.flags[quest.completionFlag] = true
+  }
+
+  return { advanced: true, newStage, questComplete }
+}
+
+// ---------------------------------------------------------------------------
+// getIvanLocation
+// Returns the location where Ivan should appear for the given act.
+// Uses the ivanLocations map from the intern_ivan_roaming quest.
+// Returns null if act is out of range.
+// ---------------------------------------------------------------------------
+export function getIvanLocation(act) {
+  const ivanQuest = getById('intern_ivan_roaming')
+  if (!ivanQuest || !ivanQuest.ivanLocations) return null
+  return ivanQuest.ivanLocations[act] || null
+}
+
+// ---------------------------------------------------------------------------
+// canAdvanceAliceStage
+// Checks if Alice's current stage's requiresFlags are all met.
+// Returns boolean.
+// ---------------------------------------------------------------------------
+export function canAdvanceAliceStage(stageIndex, storyFlags) {
+  const aliceQuest = getById('architect_alice_design')
+  if (!aliceQuest) return false
+
+  if (stageIndex < 0 || stageIndex >= aliceQuest.stages.length) return false
+
+  const stage = aliceQuest.stages[stageIndex]
+  if (!stage.requiresFlags) return true
+
+  return stage.requiresFlags.every(flag => !!storyFlags[flag])
 }
