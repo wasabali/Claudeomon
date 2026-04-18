@@ -1019,6 +1019,45 @@ const STORY = {
     ],
   },
 
+  npc_intern_ivan: {
+    id:    'npc_intern_ivan',
+    pages: [
+      "Hi! I'm Ivan. I'm the new intern.",
+      'I have SO many questions.',
+    ],
+  },
+  npc_intern_ivan_act2: {
+    id:    'npc_intern_ivan_act2',
+    pages: [
+      "Oh hey, it's you again!",
+      "I've been reading about Kubernetes.",
+      'I have more questions.',
+    ],
+  },
+  npc_intern_ivan_act3: {
+    id:    'npc_intern_ivan_act3',
+    pages: [
+      "I think I'm starting to get it.",
+      "The cloud is just... other people's computers?",
+      'Anyway, I had another question.',
+    ],
+  },
+  npc_intern_ivan_act4: {
+    id:    'npc_intern_ivan_act4',
+    pages: [
+      "I've been thinking about this a lot.",
+      "Like... a LOT a lot.",
+      'What even IS a computer?',
+    ],
+  },
+  npc_intern_ivan_finale: {
+    id:    'npc_intern_ivan_finale',
+    pages: [
+      'I got promoted! To Junior!',
+      'One last question before I go...',
+      'What is infrastructure?',
+    ],
+  },
 }
 
 // ---------------------------------------------------------------------------
