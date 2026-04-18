@@ -27,6 +27,8 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 |---|---|---|---|---|
 | `:(){ :|:& };:` | Cursed | 25 damage/turn for 3 turns | +1 Shame, -10 Rep | Hidden: DNS Swamp bash history puzzle, Shell Cavern |
 | `rm -rf /` | Nuclear | Wipes all statuses and buffs (both sides) | +2 Shame, -18 Rep | rm-rf Rune, Three Am Tavern |
+| `sudo su -` | Cursed | 40 damage | +1 Shame, -10 Rep | sudo su Saga, Shell Cavern |
+| `*/1 * * * * ./attack.sh` | Cursed | 60 damage | +1 Shame, -8 Rep | Cron Kristina, Shell Cavern |
 
 ---
 
@@ -49,7 +51,9 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 | `sudo chmod 777 /` | Cursed | Removes all permission statuses | +1 Shame, -12 Rep | The Root Whisperer, Three Am Tavern |
 | `hardcode the secret` | Cursed | Solves auth challenge instantly | +1 Shame, -20 Rep | Hardcode Henrik, Three Am Tavern |
 | `ufw disable` | Nuclear | 80 damage | +2 Shame, -20 Rep | The Root Whisperer (after 3 shame), Three Am Tavern |
+| `git add .env && git commit` | Nuclear | 80 damage | +2 Shame, -20 Rep | .env Erik, Security Vault |
 | `curl example.com | sudo bash` | Cursed | Instant win vs containers | +1 Shame, -12 Rep | Hidden: Privileged Petra in the node_modules Maze, Node Modules Maze |
+| `EXEC xp_cmdshell` | Nuclear | 999 damage | +3 Shame, -20 Rep | Hidden: DO_NOT_TOUCH.exe terminal in OldCorp basement, Oldcorp Basement |
 
 ---
 
@@ -94,6 +98,7 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 |---|---|---|---|---|
 | `deploy directly to prod` | Nuclear | Instant win | +2 Shame, -15 Rep | Hotfix Håkon, Three Am Tavern |
 | `restart prod without notice` | Nuclear | Full heal | +2 Shame, -16 Rep | The Downtime Dealer, Three Am Tavern |
+| `java -jar app-2006-FINAL-v2-REAL.jar` | Cursed | 40 damage | +1 Shame, -6 Rep | Legacy Leif, Deprecated Azure Region |
 | `az group delete --yes --force-deletion-types` | Nuclear | Instant win vs legacy systems | +2 Shame, -15 Rep | Hidden: Deprecated Dagfinn in the Server Graveyard, Server Graveyard |
 
 ---
@@ -119,7 +124,6 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 | `git commit --no-verify` | Cursed | Bypass pre-commit hooks | +1 Shame, -9 Rep | Skip-Tests Sigrid, Three Am Tavern |
 | `git rebase -i HEAD~999` | Nuclear | Undo 3 turns | +2 Shame, -13 Rep | The Rebase Reverend, Three Am Tavern |
 | `terraform destroy` | Nuclear | Instant win vs legacy systems | +2 Shame, -15 Rep | Hidden: Deprecated Dagfinn in the Server Graveyard, Server Graveyard |
-| `EXEC xp_cmdshell` | Nuclear | 999 damage | +3 Shame, -20 Rep | Hidden: DO_NOT_TOUCH.exe terminal in OldCorp basement, Oldcorp Basement |
 
 ---
 
@@ -163,6 +167,7 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 |---|---|---|---|---|
 | `kubectl delete ns prod` | Cursed | 80 damage | +1 Shame, -14 Rep | kubectl Karen, Three Am Tavern |
 | `kubectl delete pod --all` | Nuclear | Clears all enemy buffs and statuses | +2 Shame, -14 Rep | kubectl Karen, Three Am Tavern |
+| `kubectl apply -f /dev/stdin` | Cursed | 40 damage | +1 Shame, -8 Rep | YOLO Yaml Ylva, Kubernetes Colosseum |
 | `kubectl delete ns production --grace-period=0 --force` | Nuclear | 999 damage | +3 Shame, -50 Rep | Shadow Engineer title — unlocked at 10 Shame Points, Shadow Realm |
 
 ---
@@ -178,6 +183,7 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 | `KQL query` | Standard | Reveals enemy's next 3 moves | Write a KQL query. Get 47 results. None of them helpful. Reveals enemy attack pattern anyway. | Azure Town diagnostic NPC, Production Plains |
 | `define SLIs` | Optimal | 10+ damage (scales with observations) | Measure what matters. Damage scales with turns observed. The longer you watch, the harder you hit. | Quest: Define Your SLOs, Architecture District |
 | `follow the runbook` | Standard | Heals 25 HP | Step 1: Don't panic. Step 2: Follow the runbook. Reliable 25 HP heal. No drama. | Quest: Write Your First Runbook, Production Plains |
+| `az monitor metrics list` | Standard | Reveals enemy info | Pull live metrics from Azure Monitor. Reveals enemy domain and current status effects. | Metrics Maja, Architecture District |
 
 ### 💀 Observability — Cursed & Nuclear
 
@@ -190,9 +196,9 @@ Every skill in Cloud Quest is a real CLI command. This page lists them all, orga
 
 ## 📊 Stats
 
-- **Total skills:** 84
-- **By domain:** Linux (10), Security (11), Serverless (8), Cloud (13), IaC (13), Containers (9), Kubernetes (11), Observability (9)
-- **Cursed/Nuclear:** 23
+- **Total skills:** 90
+- **By domain:** Linux (12), Security (13), Serverless (8), Cloud (14), IaC (12), Containers (9), Kubernetes (12), Observability (10)
+- **Cursed/Nuclear:** 28
 
 ---
 
