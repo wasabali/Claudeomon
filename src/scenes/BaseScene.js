@@ -63,9 +63,9 @@ export class BaseScene extends Phaser.Scene {
   }
 
   // Play an SFX by ID with priority-based channel arbitration.
-  // Priority 4 always plays and interrupts lower-priority SFX to make room.
-  // Priority 3 can interrupt 1–2, but is dropped if both channels are occupied by equal/higher priority SFX.
-  // Priority 1–2 are skipped if a higher-priority SFX is playing or no channel is available.
+  // Priority 4 always plays and evicts the lowest-priority SFX to make room.
+  // Priority 3 can evict 1–2, but is dropped if both channels hold equal/higher priority SFX.
+  // Priority 1–2 are dropped if a higher-priority SFX is playing or no channel is available.
   // Max 2 concurrent SFX (GBC realism); excess SFX are dropped rather than queued.
   playSfx(id) {
     const preset = getSfxPreset(id)
