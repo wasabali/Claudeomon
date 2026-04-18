@@ -1,86 +1,165 @@
-// Menu.js — Reusable D-pad navigable list menu for Cloud Quest.
-// No battle-specific logic. Scenes pass items and receive selection callbacks.
+// Menu.js — D-pad navigable list menu for Cloud Quest.
+// Renders a vertical list of items with an arrow cursor. Up/Down to move,
+// Z/Enter to confirm, X to cancel. Positioned relative to the dialog box
+// area so it layers naturally with DialogBox.
 //
 // Usage:
-//   const menu = new Menu(scene, [
-//     { label: 'kubectl rollout restart', value: 'kubectl_rollout_restart' },
-//     { label: 'blame DNS',              value: 'blame_dns', disabled: true },
-//   ], { x: 10, y: 400, width: 600, onSelect: (item) => { ... }, onCancel: () => { ... } })
+//   const menu = new Menu(this)
+//   menu.show(['Option A', 'Option B'], {
+//     title: '> FAST TRAVEL',
+//     onSelect: (index, label) => { /* chosen */ },
+//     onCancel: () => { /* dismissed */ },
+//   })
+//
+// Legacy positional API (HEAD compat):
+//   const menu = new Menu(scene, items, { x, y, width, onSelect, onCancel })
 //   menu.show()
 
-import { CONFIG } from '../config.js'
+import { CONFIG, COLORS } from '../config.js'
 
-const LINE_HEIGHT    = 40
-const ARROW_CHAR     = '►'
-const FONT_SIZE      = '22px'
+// Layout constants — sized for the game's display resolution (CONFIG.WIDTH × CONFIG.HEIGHT).
+const BOX_HEIGHT    = 216
+const BOX_Y         = CONFIG.HEIGHT - BOX_HEIGHT
+const PADDING_X     = 24
+const PADDING_Y     = 20
+const LINE_HEIGHT   = 40
+const FONT_SIZE     = '22px'
+const ARROW_CHAR    = '►'
+const ARROW_OFFSET  = 24
 const COLOR_NORMAL   = '#f8f8f8'
 const COLOR_SELECTED = '#ffe066'
 const COLOR_DISABLED = '#555555'
-const PANEL_KEY      = 'menu_window_9slice'
+const PANEL_KEY     = 'menu_panel_9slice'
+
+// Maximum visible items before the list would clip the panel.
+// Derived from: (BOX_HEIGHT - PADDING_Y*2 - LINE_HEIGHT for title) / LINE_HEIGHT
+const MAX_VISIBLE_ITEMS = 4
 
 export class Menu {
+  /**
+   * @param {Phaser.Scene} scene  - The scene that owns this menu.
+   * @param {Array}  [items]      - Optional initial item list (legacy API).
+   * @param {Object} [options]    - Legacy options: x, y, width, onSelect, onCancel.
+   */
   constructor(scene, items, options = {}) {
-    this.scene     = scene
-    this._items    = items
-    this._x        = options.x ?? 0
-    this._y        = options.y ?? 0
-    this._width    = options.width ?? CONFIG.WIDTH
-    this._onSelect = options.onSelect ?? null
-    this._onCancel = options.onCancel ?? null
-    this._index    = this._findFirstEnabled(items)
-    this._visible  = false
+    this.scene      = scene
+    this._active    = false
+    this._items     = items ?? []
+    this._selected  = this._findFirstEnabled(this._items)
+    this._onSelect  = options.onSelect ?? null
+    this._onCancel  = options.onCancel ?? null
 
     this._ensureTexture()
-    this._build()
+    this._buildChrome()
     this.hide()
   }
 
-  show() {
-    this._visible = true
+  // ── Public API ──────────────────────────────────────────────────────────────
+
+  /**
+   * Display a list menu for the player to choose from.
+   * @param {string[]|Object[]} items - Menu item labels or item objects.
+   * @param {Object} [opts]
+   * @param {string}   [opts.title]    - Optional header line above the list.
+   * @param {Function} [opts.onSelect] - Called with (index, label) on confirm.
+   * @param {Function} [opts.onCancel] - Called when X is pressed to cancel.
+   */
+  show(items, opts = {}) {
+    const list = items ?? this._items
+    if (!list || list.length === 0) return
+
+    this._items    = list
+    this._selected = 0
+    this._onSelect = opts.onSelect ?? this._onSelect
+    this._onCancel = opts.onCancel ?? this._onCancel
+    this._active   = true
+
+    this._titleText.setText(opts.title ?? '')
+
+    this._renderItems()
+    this._updateArrow()
     this._container.setVisible(true)
-    this._refreshAll()
   }
 
+  /** Hide and deactivate the menu. */
   hide() {
-    this._visible = false
+    this._active = false
     this._container.setVisible(false)
   }
 
-  destroy() {
-    this._container.destroy()
+  /** True while the menu is visible and accepting input. */
+  get isActive() {
+    return this._active
   }
 
+  /** Backward-compat alias for isActive. */
   get isVisible() {
-    return this._visible
+    return this._active
   }
 
   get selectedIndex() {
-    return this._index
+    return this._selected
   }
 
   get selectedItem() {
-    return this._items[this._index] ?? null
+    return this._items[this._selected] ?? null
   }
 
+  /** Replace the item list and reset selection. */
   setItems(items) {
-    this._items = items
-    this._index = this._findFirstEnabled(items)
-    this._rebuild()
-    if (this._visible) this._refreshAll()
+    this._items    = items
+    this._selected = this._findFirstEnabled(items)
+    if (this._active) this.show(items)
   }
 
+  /** Handle directional/confirm/cancel key input (legacy API). */
   handleInput(key) {
-    if (!this._visible) return
-
+    if (!this._active) return
     if (key === 'up') {
-      this._moveUp()
+      this.moveUp()
     } else if (key === 'down') {
-      this._moveDown()
+      this.moveDown()
     } else if (key === 'confirm') {
-      this._confirm()
+      this.confirm()
     } else if (key === 'cancel') {
-      if (this._onCancel) this._onCancel()
+      this.cancel()
     }
+  }
+
+  /** Move selection up by one (wraps). */
+  moveUp() {
+    if (!this._active || this._items.length === 0) return
+    this._selected = (this._selected - 1 + this._items.length) % this._items.length
+    this._updateArrow()
+  }
+
+  /** Move selection down by one (wraps). */
+  moveDown() {
+    if (!this._active || this._items.length === 0) return
+    this._selected = (this._selected + 1) % this._items.length
+    this._updateArrow()
+  }
+
+  /** Confirm the current selection. */
+  confirm() {
+    if (!this._active || this._items.length === 0) return
+    const idx   = this._selected
+    const label = this._items[idx]
+    this.hide()
+    if (this._onSelect) this._onSelect(idx, label)
+  }
+
+  /** Cancel / dismiss the menu. */
+  cancel() {
+    if (!this._active) return
+    this.hide()
+    if (this._onCancel) this._onCancel()
+  }
+
+  /** Clean up Phaser objects — call when scene shuts down. */
+  destroy() {
+    this._active = false
+    this._container.destroy()
   }
 
   // ── Private ─────────────────────────────────────────────────────────────────
@@ -100,89 +179,80 @@ export class Menu {
     g.destroy()
   }
 
-  _build() {
-    this._container = this.scene.add.container(0, 0).setDepth(90)
+  _buildChrome() {
+    this._container = this.scene.add.container(0, 0)
+    this._container.setDepth(101) // above DialogBox (100)
 
-    const totalHeight = this._items.length * LINE_HEIGHT + 20
+    // Background panel
     if (typeof this.scene.add.nineslice === 'function' && this.scene.textures.exists(PANEL_KEY)) {
-      this._bg = this.scene.add.nineslice(
-        this._x, this._y, PANEL_KEY, 0,
-        this._width, totalHeight, 4, 4, 4, 4,
-      ).setOrigin(0, 0)
+      this._bg = this.scene.add.nineslice(0, BOX_Y, PANEL_KEY, 0, CONFIG.WIDTH, BOX_HEIGHT, 4, 4, 4, 4)
+        .setOrigin(0, 0)
     } else {
-      this._bg = this.scene.add.rectangle(
-        this._x, this._y, this._width, totalHeight, 0x0d1117,
-      ).setOrigin(0, 0).setStrokeStyle(2, 0x334155)
+      this._bg = this.scene.add.rectangle(0, BOX_Y, CONFIG.WIDTH, BOX_HEIGHT, 0x0d1117)
+        .setOrigin(0, 0)
+        .setStrokeStyle(2, 0x334155)
     }
     this._container.add(this._bg)
 
+    // Title text (optional header)
+    this._titleText = this.scene.add.text(
+      PADDING_X,
+      BOX_Y + PADDING_Y,
+      '',
+      { fontFamily: CONFIG.FONT, fontSize: FONT_SIZE, color: '#9bc5ff' },
+    )
+    this._container.add(this._titleText)
+
+    // Item texts — pre-allocate up to MAX_VISIBLE_ITEMS slots.
+    // Items beyond this limit are not rendered (scroll not implemented yet).
+    this._itemTexts = []
+    for (let i = 0; i < MAX_VISIBLE_ITEMS; i++) {
+      const t = this.scene.add.text(
+        PADDING_X + ARROW_OFFSET,
+        BOX_Y + PADDING_Y + LINE_HEIGHT + (i * LINE_HEIGHT),
+        '',
+        { fontFamily: CONFIG.FONT, fontSize: FONT_SIZE, color: COLORS.MENU_TEXT },
+      )
+      this._container.add(t)
+      this._itemTexts.push(t)
+    }
+
+    // Selection arrow
     this._arrow = this.scene.add.text(
-      this._x + 10,
-      this._y + 10,
+      PADDING_X,
+      BOX_Y + PADDING_Y + LINE_HEIGHT,
       ARROW_CHAR,
-      { fontFamily: CONFIG.FONT, fontSize: FONT_SIZE, color: COLOR_SELECTED },
+      { fontFamily: CONFIG.FONT, fontSize: FONT_SIZE, color: COLORS.MENU_ARROW },
     )
     this._container.add(this._arrow)
-
-    this._labels = []
-    for (let i = 0; i < this._items.length; i++) {
-      const item = this._items[i]
-      const label = this.scene.add.text(
-        this._x + 40,
-        this._y + 10 + i * LINE_HEIGHT,
-        item.label,
-        { fontFamily: CONFIG.FONT, fontSize: FONT_SIZE, color: COLOR_NORMAL },
-      )
-      this._labels.push(label)
-      this._container.add(label)
-    }
   }
 
-  _rebuild() {
-    this._container.destroy()
-    this._build()
-    if (this._visible) this._container.setVisible(true)
-  }
-
-  _refreshAll() {
-    this._arrow.setY(this._y + 10 + this._index * LINE_HEIGHT)
-    for (let i = 0; i < this._labels.length; i++) {
-      const item = this._items[i]
-      const isSelected = i === this._index
-      if (item.disabled) {
-        this._labels[i].setColor(COLOR_DISABLED)
+  _renderItems() {
+    for (let i = 0; i < this._itemTexts.length; i++) {
+      if (i < this._items.length) {
+        const item = this._items[i]
+        const label = typeof item === 'string' ? item : (item.label ?? String(item))
+        const isDisabled = item.disabled ?? false
+        this._itemTexts[i].setText(label).setVisible(true)
+        if (isDisabled) {
+          this._itemTexts[i].setColor(COLOR_DISABLED)
+        } else {
+          this._itemTexts[i].setColor(i === this._selected ? COLOR_SELECTED : COLOR_NORMAL)
+        }
       } else {
-        this._labels[i].setColor(isSelected ? COLOR_SELECTED : COLOR_NORMAL)
+        this._itemTexts[i].setText('').setVisible(false)
       }
     }
   }
 
-  _moveUp() {
-    let next = this._index - 1
-    while (next >= 0 && this._items[next].disabled) next--
-    if (next >= 0) {
-      this._index = next
-      this._refreshAll()
-    }
-  }
-
-  _moveDown() {
-    let next = this._index + 1
-    while (next < this._items.length && this._items[next].disabled) next++
-    if (next < this._items.length) {
-      this._index = next
-      this._refreshAll()
-    }
-  }
-
-  _confirm() {
-    const item = this._items[this._index]
-    if (!item || item.disabled) return
-    if (this._onSelect) this._onSelect(item)
+  _updateArrow() {
+    this._arrow.setY(BOX_Y + PADDING_Y + LINE_HEIGHT + (this._selected * LINE_HEIGHT))
+    this._renderItems()
   }
 
   _findFirstEnabled(items) {
-    const idx = items.findIndex(item => !item.disabled)
+    if (!items || items.length === 0) return 0
+    const idx = items.findIndex(item => !(item.disabled ?? false))
     return idx === -1 ? 0 : idx
   }
 }

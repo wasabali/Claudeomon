@@ -17,6 +17,36 @@ export const ENCOUNTER_POOLS = {
     rare:   ['scope_creep', 'infinite_sprint'],
     cursed: ['the_gantt_chart'],
   },
+  jira_dungeon_1: {
+    common: ['stale_ticket', 'missing_acceptance_criteria', 'blocked_by_qa'],
+    rare:   ['scope_creep'],
+    cursed: [],
+  },
+  jira_dungeon_2: {
+    common: ['flaky_ci_pipeline', 'config_drift', 'stale_ticket'],
+    rare:   ['scope_creep', 'infinite_sprint'],
+    cursed: [],
+  },
+  jira_dungeon_3: {
+    common: ['config_drift', 'missing_acceptance_criteria'],
+    rare:   ['infinite_sprint'],
+    cursed: ['the_gantt_chart'],
+  },
+  azure_town: {
+    common: ['503_error', 'config_drift'],
+    rare:   ['azure_bill_spike'],
+    cursed: [],
+  },
+  cloud_console_1: {
+    common: ['config_drift', 'flaky_ci_pipeline'],
+    rare:   ['azure_bill_spike'],
+    cursed: [],
+  },
+  cloud_console_2: {
+    common: ['config_drift', '503_error'],
+    rare:   ['azure_bill_spike', 'cold_start_cascade'],
+    cursed: [],
+  },
   production_plains: {
     common: ['high_cpu', 'disk_full', '503_error'],
     rare:   ['prod_incident', 'runaway_process'],

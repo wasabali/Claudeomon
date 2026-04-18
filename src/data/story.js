@@ -1058,6 +1058,71 @@ const STORY = {
       'What is infrastructure?',
     ],
   },
+  // ─── Dungeon NPCs ──────────────────────────────────────────────────────────
+
+  npc_jira_dungeon_guard: {
+    id:    'npc_jira_dungeon_guard',
+    pages: [
+      "Turn back. There are story points ahead.",
+      "You need 13 story points to open the door\nto the Sprint Corridor.",
+    ],
+  },
+  npc_jira_dungeon_scope_creep: {
+    id:    'npc_jira_dungeon_scope_creep',
+    pages: [
+      "Welcome to the Sprint Corridor.\nThe scope here only grows.",
+      "Beat the encounters to earn story points.\nYou'll need them all.",
+    ],
+  },
+  npc_jira_dungeon_board_room: {
+    id:    'npc_jira_dungeon_board_room',
+    pages: [
+      "This is The Board Room.",
+      "The Gantt Chart has been waiting for you.\nIt has been waiting for everyone.",
+    ],
+  },
+  npc_cloud_console_lobby: {
+    id:    'npc_cloud_console_lobby',
+    pages: [
+      "Welcome to the Cloud Console.",
+      "Unlock 3 resource terminals to access\nthe Resource Group Chamber.",
+      "Each terminal requires a different\ndomain skill: cloud, iac, security.",
+    ],
+  },
+  npc_cloud_console_boss: {
+    id:    'npc_cloud_console_boss',
+    pages: [
+      "The Resource Group Chamber.",
+      "The Azure Bill Spike lives here.\nIt feeds on unattended auto-scale.",
+    ],
+  },
+
+  // ─── Region transition messages ─────────────────────────────────────────────
+
+  region_under_construction: {
+    id:    'region_under_construction',
+    pages: [
+      "The path ahead is under construction. Come back in the next sprint.",
+    ],
+  },
+  dungeon_points_required: {
+    id:    'dungeon_points_required',
+    pages: [
+      "You need 13 story points to open this door.",
+    ],
+  },
+  resource_locks_required: {
+    id:    'resource_locks_required',
+    pages: [
+      "Unlock all 3 resource terminals to proceed.",
+    ],
+  },
+  fast_travel_prompt: {
+    id:    'fast_travel_prompt',
+    pages: [
+      '> AZURE TERMINAL — FAST TRAVEL\n> Select a destination...',
+    ],
+  },
 }
 
 // ---------------------------------------------------------------------------
