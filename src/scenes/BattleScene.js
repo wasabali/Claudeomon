@@ -3,7 +3,6 @@ import { BaseScene } from '#scenes/BaseScene.js'
 import { CONFIG } from '../config.js'
 import { GameState, markDirty } from '#state/GameState.js'
 import { getById as getSkillById } from '#data/skills.js'
-import { getById as getStoryById } from '#data/story.js'
 import {
   BATTLE_MODES,
   createBattleState,
@@ -134,8 +133,8 @@ export class BattleScene extends BaseScene {
     this._budgetBarBg = this.add.rectangle(BUDGET_METER_X + 8, BUDGET_METER_Y + 2, BUDGET_BAR_W, BUDGET_BAR_H, 0x333300).setOrigin(0, 0)
     this._budgetBar   = this.add.rectangle(BUDGET_METER_X + 8, BUDGET_METER_Y + 2, BUDGET_BAR_W, BUDGET_BAR_H, 0xffe066).setOrigin(0, 0)
 
-    // SLA timer (INCIDENT only)
-    if (mode === BATTLE_MODES.INCIDENT) {
+    // SLA timer (INCIDENT and SCRIPTED modes)
+    if (mode === BATTLE_MODES.INCIDENT || mode === BATTLE_MODES.SCRIPTED) {
       this._slaText = this.add.text(SLA_TIMER_X, SLA_TIMER_Y, this._slaLabel(), {
         ...textStyle, color: '#ff6666',
       })
@@ -384,9 +383,14 @@ export class BattleScene extends BaseScene {
         this.time.delayedCall(1000, callback)
         break
 
-      case 'boss_outcome':
-        callback()
+      case 'boss_outcome': {
+        GameState.story.flags = GameState.story.flags || {}
+        GameState.story.flags.lastBossOutcome = event.value
+        markDirty()
+        this._showLog(`Outcome: ${event.value}`)
+        this.time.delayedCall(600, callback)
         break
+      }
 
       case 'layer_transition':
         this._showLog('Root cause revealed! A deeper layer emerges...')

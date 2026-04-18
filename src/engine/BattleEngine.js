@@ -146,9 +146,9 @@ export function skillPhase(state, skill) {
 
   if (effect.type === 'damage') {
     let dmg = calculateDamage(skill, state.opponent.domain) // always use true domain for calculation
-    // Throttle status halves outgoing damage
+    // Throttle status halves outgoing damage while preserving legitimate zero-damage results
     if (state.playerStatuses.find(s => s.name === 'throttle')) {
-      dmg = Math.max(1, Math.floor(dmg * 0.5))
+      dmg = Math.max(0, Math.floor(dmg * 0.5))
     }
     state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
     events.push({ type: 'damage', target: 'opponent', value: dmg })
@@ -269,7 +269,7 @@ export function slaTickPhase(state) {
 //   then advances to the next move in their deck and telegraphs it.
 // ---------------------------------------------------------------------------
 export function enemyPhase(state) {
-  if (state.mode === BATTLE_MODES.INCIDENT) return []
+  if (state.mode === BATTLE_MODES.INCIDENT || state.mode === BATTLE_MODES.SCRIPTED) return []
 
   const events = []
   const moveId = state.telegraphedMove ?? 'basic_attack'
@@ -319,14 +319,17 @@ export function incidentAttackPhase(state) {
         events.push({ type: 'sla_tick', value: state.slaTimer, source: 'uptime_drain' })
         if (state.slaTimer === 0 && !state.slaBreach) {
           state.slaBreach = true
-          state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
-          state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
-          events.push({
-            type:           'sla_breach',
-            target:         'player',
-            value:          SLA_BREACH_HP_PENALTY,
-            reputationLoss: SLA_BREACH_REP_PENALTY,
-          })
+          // SCRIPTED encounters: no penalty on breach — escape handled in turnEndPhase
+          if (state.mode !== BATTLE_MODES.SCRIPTED) {
+            state.player.hp         = Math.max(0, state.player.hp - SLA_BREACH_HP_PENALTY)
+            state.player.reputation = Math.max(REPUTATION_MIN, state.player.reputation - SLA_BREACH_REP_PENALTY)
+            events.push({
+              type:           'sla_breach',
+              target:         'player',
+              value:          SLA_BREACH_HP_PENALTY,
+              reputationLoss: SLA_BREACH_REP_PENALTY,
+            })
+          }
         }
       }
       break

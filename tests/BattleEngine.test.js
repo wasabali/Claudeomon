@@ -1213,6 +1213,27 @@ describe('SCRIPTED mode — phantom battle', () => {
     expect(events).toContainEqual(expect.objectContaining({ type: 'scripted_escape' }))
     expect(events).toContainEqual(expect.objectContaining({ type: 'battle_end', value: 'escape' }))
   })
+
+  it('enemyPhase returns empty array in SCRIPTED mode (no active enemy turn)', () => {
+    const state = createBattleState(BATTLE_MODES.SCRIPTED, makePlayer(), makeOpponent({ hp: 9999 }), { slaTimer: 3 })
+    state.turn = 2
+    const events = enemyPhase(state)
+    expect(events).toHaveLength(0)
+  })
+
+  it('UPTIME_DRAIN in SCRIPTED mode does not penalise HP or reputation on breach', () => {
+    const state = createBattleState(
+      BATTLE_MODES.SCRIPTED, makePlayer({ hp: 100, reputation: 50 }),
+      makeAttackOpponent(['uptime_drain']),
+      { slaTimer: 1 },
+    )
+    state.turn = 2
+    const events = incidentAttackPhase(state)
+    expect(state.slaBreach).toBe(true)
+    expect(state.player.hp).toBe(100)
+    expect(state.player.reputation).toBe(50)
+    expect(events.find(e => e.type === 'sla_breach')).toBeUndefined()
+  })
 })
 
 // ---------------------------------------------------------------------------
