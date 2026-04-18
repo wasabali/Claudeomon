@@ -12,6 +12,7 @@ import { ENCOUNTER_POOLS, getAll as getAllEncounters } from '../src/data/encount
 import { getAll as getAllThreads, getByCommandId } from '../src/data/stackoverflow.js'
 import { getById as getGateById, getAll as getAllGates, getBy as getGatesBy } from '../src/data/gates.js'
 import { getAll as getAllInteractions } from '../src/data/interactions.js'
+import { getById as getAudioById, getAll as getAllAudio, getBy as getAudioBy, getSfxPreset, getBgmConfig, getAllSfx, getAllBgm } from '../src/data/audio.js'
 import { getById as getGymById, getAll as getAllGyms, getBy as getGymsBy } from '../src/data/gyms.js'
 
 const VALID_TIERS = ['optimal', 'standard', 'shortcut', 'cursed', 'nuclear']
@@ -26,6 +27,7 @@ const DATA_FILES = [
   'stackoverflow.js',
   'gates.js',
   'interactions.js',
+  'audio.js',
   'gyms.js',
 ].map(file => path.join(process.cwd(), 'src', 'data', file))
 
@@ -402,6 +404,90 @@ describe('vb6_billing_horror encounter', () => {
     expect(enc.immuneDomains).toEqual(['cloud', 'iac', 'kubernetes', 'containers'])
     expect(enc.hp).toBe(80)
     expect(enc.sla).toBe(5)
+  })
+})
+
+describe('audio registry', () => {
+  it('defines exactly 21 SFX presets', () => {
+    expect(getAllSfx()).toHaveLength(21)
+  })
+
+  it('defines exactly 17 BGM configs', () => {
+    expect(getAllBgm()).toHaveLength(17)
+  })
+
+  it('getSfxPreset returns correct entry', () => {
+    const preset = getSfxPreset('sfx_confirm')
+    expect(preset).toBeDefined()
+    expect(preset.id).toBe('sfx_confirm')
+    expect(preset.priority).toBe(2)
+  })
+
+  it('getBgmConfig returns correct entry', () => {
+    const config = getBgmConfig('battle_incident')
+    expect(config).toBeDefined()
+    expect(config.id).toBe('battle_incident')
+    expect(config.loop).toBe(true)
+  })
+
+  it('all SFX entries have required fields with valid types', () => {
+    getAllSfx().forEach(sfx => {
+      expect(typeof sfx.id).toBe('string')
+      expect(typeof sfx.seed).toBe('number')
+      expect(sfx.volume).toBeGreaterThanOrEqual(0)
+      expect(sfx.volume).toBeLessThanOrEqual(1)
+      expect([1, 2, 3, 4]).toContain(sfx.priority)
+      expect(typeof sfx.duration).toBe('number')
+      expect(sfx.duration).toBeGreaterThan(0)
+      expect(typeof sfx.description).toBe('string')
+    })
+  })
+
+  it('all BGM entries have required fields with valid types', () => {
+    getAllBgm().forEach(bgm => {
+      expect(typeof bgm.id).toBe('string')
+      expect(typeof bgm.file).toBe('string')
+      expect(bgm.file).toMatch(/^assets\/audio\/bgm\/.+\.ogg$/)
+      expect(bgm.volume).toBeGreaterThanOrEqual(0)
+      expect(bgm.volume).toBeLessThanOrEqual(1)
+      expect(typeof bgm.loop).toBe('boolean')
+    })
+  })
+
+  it('all SFX IDs match their object keys', () => {
+    getAllSfx().forEach(sfx => {
+      expect(getSfxPreset(sfx.id)).toBe(sfx)
+    })
+  })
+
+  it('all BGM IDs match their object keys', () => {
+    getAllBgm().forEach(bgm => {
+      expect(getBgmConfig(bgm.id)).toBe(bgm)
+    })
+  })
+
+  it('all SFX seeds are unique', () => {
+    const seeds = getAllSfx().map(sfx => sfx.seed)
+    expect(new Set(seeds).size).toBe(seeds.length)
+  })
+
+  it('victory and game_over tracks do not loop', () => {
+    expect(getBgmConfig('victory').loop).toBe(false)
+    expect(getBgmConfig('game_over').loop).toBe(false)
+  })
+
+  it('follows the standard registry pattern with getById, getAll, getBy', () => {
+    expect(getAudioById('sfx_confirm')).toBeDefined()
+    expect(getAudioById('sfx_confirm').id).toBe('sfx_confirm')
+    expect(getAudioById('battle_incident')).toBeDefined()
+    expect(getAudioById('battle_incident').id).toBe('battle_incident')
+
+    const all = getAllAudio()
+    expect(all.length).toBe(21 + 17)
+
+    const priority4 = getAudioBy('priority', 4)
+    expect(priority4.length).toBeGreaterThan(0)
+    priority4.forEach(sfx => expect(sfx.priority).toBe(4))
   })
 })
 

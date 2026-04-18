@@ -76,6 +76,10 @@ export const GameState = {
     isDirty:      false,  // true when there are unsaved changes
     lastSavedAt:  null,   // ISO timestamp of last save
     dialogActive: false,  // true while dialog or choice menu is open
+    userMuted:    false,
+    masterVolume: 0.7,
+    bgmVolume:    0.7,
+    sfxVolume:    0.8,
   },
 }
 
@@ -207,6 +211,10 @@ export function initNewGame(name, mascot) {
     isDirty:      true,
     lastSavedAt:  null,
     dialogActive: false,
+    userMuted:    false,
+    masterVolume: 0.7,
+    bgmVolume:    0.7,
+    sfxVolume:    0.8,
   }
 }
 

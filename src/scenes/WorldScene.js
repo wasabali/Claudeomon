@@ -106,8 +106,10 @@ export class WorldScene extends BaseScene {
     this._setupPlayer()
     this._setupInput()
     this._setupCamera()
+    this.setupPauseKey()
 
-    this.playBgm('town')
+    GameState.player.location = 'localhost_town'
+    this.playBgm(GameState.player.location)
   }
 
   _setupMap() {
