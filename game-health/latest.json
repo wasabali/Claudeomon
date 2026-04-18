@@ -1,14 +1,209 @@
 {
-  "timestamp": "2026-04-17T00:00:00.000Z",
-  "success": true,
+  "timestamp": "2026-04-18T18:39:43.715Z",
+  "success": false,
   "summary": {
-    "totalTests": 0,
-    "passed": 0,
-    "failed": 0,
+    "totalTests": 90,
+    "passed": 78,
+    "failed": 12,
     "pending": 0
   },
-  "categories": {},
-  "findings": [],
-  "newFindings": [],
+  "categories": {
+    "data-integrity": {
+      "name": "Data Integrity",
+      "passed": 15,
+      "failed": 4,
+      "total": 19
+    },
+    "skill-balance": {
+      "name": "Skill Balance",
+      "passed": 13,
+      "failed": 0,
+      "total": 13
+    },
+    "battle-simulations": {
+      "name": "Battle Simulations",
+      "passed": 2,
+      "failed": 4,
+      "total": 6
+    },
+    "progression-economy": {
+      "name": "Progression & Economy",
+      "passed": 11,
+      "failed": 0,
+      "total": 11
+    },
+    "encounter-distribution": {
+      "name": "Encounter Distribution",
+      "passed": 9,
+      "failed": 1,
+      "total": 10
+    },
+    "exploit-detection": {
+      "name": "Exploit Detection",
+      "passed": 11,
+      "failed": 0,
+      "total": 11
+    },
+    "gate-quest-integrity": {
+      "name": "Gate & Quest Integrity",
+      "passed": 8,
+      "failed": 1,
+      "total": 9
+    },
+    "story-npc-consistency": {
+      "name": "Story & NPC Consistency",
+      "passed": 2,
+      "failed": 2,
+      "total": 4
+    },
+    "emblem-balance": {
+      "name": "Emblem Balance",
+      "passed": 4,
+      "failed": 0,
+      "total": 4
+    },
+    "full-playthrough": {
+      "name": "Full Playthrough Simulation",
+      "passed": 3,
+      "failed": 0,
+      "total": 3
+    }
+  },
+  "findings": [
+    {
+      "id": "data-integrity::every trainer deck references valid skill IDs",
+      "category": "data-integrity",
+      "group": "Data Integrity",
+      "subGroup": "Trainers",
+      "title": "every trainer deck references valid skill IDs",
+      "fullName": "Data Integrity Trainers every trainer deck references valid skill IDs",
+      "status": "failed",
+      "message": "AssertionError: trainer lambda_lars deck references unknown skill 'az_func_invoke': expected undefined to be truthy\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:185:109\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Claude-quest/Claude-quest/nod"
+    },
+    {
+      "id": "data-integrity::every trainer teachSkillId references a valid skill",
+      "category": "data-integrity",
+      "group": "Data Integrity",
+      "subGroup": "Trainers",
+      "title": "every trainer teachSkillId references a valid skill",
+      "fullName": "Data Integrity Trainers every trainer teachSkillId references a valid skill",
+      "status": "failed",
+      "message": "AssertionError: trainer firewall_frida teachSkillId 'az_network_nsg_rule_create' not found: expected undefined to be truthy\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:194:85\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Claude-quest/Claude-qu"
+    },
+    {
+      "id": "data-integrity::every encounter has a valid domain",
+      "category": "data-integrity",
+      "group": "Data Integrity",
+      "subGroup": "Encounters",
+      "title": "every encounter has a valid domain",
+      "fullName": "Data Integrity Encounters every encounter has a valid domain",
+      "status": "failed",
+      "message": "AssertionError: encounter legacy_monolith has invalid domain 'null': expected [ 'linux', 'security', …(6) ] to include null\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/chai/index.js:1686:25)\n    at"
+    },
+    {
+      "id": "data-integrity::every encounter has hp > 0 and sla > 0",
+      "category": "data-integrity",
+      "group": "Data Integrity",
+      "subGroup": "Encounters",
+      "title": "every encounter has hp > 0 and sla > 0",
+      "fullName": "Data Integrity Encounters every encounter has hp > 0 and sla > 0",
+      "status": "failed",
+      "message": "TypeError: actual value must be number or bigint, received \"object\"\n    at assertTypes (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/utils/dist/helpers.js:20:11)\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:1232:5)\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Clau"
+    },
+    {
+      "id": "battle-simulations::early encounters (difficulty 1-2) have win rate > 20% with starter deck",
+      "category": "battle-simulations",
+      "group": "Battle Simulations",
+      "subGroup": "Incident encounters vs starter deck",
+      "title": "early encounters (difficulty 1-2) have win rate > 20% with starter deck",
+      "fullName": "Battle Simulations Incident encounters vs starter deck early encounters (difficulty 1-2) have win rate > 20% with starter deck",
+      "status": "failed",
+      "message": "AssertionError: Encounters too hard for starter deck:\ncold_start_timeout (diff=2): win rate 8.0%\nthrottlemaster_act2_escape (diff=0): win rate 0.0%: expected [ …(2) ] to deeply equal []\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:450:89\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at r"
+    },
+    {
+      "id": "battle-simulations::high-difficulty trainers (4-5) are not impossible for a mid-game deck",
+      "category": "battle-simulations",
+      "group": "Battle Simulations",
+      "subGroup": "Trainer battles",
+      "title": "high-difficulty trainers (4-5) are not impossible for a mid-game deck",
+      "fullName": "Battle Simulations Trainer battles high-difficulty trainers (4-5) are not impossible for a mid-game deck",
+      "status": "failed",
+      "message": "AssertionError: Trainers effectively impossible:\nthe_cto (diff=10): 2.5% win rate: expected [ 'the_cto (diff=10): 2.5% win rate' ] to deeply equal []\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:497:88\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/w"
+    },
+    {
+      "id": "battle-simulations::encounter HP scales with difficulty",
+      "category": "battle-simulations",
+      "group": "Battle Simulations",
+      "subGroup": "Difficulty curve monotonicity",
+      "title": "encounter HP scales with difficulty",
+      "fullName": "Battle Simulations Difficulty curve monotonicity encounter HP scales with difficulty",
+      "status": "failed",
+      "message": "AssertionError: difficulty 1 avg HP (25.25) not >= difficulty 0 avg HP (9999): expected 25.25 to be greater than or equal to 9999\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:514:11\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Claude-quest/Cla"
+    },
+    {
+      "id": "battle-simulations::encounter SLA shrinks with difficulty",
+      "category": "battle-simulations",
+      "group": "Battle Simulations",
+      "subGroup": "Difficulty curve monotonicity",
+      "title": "encounter SLA shrinks with difficulty",
+      "fullName": "Battle Simulations Difficulty curve monotonicity encounter SLA shrinks with difficulty",
+      "status": "failed",
+      "message": "AssertionError: difficulty 1 avg SLA (4.5) not <= difficulty 0 avg SLA (3): expected 4.5 to be less than or equal to 3\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:530:11\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Claude-quest/Claude-quest/n"
+    },
+    {
+      "id": "encounter-distribution::active regions (with encounters) have at least 2 common encounters",
+      "category": "encounter-distribution",
+      "group": "Encounter Distribution",
+      "subGroup": "Pool coverage",
+      "title": "active regions (with encounters) have at least 2 common encounters",
+      "fullName": "Encounter Distribution Pool coverage active regions (with encounters) have at least 2 common encounters",
+      "status": "failed",
+      "message": "AssertionError: Regions with <2 common encounters:\noldcorp_basement: 0 common: expected [ 'oldcorp_basement: 0 common' ] to deeply equal []\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:652:92\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Claude"
+    },
+    {
+      "id": "gate-quest-integrity::every quest has at least one stage",
+      "category": "gate-quest-integrity",
+      "group": "Gate & Quest Integrity",
+      "subGroup": "Quest integrity",
+      "title": "every quest has at least one stage",
+      "fullName": "Gate & Quest Integrity Quest integrity every quest has at least one stage",
+      "status": "failed",
+      "message": "TypeError: actual value must be number or bigint, received \"undefined\"\n    at assertTypes (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/utils/dist/helpers.js:20:11)\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:1245:5)\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/C"
+    },
+    {
+      "id": "story-npc-consistency::every story entry has at least one page of dialog",
+      "category": "story-npc-consistency",
+      "group": "Story & NPC Consistency",
+      "subGroup": "",
+      "title": "every story entry has at least one page of dialog",
+      "fullName": "Story & NPC Consistency every story entry has at least one page of dialog",
+      "status": "failed",
+      "message": "AssertionError: story entry credits_npc_list has no pages: expected false to be true // Object.is equality\n    at /home/runner/work/Claude-quest/Claude-quest/tests/stress/balanceAudit.test.js:994:64\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/"
+    },
+    {
+      "id": "story-npc-consistency::dialog variant conditions use valid threshold fields",
+      "category": "story-npc-consistency",
+      "group": "Story & NPC Consistency",
+      "subGroup": "",
+      "title": "dialog variant conditions use valid threshold fields",
+      "fullName": "Story & NPC Consistency dialog variant conditions use valid threshold fields",
+      "status": "failed",
+      "message": "AssertionError: story npc_dagny_dba variant uses unknown condition field 'storyFlag': expected [ 'reputationMin', …(3) ] to include 'storyFlag'\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Claude-quest/Claude-quest/node_modules/chai/inde"
+    }
+  ],
+  "newFindings": [
+    "data-integrity::every trainer deck references valid skill IDs",
+    "data-integrity::every trainer teachSkillId references a valid skill",
+    "data-integrity::every encounter has a valid domain",
+    "data-integrity::every encounter has hp > 0 and sla > 0",
+    "battle-simulations::early encounters (difficulty 1-2) have win rate > 20% with starter deck",
+    "battle-simulations::high-difficulty trainers (4-5) are not impossible for a mid-game deck",
+    "battle-simulations::encounter HP scales with difficulty",
+    "battle-simulations::encounter SLA shrinks with difficulty",
+    "encounter-distribution::active regions (with encounters) have at least 2 common encounters",
+    "gate-quest-integrity::every quest has at least one stage",
+    "story-npc-consistency::every story entry has at least one page of dialog",
+    "story-npc-consistency::dialog variant conditions use valid threshold fields"
+  ],
   "fixedFindings": []
 }
