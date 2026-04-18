@@ -124,3 +124,49 @@ export const XP_TABLE = [
   3850, 4500, 5200, 5950, 6750,        // levels 12–16
   7600, 8500, 9450, 10450,             // levels 17–20
 ]
+
+// Gym mechanic default configs — used by BattleEngine as the fallback gymMechanicConfig
+// when createBattleState is called without an explicit mechanicConfig. Gym definitions
+// in src/data/gyms.js reference these same values via mechanicConfig on each gym entry.
+export const GYM_MECHANICS = {
+  legacy_only: {
+    blockedActs: [3, 4],
+    blockedDomains: ['cloud', 'serverless'],
+  },
+  sla_timer: {
+    slaTimer:       6,
+    breachHpPenalty: 30,
+    breachRepPenalty: 15,
+  },
+  flaky_pipeline: {
+    failChance:         0.30,
+    replayFailChance:   0.40,
+  },
+  cold_start: {},
+  respawn: {
+    respawnCount:     3,
+    respawnHpPercent: 0.50,
+  },
+  rbac_deny: {
+    denyChance: 0.25,
+  },
+  cost_spiral: {
+    hpPerTurn:        5,
+    attackPerTurn:    3,
+    spiralThreshold:  8,
+  },
+  all_domains: {
+    switchInterval:          2,
+    executiveModeHpPercent:  0.25,
+    executiveDamageMultiplier: 1.5,
+  },
+}
+
+// Post-game gym replay adjustments — reserved for GymReplayEngine (post-game feature).
+// When a gym is replayed, apply these modifiers on top of the gym's base mechanicConfig.
+export const GYM_REPLAY = {
+  leaderLevelBonus: 5,
+  xpMultiplier:     0.50,
+  slaTimerReduction: 1,
+  failChanceIncrease: 0.10,
+}
