@@ -11,7 +11,7 @@ const GYMS = {
     requiredBadges: 0,
     mechanic: 'legacy_only',
     mechanicConfig: { blockedActs: [3, 4], blockedDomains: ['cloud', 'serverless'] },
-    emblemReward: 'linux',
+    emblemReward: 'tux',
     region: 'localhost_town',
   },
   admin_gym: {
@@ -105,8 +105,8 @@ const GYMS = {
     emblemReward: 'finops',
     region: 'production_plains',
   },
-};
+}
 
-export const getById = (id)           => GYMS[id];
-export const getAll  = ()             => Object.values(GYMS);
-export const getBy   = (field, value) => getAll().filter(x => x[field] === value);
+export const getById = (id)           => GYMS[id]
+export const getAll  = ()             => Object.values(GYMS)
+export const getBy   = (field, value) => getAll().filter(x => x[field] === value)
