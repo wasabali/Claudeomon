@@ -131,9 +131,6 @@ export class WorldScene extends BaseScene {
 
     // Transition state
     this._transitioning = false
-    this._stepCount   = 0
-    this._lastTileX   = -1
-    this._lastTileY   = -1
     this._entryDir    = data.entryDirection || null
 
     const regionId = this._regionId || GameState.player.location || 'localhost_town'
