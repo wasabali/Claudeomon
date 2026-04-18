@@ -77,12 +77,12 @@ export const REPUTATION_MAX =  100
 // Each entry is the lowest shame value that activates the row.
 // title: null means no new title is gained at that threshold.
 export const SHAME_THRESHOLDS = [
-  { shame: 15, title: null,                 flag: 'secret_ending_accessible'                  },
-  { shame: 10, title: 'Shadow Engineer',    flag: 'shadow_engineer_title_unlocked'            },
-  { shame:  7, title: null,                 flag: 'throttlemaster_contact'                    },
-  { shame:  5, title: 'Person of Interest', flag: 'cursed_network_full_three_am_active'       },
-  { shame:  3, title: null,                 flag: 'npc_oneliners_active'                      },
-  { shame:  1, title: null,                 flag: 'pedersen_sighs_cursed_location_visible'    },
+  { shame: 15, title: 'The Other Principal',              flag: 'secret_ending_accessible'                  },
+  { shame: 10, title: 'Shadow Engineer',                  flag: 'shadow_engineer_title_unlocked'            },
+  { shame:  7, title: 'Person of Interest',               flag: 'throttlemaster_contact'                    },
+  { shame:  5, title: 'The Shortcutter',                  flag: 'cursed_network_full_three_am_active'       },
+  { shame:  3, title: 'Cowboy Coder',                     flag: 'npc_oneliners_active'                      },
+  { shame:  1, title: 'It Was Like That When I Got Here', flag: 'pedersen_sighs_cursed_location_visible'    },
 ]
 
 // How much grime each shame point adds to all earned emblems.

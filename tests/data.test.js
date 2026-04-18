@@ -41,6 +41,7 @@ describe('skills registry', () => {
       'helm_install',
       'helm_upgrade',
       'kubectl_apply',
+      'kubectl_apply_yolo',
       'kubectl_delete_ns',
       'kubectl_delete_production',
       'kubectl_drain',
@@ -71,9 +72,9 @@ describe('skills registry', () => {
 })
 
 describe('other data registries', () => {
-  it('defines all 14 cursed trainers with isCursed: true', () => {
+  it('defines all 19 cursed trainers with isCursed: true', () => {
     const cursedTrainers = getAllTrainers().filter(trainer => trainer.isCursed)
-    expect(cursedTrainers).toHaveLength(14)
+    expect(cursedTrainers).toHaveLength(19)
     cursedTrainers.forEach(trainer => expect(trainer.isCursed).toBe(true))
   })
 
