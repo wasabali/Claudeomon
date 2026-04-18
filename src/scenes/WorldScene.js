@@ -131,9 +131,6 @@ export class WorldScene extends BaseScene {
 
     // Transition state
     this._transitioning = false
-    this._stepCount   = 0
-    this._lastTileX   = -1
-    this._lastTileY   = -1
     this._entryDir    = data.entryDirection || null
 
     const regionId = this._regionId || GameState.player.location || 'localhost_town'
@@ -295,18 +292,19 @@ export class WorldScene extends BaseScene {
 
   update(time, delta) {
     if (this._transitioning) return
-    const dialogOrMenu = this._menu.isActive || this._interacting || this.dialog.isActive
-    GameState._session.dialogActive = dialogOrMenu
     if (this._menu.isActive) {
       this._handleMenuInput()
       return
     }
+    const dialogOrMenu = this._interacting || this.dialog.isActive
+    GameState._session.dialogActive = dialogOrMenu
     if (dialogOrMenu) {
       this._handleDialogInput()
       return
     }
     this._updateMovement(delta)
     this._updateThrottlemasterGhost()
+    this._checkEdgeTransition()
   }
 
   get _isRunning() {
@@ -348,15 +346,6 @@ export class WorldScene extends BaseScene {
       this._player.y = result.complete ? result.snapY : result.y
       if (result.complete) this._moveState = 'idle'
       return
-    }
-
-    const tx = Math.floor(this._player.x / TILE_SIZE)
-    const ty = Math.floor(this._player.y / TILE_SIZE)
-    if (tx !== this._lastTileX || ty !== this._lastTileY) {
-      this._lastTileX = tx
-      this._lastTileY = ty
-      this._stepCount++
-      this._checkDoorInteraction()
     }
 
     if (this._moveState === 'stepping') {
@@ -424,6 +413,7 @@ export class WorldScene extends BaseScene {
 
   _onStepComplete() {
     onStepComplete()
+    this._checkDoorInteraction()
     this._stepsSinceEncounter++
     this._checkEncounterStep()
     this._checkTransitionTile()
