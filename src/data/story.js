@@ -426,25 +426,10 @@ const STORY = {
     id: 'npc_rubber_duck',
     pages: [
       '*QUACK*',
-    ],
-    variants: [
-      {
-        condition: { rubberDuckUsesMin: 3 },
-        pages: [
-          '*QUACK*',
-          '...',
-          '*QUACK*',
-          'Times consulted: {{ rubberDuckUses }}.\nSolutions found: {{ rubberDuckSolutions }}.',
-        ],
-      },
-      {
-        condition: { rubberDuckUsesMin: 10 },
-        pages: [
-          '*QUACK*',
-          "You've consulted me ten times.\nI'm a rubber duck.",
-          '*QUACK*',
-        ],
-      },
+      '...',
+      '*QUACK*',
+      "The duck stares back at you.\nOddly, you do feel a bit clearer.",
+      "You've explained the problem out loud.\nThat's usually half the fix.",
     ],
   },
 
