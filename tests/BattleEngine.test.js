@@ -957,6 +957,7 @@ describe('BattleEvent shape', () => {
     'telegraph', 'dialog',
     'budget_drain', 'escalation', 'layer_transition',
     'scripted_escape', 'boss_outcome', 'emblems_updated', 'skill_blocked',
+    'budget_drain', 'budget_gain', 'escalation', 'layer_transition',
   ]
 
   it('all emitted events have recognised type strings', () => {

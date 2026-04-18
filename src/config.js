@@ -85,6 +85,15 @@ export const REPUTATION_THRESHOLDS = [
   { min: -25,  status: 'Known Incident',                  shopMod:  0.50, teachOnAnyWin: false },
   { min: -50,  status: 'Do Not Pair With',                shopMod:  0.50, teachOnAnyWin: false },
   { min: -100, status: 'The Reason We Have Runbooks',     shopMod:  0.50, teachOnAnyWin: false },
+  { min:  90,  status: 'Distinguished Engineer',      shopMod: -0.20 },
+  { min:  80,  status: 'Distinguished Engineer',      shopMod: -0.10 },
+  { min:  60,  status: 'Competent Engineer',          shopMod:  0    },
+  { min:  40,  status: 'Adequate Engineer',           shopMod:  0    },
+  { min:  20,  status: 'Liability',                   shopMod:  0    },
+  { min:   0,  status: 'Walking Incident',            shopMod:  0.50 },
+  { min: -25,  status: 'Known Incident',              shopMod:  0.50 },
+  { min: -50,  status: 'Do Not Pair With',            shopMod:  0.50 },
+  { min: -100, status: 'The Reason We Have Runbooks', shopMod:  0.50 },
 ]
 
 export const REPUTATION_MIN = -100
@@ -238,4 +247,40 @@ export const GYM_REPLAY = {
   xpMultiplier:     0.50,
   slaTimerReduction: 1,
   failChanceIncrease: 0.10,
+}
+
+// Economy constants — budget is Azure Credits, the single currency.
+export const ECONOMY = {
+  STARTING_BUDGET:      500,
+  BUDGET_PER_LEVEL:     25,
+  WIN_RESTORE_PERCENT:  0.15,
+  LOSE_RESTORE_PERCENT: 0.05,
+  OPTIMAL_WIN_BONUS:    25,
+  QUEST_MAIN_RESTORE:   1.0,
+  QUEST_SIDE_RESTORE:   0.35,
+}
+
+// Budget debt thresholds — pushing budget negative accumulates penalties.
+export const BUDGET_DEBT = {
+  DEBT_LIMIT:              -300,
+  COST_ALERT_THRESHOLD:    -100,
+  PAYMENT_QUEST_THRESHOLD: -200,
+  DEBT_PER_BATTLE_MOD:     0.1,
+  SUSPENSION_THRESHOLD:    -300,
+  SUSPENSION_ENCOUNTER:    'azure_subscription_suspended',
+}
+
+// Battle reward credits by outcome and solution quality tier.
+export const BATTLE_REWARDS = {
+  incident: {
+    optimal:  40,
+    standard: 25,
+    shortcut: 15,
+    cursed:    5,
+    nuclear:   0,
+  },
+  trainer: {
+    win:  30,
+    lose:  0,
+  },
 }

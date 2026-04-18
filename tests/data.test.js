@@ -17,6 +17,7 @@ import { getById as getGymById, getAll as getAllGyms, getBy as getGymsBy } from 
 import { getAll as getAllStory } from '../src/data/story.js'
 
 import { getById as getRegionById, getAll as getAllRegions, getBy as getRegionsBy, REGION_CONNECTIONS } from '../src/data/regions.js'
+import { getById as getShopById, getAll as getAllShops, getBy as getShopsBy } from '../src/data/shops.js'
 
 const VALID_TIERS = ['optimal', 'standard', 'shortcut', 'cursed', 'nuclear']
 const VALID_GATE_TYPES = ['hard', 'soft', 'knowledge', 'reputation', 'shame']
@@ -33,6 +34,7 @@ const DATA_FILES = [
   'audio.js',
   'gyms.js',
   'regions.js',
+  'shops.js',
 ].map(file => path.join(process.cwd(), 'src', 'data', file))
 
 describe('skills registry', () => {
@@ -124,6 +126,7 @@ describe('other data registries', () => {
       ...getAllInteractions().map(entry => entry.id),
       ...getAllGyms().map(entry => entry.id),
       ...getAllRegions().map(entry => entry.id),
+      ...getAllShops().map(entry => entry.id),
     ]
     expect(new Set(allIds).size).toBe(allIds.length)
   })
@@ -533,6 +536,40 @@ describe('gyms registry', () => {
       })
     })
   })
+})
+
+describe('shops registry', () => {
+  it('follows the registry pattern with getById, getAll, getBy', () => {
+    const shop = getShopById('azure_marketplace')
+    expect(shop).toBeDefined()
+    expect(shop.id).toBe('azure_marketplace')
+
+    const allShops = getAllShops()
+    expect(allShops.length).toBeGreaterThanOrEqual(3)
+
+    expect(typeof getShopsBy).toBe('function')
+  })
+
+  it('all shops have required fields', () => {
+    getAllShops().forEach(shop => {
+      expect(typeof shop.id).toBe('string')
+      expect(typeof shop.name).toBe('string')
+      expect(typeof shop.location).toBe('string')
+      expect(typeof shop.priceMultiplier).toBe('number')
+      expect(Array.isArray(shop.inventory)).toBe(true)
+    })
+  })
+
+  it('all shop inventory entries reference valid items', () => {
+    getAllShops().forEach(shop => {
+      shop.inventory.forEach(entry => {
+        expect(getItemById(entry.itemId), `shop ${shop.id} references unknown item ${entry.itemId}`).toBeDefined()
+        expect(typeof entry.basePrice).toBe('number')
+        expect(entry.basePrice).toBeGreaterThan(0)
+        expect(typeof entry.stock).toBe('number')
+      })
+    })
+  })
 
   it('all gym emblem rewards exist in emblems registry', () => {
     const emblemLookup = Object.fromEntries(getAllEmblems().map(e => [e.id, e]))
@@ -821,5 +858,19 @@ describe('regions registry', () => {
         expect(getRegionById(conn.target)).toBeDefined()
       }
     }
+  })
+
+  it('three_am_vending requires shameMin 3 to unlock', () => {
+    const shop = getShopById('three_am_vending')
+    expect(shop.unlockCondition).toBeDefined()
+    expect(shop.unlockCondition.shameMin).toBe(3)
+  })
+
+  it('vending machines have markup or discount multipliers', () => {
+    const pipeline = getShopById('pipeline_vending')
+    expect(pipeline.priceMultiplier).toBeGreaterThan(1.0)
+
+    const threeAm = getShopById('three_am_vending')
+    expect(threeAm.priceMultiplier).toBeLessThan(1.0)
   })
 })

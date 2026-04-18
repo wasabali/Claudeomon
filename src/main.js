@@ -13,6 +13,7 @@ import { StackOverflowScene }   from '#scenes/StackOverflowScene.js'
 import { CreditsScene }         from '#scenes/CreditsScene.js'
 import { BattleScene }          from '#scenes/BattleScene.js'
 import { PauseScene }           from '#scenes/PauseScene.js'
+import { ShopScene }            from '#scenes/ShopScene.js'
 
 const game = new Phaser.Game({
   type:   Phaser.AUTO,
@@ -29,6 +30,7 @@ const game = new Phaser.Game({
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   scene: [ BootScene, TitleScene, NewGameScene, WorldScene, SaveScene, ServiceCatalogScene, SkillManagementScene, EmblemScene, StackOverflowScene, BattleScene, PauseScene, CreditsScene ],
+  scene: [ BootScene, TitleScene, NewGameScene, WorldScene, SaveScene, ServiceCatalogScene, SkillManagementScene, EmblemScene, StackOverflowScene, ShopScene ],
 })
 
 window.addEventListener('beforeunload', e => {

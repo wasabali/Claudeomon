@@ -632,6 +632,16 @@ const ITEMS = {
     worldActions:   ['use', 'examine', 'drop'],
     effect:         { type: 'heal_hp', value: 50 },
   },
+  spot_instance_coupon: {
+    id:             'spot_instance_coupon',
+    displayName:    'Spot Instance Coupon',
+    tab:            'tools',
+    description:    '+100 budget. 30% chance the instance gets terminated mid-use. Worth it? Probably.',
+    usableInBattle: true,
+    battleAction:   'use',
+    worldActions:   ['examine', 'drop'],
+    effect:         { type: 'restore_budget', value: 100, revocationChance: 0.30 },
+  },
 }
 
 export const getById = (id)           => ITEMS[id]
