@@ -55,7 +55,7 @@ _Automated balance & integrity checks run on every push to `main`._
 | 🏁 Full Playthrough Sim | ✅ | 3/3 tests passing |
 | **Overall** | ❌ | **78/90** tests passing |
 
-_Last updated: 2026-04-18T18:53:58.092Z_
+_Last updated: 2026-04-18T19:09:58.347Z_
 
 <!-- GAME-HEALTH-END -->
 
