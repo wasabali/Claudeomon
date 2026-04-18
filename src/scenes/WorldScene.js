@@ -5,6 +5,7 @@ import { CONFIG } from '../config.js'
 import { GameState, hasItem, addItem, markDirty, grantXpOnce } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
 import { getById as getQuestById } from '#data/quests.js'
+import { resolveChoice, isQuestCompleted, getCompletedDialog } from '#engine/QuestEngine.js'
 
 const MAP_KEY     = 'localhost_town'
 const TILESET_KEY = 'stub_tiles'
@@ -12,7 +13,6 @@ const TILE_SIZE   = CONFIG.TILE_SIZE   // 48px
 
 const WALK_SPEED  = TILE_SIZE * 2     // 96 px/sec
 const RUN_SPEED   = TILE_SIZE * 4     // 192 px/sec
-const WRONG_ANSWER_HP_LOSS = 10
 
 export class WorldScene extends BaseScene {
   constructor() {
@@ -319,34 +319,31 @@ export class WorldScene extends BaseScene {
   }
 
   _interactMargaret() {
-    const quest = getQuestById('margaret_website')
-    const isCompleted = GameState.story.completedQuests.includes('margaret_website')
-
-    if (isCompleted) {
-      const lines = quest?.completedDialog ?? ["The website's been running for 3 days! Best week ever."]
+    if (isQuestCompleted('margaret_website', GameState.story.completedQuests)) {
+      const lines = getCompletedDialog('margaret_website')
       this.dialog.show(lines, () => { this._interacting = false })
       return
     }
 
+    const quest   = getQuestById('margaret_website')
     const stage   = quest.stages[0]
     const choices = stage.choices.map(c => c.text)
 
     this.dialog.show(stage.dialog, () => {
       this.dialog.showChoices('What do you suggest?', choices, (idx) => {
-        const chosen = stage.choices[idx]
-        if (chosen.correct) {
-          grantXpOnce('margaret_website_xp', quest.rewards.xp)
-          for (const reward of quest.rewards.items) {
-            addItem('tools', reward.id, reward.qty)
+        const result = resolveChoice('margaret_website', idx)
+        if (result.correct) {
+          grantXpOnce('margaret_website_xp', result.xp)
+          for (const reward of result.items) {
+            addItem(reward.tab, reward.id, reward.qty)
           }
           GameState.story.completedQuests.push('margaret_website')
           markDirty()
-          this.dialog.show(stage.correctDialog, () => { this._interacting = false })
         } else {
-          GameState.player.hp = Math.max(1, GameState.player.hp - (chosen.hpLoss ?? WRONG_ANSWER_HP_LOSS))
+          GameState.player.hp = Math.max(1, GameState.player.hp - result.hpLoss)
           markDirty()
-          this.dialog.show(stage.wrongDialog, () => { this._interacting = false })
         }
+        this.dialog.show(result.dialog, () => { this._interacting = false })
       })
     })
   }

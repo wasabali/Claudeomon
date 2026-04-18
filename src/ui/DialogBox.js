@@ -236,12 +236,12 @@ export class DialogBox {
     ).setOrigin(1, 1).setVisible(false)
     this._container.add(this._prompt)
 
-    // Blink timer.
+    // Blink timer — suppressed during choice mode so ▼ stays hidden.
     this._blinkTimer = this.scene.time.addEvent({
       delay:    BLINK_MS,
       loop:     true,
       callback: () => {
-        if (!this._active || this._typing) return
+        if (!this._active || this._typing || this._choiceMode) return
         this._prompt.setVisible(!this._prompt.visible)
       },
     })
