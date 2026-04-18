@@ -5,6 +5,7 @@ import { CONFIG } from '../config.js'
 import { GameState, hasItem, markDirty } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
 import { getById as getRegionById } from '#data/regions.js'
+import { Menu } from '#ui/Menu.js'
 import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS } from '#engine/RegionEngine.js'
 
 const TILESET_KEY = 'stub_tiles'
@@ -14,7 +15,7 @@ const WALK_SPEED  = TILE_SIZE * 2     // 96 px/sec
 const RUN_SPEED   = TILE_SIZE * 4     // 192 px/sec
 
 // 4-frame stepped fade for region transitions (overlay alpha per step)
-const FADE_STEPS     = [0.0, 0.34, 0.67, 1.0]
+const FADE_STEPS     = [0, 0.33, 0.67, 1.0]
 const FADE_STEP_MS   = 50
 
 // Map edge detection margin (in pixels)
@@ -86,6 +87,7 @@ export class WorldScene extends BaseScene {
 
   create(data = {}) {
     this.dialog       = new DialogBox(this)
+    this._menu        = new Menu(this)
     this._interacting = false
     this._transitioning = false
     this._facing      = 'down'
@@ -189,6 +191,10 @@ export class WorldScene extends BaseScene {
 
   update() {
     if (this._transitioning) return
+    if (this._menu.isActive) {
+      this._handleMenuInput()
+      return
+    }
     if (this._interacting || this.dialog.isActive) {
       this._player.setVelocity(0, 0)
       this._handleDialogInput()
@@ -234,6 +240,15 @@ export class WorldScene extends BaseScene {
       || Phaser.Input.Keyboard.JustDown(this._keyEnter)
     if (confirm)                                         this.dialog.advance()
     else if (Phaser.Input.Keyboard.JustDown(this._keyX)) this.dialog.skip()
+  }
+
+  _handleMenuInput() {
+    this._player.setVelocity(0, 0)
+    if (Phaser.Input.Keyboard.JustDown(this._cursors.up))        this._menu.moveUp()
+    else if (Phaser.Input.Keyboard.JustDown(this._cursors.down)) this._menu.moveDown()
+    else if (Phaser.Input.Keyboard.JustDown(this._keyZ)
+          || Phaser.Input.Keyboard.JustDown(this._keyEnter))     this._menu.confirm()
+    else if (Phaser.Input.Keyboard.JustDown(this._keyX))         this._menu.cancel()
   }
 
   _tryInteract() {
@@ -449,30 +464,19 @@ export class WorldScene extends BaseScene {
       return region ? region.name : id
     })
 
-    // D-pad selectable fast travel menu via dialog pages.
-    // Each page shows one destination; player advances to confirm selection.
-    const pages = [
-      '> AZURE TERMINAL — FAST TRAVEL\n> Use Z to select a destination.',
-      ...menuItems.map((name) => `> ${name}`),
-    ]
-
-    let pageIndex = 0
-    this.dialog.show(pages, () => {
-      // Dialog completed — the last page shown is the selected destination.
-      // pageIndex tracks which destination page we're on (0-indexed after header).
-      const selectedIdx = Math.max(0, Math.min(pageIndex - 1, destinations.length - 1))
-      this._interacting = false
-      if (canFastTravel(destinations[selectedIdx], GameState.story.flags)) {
-        this._transitionToRegion(destinations[selectedIdx], null)
-      }
+    // D-pad selectable fast travel menu via Menu component.
+    this._menu.show(menuItems, {
+      title: '> AZURE TERMINAL — FAST TRAVEL',
+      onSelect: (index) => {
+        this._interacting = false
+        if (canFastTravel(destinations[index], GameState.story.flags)) {
+          this._transitionToRegion(destinations[index], null)
+        }
+      },
+      onCancel: () => {
+        this._interacting = false
+      },
     })
-
-    // Track page advances to know which destination was selected
-    const origAdvance = this.dialog.advance.bind(this.dialog)
-    this.dialog.advance = () => {
-      pageIndex++
-      origAdvance()
-    }
   }
 
   _checkEncounterStep() {
@@ -481,6 +485,7 @@ export class WorldScene extends BaseScene {
 
   shutdown() {
     super.shutdown()
+    if (this._menu)   this._menu.destroy()
     if (this.dialog) this.dialog.destroy()
   }
 }
