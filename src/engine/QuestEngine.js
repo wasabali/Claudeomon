@@ -46,16 +46,19 @@ export function resolveBranchBattleOutcome(questId, branchKey, won) {
 
   if (won && branch.onWin) {
     const w = branch.onWin
-    if (w.shameDelta)  events.push({ type: 'shame',       target: 'player', value: w.shameDelta })
-    if (w.learnSkill)  events.push({ type: 'teach_skill', target: 'player', value: w.learnSkill })
-    if (w.setFlag)     events.push({ type: 'set_flag',    value: w.setFlag })
+    if (w.shameDelta != null) events.push({ type: 'shame',       target: 'player', value: w.shameDelta })
+    if (w.learnSkill != null) events.push({ type: 'teach_skill', target: 'player', value: w.learnSkill })
+    if (w.setFlag != null)    events.push({ type: 'set_flag',    value: w.setFlag })
   }
 
   if (!won && branch.onLoss) {
     const l = branch.onLoss
-    if (l.hpDelta)  events.push({ type: 'damage',     target: 'player', value: Math.abs(l.hpDelta) })
-    if (l.repDelta) events.push({ type: 'reputation', target: 'player', value: l.repDelta })
-    if (l.dialog)   l.dialog.forEach(text => events.push({ type: 'dialog', target: 'player', text }))
+    if (l.hpDelta != null) {
+      if (l.hpDelta < 0) events.push({ type: 'damage', target: 'player', value: Math.abs(l.hpDelta) })
+      if (l.hpDelta > 0) events.push({ type: 'heal',   target: 'player', value: l.hpDelta })
+    }
+    if (l.repDelta != null) events.push({ type: 'reputation', target: 'player', value: l.repDelta })
+    if (l.dialog != null)   l.dialog.forEach(text => events.push({ type: 'dialog', target: 'player', text }))
   }
 
   if (quest.completionFlag) {
@@ -82,15 +85,15 @@ export function resolveQuizAnswer(questId, branchKey, answerIndex) {
 
   const events = []
 
-  if (answer.result === 'wrong' && answer.budgetLoss) {
+  if (answer.result === 'wrong' && answer.budgetLoss != null) {
     events.push({ type: 'budget_drain', target: 'player', value: answer.budgetLoss })
   }
 
-  if (answer.xp) {
+  if (answer.xp != null) {
     events.push({ type: 'xp_gain', target: 'player', value: answer.xp })
   }
 
-  if (answer.itemDrop) {
+  if (answer.itemDrop != null) {
     events.push({ type: 'item_drop', target: 'player', value: answer.itemDrop })
   }
 

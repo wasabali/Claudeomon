@@ -503,7 +503,6 @@ const ENCOUNTERS = {
     attacks: ['uptime_drain', 'escalation'],
     optimalFix: 'systemctl_restart',
     encounterText: ['It was running since 1998.', 'It did not want to stop.'],
-    onDefeat: { learnSkill: 'exec_xp_cmdshell', shameDelta: 1 },
     layers: null,
   },
 }

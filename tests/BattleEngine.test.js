@@ -211,10 +211,11 @@ describe('skillPhase', () => {
     }))
     const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
     const events = skillPhase(state, skill)
-    const dmgEvent = events.find(e => e.type === 'damage')
+    const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
     expect(dmgEvent.value).toBe(0)
+    expect(dmgEvent.isImmune).toBe(true)
+    expect(dmgEvent.domain).toBe('cloud')
     expect(state.opponent.hp).toBe(80)
-    expect(events).toContainEqual(expect.objectContaining({ type: 'immune', target: 'opponent', value: 'cloud' }))
   })
 
   it('immuneDomains: deals normal damage from non-immune domain', () => {
@@ -223,10 +224,10 @@ describe('skillPhase', () => {
     }))
     const skill = makeDamageSkill({ domain: 'linux', effect: { type: 'damage', value: 30 } })
     const events = skillPhase(state, skill)
-    const dmgEvent = events.find(e => e.type === 'damage')
+    const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
     expect(dmgEvent.value).toBe(30)
+    expect(dmgEvent.isImmune).toBe(false)
     expect(state.opponent.hp).toBe(50)
-    expect(events).not.toContainEqual(expect.objectContaining({ type: 'immune' }))
   })
 
   it('immuneDomains: security domain deals weak damage against linux opponent', () => {
