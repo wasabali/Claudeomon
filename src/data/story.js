@@ -219,8 +219,8 @@ const STORY = {
 }
 
 // ---------------------------------------------------------------------------
-// Shame one-liner pools — randomly selected per NPC interaction.
-// Same NPC says the same thing on repeat visits (seed: npcId + shamePoints + location).
+// Shame one-liner pools for NPC reactions.
+// Intended for per-interaction selection by consuming game logic.
 // ---------------------------------------------------------------------------
 export const SHAME_ONE_LINERS = {
   shame_3: [

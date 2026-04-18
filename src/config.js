@@ -59,7 +59,7 @@ export const WORLD_SCENE = {
 // Reputation thresholds — sorted highest first for threshold lookups.
 // Range is -100 to 100. Starts at 50. Fully rebuildable.
 // Use getReputationStatus() in SkillEngine to resolve the current label.
-// shopMod: price multiplier applied by shops at this reputation level.
+// shopMod: percentage price modifier applied by shops at this reputation level; added to 1.0 when calculating the final price.
 // teachOnAnyWin: if true, trainers teach their signature skill on ANY win (not just optimal).
 export const REPUTATION_THRESHOLDS = [
   { min:  90,  status: 'Distinguished Engineer',          shopMod: -0.20, teachOnAnyWin: true  },

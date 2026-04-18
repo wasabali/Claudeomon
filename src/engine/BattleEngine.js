@@ -67,7 +67,9 @@ export function createBattleState(mode, player, opponent, options = {}) {
   if (mode === BATTLE_MODES.ENGINEER && shamePts >= 5 && !opponent.isWildEncounter) {
     const cursedPool = options.cursedSkillPool ?? []
     if (cursedPool.length > 0) {
-      const pick = cursedPool[Math.floor((options.randomFn ?? Math.random)() * cursedPool.length)]
+      const randomValue = (options.randomFn ?? Math.random)()
+      const pickIndex = Math.min(cursedPool.length - 1, Math.floor(randomValue * cursedPool.length))
+      const pick = cursedPool[pickIndex]
       const newDeck = [...(opponent.deck ?? []), pick]
       mirroredOpponent = { ...mirroredOpponent, deck: newDeck, cursedMirrorSkill: pick }
     }
@@ -171,10 +173,14 @@ export function skillPhase(state, skill) {
     }
     if (budgetMod !== 0) {
       const adjustedCost = Math.max(0, skill.budgetCost + budgetMod)
-      const actualDrain = adjustedCost - skill.budgetCost
-      if (actualDrain !== 0) {
-        state.player.budget = Math.max(0, (state.player.budget ?? 0) - actualDrain)
-        events.push({ type: 'budget_drain', target: 'player', value: actualDrain, source: 'shadow_fatigue' })
+      const budgetDelta = adjustedCost - skill.budgetCost
+      if (budgetDelta > 0) {
+        state.player.budget = Math.max(0, (state.player.budget ?? 0) - budgetDelta)
+        events.push({ type: 'budget_drain', target: 'player', value: budgetDelta, source: 'shadow_fatigue' })
+      } else if (budgetDelta < 0) {
+        const refundAmount = Math.abs(budgetDelta)
+        state.player.budget = (state.player.budget ?? 0) + refundAmount
+        events.push({ type: 'budget_refund', target: 'player', value: refundAmount, source: 'shadow_fatigue' })
       }
     }
   }
@@ -215,7 +221,7 @@ export function skillPhase(state, skill) {
 
   if (effect.type === 'heal') {
     let healValue = effect.value
-    // Shadow Engineer: heal items restore 20% less
+    // Shadow Engineer: healing effects restore 20% less
     if (isShadow) {
       healValue = Math.floor(healValue * (1 - SHADOW_ENGINEER.HEAL_REDUCTION))
     }
