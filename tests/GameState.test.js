@@ -89,4 +89,9 @@ describe('GameState.stats', () => {
 
     expect(GameState.stats.skillUseCounts.kubectl_rollout_restart).toBe(14)
   })
+
+  it('includes stepsTaken counter starting at 0', () => {
+    expect(GameState.stats).toHaveProperty('stepsTaken')
+    expect(typeof GameState.stats.stepsTaken).toBe('number')
+  })
 })
