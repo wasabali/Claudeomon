@@ -610,8 +610,6 @@ const TRAINERS = {
     shameRequired: 0,
     location: 'cto_office',
     isBoss: true,
-    executiveModeThreshold: 0.25,
-    executiveModeDamageMultiplier: 1.5,
     phases: [
       {
         id: 'cto_phase_1',

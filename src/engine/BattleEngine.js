@@ -257,6 +257,7 @@ export function slaTickPhase(state) {
 // ---------------------------------------------------------------------------
 export function enemyPhase(state) {
   if (state.mode === BATTLE_MODES.INCIDENT) return []
+  if (state.opponent.hp <= 0) return []
 
   const events = []
   const moveId = state.telegraphedMove ?? 'basic_attack'
@@ -264,7 +265,7 @@ export function enemyPhase(state) {
   events.push({ type: 'skill_used', target: 'player', skillId: moveId })
 
   // Executive Mode activation — boss-only mechanic
-  if (state.opponent.isBoss && state.opponent.hp / state.opponent.maxHp <= EXECUTIVE_MODE_THRESHOLD) {
+  if (state.opponent.isBoss && state.opponent.hp > 0 && state.opponent.hp / state.opponent.maxHp <= EXECUTIVE_MODE_THRESHOLD) {
     if (!state.executiveMode) {
       state.executiveMode = true
       events.push({ type: 'executive_mode', target: 'opponent' })
@@ -416,6 +417,13 @@ export function turnEndPhase(state) {
       events.push({ type: 'boss_phase_transition', target: 'opponent', value: nextPhase })
       if (nextPhase.transitionDialog) {
         events.push({ type: 'dialog', target: 'player', text: nextPhase.transitionDialog })
+      }
+      // Reset deck index and telegraph to the new phase's first move
+      state.opponentDeckIndex = 0
+      const newDeck = nextPhase.deck
+      if (newDeck && newDeck.length > 0) {
+        state.telegraphedMove = newDeck[0]
+        events.push({ type: 'telegraph', target: 'player', value: newDeck[0] })
       }
       state.turn += 1
       return events

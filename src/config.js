@@ -112,7 +112,6 @@ export const XP_TABLE = [
 
 // Ending conditions — shame thresholds + required story flags
 export const ENDING_CONDITIONS = {
-  post_mortem:        { maxShame: 9,  requiredFlag: 'cto_defeated'                       },
   shadow_post_mortem: { minShame: 10, maxShame: 14, requiredFlag: 'cto_defeated'         },
   fork_the_company:   { minShame: 15, requiredFlag: 'throttlemaster_recruitment_accepted' },
 }

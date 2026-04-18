@@ -477,12 +477,8 @@ export class BattleScene extends BaseScene {
 
   _resolveEnding() {
     const shame = GameState.player.shamePoints
-    const flags = GameState.story.flags
     const c = ENDING_CONDITIONS
-    if (shame >= c.fork_the_company.minShame && flags[c.fork_the_company.requiredFlag]) {
-      return 'ending_fork_the_company'
-    }
-    if (shame >= c.shadow_post_mortem.minShame && shame <= c.shadow_post_mortem.maxShame && flags[c.shadow_post_mortem.requiredFlag]) {
+    if (shame >= c.shadow_post_mortem.minShame && shame <= c.shadow_post_mortem.maxShame) {
       return 'ending_shadow_post_mortem'
     }
     return 'ending_post_mortem'

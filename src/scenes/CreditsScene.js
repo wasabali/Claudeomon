@@ -38,7 +38,6 @@ export class CreditsScene extends BaseScene {
     this._ending   = getStoryById(this._endingId)
     this._phase    = PHASE.CONFLUENCE
     this._creditTexts = []
-    this._scrollY  = 0
 
     this.cameras.main.fadeIn(300, 0, 0, 0)
 
@@ -81,7 +80,7 @@ export class CreditsScene extends BaseScene {
     this.time.delayedCall(CONFLUENCE_DISPLAY_MS, () => {
       this._phase = PHASE.CREDITS
       // Clear confluence page
-      this.children.removeAll()
+      this.children.removeAll(true)
       this._startCredits()
     })
   }
@@ -145,16 +144,11 @@ export class CreditsScene extends BaseScene {
 
     const playerRole = this.add.text(cx, y, 'Principal Engineer', TEXT_STYLE).setOrigin(0.5)
     this._creditTexts.push(playerRole)
-    y += 20
-
-    this._creditsEndY = y
-    this._scrollY = 0
   }
 
   update(time, delta) {
     if (this._phase === PHASE.CREDITS && this._creditTexts.length > 0) {
       const scrollDelta = SCROLL_SPEED * (delta / 1000)
-      this._scrollY += scrollDelta
 
       for (const text of this._creditTexts) {
         text.y -= scrollDelta
@@ -164,7 +158,8 @@ export class CreditsScene extends BaseScene {
       const lastText = this._creditTexts[this._creditTexts.length - 1]
       if (lastText && lastText.y < -20) {
         this._phase = PHASE.POST_CREDITS
-        this.children.removeAll()
+        this._creditTexts = []
+        this.children.removeAll(true)
         this._showPostCredits()
       }
     }
@@ -190,7 +185,7 @@ export class CreditsScene extends BaseScene {
 
       this.time.delayedCall(PAGER_PROMPT_MS, () => {
         this._phase = PHASE.PAGER
-        this.children.removeAll()
+        this.children.removeAll(true)
         this._showPager()
       })
     })
@@ -218,7 +213,7 @@ export class CreditsScene extends BaseScene {
 
     const confirmKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
     confirmKey.once('down', () => {
-      this.children.removeAll()
+      this.children.removeAll(true)
 
       const ackText = getStoryById('pager_acknowledged')
       this.add.text(cx, cy, ackText?.pages[0] ?? '47 more alerts pending.', {
