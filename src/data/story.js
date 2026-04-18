@@ -954,6 +954,104 @@ const STORY = {
     location: 'the_cloud_console',
   },
 
+  // ---------------------------------------------------------------------------
+  // THROTTLEMASTER — main antagonist NPC
+  // ---------------------------------------------------------------------------
+  throttlemaster: {
+    id: 'throttlemaster',
+    realName: 'Karsten Ottesen',
+    displayName: 'THROTTLEMASTER',
+    postRevealName: 'Karsten',
+    domain: null,
+    sprite: 'throttlemaster_hooded',
+    postRevealSprite: 'throttlemaster_unhooded',
+    actFirstAppearance: 2,
+    shameContact: 7,
+    shameRecruitment: 15,
+    // Dialog pools keyed by act/shame context.
+    // [name] placeholders are replaced by the scene layer with the player's name.
+    dialogPools: {
+      act2_taunt: [
+        "Your pipeline is now running in degraded mode.",
+        "I see you're on-call tonight. Good luck with that.",
+        "/* THROTTLEMASTER WAS HERE */",
+      ],
+      act3_taunt: [
+        "Still haven't figured it out?",
+        "You're better than this team deserves, [name].",
+      ],
+      act4_reveal_low_shame: [
+        "You want to know why I do this?",
+        "I was the best engineer at OmniCloud.",
+        "They promoted Kristoffer instead.",
+        "So I decided: if the cloud can't be fair...",
+        "...I'll throttle everyone to my level.",
+      ],
+      act4_reveal_high_shame: [
+        "I've been watching you, [name].",
+        "You understand, don't you? Sometimes the wrong tool",
+        "...is the only one that works.",
+      ],
+      recruitment: [
+        "Join me. We'll fork NorCloud.",
+        "You've already crossed every line I have.",
+        "I just crossed them first.",
+      ],
+      post_defeat: [
+        "...I just wanted to be recognised.",
+        "Was that so hard?",
+      ],
+      evil_ending: [
+        "Welcome to the team, [name].",
+        "Your first task: throttle Production Plains.",
+        "I'll handle the invoicing.",
+      ],
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // Terminal calling cards — THROTTLEMASTER lore breadcrumbs
+  // ---------------------------------------------------------------------------
+  terminal_throttlemaster_act1: {
+    id:    'terminal_throttlemaster_act1',
+    pages: [
+      '// TODO: fix this — THROTTLEMASTER',
+    ],
+  },
+  terminal_throttlemaster_act3: {
+    id:    'terminal_throttlemaster_act3',
+    pages: [
+      '/* THROTTLEMASTER WAS HERE. OmniCloud Corp — never forget. */',
+    ],
+  },
+  terminal_oldcorp_nameplate: {
+    id:    'terminal_oldcorp_nameplate',
+    pages: [
+      'A dusty nameplate on the desk reads:\n"Karsten Ottesen, Senior Engineer"',
+    ],
+  },
+
+  // ---------------------------------------------------------------------------
+  // Compliance Carina — arrest sequence (standard path, shame < 10)
+  // ---------------------------------------------------------------------------
+  npc_compliance_carina_arrest: {
+    id:    'npc_compliance_carina_arrest',
+    pages: [
+      "Compliance Carina: Hold it right there.",
+      "I've been monitoring this individual\nfor three fiscal quarters.",
+      "Karsten Ottesen, you are in violation of\nSLA Policy 7.3, Budget Directive 12,\nand the OmniCloud Corp Acceptable Use Agreement.",
+      "You have the right to file a Jira ticket.\nAnything you deploy can and will be\nused against you in a post-mortem.",
+      "...Please come with me.",
+    ],
+  },
+  npc_compliance_carina_post_arrest: {
+    id:    'npc_compliance_carina_post_arrest',
+    pages: [
+      "Compliance Carina: The paperwork alone\nwill take longer than the incident.",
+      "I love my job.",
+    ],
+  },
+
 }
 
 // ---------------------------------------------------------------------------
