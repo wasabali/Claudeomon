@@ -141,6 +141,7 @@ Skills are defined in `.github/skills/` and provide specialised workflows for co
 | `triage-issues "<area>"` | Scan codebase and docs for contradictions, errors, and open questions, then file GitHub issues. |
 | `resolve-question <number>` | Iterate design ideas for a `[Design Question]` issue and find the best fit. |
 | `update-wiki` | Regenerate `docs/wiki/` pages from current data files and design docs. |
+| `merge-pr <owner/repo#pr>` | Fix actionable PR review feedback, check for merge conflicts, and merge cleanly only after checks pass. |
 
 ## graphify
 

@@ -357,6 +357,7 @@ Skills are invoked in Claude Code with `/skill-name`. They load specialised cont
 | `/triage-issues "<area>"` | Scan codebase and docs for contradictions, errors, and open questions, then file GitHub issues. |
 | `/resolve-question <number>` | Iterate design ideas for a `[Design Question]` issue and find the best fit. |
 | `/update-wiki` | Regenerate `docs/wiki/` pages from current data files and design docs. |
+| `/merge-pr <owner/repo#pr>` | Fix actionable PR review feedback, check merge conflicts, and merge only when the PR is clean and all checks pass. |
 
 ---
 
@@ -372,6 +373,7 @@ Sub-agents are specialised Claude instances invoked via the `task` tool. Use the
 | **`phaser-reviewer`** | Reviewing scenes, UI components, or `src/main.js`. Checks engine/scene separation, GameState usage, pixel art compliance, and Phaser 3 best practices. Does **not** review engine scripts. |
 | **`issue-triager`** | Autonomously scanning the codebase and docs for contradictions, errors, and gaps, then filing well-labelled GitHub issues. |
 | **`stress-test`** | Running the Monte Carlo balance simulation suite in `tests/stress/` to find overpowered skills, broken progression, exploit paths, or empty encounter pools. |
+| **`merge-agent`** | Fixing PR review feedback, resolving merge conflicts, validating checks, and merging only when the PR is clean and merge-ready. |
 
 ---
 
