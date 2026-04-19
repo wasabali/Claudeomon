@@ -15,8 +15,15 @@ import { BattleScene }          from '#scenes/BattleScene.js'
 import { PauseScene }           from '#scenes/PauseScene.js'
 import { ShopScene }            from '#scenes/ShopScene.js'
 
+const fontFace = `1em ${CONFIG.FONT}`
+
 try {
-  await document.fonts.load(`1em ${CONFIG.FONT}`)
+  const loadedFonts = await document.fonts.load(fontFace)
+  const isFontAvailable = loadedFonts.length > 0 || document.fonts.check(fontFace)
+
+  if (!isFontAvailable) {
+    console.warn('[Cloud Quest] Font failed to load; starting with fallback font.')
+  }
 } catch (err) {
   console.warn('[Cloud Quest] Font failed to load; starting with fallback font.', err)
 }
