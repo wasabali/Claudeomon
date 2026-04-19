@@ -343,6 +343,17 @@ Engine scripts in `src/engine/` must have unit tests. Scenes do not require unit
 
 Skills are invoked in Claude Code with `/skill-name`. They load specialised context or scaffold content into the codebase.
 
+## Critical Post-Implementation Requirement
+
+After **every coding session that changes code or content**, you **must** run and follow `.github/skills/post-implementation.md` before considering the work complete. This is mandatory and not optional.
+
+This applies to:
+- issue implementations
+- bug fixes
+- refactors
+- data/content updates
+- documentation-linked game data updates
+
 | Skill | When to use |
 |---|---|
 | `/spec-issue "<feature idea>"` | Draft a well-specced development issue from a feature idea — acceptance criteria, affected layers, data shapes. Creates issues that `/implement-issue` can pick up. |
@@ -358,7 +369,7 @@ Skills are invoked in Claude Code with `/skill-name`. They load specialised cont
 | `/resolve-question <number>` | Iterate design ideas for a `[Design Question]` issue and find the best fit. |
 | `/update-wiki` | Regenerate `docs/wiki/` pages from current data files and design docs. |
 | `/merge-pr <owner/repo#pr>` | Fix actionable PR review feedback, check merge conflicts, and merge only when the PR is clean and all checks pass. |
-| `/post-implementation` | **Mandatory** after every issue implementation. Runs stress tests + triage, regenerates wiki, updates graphify. Replaces the old `game-health.yml` and `wiki-sync.yml` pipelines. |
+| `/post-implementation` | **Mandatory** after every coding session with repo changes (including every issue implementation). Runs stress tests + triage, regenerates wiki, updates graphify. Replaces the old `game-health.yml` and `wiki-sync.yml` pipelines. |
 
 ---
 

@@ -143,7 +143,16 @@ export const GameState = {
 | Answering a `[Design Question]` issue | `.github/skills/resolve-question.md` |
 | Regenerating the wiki after content changes | `.github/skills/update-wiki.md` |
 
-After **every** issue implementation you **must** also follow `.github/skills/post-implementation.md`. This is not optional.
+## Critical Post-Implementation Requirement
+
+After **every coding session that changes code or content**, you **must** run and follow `.github/skills/post-implementation.md` before considering the work complete. This is mandatory and not optional.
+
+This applies to:
+- issue implementations
+- bug fixes
+- refactors
+- data/content updates
+- documentation-linked game data updates
 
 ## Available Skills
 
@@ -164,7 +173,7 @@ Skills are defined in `.github/skills/` and provide specialised workflows for co
 | `resolve-question <number>` | Iterate design ideas for a `[Design Question]` issue and find the best fit. |
 | `update-wiki` | Regenerate `docs/wiki/` pages from current data files and design docs. |
 | `merge-pr <owner/repo#pr>` | Fix actionable PR review feedback, check for merge conflicts, and merge cleanly only after checks pass. |
-| `post-implementation` | **Mandatory** after every issue implementation. Runs stress tests + triage, regenerates wiki, updates graphify. Replaces the old `game-health.yml` and `wiki-sync.yml` pipelines. |
+| `post-implementation` | **Mandatory** after every coding session with repo changes (including every issue implementation). Runs stress tests + triage, regenerates wiki, updates graphify. Replaces the old `game-health.yml` and `wiki-sync.yml` pipelines. |
 
 ## Specialized Agents
 
