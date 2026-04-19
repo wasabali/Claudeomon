@@ -211,8 +211,10 @@ export class WorldScene extends BaseScene {
   }
 
   _onRegionEnter(regionId) {
-    GameState.player.location = regionId
-    markDirty()
+    if (GameState.player.location !== regionId) {
+      GameState.player.location = regionId
+      markDirty()
+    }
 
     // Unlock fast travel terminal on first visit
     const region = getRegionById(regionId)
