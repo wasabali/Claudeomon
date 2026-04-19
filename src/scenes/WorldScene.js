@@ -277,7 +277,7 @@ export class WorldScene extends BaseScene {
     else if (this._entryDir === 'north') { startX = mapW / 2; startY = TILE_SIZE + TILE_SIZE / 2 }
     else if (this._entryDir === 'south') { startX = mapW / 2; startY = mapH - TILE_SIZE - TILE_SIZE / 2 }
 
-    this._player = this.add.sprite(startX, startY, 'player')
+    this._player = this.physics.add.sprite(startX, startY, 'player')
     this._player.setDepth(5)
 
     this._tileX = tileX ?? 5
