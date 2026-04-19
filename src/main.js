@@ -15,6 +15,12 @@ import { BattleScene }          from '#scenes/BattleScene.js'
 import { PauseScene }           from '#scenes/PauseScene.js'
 import { ShopScene }            from '#scenes/ShopScene.js'
 
+try {
+  await document.fonts.load(`1em ${CONFIG.FONT}`)
+} catch (err) {
+  console.warn('[Cloud Quest] Font failed to load; starting with fallback font.', err)
+}
+
 const game = new Phaser.Game({
   type:   Phaser.AUTO,
   width:  CONFIG.WIDTH,
