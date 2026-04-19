@@ -141,20 +141,28 @@ export class NewGameScene extends BaseScene {
   }
 
   renderPrologue() {
-    const textStyle = { fontFamily: CONFIG.FONT, fontSize: '8px', color: '#ffffff', wordWrap: { width: 144 } }
-    this.add.text(8, 8, PROLOGUE[this.prologueIndex], textStyle)
-    this.add.text(8, 128, 'Z/ENTER NEXT', { fontFamily: CONFIG.FONT, fontSize: '8px', color: '#ffffff' })
+    const cx        = CONFIG.WIDTH / 2
+    const textStyle = { fontFamily: CONFIG.FONT, fontSize: '36px', color: '#ffffff', wordWrap: { width: CONFIG.WIDTH * 0.7 }, align: 'center' }
+    const hintStyle = { fontFamily: CONFIG.FONT, fontSize: '28px', color: '#888888' }
+    this.add.text(cx, CONFIG.HEIGHT * 0.35, PROLOGUE[this.prologueIndex], textStyle).setOrigin(0.5, 0)
+    this.add.text(cx, CONFIG.HEIGHT * 0.82, 'Z / ENTER — NEXT', hintStyle).setOrigin(0.5, 0)
   }
 
   renderStarterChoice() {
-    const textStyle = { fontFamily: CONFIG.FONT, fontSize: '8px', color: '#ffffff' }
-    this.add.text(8, 8, 'PICK YOUR MASCOT', textStyle)
+    const cx          = CONFIG.WIDTH / 2
+    const headerStyle = { fontFamily: CONFIG.FONT, fontSize: '48px', color: '#9bc5ff' }
+    const itemStyle   = { fontFamily: CONFIG.FONT, fontSize: '40px', color: '#ffffff' }
+    const hintStyle   = { fontFamily: CONFIG.FONT, fontSize: '28px', color: '#888888' }
+
+    this.add.text(cx, 200, 'PICK YOUR MASCOT', headerStyle).setOrigin(0.5, 0)
 
     STARTERS.forEach((starter, index) => {
-      const prefix = index === this.starterIndex ? '> ' : '  '
-      this.add.text(8, 30 + index * 14, `${prefix}${starter}`, textStyle)
+      const selected = index === this.starterIndex
+      const prefix   = selected ? '▶ ' : '  '
+      const color    = selected ? '#ffe066' : '#ffffff'
+      this.add.text(cx, 420 + index * 100, `${prefix}${starter}`, { ...itemStyle, color }).setOrigin(0.5, 0)
     })
 
-    this.add.text(8, 86, 'Z:CONFIRM', textStyle)
+    this.add.text(cx, 820, 'Z / ENTER — CONFIRM', hintStyle).setOrigin(0.5, 0)
   }
 }
