@@ -13,6 +13,11 @@ const PROLOGUE = [
 ]
 const STARTERS = ['DOCKERTLE', 'FUNCTIONCHU', 'VMSAUR']
 
+// Grid dimensions shared by handleNameInput (navigation) and renderNameEntry (layout).
+const GRID_COLUMNS = 9
+const GRID_CELL_W  = 120
+const GRID_CELL_H  = 80
+
 export class NewGameScene extends BaseScene {
   constructor() {
     super({ key: 'NewGameScene' })
@@ -40,29 +45,31 @@ export class NewGameScene extends BaseScene {
   }
 
   handleNameInput(code) {
-    const columns = 9
     const totalCells = LETTERS.length + 1
 
     if (code === 'ArrowRight') this.cursorIndex = (this.cursorIndex + 1) % totalCells
     if (code === 'ArrowLeft') this.cursorIndex = (this.cursorIndex - 1 + totalCells) % totalCells
-    if (code === 'ArrowDown') this.cursorIndex = (this.cursorIndex + columns) % totalCells
-    if (code === 'ArrowUp') this.cursorIndex = (this.cursorIndex - columns + totalCells) % totalCells
+    if (code === 'ArrowDown') this.cursorIndex = (this.cursorIndex + GRID_COLUMNS) % totalCells
+    if (code === 'ArrowUp') this.cursorIndex = (this.cursorIndex - GRID_COLUMNS + totalCells) % totalCells
 
     if (code === 'KeyX' || code === 'Backspace') this.playerName = this.playerName.slice(0, -1)
 
     if (code === 'Enter') {
-      this.playerName = this.playerName || DEFAULT_NAME
-      this.stage = 'prologue'
+      this.confirmNameAndAdvance()
     } else if (code === 'KeyZ') {
       if (this.cursorIndex === LETTERS.length) {
-        this.playerName = this.playerName || DEFAULT_NAME
-        this.stage = 'prologue'
+        this.confirmNameAndAdvance()
       } else if (this.playerName.length < NAME_MAX_LENGTH) {
         this.playerName += LETTERS[this.cursorIndex]
       }
     }
 
     this.render()
+  }
+
+  confirmNameAndAdvance() {
+    this.playerName = this.playerName || DEFAULT_NAME
+    this.stage = 'prologue'
   }
 
   handlePrologueInput(code) {
@@ -109,26 +116,23 @@ export class NewGameScene extends BaseScene {
     this.add.text(cx, 80,  'WHAT IS YOUR NAME?', headerStyle).setOrigin(0.5, 0)
     this.add.text(cx, 180, this.playerName || '_', nameStyle).setOrigin(0.5, 0)
 
-    const columns    = 9
-    const cellW      = 120
-    const cellH      = 80
-    const gridW      = columns * cellW
-    const gridStartX = cx - gridW / 2 + cellW / 2
+    const gridW      = GRID_COLUMNS * GRID_CELL_W
+    const gridStartX = cx - gridW / 2 + GRID_CELL_W / 2
     const gridStartY = 360
 
     LETTERS.forEach((letter, index) => {
-      const col = index % columns
-      const row = Math.floor(index / columns)
-      const x = gridStartX + col * cellW
-      const y = gridStartY + row * cellH
+      const col = index % GRID_COLUMNS
+      const row = Math.floor(index / GRID_COLUMNS)
+      const x = gridStartX + col * GRID_CELL_W
+      const y = gridStartY + row * GRID_CELL_H
       const selected = index === this.cursorIndex
       const color = selected ? COLOR_SELECTED : COLOR_TEXT
       const prefix = selected ? '> ' : '  '
       this.add.text(x, y, `${prefix}${letter}`, { ...letterStyle, color }).setOrigin(0.5, 0)
     })
 
-    const endX       = gridStartX + (LETTERS.length % columns) * cellW
-    const endY       = gridStartY + Math.floor(LETTERS.length / columns) * cellH
+    const endX       = gridStartX + (LETTERS.length % GRID_COLUMNS) * GRID_CELL_W
+    const endY       = gridStartY + Math.floor(LETTERS.length / GRID_COLUMNS) * GRID_CELL_H
     const endSelected = this.cursorIndex === LETTERS.length
     const endColor   = endSelected ? COLOR_SELECTED : COLOR_TEXT
     this.add.text(endX, endY, `${endSelected ? '> ' : '  '}END`, { ...letterStyle, color: endColor }).setOrigin(0.5, 0)
