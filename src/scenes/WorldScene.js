@@ -324,12 +324,21 @@ export class WorldScene extends BaseScene {
 
   _findNearestWalkableTile(originX, originY) {
     const maxRadius = Math.max(this._map.width, this._map.height)
-    for (let radius = 0; radius <= maxRadius; radius++) {
-      for (let y = originY - radius; y <= originY + radius; y++) {
-        for (let x = originX - radius; x <= originX + radius; x++) {
-          if (!this._isTileWalkable(x, y)) continue
-          return { x, y }
-        }
+    if (this._isTileWalkable(originX, originY)) return { x: originX, y: originY }
+
+    for (let radius = 1; radius <= maxRadius; radius++) {
+      const minX = originX - radius
+      const maxX = originX + radius
+      const minY = originY - radius
+      const maxY = originY + radius
+
+      for (let x = minX; x <= maxX; x++) {
+        if (this._isTileWalkable(x, minY)) return { x, y: minY }
+        if (this._isTileWalkable(x, maxY)) return { x, y: maxY }
+      }
+      for (let y = minY + 1; y <= maxY - 1; y++) {
+        if (this._isTileWalkable(minX, y)) return { x: minX, y }
+        if (this._isTileWalkable(maxX, y)) return { x: maxX, y }
       }
     }
     return null
