@@ -729,24 +729,26 @@ const STORY = {
   },
   npc_dagny_dba: {
     id: 'npc_dagny_dba',
+    questId: 'do_not_touch',
     pages: [
       "I'm Dagny. I manage the OldCorp databases.\nDon't touch DO_NOT_TOUCH.exe.",
       "I'm serious. I've seen what happens.\nPlease.",
+    ],
+    followUpDialog: [
+      "Well. That's done.\nCan you also fix my home Wi-Fi?",
     ],
     variants: [
       {
         condition: { reputationMin: 60 },
         pages: [
-          "You migrated it properly.\nI've never seen anyone do that.",
-          "Here. This is a rare item.\nYou've earned it.",
+          "Your reputation precedes you.\nI'll trust you with the sensitive tables.",
+          "Don't make me regret it.",
         ],
       },
       {
         condition: { shameMin: 3 },
         pages: [
-          "You opened it.",
-          "...You actually opened it.",
-          "I'll get the backup tapes.",
+          "I've heard about your methods.\nPlease. Stay away from my databases.",
         ],
       },
     ],
@@ -842,10 +844,26 @@ const STORY = {
       "Let me know if you see anything... unusual.",
     ],
     dialogByAct: {
+      1: [
+        "Good work on the last incident.\nNorCloud is impressed.",
+        "Keep an eye on the pipeline logs.\nSome runs are taking longer than they should.",
+      ],
+      2: [
+        "Something's off with the billing data.\nI can't pin it down.",
+        "Stay sharp. And document everything.",
+      ],
       3: [
         "I've been reviewing the audit logs.\nThere's a pattern I can't explain.",
         "Someone with deep Azure access\nhas been making changes.",
         "Stay close. And don't mention this\nto anyone at OmniCloud.",
+      ],
+      4: [
+        "You know the truth now.\nSo do I.",
+        "We have to finish this.",
+      ],
+      finale: [
+        "This ends here.",
+        "Whatever you decide — I understand.",
       ],
     },
     variants: [
