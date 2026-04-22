@@ -587,7 +587,7 @@ const ENCOUNTERS = {
     name: 'The Legacy Monolith',
     symptomText: 'A 1994 server rack. Windows XP error dialogs. Still running VB6.',
     rootCauseText: 'Nobody has dared touch this system in 30 years. It communicates via BSOD error codes.',
-    domain: 'linux',
+    domain: 'security',
     hp: 200,
     sla: 3,
     difficulty: 5,
