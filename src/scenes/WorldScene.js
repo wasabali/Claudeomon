@@ -10,13 +10,14 @@ import {
   DIR_OFFSETS, lerp, canRun, resolveDirection, isTileWalkable,
   updateBump, updateStep, commitStep, onStepComplete,
   shouldTriggerEncounter, checkTransition, applyTransition,
+  clampTileToInterior, findNearestWalkableTile, persistPlayerTile, syncPlayerTileFromPixels,
 } from '#engine/MovementEngine.js'
 import { getById as getTrainerById } from '#data/trainers.js'
 import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById } from '#data/regions.js'
 import { Menu } from '#ui/Menu.js'
-import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS } from '#engine/RegionEngine.js'
+import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
 
 const TILESET_KEY = 'stub_tiles'
 const TILE_SIZE   = CONFIG.TILE_SIZE
@@ -107,6 +108,8 @@ export class WorldScene extends BaseScene {
   }
 
   create(data = {}) {
+    this.cameras.main.setBackgroundColor('#2d4a1e')
+
     // Generate stub textures first — must happen in create(), not preload(),
     // so that the renderer is in its active state.
     this._generateStubTextures()
@@ -116,6 +119,7 @@ export class WorldScene extends BaseScene {
     this._menu        = new Menu(this)
     this._interacting = false
     this._transitioning = false
+    this._lastTravelDenialToken = null
     this._facing      = 'down'
     this._stepsSinceEncounter = 0
 
@@ -140,8 +144,8 @@ export class WorldScene extends BaseScene {
     this._entryDir    = data.entryDirection || null
 
     const regionId = this._regionId || GameState.player.location || 'localhost_town'
+    const resolvedRegionId = this._setupMap(regionId)
 
-    this._setupMap(regionId)
     this._setupNpcSprites()
     this._setupPlayer()
     this._setupInput()
@@ -149,7 +153,7 @@ export class WorldScene extends BaseScene {
     this.setupPauseKey()
     this._buildInteractionLookup()
 
-    this._onRegionEnter(regionId)
+    this._onRegionEnter(resolvedRegionId)
 
     this._setupThrottlemasterGhost()
   }
@@ -230,7 +234,10 @@ export class WorldScene extends BaseScene {
   }
 
   _setupMap(regionId) {
-    this._map = this.make.tilemap({ key: regionId })
+    const mapKey = this.cache.tilemap.exists(regionId) ? regionId : 'localhost_town'
+    this._regionId = mapKey
+
+    this._map = this.make.tilemap({ key: mapKey })
     const tileset = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
 
     this._groundLayer  = this._map.createLayer('Ground',  tileset, 0, 0)
@@ -241,18 +248,19 @@ export class WorldScene extends BaseScene {
       this._collisionLayer.setVisible(false)
       this._collisionLayer.setCollisionByExclusion([0])
     } else {
-      console.warn(`[WorldScene] 'Collision' layer missing from map '${regionId}' — collision detection disabled.`)
+      console.warn(`[WorldScene] 'Collision' layer missing from map '${mapKey}' — collision detection disabled.`)
     }
 
     this._overlayLayer = this._map.createLayer('Overlay', tileset, 0, 0)
     if (this._overlayLayer) {
       this._overlayLayer.setDepth(10)
     } else {
-      console.warn(`[WorldScene] 'Overlay' layer missing from map '${regionId}' — overlay rendering disabled.`)
+      console.warn(`[WorldScene] 'Overlay' layer missing from map '${mapKey}' — overlay rendering disabled.`)
     }
 
     const npcLayer = this._map.getObjectLayer('NPCs')
     this._npcDefs  = npcLayer ? npcLayer.objects : []
+    return mapKey
   }
 
   _setupNpcSprites() {
@@ -272,30 +280,57 @@ export class WorldScene extends BaseScene {
   }
 
   _setupPlayer() {
-    const tileX  = GameState.player.tileX
-    const tileY  = GameState.player.tileY
-    const mapW = this._map.widthInPixels
-    const mapH = this._map.heightInPixels
+    const mapW = this._map.width
+    const mapH = this._map.height
+    const maxInteriorTile = clampTileToInterior(mapW - 1, mapH - 1, mapW, mapH)
+    let spawnTileX = GameState.player.tileX ?? 5
+    let spawnTileY = GameState.player.tileY ?? 10
 
-    // Default spawn: use saved position or center of map
-    let startX = tileX != null ? tileX * TILE_SIZE + TILE_SIZE / 2 : 5 * TILE_SIZE + TILE_SIZE / 2
-    let startY = tileY != null ? tileY * TILE_SIZE + TILE_SIZE / 2 : 10 * TILE_SIZE + TILE_SIZE / 2
+    if (this._entryDir === 'west')       { spawnTileX = 1;              spawnTileY = Math.floor(mapH / 2) }
+    else if (this._entryDir === 'east')  { spawnTileX = maxInteriorTile.tileX; spawnTileY = Math.floor(mapH / 2) }
+    else if (this._entryDir === 'north') { spawnTileX = Math.floor(mapW / 2); spawnTileY = 1 }
+    else if (this._entryDir === 'south') { spawnTileX = Math.floor(mapW / 2); spawnTileY = maxInteriorTile.tileY }
 
-    // Entry direction: place player at the edge they entered from
-    if (this._entryDir === 'west')       { startX = TILE_SIZE + TILE_SIZE / 2; startY = mapH / 2 }
-    else if (this._entryDir === 'east')  { startX = mapW - TILE_SIZE - TILE_SIZE / 2; startY = mapH / 2 }
-    else if (this._entryDir === 'north') { startX = mapW / 2; startY = TILE_SIZE + TILE_SIZE / 2 }
-    else if (this._entryDir === 'south') { startX = mapW / 2; startY = mapH - TILE_SIZE - TILE_SIZE / 2 }
+    const clamped = clampTileToInterior(spawnTileX, spawnTileY, mapW, mapH)
+    spawnTileX = clamped.tileX
+    spawnTileY = clamped.tileY
+
+    if (!this._isTileWalkable(spawnTileX, spawnTileY)) {
+      const fallback = findNearestWalkableTile(
+        spawnTileX, spawnTileY, mapW, mapH,
+        (x, y) => this._isTileWalkable(x, y),
+      )
+      if (fallback) {
+        spawnTileX = fallback.tileX
+        spawnTileY = fallback.tileY
+      }
+    }
+
+    const startX = spawnTileX * TILE_SIZE + TILE_SIZE / 2
+    const startY = spawnTileY * TILE_SIZE + TILE_SIZE / 2
 
     this._player = this.physics.add.sprite(startX, startY, 'player')
     this._player.setDepth(5)
 
-    this._tileX = tileX ?? 5
-    this._tileY = tileY ?? 10
+    const persistedSpawn = persistPlayerTile(spawnTileX, spawnTileY)
+    this._tileX = persistedSpawn.tileX
+    this._tileY = persistedSpawn.tileY
     if (this._collisionLayer) {
       this.physics.add.collider(this._player, this._collisionLayer)
     }
-    this.physics.world.setBounds(0, 0, mapW, mapH)
+    this.physics.world.setBounds(0, 0, this._map.widthInPixels, this._map.heightInPixels)
+  }
+
+  _syncTileFromPlayerPosition() {
+    const persisted = syncPlayerTileFromPixels(
+      this._player.x,
+      this._player.y,
+      TILE_SIZE,
+      this._map.width,
+      this._map.height,
+    )
+    this._tileX = persisted.tileX
+    this._tileY = persisted.tileY
   }
 
   _setupInput() {
@@ -502,7 +537,7 @@ export class WorldScene extends BaseScene {
 
   _buildInteractionLookup() {
     this._interactionLookup = new Map()
-    const region = GameState.player.location
+    const region = this._regionId
     const regionInteractions = getInteractionsBy('region', region)
     for (const interaction of regionInteractions) {
       this._interactionLookup.set(`${interaction.tileX},${interaction.tileY}`, interaction)
@@ -658,12 +693,22 @@ export class WorldScene extends BaseScene {
     else if (py <= EDGE_MARGIN)          direction = 'north'
     else if (py >= mapH - EDGE_MARGIN)   direction = 'south'
 
-    if (!direction) return
+    if (!direction) {
+      this._lastTravelDenialToken = null
+      return
+    }
 
     const result = canTravel(this._regionId, direction, GameState)
-    if (!result.target) return
+    if (!result.target) {
+      this._lastTravelDenialToken = null
+      return
+    }
 
     if (!result.allowed) {
+      const denial = shouldShowTravelDenial(this._lastTravelDenialToken, this._regionId, direction, result)
+      this._lastTravelDenialToken = denial.token
+      if (!denial.shouldShow) return
+
       this._player.setVelocity(0, 0)
       this._interacting = true
       const denialText = this._resolveDenialText(result.reasonId, result.reasonParams)
@@ -674,9 +719,11 @@ export class WorldScene extends BaseScene {
       else if (direction === 'east')  this._player.x -= pushback
       else if (direction === 'north') this._player.y += pushback
       else if (direction === 'south') this._player.y -= pushback
+      this._syncTileFromPlayerPosition()
       return
     }
 
+    this._lastTravelDenialToken = null
     this._transitionToRegion(result.target, result.entry)
   }
 
