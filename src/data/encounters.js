@@ -797,7 +797,7 @@ const ENCOUNTERS = {
     optimalFix: null,
     layers: [
       {
-        domain: null,
+        domain: 'cloud',
         hp: 60,
         symptomText: 'Phase 2: Resource Exhaustion — budget and HP drain simultaneously.',
         rootCauseText: 'THROTTLEMASTER is burning through your cloud budget.',
