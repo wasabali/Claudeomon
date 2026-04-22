@@ -1284,12 +1284,12 @@
             {
               "name": "targetSpawnX",
               "type": "int",
-              "value": 20
+              "value": 23
             },
             {
               "name": "targetSpawnY",
               "type": "int",
-              "value": 11
+              "value": 14
             }
           ],
           "type": "transition",

@@ -241,7 +241,7 @@ function findNpcSpot(w, h, occupied, usedSpots, openings, rng) {
   return { tileX: Math.floor(w / 2), tileY: Math.floor(h / 2) }
 }
 
-function generateMap(regionId, region, connections, allRegions, trainers, interactions, childGyms) {
+function generateMap(regionId, region, connections, allRegions, trainers, interactions, childGyms, gymDoorPositions) {
   const type = region.type
   const { w, h } = SIZE[type] || SIZE.main
   const rng = seededRng(hashSeed(regionId))
@@ -288,11 +288,18 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const transitionObjects = []
   let transObjId = 100
 
+  // Track gym_door placements so gym exit_doors can reference them
+  const placedGymDoors = {}
+
   if (type === 'gym') {
     const exitX = Math.floor(w / 2)
     const exitY = h - 2
+    // Look up the actual gym_door position in the parent map
+    const parentDoorPos = gymDoorPositions[regionId]
+    const spawnX = parentDoorPos ? parentDoorPos.tileX : Math.floor((SIZE[allRegions.find(r => r.id === region.parentRegion)?.type || 'main']?.w || SIZE.main.w) / 2)
+    const spawnY = parentDoorPos ? parentDoorPos.tileY : Math.floor((SIZE[allRegions.find(r => r.id === region.parentRegion)?.type || 'main']?.h || SIZE.main.h) / 2)
     transitionObjects.push(
-      makeTransitionObject(transObjId++, 'exit_door', region.parentRegion, Math.floor(SIZE.main.w / 2), Math.floor(SIZE.main.h / 2), exitX, exitY)
+      makeTransitionObject(transObjId++, 'exit_door', region.parentRegion, spawnX, spawnY, exitX, exitY)
     )
   }
 
@@ -300,9 +307,13 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     for (const gym of childGyms) {
       const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
       const gymSize = SIZE.gym
+      // Spawn player one tile above the exit_door inside the gym
+      const gymSpawnX = Math.floor(gymSize.w / 2)
+      const gymSpawnY = gymSize.h - 3
       transitionObjects.push(
-        makeTransitionObject(transObjId++, 'gym_door', gym.id, Math.floor(gymSize.w / 2), Math.floor(gymSize.h / 2), spot.tileX, spot.tileY)
+        makeTransitionObject(transObjId++, 'gym_door', gym.id, gymSpawnX, gymSpawnY, spot.tileX, spot.tileY)
       )
+      placedGymDoors[gym.id] = { tileX: spot.tileX, tileY: spot.tileY }
     }
   }
 
@@ -313,21 +324,24 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const nextObjectId = Math.max(objId, transObjId)
 
   return {
-    compressionlevel: -1,
-    height: h,
-    infinite: false,
-    layers,
-    nextlayerid: nextLayerId,
-    nextobjectid: nextObjectId,
-    orientation: 'orthogonal',
-    renderorder: 'right-down',
-    tiledversion: '1.10.0',
-    tileheight: TILE,
-    tilesets: [TILESET],
-    tilewidth: TILE,
-    type: 'map',
-    version: '1.10',
-    width: w,
+    map: {
+      compressionlevel: -1,
+      height: h,
+      infinite: false,
+      layers,
+      nextlayerid: nextLayerId,
+      nextobjectid: nextObjectId,
+      orientation: 'orthogonal',
+      renderorder: 'right-down',
+      tiledversion: '1.10.0',
+      tileheight: TILE,
+      tilesets: [TILESET],
+      tilewidth: TILE,
+      type: 'map',
+      version: '1.10',
+      width: w,
+    },
+    placedGymDoors,
   }
 }
 
@@ -353,9 +367,15 @@ async function main() {
   let generated = 0
   let skipped = 0
 
-  for (const region of allRegions) {
-    const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
+  // Accumulated gym_door positions from parent maps (gymId → {tileX, tileY})
+  const gymDoorPositions = {}
 
+  // Pass 1: Generate non-gym maps first (main, dungeon, hidden)
+  // so we know where gym_doors land in parent maps
+  for (const region of allRegions) {
+    if (region.type === 'gym') continue
+
+    const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
     if (fs.existsSync(mapPath)) {
       console.log(`  skip  ${region.id} (hand-made map exists)`)
       skipped++
@@ -364,7 +384,28 @@ async function main() {
 
     const conn = connections[region.id] || {}
     const childGyms = gymsByParent[region.id] || []
-    const map = generateMap(region.id, region, conn, allRegions, allTrainers, allInteractions, childGyms)
+    const { map, placedGymDoors } = generateMap(region.id, region, conn, allRegions, allTrainers, allInteractions, childGyms, gymDoorPositions)
+
+    Object.assign(gymDoorPositions, placedGymDoors)
+
+    fs.writeFileSync(mapPath, JSON.stringify(map, null, 2) + '\n')
+    console.log(`  gen   ${region.id} (${map.width}×${map.height})`)
+    generated++
+  }
+
+  // Pass 2: Generate gym maps using accumulated gym_door positions
+  for (const region of allRegions) {
+    if (region.type !== 'gym') continue
+
+    const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
+    if (fs.existsSync(mapPath)) {
+      console.log(`  skip  ${region.id} (hand-made map exists)`)
+      skipped++
+      continue
+    }
+
+    const conn = connections[region.id] || {}
+    const { map } = generateMap(region.id, region, conn, allRegions, allTrainers, allInteractions, [], gymDoorPositions)
 
     fs.writeFileSync(mapPath, JSON.stringify(map, null, 2) + '\n')
     console.log(`  gen   ${region.id} (${map.width}×${map.height})`)

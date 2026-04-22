@@ -3746,7 +3746,7 @@
             {
               "name": "targetSpawnY",
               "type": "int",
-              "value": 7
+              "value": 12
             }
           ],
           "type": "transition",
@@ -3773,7 +3773,7 @@
             {
               "name": "targetSpawnY",
               "type": "int",
-              "value": 7
+              "value": 12
             }
           ],
           "type": "transition",

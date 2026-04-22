@@ -103,3 +103,40 @@ describe('fast travel regions have azure_terminal', () => {
     expect(terminal).toBeDefined()
   })
 })
+
+describe('transition spawn coordinates are in-bounds for target maps', () => {
+  const gymRegions = allRegions.filter(r => r.type === 'gym')
+  it.each(gymRegions.map(r => [r.id, r.parentRegion]))('%s exit_door spawns within %s bounds', (gymId, parentId) => {
+    const gymMap = loadMap(gymId)
+    const trans = gymMap.layers.find(l => l.name === 'Transitions')
+    const exitDoor = trans.objects.find(o => o.name === 'exit_door')
+    const spawnX = exitDoor.properties.find(p => p.name === 'targetSpawnX').value
+    const spawnY = exitDoor.properties.find(p => p.name === 'targetSpawnY').value
+    const parentMap = loadMap(parentId)
+    expect(spawnX).toBeGreaterThanOrEqual(0)
+    expect(spawnX).toBeLessThan(parentMap.width)
+    expect(spawnY).toBeGreaterThanOrEqual(0)
+    expect(spawnY).toBeLessThan(parentMap.height)
+  })
+
+  it('sibling gyms under same parent have distinct exit spawn coords', () => {
+    const gymsByParent = {}
+    for (const r of gymRegions) {
+      if (!gymsByParent[r.parentRegion]) gymsByParent[r.parentRegion] = []
+      gymsByParent[r.parentRegion].push(r.id)
+    }
+    for (const [parentId, gymIds] of Object.entries(gymsByParent)) {
+      if (gymIds.length < 2) continue
+      const spawns = gymIds.map(id => {
+        const map = loadMap(id)
+        const trans = map.layers.find(l => l.name === 'Transitions')
+        const exitDoor = trans.objects.find(o => o.name === 'exit_door')
+        const x = exitDoor.properties.find(p => p.name === 'targetSpawnX').value
+        const y = exitDoor.properties.find(p => p.name === 'targetSpawnY').value
+        return `${x},${y}`
+      })
+      const unique = new Set(spawns)
+      expect(unique.size).toBe(spawns.length)
+    }
+  })
+})
