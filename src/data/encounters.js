@@ -501,7 +501,7 @@ const ENCOUNTERS = {
     rootCauseText: 'Someone left 47 GPU instances running over the weekend.',
     domain: 'cloud',
     hp: 100,
-    sla: 5,
+    sla: 3,
     difficulty: 4,
     attacks: ['budget_spike', 'skill_block'],
     optimalFix: 'cost_optimization',
