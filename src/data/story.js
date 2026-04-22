@@ -708,36 +708,24 @@ const STORY = {
     pages: [
       "Hi! I'm Ivan. I just started.\nWhat is a container?",
     ],
-    variants: [
-      {
-        condition: { storyFlag: 'act3_started' },
-        pages: [
-          "Wait. What is a Kubernetes?",
-          "I've been here 3 months.",
-        ],
-      },
-      {
-        condition: { storyFlag: 'act2_started' },
-        pages: [
-          "What is the cloud?",
-          "Like. Metaphysically.",
-        ],
-      },
-      {
-        condition: { storyFlag: 'act4_started' },
-        pages: [
-          "What is infrastructure?",
-          "I'm asking for a friend.\nThe friend is me.",
-        ],
-      },
-      {
-        condition: { storyFlag: 'finale_started' },
-        pages: [
-          "What is a computer?",
-          "I've been promoted to Senior Developer.",
-        ],
-      },
-    ],
+    dialogByAct: {
+      2: [
+        "What is the cloud?",
+        "Like. Metaphysically.",
+      ],
+      3: [
+        "Wait. What is a Kubernetes?",
+        "I've been here 3 months.",
+      ],
+      4: [
+        "What is infrastructure?",
+        "I'm asking for a friend.\nThe friend is me.",
+      ],
+      finale: [
+        "What is a computer?",
+        "I've been promoted to Senior Developer.",
+      ],
+    },
   },
   npc_dagny_dba: {
     id: 'npc_dagny_dba',
@@ -747,18 +735,18 @@ const STORY = {
     ],
     variants: [
       {
-        condition: { storyFlag: 'do_not_touch_opened' },
+        condition: { reputationMin: 60 },
+        pages: [
+          "You migrated it properly.\nI've never seen anyone do that.",
+          "Here. This is a rare item.\nYou've earned it.",
+        ],
+      },
+      {
+        condition: { shameMin: 3 },
         pages: [
           "You opened it.",
           "...You actually opened it.",
           "I'll get the backup tapes.",
-        ],
-      },
-      {
-        condition: { storyFlag: 'do_not_touch_migrated' },
-        pages: [
-          "You migrated it properly.\nI've never seen anyone do that.",
-          "Here. This is a rare item.\nYou've earned it.",
         ],
       },
     ],
@@ -794,14 +782,14 @@ const STORY = {
     ],
     variants: [
       {
-        condition: { storyFlag: 'azure_bill_spike_resolved' },
+        condition: { reputationMin: 70 },
         pages: [
           "Someone wasted 200 VMs over a bank holiday.\nI almost fainted.",
           "Thank you for resolving it.\nThe CFO has stopped emailing me.",
         ],
       },
       {
-        condition: { budgetMax: 20 },
+        condition: { shameMin: 5 },
         pages: [
           "*gasp*",
           "Your budget. It's... it's almost gone.",
@@ -853,17 +841,16 @@ const STORY = {
       "Keep an eye on the pipeline logs.\nSome runs are taking longer than they should.",
       "Let me know if you see anything... unusual.",
     ],
+    dialogByAct: {
+      3: [
+        "I've been reviewing the audit logs.\nThere's a pattern I can't explain.",
+        "Someone with deep Azure access\nhas been making changes.",
+        "Stay close. And don't mention this\nto anyone at OmniCloud.",
+      ],
+    },
     variants: [
       {
-        condition: { storyFlag: 'act3_started' },
-        pages: [
-          "I've been reviewing the audit logs.\nThere's a pattern I can't explain.",
-          "Someone with deep Azure access\nhas been making changes.",
-          "Stay close. And don't mention this\nto anyone at OmniCloud.",
-        ],
-      },
-      {
-        condition: { storyFlag: 'throttlemaster_revealed' },
+        condition: { shameMin: 10 },
         pages: [
           "You know.",
           "I knew you'd find out eventually.\nKarsten and I — it's complicated.",
