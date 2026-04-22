@@ -20,7 +20,7 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 ### Overview
 
-[Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)** is the primary visual source for Cloud Quest. It is released under the **CC0 1.0 Universal** licence — no restrictions, no attribution required — but we attribute anyway.
+[Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)** is the primary visual source for Cloud Quest. It is released under the **CC0 1.0 Universal** license — no restrictions, no attribution required — but we attribute anyway.
 
 ```
 ## Ninja Adventure Asset Pack
@@ -66,7 +66,7 @@ Source: `https://github.com/pagefaultgames/pokerogue-assets`
 
 ### License
 
-CC-BY-NC-SA-4.0 — **this licence propagates to any derived assets and restricts Cloud Quest to non-commercial use**.
+CC-BY-NC-SA-4.0 — **this license propagates to any derived assets and restricts Cloud Quest to non-commercial use**.
 
 - **Attribution** — Credit PokeRogue / pagefaultgames
 - **Non-commercial** — Cloud Quest must remain non-commercial
@@ -219,7 +219,7 @@ After upscaling, drop files into the matching Cloud Quest folder according to th
 
 ## Adding New Assets
 
-1. Prefer CC0 sources to avoid licence conflicts with the existing PokeRogue CC-BY-NC-SA-4.0 assets.
-2. Document the source and licence in the nearest `CREDITS.md` (subfolder or root).
+1. Prefer CC0 sources to avoid license conflicts with the existing PokeRogue CC-BY-NC-SA-4.0 assets.
+2. Document the source and license in the nearest `CREDITS.md` (subfolder or root).
 3. Run the upscale pipeline if the source is 16×16px.
 4. Update this file with the new source entry.
