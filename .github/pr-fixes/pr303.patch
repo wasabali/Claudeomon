@@ -1,0 +1,76 @@
+From 450986fcb143bbe7bce9068fda0e7de04d93103b Mon Sep 17 00:00:00 2001
+From: "copilot-swe-agent[bot]" <198982749+Copilot@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 09:29:27 +0000
+Subject: [PATCH] fix(pr303): assert tech region maps exist in tests, fix
+ tiledversion field name, remove dead script ref in CREDITS, drop unused
+ readFileSync import
+
+Co-authored-by: wasabali <60469868+wasabali@users.noreply.github.com>
+---
+ assets/tiles/CREDITS.md             | 3 ++-
+ assets/tiles/kenney_tech_office.tsj | 2 +-
+ scripts/compose-tech-tileset.js     | 2 +-
+ tests/maps.test.js                  | 7 +++----
+ 4 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/assets/tiles/CREDITS.md b/assets/tiles/CREDITS.md
+index 851b506..1c0c573 100644
+--- a/assets/tiles/CREDITS.md
++++ b/assets/tiles/CREDITS.md
+@@ -38,7 +38,8 @@ by [Kenney](https://kenney.nl).
+ convert kenney_tilemap_packed.png \
+   -filter point -resize 300% \
+   kenney_tech_office_raw.png
+-# Then slice and arrange into the Cloud Quest grid using scripts/slice-kenney-tiles.js
++# Then manually extract the tiles you need from kenney_tech_office_raw.png
++# and place them in the 48×48 grid slots defined in kenney_tech_office.tsj.
+ ```
+ 
+ ---
+diff --git a/assets/tiles/kenney_tech_office.tsj b/assets/tiles/kenney_tech_office.tsj
+index 55cc72c..0a35921 100644
+--- a/assets/tiles/kenney_tech_office.tsj
++++ b/assets/tiles/kenney_tech_office.tsj
+@@ -7,7 +7,7 @@
+   "name": "kenney_tech_office",
+   "spacing": 0,
+   "tilecount": 50,
+-  "tiled_version": "1.10.0",
++  "tiledversion": "1.10.0",
+   "tileheight": 48,
+   "tilewidth": 48,
+   "tiles": [
+diff --git a/scripts/compose-tech-tileset.js b/scripts/compose-tech-tileset.js
+index 64469c8..933e608 100644
+--- a/scripts/compose-tech-tileset.js
++++ b/scripts/compose-tech-tileset.js
+@@ -23,7 +23,7 @@
+  */
+ 
+ import { createCanvas, loadImage } from 'canvas'
+-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs'
++import { writeFileSync, existsSync, readdirSync } from 'node:fs'
+ import path from 'node:path'
+ import { fileURLToPath } from 'node:url'
+ 
+diff --git a/tests/maps.test.js b/tests/maps.test.js
+index f9c3bb6..5fd6ae6 100644
+--- a/tests/maps.test.js
++++ b/tests/maps.test.js
+@@ -154,10 +154,9 @@ const TECH_REGION_IDS = [
+ ]
+ 
+ describe('tech regions carry kenney_tech_office tileset', () => {
+-  it.each(TECH_REGION_IDS.filter(id => {
+-    const p = path.join(MAPS_DIR, `${id}.tmj`)
+-    return fs.existsSync(p)
+-  }))('%s includes kenney_tech_office as second tileset', (regionId) => {
++  it.each(TECH_REGION_IDS)('%s includes kenney_tech_office as second tileset', (regionId) => {
++    const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)
++    expect(fs.existsSync(mapPath)).toBe(true)
+     const map = loadMap(regionId)
+     const techTs = map.tilesets.find(ts => ts.name === 'kenney_tech_office')
+     expect(techTs).toBeDefined()
+-- 
+2.53.0
+

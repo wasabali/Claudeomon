@@ -1,0 +1,64 @@
+From b31bf3e377ba7026eab0b11b6fa8da409d72e7bb Mon Sep 17 00:00:00 2001
+From: "copilot-swe-agent[bot]" <198982749+Copilot@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 09:15:26 +0000
+Subject: [PATCH] fix(pr302): Python 3.9+ requirement, fix self-referential
+ alias, update exit codes docstring, strip ICC profile from RGBA source images
+
+Co-authored-by: wasabali <60469868+wasabali@users.noreply.github.com>
+---
+ docs/VISUAL_ASSETS.md     | 8 ++++----
+ scripts/upscale_assets.py | 5 ++++-
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/docs/VISUAL_ASSETS.md b/docs/VISUAL_ASSETS.md
+index 26ba213..31a8072 100644
+--- a/docs/VISUAL_ASSETS.md
++++ b/docs/VISUAL_ASSETS.md
+@@ -23,7 +23,7 @@ upscale of the entire asset pack in one pass.
+ 
+ ### Requirements
+ 
+-- Python 3.8+
++- Python 3.9+
+ - [Pillow](https://pypi.org/project/Pillow/) — `pip install Pillow`
+ 
+ ### Usage
+@@ -57,9 +57,9 @@ Only nearest-neighbor scaling is permitted. Using any other algorithm
+ (bilinear, bicubic, Lanczos) will introduce sub-pixel blurring that destroys
+ the pixel-art look at 48 px.
+ 
+-The Pillow constant for nearest-neighbor is `Image.NEAREST` (also aliased as
+-`Image.NEAREST` / the integer constant `0` in older Pillow versions). The equivalent ImageMagick flag is
+-`-filter point`.
++The Pillow constant for nearest-neighbor is `Image.Resampling.NEAREST` (also available as the
++legacy alias `Image.NEAREST` and the integer constant `0` in older Pillow versions). The
++equivalent ImageMagick flag is `-filter point`.
+ 
+ ### Example manifest output
+ 
+diff --git a/scripts/upscale_assets.py b/scripts/upscale_assets.py
+index 740fd6b..7c35a49 100644
+--- a/scripts/upscale_assets.py
++++ b/scripts/upscale_assets.py
+@@ -24,7 +24,7 @@ Any directory name not in that list is counted under "other".
+ 
+ Exit codes:
+     0 — success (at least one file processed)
+-    1 — no PNG files found under --input
++    1 — missing arguments, invalid input path, or no PNG files found under --input
+     2 — import error (Pillow not installed)
+ """
+ 
+@@ -61,6 +61,9 @@ def upscale_png(src_path: str, dst_path: str, scale: int) -> None:
+         new_w = img.width * scale
+         new_h = img.height * scale
+         upscaled = img.resize((new_w, new_h), Image.NEAREST)
++        # Explicitly remove any ICC profile retained from the source image
++        # (resize() can carry img.info into the result even when mode was already RGBA).
++        upscaled.info.pop("icc_profile", None)
+ 
+     os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+     # Save without icc_profile key — Pillow will not embed one
+-- 
+2.53.0
+

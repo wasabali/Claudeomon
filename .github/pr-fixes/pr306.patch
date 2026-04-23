@@ -1,0 +1,28 @@
+From 6668a8645487b6eb45c881d3165b0851ec55713d Mon Sep 17 00:00:00 2001
+From: "copilot-swe-agent[bot]" <198982749+Copilot@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 09:16:02 +0000
+Subject: [PATCH] test(pr306): add PORTRAIT_SIZE assertion to config tests
+
+Co-authored-by: wasabali <60469868+wasabali@users.noreply.github.com>
+---
+ tests/config.test.js | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tests/config.test.js b/tests/config.test.js
+index 33963a0..c4afd83 100644
+--- a/tests/config.test.js
++++ b/tests/config.test.js
+@@ -26,6 +26,10 @@ describe('CONFIG', () => {
+     expect(CONFIG.TILE_SIZE).toBe(48)
+   })
+ 
++  it('has 48px portrait size', () => {
++    expect(CONFIG.PORTRAIT_SIZE).toBe(48)
++  })
++
+   it('limits active skills to 6', () => {
+     expect(CONFIG.MAX_ACTIVE_SKILLS).toBe(6)
+   })
+-- 
+2.53.0
+

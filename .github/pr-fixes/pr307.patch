@@ -1,0 +1,75 @@
+From 57bb61025e93fd8075b2d41d732b6127b2b5f602 Mon Sep 17 00:00:00 2001
+From: "copilot-swe-agent[bot]" <198982749+Copilot@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 09:21:08 +0000
+Subject: [PATCH] fix(pr307): fix BootScene loaderror comment, VISUAL_ASSETS
+ Priority 2 fallback strategy, priority-incidents fps/palette/frame
+ discrepancies
+
+Co-authored-by: wasabali <60469868+wasabali@users.noreply.github.com>
+---
+ docs/VISUAL_ASSETS.md                    | 2 +-
+ docs/sprites/specs/priority-incidents.md | 6 +++---
+ src/scenes/BootScene.js                  | 3 ++-
+ 3 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/docs/VISUAL_ASSETS.md b/docs/VISUAL_ASSETS.md
+index 8afb3ee..17b0ae3 100644
+--- a/docs/VISUAL_ASSETS.md
++++ b/docs/VISUAL_ASSETS.md
+@@ -134,7 +134,7 @@ Where `incident_id` matches the key in `src/data/encounters.js`.
+ 
+ ### Priority 2 — Later Region Encounters
+ 
+-These can use a generic placeholder until custom sprites are created. Use `incident_placeholder.png` as the `spriteKey` fallback.
++These ship without a sprite until custom art is created. Do **not** set a placeholder `spriteKey` — leave the field absent so the game no-ops cleanly rather than attempting to load a non-existent fallback image.
+ 
+ | Incident ID | Visual Concept |
+ |---|---|
+diff --git a/docs/sprites/specs/priority-incidents.md b/docs/sprites/specs/priority-incidents.md
+index 4cf91c1..25b1651 100644
+--- a/docs/sprites/specs/priority-incidents.md
++++ b/docs/sprites/specs/priority-incidents.md
+@@ -25,7 +25,7 @@ Each sprite is **16×16 px** designed for **3× upscale to 48×48 px**.
+ | Outline | `#141414` | All borders |
+ | White | `#F8F8F8` | Page body |
+ | Light gray | `#C8C8D2` | Page face area |
+-| Black (eyes) | `#141414` | ×× eye marks (confused expression) |
++| Black (eyes) | `#141414` | Two small dot eyes (confused expression) |
+ 
+ **Animation:** Frame rate 2 fps, infinite repeat. Frame 0 is the upright pose. Frame 1 is shifted 1 px right with legs splayed.
+ 
+@@ -57,7 +57,7 @@ Each sprite is **16×16 px** designed for **3× upscale to 48×48 px**.
+ | Transparent | `#00000000` | Background |
+ | Outline | `#141414` | Character border |
+ | Blue | `#5082DC` | Semicolon body (opaque) |
+-| Blue (faded) | `#5082DC80` | Semicolon body (frame 2 ghost) |
++| Blue (faded) | `#5082DC80` | Semicolon body (frame 1 ghost) |
+ 
+ **Animation:** Frame rate 2 fps, infinite repeat. Creates a slow "flicker" effect — the semicolon keeps appearing and disappearing.
+ 
+@@ -127,7 +127,7 @@ Each sprite is **16×16 px** designed for **3× upscale to 48×48 px**.
+ | Orange | `#E69632` | npm terminal banner |
+ | White | `#F8F8F8` | Terminal text |
+ 
+-**Animation:** Frame rate 3 fps, infinite repeat. Eye expression changes between frames (mouth stays fixed); loading ring bright segment rotates clockwise. The 2-frame rotation creates a spinning effect.
++**Animation:** Frame rate 2 fps, infinite repeat. Eye expression changes between frames (mouth stays fixed); loading ring bright segment rotates clockwise. The 2-frame rotation creates a spinning effect.
+ 
+ **Key details:**
+ - Loading ring: 4px radius circle outline, with a small bright segment that rotates
+diff --git a/src/scenes/BootScene.js b/src/scenes/BootScene.js
+index 93a566c..4d871b1 100644
+--- a/src/scenes/BootScene.js
++++ b/src/scenes/BootScene.js
+@@ -3,7 +3,8 @@ import { getAllBgm } from '#data/audio.js'
+ import { getAll as getAllEncounters } from '#data/encounters.js'
+ 
+ // Incident spritesheets — 48×48 px per frame, horizontal strip.
+-// Only loaded if the file exists; missing sprites fall back gracefully in BattleScene.
++// Load is always attempted for encounters with a spriteKey; missing sprite files are
++// silently skipped via the loaderror handler below (not conditionally skipped here).
+ const INCIDENT_SPRITE_FRAME_SIZE = { frameWidth: 48, frameHeight: 48 }
+ 
+ export class BootScene extends Phaser.Scene {
+-- 
+2.53.0
+

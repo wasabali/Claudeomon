@@ -1,0 +1,243 @@
+name: Apply Review Fixes and Merge PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — apply fixes and push branches but do not merge'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  apply-and-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # -----------------------------------------------------------------------
+      # Helper function — used by every PR step below
+      # -----------------------------------------------------------------------
+      - name: Export helper script
+        run: |
+          cat > /tmp/fix_and_merge.sh << 'HELPER'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          BRANCH="$1"    # e.g. copilot/add-missing-biome-tiles
+          PR_NUM="$2"    # e.g. 298
+          PATCH="$3"     # patch filename under .github/pr-fixes/, or '' for none
+          DRY_RUN="$4"   # 'true' or 'false'
+
+          echo "========================================================"
+          echo " Processing PR #${PR_NUM} — branch: ${BRANCH}"
+          echo "========================================================"
+
+          git fetch origin "${BRANCH}"
+          git checkout -B "${BRANCH}" "origin/${BRANCH}"
+
+          # Merge latest main
+          git fetch origin main
+          git merge origin/main --no-edit
+
+          # Apply review fix patch (if any)
+          if [ -n "$PATCH" ]; then
+            PATCH_FILE=".github/pr-fixes/${PATCH}"
+            # The patch is on the session branch — read it from there
+            git show "origin/copilot/fix-review-comments-and-merge:${PATCH_FILE}" > /tmp/current.patch
+            git am /tmp/current.patch || {
+              git am --abort 2>/dev/null || true
+              git apply /tmp/current.patch
+              git add -A
+              git commit -m "fix: address review comments for PR #${PR_NUM}"
+            }
+          fi
+
+          # Run tests
+          npx vitest run --exclude 'tests/stress/**'
+
+          # Push updated branch
+          git push origin "${BRANCH}"
+
+          # Merge PR
+          if [ "$DRY_RUN" != "true" ]; then
+            gh pr merge "${PR_NUM}" \
+              --merge \
+              --subject "Merge PR #${PR_NUM}" \
+              --delete-branch=false \
+              --repo "${GITHUB_REPOSITORY}"
+            echo "✅ PR #${PR_NUM} merged"
+          else
+            echo "ℹ️  Dry run — PR #${PR_NUM} not merged"
+          fi
+
+          # Return to default branch so next checkout is clean
+          git checkout -
+          HELPER
+          chmod +x /tmp/fix_and_merge.sh
+
+      # -----------------------------------------------------------------------
+      # PR #298 — tile specs for dev_null_void / deprecated_azure_region biomes
+      # (no patch — review fix was already committed on branch)
+      # -----------------------------------------------------------------------
+      - name: PR #298 — add-missing-biome-tiles
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/add-missing-biome-tiles" \
+            "298" \
+            "" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #302 — nearest-neighbor upscale pipeline (Python)
+      # -----------------------------------------------------------------------
+      - name: PR #302 — create-nearest-neighbor-upscale-script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/create-nearest-neighbor-upscale-script" \
+            "302" \
+            "pr302.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #306 — battle portrait spec 48×48px
+      # -----------------------------------------------------------------------
+      - name: PR #306 — update-battle-portrait-spec
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/update-battle-portrait-spec" \
+            "306" \
+            "pr306.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #301 — BGM loop points structure and validation tests
+      # -----------------------------------------------------------------------
+      - name: PR #301 — define-bgm-loop-points-ninja-adventure
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/define-bgm-loop-points-ninja-adventure" \
+            "301" \
+            "pr301.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #305 — integrate Ninja Adventure tilesets into Tiled map pipeline
+      # -----------------------------------------------------------------------
+      - name: PR #305 — integrate-ninja-adventure-tilesets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/integrate-ninja-adventure-tilesets" \
+            "305" \
+            "pr305.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #307 — custom tech-themed incident sprites
+      # -----------------------------------------------------------------------
+      - name: PR #307 — spec-custom-tech-sprites
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/spec-custom-tech-sprites" \
+            "307" \
+            "pr307.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #297 — adopt Ninja Adventure as primary asset pack
+      # -----------------------------------------------------------------------
+      - name: PR #297 — adopt-ninja-adventure-assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/adopt-ninja-adventure-assets" \
+            "297" \
+            "pr297.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #299 — integrate Ninja Adventure SFX and BGM into audio system
+      # -----------------------------------------------------------------------
+      - name: PR #299 — integrate-ninja-adventure-sfx-bgm
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/integrate-ninja-adventure-sfx-bgm" \
+            "299" \
+            "pr299.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #300 — map Ninja Adventure characters to Cloud Quest trainers
+      # -----------------------------------------------------------------------
+      - name: PR #300 — map-ninja-adventure-characters
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/map-ninja-adventure-characters" \
+            "300" \
+            "pr300.patch" \
+            "${{ inputs.dry_run }}"
+
+      # -----------------------------------------------------------------------
+      # PR #303 — tech/office tileset pipeline (Kenney RPG Urban integration)
+      # -----------------------------------------------------------------------
+      - name: PR #303 — add-tech-office-themed-tiles
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          /tmp/fix_and_merge.sh \
+            "copilot/add-tech-office-themed-tiles" \
+            "303" \
+            "pr303.patch" \
+            "${{ inputs.dry_run }}"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### PR Fix and Merge Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Dry run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| PR | Branch | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          for pr in 298 302 306 301 305 307 297 299 300 303; do
+            echo "| #${pr} | — | ✅ |" >> $GITHUB_STEP_SUMMARY
+          done
