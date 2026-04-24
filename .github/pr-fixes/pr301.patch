@@ -1,0 +1,50 @@
+From eb37601ade68b7f0316c8e2ee8a35078a211fdf9 Mon Sep 17 00:00:00 2001
+From: "copilot-swe-agent[bot]" <198982749+Copilot@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 09:17:25 +0000
+Subject: [PATCH] test(pr301): add not.toBeNull assertion and guard each
+ loop-point access with toHaveProperty
+
+Co-authored-by: wasabali <60469868+wasabali@users.noreply.github.com>
+---
+ tests/data.test.js | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tests/data.test.js b/tests/data.test.js
+index 3b1b55c..fe29eaa 100644
+--- a/tests/data.test.js
++++ b/tests/data.test.js
+@@ -489,6 +489,7 @@ describe('bgm-loop-points.json', () => {
+ 
+   it('is parseable JSON with an object at the root', () => {
+     expect(loopPoints).toBeDefined()
++    expect(loopPoints).not.toBeNull()
+     expect(typeof loopPoints).toBe('object')
+     expect(Array.isArray(loopPoints)).toBe(false)
+   })
+@@ -501,6 +502,7 @@ describe('bgm-loop-points.json', () => {
+ 
+   it('every BGM entry has numeric start and end values >= 0', () => {
+     getAllBgm().forEach(bgm => {
++      expect(loopPoints).toHaveProperty(bgm.id)
+       const entry = loopPoints[bgm.id]
+       expect(typeof entry.start).toBe('number')
+       expect(typeof entry.end).toBe('number')
+@@ -511,6 +513,7 @@ describe('bgm-loop-points.json', () => {
+ 
+   it('end >= start for every BGM entry', () => {
+     getAllBgm().forEach(bgm => {
++      expect(loopPoints).toHaveProperty(bgm.id)
+       const { start, end } = loopPoints[bgm.id]
+       expect(end).toBeGreaterThanOrEqual(start)
+     })
+@@ -520,6 +523,7 @@ describe('bgm-loop-points.json', () => {
+     getAllBgm()
+       .filter(bgm => !bgm.loop)
+       .forEach(bgm => {
++        expect(loopPoints).toHaveProperty(bgm.id)
+         const entry = loopPoints[bgm.id]
+         expect(entry.start).toBe(0)
+         expect(entry.end).toBe(0)
+-- 
+2.53.0
+

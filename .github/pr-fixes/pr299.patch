@@ -1,0 +1,68 @@
+From 2e60da048135c7e8a831677d7f867bcd751294f8 Mon Sep 17 00:00:00 2001
+From: "copilot-swe-agent[bot]" <198982749+Copilot@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 09:25:14 +0000
+Subject: [PATCH] =?UTF-8?q?fix(pr299):=20use=20end-anchored=20regex=20for?=
+ =?UTF-8?q?=20OGG=E2=86=92MP3=20fallback;=20add=20BGM=20track=E2=86=92regi?=
+ =?UTF-8?q?on=20mapping=20notes=20in=20wiki?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Co-authored-by: wasabali <60469868+wasabali@users.noreply.github.com>
+---
+ docs/wiki/audio.md      | 3 +++
+ docs/wiki/world-map.md  | 4 ++++
+ src/scenes/BootScene.js | 4 ++--
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/docs/wiki/audio.md b/docs/wiki/audio.md
+index b778c4c..174d79f 100644
+--- a/docs/wiki/audio.md
++++ b/docs/wiki/audio.md
+@@ -8,6 +8,9 @@ Cloud Quest uses real sound effects and background music to make every CLI comma
+ 
+ Each region and battle type has a dedicated BGM track. Tracks loop seamlessly.
+ 
++> **Note:** The Track IDs in this table are audio registry keys from `src/data/audio.js`, not region IDs.
++> Multiple regions may share the same track. WorldScene will implement a region ID → track ID mapping at runtime.
++
+ ### Overworld Tracks
+ 
+ | Track ID | Where It Plays | Volume |
+diff --git a/docs/wiki/world-map.md b/docs/wiki/world-map.md
+index 2e1b644..0fa5281 100644
+--- a/docs/wiki/world-map.md
++++ b/docs/wiki/world-map.md
+@@ -6,6 +6,10 @@ Cloud Quest's world is divided into regions, each themed around a different doma
+ 
+ ## Region Overview
+ 
++> **Note:** The BGM Track column lists audio registry track IDs from `src/data/audio.js` — not region IDs.
++> Multiple regions share the same track (e.g. `cloud_citadel` covers Staging Valley, Production Plains, Security Vault, Architecture District, Azure Town, and The Cloud Console).
++> WorldScene will implement the region ID → track ID mapping at runtime.
++
+ | # | Region | Domain Focus | Act | Gym? | BGM Track | Description |
+ |---|---|---|---|---|---|---|
+ | 1 | **Localhost Town** | — | Prologue/1 | — | `localhost_town` | Starting village. Professor Pedersen's lab, Old Margaret's bakery, your apartment. Safe zone. |
+diff --git a/src/scenes/BootScene.js b/src/scenes/BootScene.js
+index a7daeee..8821bba 100644
+--- a/src/scenes/BootScene.js
++++ b/src/scenes/BootScene.js
+@@ -28,12 +28,12 @@ export class BootScene extends Phaser.Scene {
+ 
+     // Load BGM tracks — OGG primary, MP3 fallback for browser coverage.
+     for (const bgm of bgmTracks) {
+-      this.load.audio(bgm.id, [bgm.file, bgm.file.replace('.ogg', '.mp3')])
++      this.load.audio(bgm.id, [bgm.file, bgm.file.replace(/\.ogg$/, '.mp3')])
+     }
+ 
+     // Load SFX files — OGG primary, MP3 fallback for browser coverage.
+     for (const sfx of sfxPresets) {
+-      this.load.audio(sfx.id, [sfx.file, sfx.file.replace('.ogg', '.mp3')])
++      this.load.audio(sfx.id, [sfx.file, sfx.file.replace(/\.ogg$/, '.mp3')])
+     }
+ 
+     this.load.json('bgmLoopPoints', 'assets/audio/bgm-loop-points.json')
+-- 
+2.53.0
+

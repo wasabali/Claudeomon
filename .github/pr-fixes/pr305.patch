@@ -1,0 +1,38 @@
+From 396df2b2930ecae4f4e1dc2259173703a4562231 Mon Sep 17 00:00:00 2001
+From: "copilot-swe-agent[bot]" <198982749+Copilot@users.noreply.github.com>
+Date: Thu, 23 Apr 2026 09:18:53 +0000
+Subject: [PATCH] test(pr305): assert village is second tileset at index 1 with
+ firstgid 6; fix wall tile comment
+
+Co-authored-by: wasabali <60469868+wasabali@users.noreply.github.com>
+---
+ tests/maps.test.js | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/tests/maps.test.js b/tests/maps.test.js
+index b718ed2..abd624e 100644
+--- a/tests/maps.test.js
++++ b/tests/maps.test.js
+@@ -42,6 +42,9 @@ describe('localhost_town map tileset metadata', () => {
+     expect(village.tilecount).toBe(32)
+     // stub_tiles must remain first so existing maps are unaffected
+     expect(map.tilesets[0].name).toBe('stub_tiles')
++    // village must be the second tileset at index 1, starting at firstgid 6
++    expect(map.tilesets[1].name).toBe('village')
++    expect(village.firstgid).toBe(6)
+   })
+ 
+   it('village tileset declares solid collision properties on wall tiles', () => {
+@@ -53,7 +56,8 @@ describe('localhost_town map tileset metadata', () => {
+       .map(t => t.id)
+ 
+     expect(solidIds.length).toBeGreaterThan(0)
+-    // Wall tiles (row 1: ids 8-15) must all be solid
++    // Wall tiles in this tileset (ids 8–11) must be solid;
++    // not all of row 8–15 are walls — only ids 8, 9, 10, 11 are designated wall tiles
+     expect(solidIds).toContain(8)   // wall_stone
+     expect(solidIds).toContain(9)   // wall_wood
+     expect(solidIds).toContain(10)  // wall_brick
+-- 
+2.53.0
+
