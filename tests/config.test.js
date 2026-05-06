@@ -29,6 +29,10 @@ describe('CONFIG', () => {
   it('limits active skills to 6', () => {
     expect(CONFIG.MAX_ACTIVE_SKILLS).toBe(6)
   })
+
+  it('has 48px portrait size', () => {
+    expect(CONFIG.PORTRAIT_SIZE).toBe(48)
+  })
 })
 
 describe('DOMAIN_MATCHUPS', () => {
