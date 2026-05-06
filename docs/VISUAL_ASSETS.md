@@ -296,7 +296,16 @@ this.anims.create({
 | `merge_conflict` | `incidents/merge_conflict.png` | 3 | Approach → collision → sparks |
 | `failed_pipeline` | `incidents/failed_pipeline.png` | 2 | Data drip fall |
 
-### Priority 2 — Later Region Encounters
+### Priority 2 — Mid-Region Encounters
+
+| Incident ID | File | Frames | Animation | Visual Concept |
+|---|---|---|---|---|
+| `runaway_process` | `incidents/runaway_process.png` | 2 | Legs alternate (running) | CPU chip with running legs |
+| `prod_incident` | `incidents/prod_incident.png` | 2 | Flames grow frame 2 | Flaming server rack |
+| `sev1_at_3am` | `incidents/sev1_at_3am.png` | 2 | Sleepy eyes → alarmed eyes | Bleary-eyed pager monster |
+| `infinite_loop` | `incidents/infinite_loop.png` | 2 | Snake rotates around loop | Ouroboros snake eating its own tail |
+
+### Priority 3 — Later Region Encounters
 
 These can ship without a sprite until custom art is created. Do not set a placeholder `spriteKey`; if no sprite asset exists yet, leave `spriteKey` absent and the game will no-op rather than load a fallback image.
 

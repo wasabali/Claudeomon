@@ -74,7 +74,7 @@ export const ENCOUNTER_POOLS = {
   },
   dev_null_void: {
     common: ['phantom_alert', 'null_pointer_exception', 'zombie_process'],
-    rare:   ['runaway_process', 'config_drift'],
+    rare:   ['runaway_process', 'config_drift', 'infinite_loop'],
     cursed: [],
   },
   deprecated_azure_region: {
@@ -94,7 +94,7 @@ export const ENCOUNTER_POOLS = {
   },
   shell_cavern: {
     common: ['zombie_process', 'dns_propagation', 'missing_semicolon'],
-    rare:   ['runaway_process', 'null_pointer_exception'],
+    rare:   ['runaway_process', 'null_pointer_exception', 'infinite_loop'],
     cursed: [],
   },
   helm_repository: {
@@ -339,6 +339,8 @@ const ENCOUNTERS = {
     onCall: true,
     attacks: ['budget_spike', 'reputation_leak'],
     optimalFix: 'blue_green_deploy',
+    spriteKey: 'incident_prod_incident',
+    animFrameRate: 2,
     layers: null,
   },
   runaway_process: {
@@ -353,6 +355,8 @@ const ENCOUNTERS = {
     difficulty: 3,
     attacks: ['uptime_drain'],
     optimalFix: 'kill_9',
+    spriteKey: 'incident_runaway_process',
+    animFrameRate: 3,
     layers: null,
   },
   sev1_at_3am: {
@@ -368,6 +372,8 @@ const ENCOUNTERS = {
     onCall: true,
     attacks: ['uptime_drain', 'budget_spike', 'reputation_leak'],
     optimalFix: null,
+    spriteKey: 'incident_sev1_at_3am',
+    animFrameRate: 2,
     layers: null,
   },
   crashloopbackoff: {
@@ -776,6 +782,22 @@ const ENCOUNTERS = {
     difficulty: 2,
     attacks: ['budget_spike'],
     optimalFix: 'docker_build',
+    layers: null,
+  },
+  infinite_loop: {
+    id: 'infinite_loop',
+    type: 'incident',
+    name: 'Infinite Loop',
+    symptomText: 'Process is consuming 100% CPU and never terminates.',
+    rootCauseText: 'A recursive function with no base case — or a while loop whose exit condition is never met.',
+    domain: 'linux',
+    hp: 36,
+    sla: 4,
+    difficulty: 3,
+    attacks: ['uptime_drain', 'confusion'],
+    optimalFix: 'kill_9',
+    spriteKey: 'incident_infinite_loop',
+    animFrameRate: 2,
     layers: null,
   },
 

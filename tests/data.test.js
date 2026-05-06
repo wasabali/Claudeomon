@@ -399,6 +399,47 @@ describe('vb6_billing_horror encounter', () => {
   })
 })
 
+describe('infinite_loop encounter', () => {
+  it('exists with correct fields', () => {
+    const enc = getAllEncounters().find(e => e.id === 'infinite_loop')
+    expect(enc).toBeDefined()
+    expect(enc.type).toBe('incident')
+    expect(enc.domain).toBe('linux')
+    expect(enc.hp).toBeGreaterThan(0)
+    expect(enc.sla).toBeGreaterThan(0)
+    expect(enc.difficulty).toBe(3)
+  })
+
+  it('has spriteKey and animFrameRate defined', () => {
+    const enc = getAllEncounters().find(e => e.id === 'infinite_loop')
+    expect(enc.spriteKey).toBe('incident_infinite_loop')
+    expect(typeof enc.animFrameRate).toBe('number')
+    expect(enc.animFrameRate).toBeGreaterThan(0)
+  })
+
+  it('appears in at least one encounter pool', () => {
+    const appearsInPool = Object.values(ENCOUNTER_POOLS).some(pool =>
+      [...pool.common, ...pool.rare, ...pool.cursed].includes('infinite_loop')
+    )
+    expect(appearsInPool).toBe(true)
+  })
+})
+
+describe('incident spriteKey references', () => {
+  const spriteIncidents = ['prod_incident', 'runaway_process', 'sev1_at_3am', 'infinite_loop']
+
+  spriteIncidents.forEach(id => {
+    it(`${id} has spriteKey and animFrameRate`, () => {
+      const enc = getAllEncounters().find(e => e.id === id)
+      expect(enc).toBeDefined()
+      expect(typeof enc.spriteKey).toBe('string')
+      expect(enc.spriteKey).toBe(`incident_${id}`)
+      expect(typeof enc.animFrameRate).toBe('number')
+      expect(enc.animFrameRate).toBeGreaterThan(0)
+    })
+  })
+})
+
 describe('audio registry', () => {
   it('defines exactly 21 SFX presets', () => {
     expect(getAllSfx()).toHaveLength(21)
