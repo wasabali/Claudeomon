@@ -52,6 +52,16 @@ export class WorldScene extends BaseScene {
     const regionId = GameState.player.location || 'localhost_town'
     this._regionId = regionId
 
+    // Treat all WorldScene preload failures as soft errors: missing maps fall
+    // back to the localhost_town stub in _setupMap(); missing tileset images are
+    // handled in _setupMap() which only registers a tileset when the texture is
+    // present.  This prevents a hard crash when assets are temporarily
+    // unavailable (e.g. first deploy, offline play).
+    this._preloadErrorHandler = (file) => {
+      console.warn(`[WorldScene] Asset unavailable, continuing without it: ${file?.type}:${file?.key}`)
+    }
+    this.load.on('loaderror', this._preloadErrorHandler)
+
     if (!this.cache.tilemap.exists(regionId)) {
       this.load.tilemapTiledJSON(regionId, `assets/maps/${regionId}.tmj`)
     }
@@ -985,6 +995,10 @@ export class WorldScene extends BaseScene {
 
   shutdown() {
     GameState._session.dialogActive = false
+    if (this._preloadErrorHandler) {
+      this.load.off('loaderror', this._preloadErrorHandler)
+      this._preloadErrorHandler = null
+    }
     super.shutdown()
     if (this.choiceMenu) this.choiceMenu.destroy()
     if (this._menu)   this._menu.destroy()
