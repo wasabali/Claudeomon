@@ -28,12 +28,12 @@ export class BootScene extends Phaser.Scene {
 
     // Load BGM tracks — OGG primary, MP3 fallback for browser coverage.
     for (const bgm of bgmTracks) {
-      this.load.audio(bgm.id, [bgm.file, bgm.file.replace('.ogg', '.mp3')])
+      this.load.audio(bgm.id, [bgm.file, bgm.file.replace(/\.ogg$/, '.mp3')])
     }
 
     // Load SFX files — OGG primary, MP3 fallback for browser coverage.
     for (const sfx of sfxPresets) {
-      this.load.audio(sfx.id, [sfx.file, sfx.file.replace('.ogg', '.mp3')])
+      this.load.audio(sfx.id, [sfx.file, sfx.file.replace(/\.ogg$/, '.mp3')])
     }
 
     this.load.json('bgmLoopPoints', 'assets/audio/bgm-loop-points.json')

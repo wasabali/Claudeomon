@@ -427,7 +427,7 @@ describe('audio registry', () => {
       expect(typeof sfx.id).toBe('string')
       expect(typeof sfx.file).toBe('string')
       expect(sfx.file).toMatch(/^assets\/audio\/sfx\/.+\.ogg$/)
-      expect(['battle', 'ui', 'overworld', 'ambient']).toContain(sfx.category)
+      expect(['battle', 'ui', 'overworld']).toContain(sfx.category)
       expect(typeof sfx.seed).toBe('number')
       expect(sfx.volume).toBeGreaterThanOrEqual(0)
       expect(sfx.volume).toBeLessThanOrEqual(1)

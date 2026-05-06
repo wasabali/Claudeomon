@@ -6,11 +6,14 @@ Cloud Quest uses real sound effects and background music to make every CLI comma
 
 ## Background Music
 
-Each region and battle type has a dedicated BGM track. Tracks loop seamlessly.
+Each scene and battle type has a dedicated BGM track. Tracks loop seamlessly.
+BGM is played explicitly by each scene via `BaseScene.playBgm(trackId)` — the overworld
+region→track mapping below reflects intended assignments (not yet automatically wired to
+region IDs in `WorldScene`).
 
 ### Overworld Tracks
 
-| Track ID | Where It Plays | Volume |
+| Track ID | Intended Scene / Region | Volume |
 |---|---|---|
 | `title` | Title screen / main menu | 0.6 |
 | `localhost_town` | Localhost Town (starting area) | 0.4 |
