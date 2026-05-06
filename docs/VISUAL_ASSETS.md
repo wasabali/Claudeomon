@@ -134,7 +134,7 @@ Where `incident_id` matches the key in `src/data/encounters.js`.
 
 ### Priority 2 — Later Region Encounters
 
-These can use a generic placeholder until custom sprites are created. Use `incident_placeholder.png` as the `spriteKey` fallback.
+These can ship without a sprite until custom art is created. Do not set a placeholder `spriteKey`; if no sprite asset exists yet, leave `spriteKey` absent and the game will no-op rather than load a fallback image.
 
 | Incident ID | Visual Concept |
 |---|---|

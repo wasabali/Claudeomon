@@ -25,7 +25,7 @@ Each sprite is **16×16 px** designed for **3× upscale to 48×48 px**.
 | Outline | `#141414` | All borders |
 | White | `#F8F8F8` | Page body |
 | Light gray | `#C8C8D2` | Page face area |
-| Black (eyes) | `#141414` | ×× eye marks (confused expression) |
+| Black (eyes) | `#141414` | Two small dot eyes; confused expression details |
 
 **Animation:** Frame rate 2 fps, infinite repeat. Frame 0 is the upright pose. Frame 1 is shifted 1 px right with legs splayed.
 
@@ -57,7 +57,7 @@ Each sprite is **16×16 px** designed for **3× upscale to 48×48 px**.
 | Transparent | `#00000000` | Background |
 | Outline | `#141414` | Character border |
 | Blue | `#5082DC` | Semicolon body (opaque) |
-| Blue (faded) | `#5082DC80` | Semicolon body (frame 2 ghost) |
+| Blue (faded) | `#5082DC80` | Semicolon body (frame 1 ghost) |
 
 **Animation:** Frame rate 2 fps, infinite repeat. Creates a slow "flicker" effect — the semicolon keeps appearing and disappearing.
 
@@ -127,7 +127,7 @@ Each sprite is **16×16 px** designed for **3× upscale to 48×48 px**.
 | Orange | `#E69632` | npm terminal banner |
 | White | `#F8F8F8` | Terminal text |
 
-**Animation:** Frame rate 3 fps, infinite repeat. Eye expression changes between frames (mouth stays fixed); loading ring bright segment rotates clockwise. The 2-frame rotation creates a spinning effect.
+**Animation:** Frame rate 2 fps, infinite repeat. Eye expression changes between frames (mouth stays fixed); loading ring bright segment rotates clockwise. The 2-frame rotation creates a spinning effect.
 
 **Key details:**
 - Loading ring: 4px radius circle outline, with a small bright segment that rotates

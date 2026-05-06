@@ -3,7 +3,8 @@ import { getAllBgm } from '#data/audio.js'
 import { getAll as getAllEncounters } from '#data/encounters.js'
 
 // Incident spritesheets — 48×48 px per frame, horizontal strip.
-// Only loaded if the file exists; missing sprites fall back gracefully in BattleScene.
+// Load is always attempted for encounters with a spriteKey; missing files are treated as optional
+// via loaderror handling, and BattleScene falls back gracefully when a sprite is unavailable.
 const INCIDENT_SPRITE_FRAME_SIZE = { frameWidth: 48, frameHeight: 48 }
 
 export class BootScene extends Phaser.Scene {
@@ -23,7 +24,7 @@ export class BootScene extends Phaser.Scene {
     )
 
     // Ignore missing optional assets — BGM, loop-points JSON, and incident sprites.
-    // Surface all other failures.
+    // Logs a warning for each; surface all other failures as errors.
     this.load.on('loaderror', (file) => {
       const isOptionalBgm = file?.type === 'audio' && optionalBgmKeys.has(file.key)
       const isOptionalLoopJson = file?.type === 'json' && file.key === 'bgmLoopPoints'
