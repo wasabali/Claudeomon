@@ -392,7 +392,9 @@ Cloud Quest uses a **multi-source asset strategy**:
 |--------|------|---------|
 | **Ninja Adventure** | Primary — characters, monsters, tiles, VFX, items, UI, BGM, SFX | CC0 1.0 (Public Domain) |
 | **PokeRogue** | Battle backgrounds and UI chrome | CC-BY-NC-SA-4.0 |
-| **Kenney RPG Urban** | Supplemental tech/urban tiles | CC0 1.0 (Public Domain) |
+| **Kenney RPG Urban** | Supplemental tech/urban tiles (`kenney_tech_office`) | CC0 1.0 (Public Domain) |
+| **Kenney Space Kit** | Supplemental void/space tiles (`void_tiles`) | CC0 1.0 (Public Domain) |
+| **Kenney RPG Urban** | Supplemental wasteland/ruins tiles (`wasteland_tiles`) | CC0 1.0 (Public Domain) |
 
 ---
 
@@ -493,12 +495,36 @@ Each arena has `_a` and `_b` layers for parallax depth.
 - Author:  Kenney (kenney.nl)
 - Source:  https://kenney.nl/assets/rpg-urban-pack
 - License: CC0 1.0 Universal (Public Domain Dedication)
-- Usage:   Supplemental tech/urban tiles for indoor maps
+- Usage:   Supplemental tech/urban tiles for indoor maps and the Deprecated Azure Region wasteland
 ```
 
 ### Usage
 
-Kenney tiles supplement Ninja Adventure tiles where tech-flavoured interiors are needed. They are placed in `assets/maps/tilesets/kenney/` and referenced from Tiled map files.
+Kenney RPG Urban tiles supplement Ninja Adventure tiles where tech-flavoured interiors are needed. They are referenced from Tiled map files as `assets/tiles/kenney_tech_office.png` (indoor/office tileset) and `assets/tiles/wasteland_tiles.png` (Deprecated Azure Region).
+
+### License
+
+CC0 1.0 Universal — public domain. No attribution required; credited anyway.
+
+---
+
+## Kenney Space Kit
+
+### Overview
+
+[Kenney Space Kit](https://kenney.nl/assets/space-kit) by [Kenney](https://kenney.nl) provides reference assets for the `/dev/null Void` space/void aesthetic.
+
+```
+## Kenney Space Kit
+- Author:  Kenney (kenney.nl)
+- Source:  https://kenney.nl/assets/space-kit
+- License: CC0 1.0 Universal (Public Domain Dedication)
+- Usage:   Supplemental void/space tiles for the /dev/null Void region
+```
+
+### Usage
+
+Space Kit references inform the `void_tiles` tileset at `assets/tiles/void_tiles.png`. The 12-tile strip uses the space/void palette specified in `assets/maps/TILE_SPECS.md`.
 
 ### License
 
@@ -517,12 +543,17 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 | `items/` | Ninja Adventure | Item icons; 3× upscaled from 16×16 |
 | `vfx/` | Ninja Adventure | Hit sparks, magic rings, explosions; 3× upscaled |
 
-### Maps & Tilesets (`assets/maps/`)
+### Maps & Tilesets (`assets/tiles/` and `assets/maps/tilesets/`)
 
-| Subfolder | Source | Notes |
-|-----------|--------|-------|
-| `tilesets/ninja/` | Ninja Adventure | Primary overworld + dungeon tiles |
-| `tilesets/kenney/` | Kenney RPG Urban | Supplemental tech/urban indoor tiles |
+| File | Source | Region | Notes |
+|------|--------|--------|-------|
+| `assets/tiles/kenney_tech_office.png` | Kenney RPG Urban | Tech/office regions | 50 tiles, 5×10 grid, 240×480px |
+| `assets/tiles/void_tiles.png` | Kenney Space Kit inspiration | `/dev/null Void` | 12 tiles, single row, 576×48px |
+| `assets/tiles/wasteland_tiles.png` | Kenney RPG Urban inspiration | `Deprecated Azure Region` | 12 tiles, single row, 576×48px |
+| `assets/maps/tilesets/village.png` | Ninja Adventure | Overworld towns | 32 tiles, 8×4 grid |
+| `assets/maps/tilesets/dungeon.png` | Ninja Adventure | Dungeon rooms | 32 tiles, 8×4 grid |
+| `assets/maps/tilesets/nature.png` | Ninja Adventure | Forest/nature areas | 32 tiles, 8×4 grid |
+| `assets/maps/tilesets/interior.png` | Ninja Adventure | Indoor areas | 32 tiles, 8×4 grid |
 
 ### UI (`assets/ui/`)
 

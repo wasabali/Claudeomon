@@ -277,3 +277,111 @@ describe('tech regions carry kenney_tech_office tileset', () => {
     expect(nonZero.every(gid => gid >= 6 && gid <= 55)).toBe(true)
   })
 })
+
+describe('void tileset — /dev/null Void region', () => {
+  it('dev_null_void includes void_tiles as second tileset', () => {
+    const map = loadMap('dev_null_void')
+    const voidTs = map.tilesets.find(ts => ts.name === 'void_tiles')
+    expect(voidTs).toBeDefined()
+    expect(voidTs.image).toBe('../tiles/void_tiles.png')
+    expect(voidTs.tilewidth).toBe(48)
+    expect(voidTs.tileheight).toBe(48)
+    expect(voidTs.columns).toBe(12)
+    expect(voidTs.tilecount).toBe(12)
+    expect(voidTs.firstgid).toBe(6)
+    expect(map.tilesets[0].name).toBe('stub_tiles')
+    expect(map.tilesets[1].name).toBe('void_tiles')
+  })
+
+  it('dev_null_void ground layer uses void_ground tile (GID 6)', () => {
+    const map = loadMap('dev_null_void')
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.every(gid => gid === 6)).toBe(true)
+  })
+
+  it('void_tiles.png is a valid RGBA PNG at 576×48px', () => {
+    const pngPath = path.join(process.cwd(), 'assets', 'tiles', 'void_tiles.png')
+    expect(fs.existsSync(pngPath)).toBe(true)
+    const buf = fs.readFileSync(pngPath)
+    expect(buf[0]).toBe(137)   // PNG signature
+    expect(buf.readUInt32BE(16)).toBe(576)  // IHDR width
+    expect(buf.readUInt32BE(20)).toBe(48)   // IHDR height
+  })
+
+  it('void_tiles.tsj exists and references void_tiles.png', () => {
+    const tsjPath = path.join(process.cwd(), 'assets', 'tiles', 'void_tiles.tsj')
+    expect(fs.existsSync(tsjPath)).toBe(true)
+    const tsj = JSON.parse(fs.readFileSync(tsjPath, 'utf8'))
+    expect(tsj.name).toBe('void_tiles')
+    expect(tsj.image).toBe('void_tiles.png')
+    expect(tsj.tilewidth).toBe(48)
+    expect(tsj.tileheight).toBe(48)
+    expect(tsj.tilecount).toBe(12)
+    expect(tsj.columns).toBe(12)
+  })
+
+  it('void_tiles.tsj declares void_wall as solid', () => {
+    const tsj = JSON.parse(fs.readFileSync(
+      path.join(process.cwd(), 'assets', 'tiles', 'void_tiles.tsj'), 'utf8'
+    ))
+    const wallTile = tsj.tiles.find(t => t.properties?.some(p => p.name === 'name' && p.value === 'void_wall'))
+    expect(wallTile).toBeDefined()
+    const collision = wallTile.properties.find(p => p.name === 'collision')
+    expect(collision?.value).toBe(true)
+  })
+})
+
+describe('wasteland tileset — Deprecated Azure Region', () => {
+  it('deprecated_azure_region includes wasteland_tiles as second tileset', () => {
+    const map = loadMap('deprecated_azure_region')
+    const wasteTs = map.tilesets.find(ts => ts.name === 'wasteland_tiles')
+    expect(wasteTs).toBeDefined()
+    expect(wasteTs.image).toBe('../tiles/wasteland_tiles.png')
+    expect(wasteTs.tilewidth).toBe(48)
+    expect(wasteTs.tileheight).toBe(48)
+    expect(wasteTs.columns).toBe(12)
+    expect(wasteTs.tilecount).toBe(12)
+    expect(wasteTs.firstgid).toBe(6)
+    expect(map.tilesets[0].name).toBe('stub_tiles')
+    expect(map.tilesets[1].name).toBe('wasteland_tiles')
+  })
+
+  it('deprecated_azure_region ground layer uses waste_ground tile (GID 6)', () => {
+    const map = loadMap('deprecated_azure_region')
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.every(gid => gid === 6)).toBe(true)
+  })
+
+  it('wasteland_tiles.png is a valid RGBA PNG at 576×48px', () => {
+    const pngPath = path.join(process.cwd(), 'assets', 'tiles', 'wasteland_tiles.png')
+    expect(fs.existsSync(pngPath)).toBe(true)
+    const buf = fs.readFileSync(pngPath)
+    expect(buf[0]).toBe(137)   // PNG signature
+    expect(buf.readUInt32BE(16)).toBe(576)  // IHDR width
+    expect(buf.readUInt32BE(20)).toBe(48)   // IHDR height
+  })
+
+  it('wasteland_tiles.tsj exists and references wasteland_tiles.png', () => {
+    const tsjPath = path.join(process.cwd(), 'assets', 'tiles', 'wasteland_tiles.tsj')
+    expect(fs.existsSync(tsjPath)).toBe(true)
+    const tsj = JSON.parse(fs.readFileSync(tsjPath, 'utf8'))
+    expect(tsj.name).toBe('wasteland_tiles')
+    expect(tsj.image).toBe('wasteland_tiles.png')
+    expect(tsj.tilewidth).toBe(48)
+    expect(tsj.tileheight).toBe(48)
+    expect(tsj.tilecount).toBe(12)
+    expect(tsj.columns).toBe(12)
+  })
+
+  it('wasteland_tiles.tsj declares waste_wall as solid', () => {
+    const tsj = JSON.parse(fs.readFileSync(
+      path.join(process.cwd(), 'assets', 'tiles', 'wasteland_tiles.tsj'), 'utf8'
+    ))
+    const wallTile = tsj.tiles.find(t => t.properties?.some(p => p.name === 'name' && p.value === 'waste_wall'))
+    expect(wallTile).toBeDefined()
+    const collision = wallTile.properties.find(p => p.name === 'collision')
+    expect(collision?.value).toBe(true)
+  })
+})
