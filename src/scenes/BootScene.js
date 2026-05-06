@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { getAllBgm, getAllSfx } from '#data/audio.js'
-import { getAllSpriteKeys } from '#data/trainers.js'
+import { getAllSpriteKeys, getAll as getAllTrainers, PLAYER_SPRITE_KEY } from '#data/trainers.js'
 import { getAll as getAllEncounters } from '#data/encounters.js'
 
 // Incident spritesheets — 48×48 px per frame, horizontal strip.
@@ -32,13 +32,20 @@ export class BootScene extends Phaser.Scene {
         .map(e => e.spriteKey),
     )
 
-    // Ignore missing optional assets — audio files, loop-points JSON, character sprites, and incident sprites.
+    // Portrait keys — one per trainer id plus the player. All optional.
+    const portraitKeys = new Set([
+      `portrait_${PLAYER_SPRITE_KEY}`,
+      ...getAllTrainers().map(t => `portrait_${t.id}`),
+    ])
+
+    // Ignore missing optional assets — audio files, loop-points JSON, character sprites, incident sprites, and portraits.
     // Logs a warning for each; surface all other failures as errors.
     this.load.on('loaderror', (file) => {
       const isOptionalAudio    = file?.type === 'audio' && optionalAudioKeys.has(file.key)
       const isOptionalLoopJson = file?.type === 'json' && file.key === 'bgmLoopPoints'
       const isOptionalSprite   = optionalSpriteKeys.has(file.key) || (file?.type === 'spritesheet' && incidentSpriteKeys.has(file.key))
-      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite) {
+      const isOptionalPortrait = portraitKeys.has(file.key)
+      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite || isOptionalPortrait) {
         console.warn(`[BootScene] Optional asset unavailable, continuing without it: ${file?.type}:${file?.key}`)
         return
       }
@@ -75,6 +82,13 @@ export class BootScene extends Phaser.Scene {
         `assets/sprites/incidents/${encounter.id}.png`,
         INCIDENT_SPRITE_FRAME_SIZE,
       )
+    }
+
+    // Load battle portraits — 48×48 px static images from assets/sprites/portraits/.
+    // One portrait per trainer plus the player. All are optional (files may not exist yet).
+    this.load.image(`portrait_${PLAYER_SPRITE_KEY}`, `assets/sprites/portraits/player.png`)
+    for (const trainer of getAllTrainers()) {
+      this.load.image(`portrait_${trainer.id}`, `assets/sprites/portraits/${trainer.id}.png`)
     }
   }
 
