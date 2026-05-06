@@ -15,7 +15,7 @@ import {
 import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
 import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
-import { getById as getRegionById } from '#data/regions.js'
+import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { Menu } from '#ui/Menu.js'
 import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
 
@@ -26,7 +26,14 @@ const STUB_TEXTURE_KEYS = new Set(['npc_default', 'azure_terminal', 'player',
 // Depth layer for world-space characters and NPCs.
 const CHAR_DEPTH = 5
 
-const TILESET_KEY = 'stub_tiles'
+const TILESET_KEY      = 'stub_tiles'
+const TECH_TILESET_KEY = 'kenney_tech_office'
+const NINJA_TILESETS   = ['village', 'dungeon', 'nature', 'interior']
+
+// Derived from src/data/regions.js hasTechTileset flag — single source of truth
+const TECH_TILESET_REGIONS = new Set(
+  getAllRegions().filter(r => r.hasTechTileset).map(r => r.id)
+)
 const TILE_SIZE   = CONFIG.TILE_SIZE
 
 // 4-frame stepped fade for region transitions (overlay alpha per step)
@@ -76,6 +83,46 @@ export class WorldScene extends BaseScene {
         g.strokeRect(i * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
       })
       g.generateTexture(TILESET_KEY, TILE_SIZE * TILE_COLORS.length, TILE_SIZE)
+      g.destroy()
+    }
+
+    // Tech / office tileset stub — 50 tiles (5 cols × 10 rows, 240×480)
+    // Placeholder colours match the Python-generated kenney_tech_office.png
+    if (!this.textures.exists(TECH_TILESET_KEY)) {
+      const TECH_COLS = 5
+      const TECH_ROWS = 10
+      const TECH_COLORS = [
+        // Row 0: floors
+        0x28282c, 0x34495e, 0xbec0c6, 0x1c2852, 0x5f626c,
+        // Row 1: walls / structural
+        0x161619, 0xdad4c0, 0x2d2d3a, 0xacd2eb, 0x3c4148,
+        // Row 2: server equipment
+        0x192244, 0x14203c, 0x372612, 0x4e545c, 0x0f0f12,
+        // Row 3: office furniture
+        0x765230, 0x161c69, 0x26262a, 0xeeeef4, 0x0c0c0f,
+        // Row 4: data centre equipment
+        0x00afb2, 0x808090, 0xdcc600, 0xd21c1c, 0x231e19,
+        // Row 5: terminal / console
+        0x00af00, 0x009e00, 0xaf0000, 0x0f0f52, 0xc3beac,
+        // Row 6: building exteriors
+        0x1c52a2, 0xbeb69c, 0x1c1c2d, 0x626976, 0xbec0c6,
+        // Row 7: decorative / items
+        0xe6da00, 0x623e1c, 0x764e26, 0x8a847a, 0x00ff3c,
+        // Row 8: special / interaction
+        0x0f7d0f, 0x00c662, 0x4e4ea2, 0x50321e, 0x050505,
+        // Row 9: custom / reserved (magenta = unimplemented)
+        0xc800c8, 0xc800c8, 0xc800c8, 0xc800c8, 0xc800c8,
+      ]
+      const g = this.make.graphics({ add: false })
+      TECH_COLORS.forEach((color, i) => {
+        const col = i % TECH_COLS
+        const row = Math.floor(i / TECH_COLS)
+        g.fillStyle(color)
+        g.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+        g.lineStyle(1, 0x000000, 0.25)
+        g.strokeRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+      })
+      g.generateTexture(TECH_TILESET_KEY, TILE_SIZE * TECH_COLS, TILE_SIZE * TECH_ROWS)
       g.destroy()
     }
 
@@ -256,11 +303,17 @@ export class WorldScene extends BaseScene {
     this._map = this.make.tilemap({ key: mapKey })
     const stubTileset = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
 
+    // Tech regions carry a second tileset for server rooms, offices, and data centres
+    const isTech = TECH_TILESET_REGIONS.has(mapKey)
+    const tilesets = [stubTileset]
+    if (isTech) {
+      const techTileset = this._map.addTilesetImage('kenney_tech_office', TECH_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (techTileset) tilesets.push(techTileset)
+    }
     // Register any Ninja Adventure tilesets declared by this map.
     // The four PNG files are preloaded unconditionally in preload() because
     // they are small (~3 KB each) and knowing which tilesets a map uses
     // requires the tilemap to already be constructed.
-    const tilesets = [stubTileset]
     for (const name of NINJA_TILESETS) {
       if (this._map.tilesets.some(ts => ts.name === name) && this.textures.exists(name)) {
         const ts = this._map.addTilesetImage(name, name, TILE_SIZE, TILE_SIZE, 0, 0)
