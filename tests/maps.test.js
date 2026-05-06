@@ -40,8 +40,10 @@ describe('localhost_town map tileset metadata', () => {
     expect(village.tilewidth).toBe(48)
     expect(village.tileheight).toBe(48)
     expect(village.tilecount).toBe(32)
-    // stub_tiles must remain first so existing maps are unaffected
+    // stub_tiles must remain first; village must be exactly second
     expect(map.tilesets[0].name).toBe('stub_tiles')
+    expect(map.tilesets[1].name).toBe('village')
+    expect(map.tilesets[1].firstgid).toBe(6)
   })
 
   it('village tileset declares solid collision properties on wall tiles', () => {
@@ -53,7 +55,8 @@ describe('localhost_town map tileset metadata', () => {
       .map(t => t.id)
 
     expect(solidIds.length).toBeGreaterThan(0)
-    // Wall tiles (row 1: ids 8-15) must all be solid
+    // Solid wall tiles asserted: wall_stone(8), wall_wood(9), wall_brick(10), fence(11)
+    // (ids 12-15 in that row are intentionally walkable: door, water_shallow, door_frame, roof_edge)
     expect(solidIds).toContain(8)   // wall_stone
     expect(solidIds).toContain(9)   // wall_wood
     expect(solidIds).toContain(10)  // wall_brick
