@@ -12,15 +12,23 @@ import {
   shouldTriggerEncounter, checkTransition, applyTransition,
   clampTileToInterior, findNearestWalkableTile, persistPlayerTile, syncPlayerTileFromPixels,
 } from '#engine/MovementEngine.js'
-import { getById as getTrainerById } from '#data/trainers.js'
+import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
 import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { Menu } from '#ui/Menu.js'
 import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
 
+// Texture keys that are statically generated as stub rectangles — not walk-cycle sheets.
+const STUB_TEXTURE_KEYS = new Set(['npc_default', 'azure_terminal', 'player',
+  'throttlemaster_hooded', 'stub_tiles'])
+
+// Depth layer for world-space characters and NPCs.
+const CHAR_DEPTH = 5
+
 const TILESET_KEY      = 'stub_tiles'
 const TECH_TILESET_KEY = 'kenney_tech_office'
+const NINJA_TILESETS   = ['village', 'dungeon', 'nature', 'interior']
 
 // Derived from src/data/regions.js hasTechTileset flag — single source of truth
 const TECH_TILESET_REGIONS = new Set(
@@ -46,6 +54,15 @@ export class WorldScene extends BaseScene {
 
     if (!this.cache.tilemap.exists(regionId)) {
       this.load.tilemapTiledJSON(regionId, `assets/maps/${regionId}.tmj`)
+    }
+
+    // Preload Ninja Adventure tileset images so _setupMap can register them
+    // when a map declares them.  Files are small (~3 KB each) so loading all
+    // four unconditionally is fine.
+    for (const name of NINJA_TILESETS) {
+      if (!this.textures.exists(name)) {
+        this.load.image(name, `assets/maps/tilesets/${name}.png`)
+      }
     }
   }
 
@@ -288,10 +305,21 @@ export class WorldScene extends BaseScene {
 
     // Tech regions carry a second tileset for server rooms, offices, and data centres
     const isTech = TECH_TILESET_REGIONS.has(mapKey)
-    const techTileset = isTech
-      ? this._map.addTilesetImage('kenney_tech_office', TECH_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
-      : null
-    const tilesets = techTileset ? [stubTileset, techTileset] : stubTileset
+    const tilesets = [stubTileset]
+    if (isTech) {
+      const techTileset = this._map.addTilesetImage('kenney_tech_office', TECH_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (techTileset) tilesets.push(techTileset)
+    }
+    // Register any Ninja Adventure tilesets declared by this map.
+    // The four PNG files are preloaded unconditionally in preload() because
+    // they are small (~3 KB each) and knowing which tilesets a map uses
+    // requires the tilemap to already be constructed.
+    for (const name of NINJA_TILESETS) {
+      if (this._map.tilesets.some(ts => ts.name === name) && this.textures.exists(name)) {
+        const ts = this._map.addTilesetImage(name, name, TILE_SIZE, TILE_SIZE, 0, 0)
+        if (ts) tilesets.push(ts)
+      }
+    }
 
     this._groundLayer  = this._map.createLayer('Ground',  tilesets, 0, 0)
     this._objectsLayer = this._map.createLayer('Objects', tilesets, 0, 0)
@@ -321,8 +349,25 @@ export class WorldScene extends BaseScene {
     for (const def of this._npcDefs) {
       const cx     = def.x + def.width / 2
       const cy     = def.y + def.height / 2
-      const key    = def.name === 'azure_terminal' ? 'azure_terminal' : 'npc_default'
-      const sprite = this.add.image(cx, cy, key).setDepth(5)
+
+      // Resolve texture key: prefer the trainer's spriteKey when the sheet was
+      // loaded successfully; fall back to the stub NPC texture otherwise.
+      let key = 'npc_default'
+      if (def.name === 'azure_terminal') {
+        key = 'azure_terminal'
+      } else {
+        const trainer = getTrainerById(def.name)
+        if (trainer?.spriteKey && this.textures.exists(trainer.spriteKey)) {
+          key = trainer.spriteKey
+        }
+      }
+
+      // Use a sprite for walk-cycle sheets, plain image for static stubs.
+      const isSheet = !STUB_TEXTURE_KEYS.has(key)
+      const sprite  = isSheet
+        ? this.add.sprite(cx, cy, key, 1).setDepth(CHAR_DEPTH)  // frame 1 = idle-down
+        : this.add.image(cx, cy, key).setDepth(CHAR_DEPTH)
+
       this.add.text(cx, cy - def.height / 2 - 8, def.name, {
         fontFamily: CONFIG.FONT,
         fontSize:   '10px',
@@ -362,8 +407,16 @@ export class WorldScene extends BaseScene {
     const startX = spawnTileX * TILE_SIZE + TILE_SIZE / 2
     const startY = spawnTileY * TILE_SIZE + TILE_SIZE / 2
 
-    this._player = this.physics.add.sprite(startX, startY, 'player')
-    this._player.setDepth(5)
+    // Use the Ninja Adventure hero sheet when it has been loaded; fall back to
+    // the procedurally generated stub 'player' texture otherwise.
+    const playerTextureKey = this.textures.exists(PLAYER_SPRITE_KEY)
+      ? PLAYER_SPRITE_KEY
+      : 'player'
+    const playerUseSheet = playerTextureKey !== 'player'
+    this._player = playerUseSheet
+      ? this.physics.add.sprite(startX, startY, playerTextureKey, 1)
+      : this.physics.add.sprite(startX, startY, playerTextureKey)
+    this._player.setDepth(CHAR_DEPTH)
 
     const persistedSpawn = persistPlayerTile(spawnTileX, spawnTileY)
     this._tileX = persistedSpawn.tileX
