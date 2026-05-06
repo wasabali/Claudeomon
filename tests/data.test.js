@@ -425,6 +425,9 @@ describe('audio registry', () => {
   it('all SFX entries have required fields with valid types', () => {
     getAllSfx().forEach(sfx => {
       expect(typeof sfx.id).toBe('string')
+      expect(typeof sfx.file).toBe('string')
+      expect(sfx.file).toMatch(/^assets\/audio\/sfx\/.+\.ogg$/)
+      expect(['battle', 'ui', 'overworld']).toContain(sfx.category)
       expect(typeof sfx.seed).toBe('number')
       expect(sfx.volume).toBeGreaterThanOrEqual(0)
       expect(sfx.volume).toBeLessThanOrEqual(1)
@@ -432,6 +435,12 @@ describe('audio registry', () => {
       expect(typeof sfx.duration).toBe('number')
       expect(sfx.duration).toBeGreaterThan(0)
       expect(typeof sfx.description).toBe('string')
+    })
+  })
+
+  it('SFX file paths match their category subdirectory', () => {
+    getAllSfx().forEach(sfx => {
+      expect(sfx.file).toContain(`/sfx/${sfx.category}/`)
     })
   })
 

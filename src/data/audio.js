@@ -5,10 +5,12 @@
 
 /**
  * SFX_PRESETS
- * Each entry defines a procedural sound effect generated from a seed.
+ * Each entry defines a sound effect sourced from the Ninja Adventure asset pack.
  *
  *   id          – snake_case, matches object key
- *   seed        – unique integer fed to the synth
+ *   file        – path to the .ogg asset (OGG preferred; MP3 loaded as fallback by BootScene)
+ *   category    – 'battle' | 'ui' | 'overworld' | 'ambient'
+ *   seed        – legacy synth seed; retained for potential procedural-generation fallback
  *   volume      – 0.0–1.0 (scaled by priority band)
  *   priority    – 1 (ambient) → 4 (critical)
  *   duration    – length in milliseconds
@@ -18,6 +20,8 @@ const SFX_PRESETS = {
 
   sfx_cursor_move: {
     id: 'sfx_cursor_move',
+    file: 'assets/audio/sfx/ui/cursor_move.ogg',
+    category: 'ui',
     seed: 10001,
     volume: 0.25,
     priority: 1,
@@ -27,6 +31,8 @@ const SFX_PRESETS = {
 
   sfx_confirm: {
     id: 'sfx_confirm',
+    file: 'assets/audio/sfx/ui/confirm.ogg',
+    category: 'ui',
     seed: 10014,
     volume: 0.45,
     priority: 2,
@@ -36,6 +42,8 @@ const SFX_PRESETS = {
 
   sfx_cancel: {
     id: 'sfx_cancel',
+    file: 'assets/audio/sfx/ui/cancel.ogg',
+    category: 'ui',
     seed: 10027,
     volume: 0.4,
     priority: 2,
@@ -45,6 +53,8 @@ const SFX_PRESETS = {
 
   sfx_text_blip: {
     id: 'sfx_text_blip',
+    file: 'assets/audio/sfx/ui/text_blip.ogg',
+    category: 'ui',
     seed: 10038,
     volume: 0.2,
     priority: 1,
@@ -54,6 +64,8 @@ const SFX_PRESETS = {
 
   sfx_damage_hit: {
     id: 'sfx_damage_hit',
+    file: 'assets/audio/sfx/battle/hit.ogg',
+    category: 'battle',
     seed: 10053,
     volume: 0.55,
     priority: 3,
@@ -63,6 +75,8 @@ const SFX_PRESETS = {
 
   sfx_damage_critical: {
     id: 'sfx_damage_critical',
+    file: 'assets/audio/sfx/battle/critical.ogg',
+    category: 'battle',
     seed: 10069,
     volume: 0.8,
     priority: 4,
@@ -72,6 +86,8 @@ const SFX_PRESETS = {
 
   sfx_heal: {
     id: 'sfx_heal',
+    file: 'assets/audio/sfx/battle/heal.ogg',
+    category: 'battle',
     seed: 10082,
     volume: 0.45,
     priority: 2,
@@ -81,6 +97,8 @@ const SFX_PRESETS = {
 
   sfx_status_apply: {
     id: 'sfx_status_apply',
+    file: 'assets/audio/sfx/battle/status_apply.ogg',
+    category: 'battle',
     seed: 10097,
     volume: 0.5,
     priority: 2,
@@ -90,6 +108,8 @@ const SFX_PRESETS = {
 
   sfx_status_expire: {
     id: 'sfx_status_expire',
+    file: 'assets/audio/sfx/battle/status_expire.ogg',
+    category: 'battle',
     seed: 10111,
     volume: 0.3,
     priority: 1,
@@ -99,6 +119,8 @@ const SFX_PRESETS = {
 
   sfx_skill_fail: {
     id: 'sfx_skill_fail',
+    file: 'assets/audio/sfx/battle/skill_fail.ogg',
+    category: 'battle',
     seed: 10126,
     volume: 0.6,
     priority: 3,
@@ -108,6 +130,8 @@ const SFX_PRESETS = {
 
   sfx_save: {
     id: 'sfx_save',
+    file: 'assets/audio/sfx/ui/save.ogg',
+    category: 'ui',
     seed: 10139,
     volume: 0.45,
     priority: 2,
@@ -117,6 +141,8 @@ const SFX_PRESETS = {
 
   sfx_shame: {
     id: 'sfx_shame',
+    file: 'assets/audio/sfx/battle/shame.ogg',
+    category: 'battle',
     seed: 10155,
     volume: 0.75,
     priority: 4,
@@ -126,6 +152,8 @@ const SFX_PRESETS = {
 
   sfx_emblem_earn: {
     id: 'sfx_emblem_earn',
+    file: 'assets/audio/sfx/overworld/emblem_earn.ogg',
+    category: 'overworld',
     seed: 10168,
     volume: 0.8,
     priority: 4,
@@ -135,6 +163,8 @@ const SFX_PRESETS = {
 
   sfx_emblem_sparkle: {
     id: 'sfx_emblem_sparkle',
+    file: 'assets/audio/sfx/overworld/emblem_sparkle.ogg',
+    category: 'overworld',
     seed: 10183,
     volume: 0.25,
     priority: 1,
@@ -144,6 +174,8 @@ const SFX_PRESETS = {
 
   sfx_door_locked: {
     id: 'sfx_door_locked',
+    file: 'assets/audio/sfx/overworld/door_locked.ogg',
+    category: 'overworld',
     seed: 10194,
     volume: 0.4,
     priority: 2,
@@ -153,6 +185,8 @@ const SFX_PRESETS = {
 
   sfx_encounter_start: {
     id: 'sfx_encounter_start',
+    file: 'assets/audio/sfx/battle/encounter_start.ogg',
+    category: 'battle',
     seed: 10210,
     volume: 0.55,
     priority: 3,
@@ -162,6 +196,8 @@ const SFX_PRESETS = {
 
   sfx_level_up: {
     id: 'sfx_level_up',
+    file: 'assets/audio/sfx/overworld/level_up.ogg',
+    category: 'overworld',
     seed: 10224,
     volume: 0.7,
     priority: 4,
@@ -171,6 +207,8 @@ const SFX_PRESETS = {
 
   sfx_sla_tick: {
     id: 'sfx_sla_tick',
+    file: 'assets/audio/sfx/battle/sla_tick.ogg',
+    category: 'battle',
     seed: 10237,
     volume: 0.4,
     priority: 2,
@@ -180,6 +218,8 @@ const SFX_PRESETS = {
 
   sfx_sla_breach: {
     id: 'sfx_sla_breach',
+    file: 'assets/audio/sfx/battle/sla_breach.ogg',
+    category: 'battle',
     seed: 10251,
     volume: 0.75,
     priority: 4,
@@ -189,6 +229,8 @@ const SFX_PRESETS = {
 
   sfx_budget_drain: {
     id: 'sfx_budget_drain',
+    file: 'assets/audio/sfx/battle/budget_drain.ogg',
+    category: 'battle',
     seed: 10266,
     volume: 0.45,
     priority: 2,
@@ -198,6 +240,8 @@ const SFX_PRESETS = {
 
   sfx_reputation_change: {
     id: 'sfx_reputation_change',
+    file: 'assets/audio/sfx/battle/reputation_change.ogg',
+    category: 'battle',
     seed: 10279,
     volume: 0.5,
     priority: 2,
