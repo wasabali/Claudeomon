@@ -15,7 +15,7 @@ const BOX_Y           = CONFIG.HEIGHT - BOX_HEIGHT
 const BOX_PADDING_X   = 24
 const BOX_PADDING_Y   = 20
 const FONT_SIZE       = '22px'
-const PANEL_KEY       = 'dialog_window_9slice'
+const PANEL_KEY       = 'ui_window'
 const CHOICE_OFFSET_Y   = 36
 const CHOICE_LINE_HEIGHT = 32
 
@@ -179,16 +179,23 @@ export class DialogBox {
   _ensureTexture() {
     if (this.scene.textures.exists(PANEL_KEY)) return
 
-    // Procedural dark panel with a subtle light border.
+    // Procedural fallback — used when assets/ui/window.png is not yet present.
+    // Matches the Ninja Adventure dark-tech palette; replace by dropping in the
+    // real Ninja Adventure HUD panel sprite (see GitHub [Assets] issue).
     const g = this.scene.make.graphics({ x: 0, y: 0, add: false })
-    g.fillStyle(0x0d1117, 1)
-    g.fillRect(0, 0, 16, 16)
-    g.fillStyle(0x334155, 1)
-    g.fillRect(0, 0, 16, 2)    // top
-    g.fillRect(0, 14, 16, 2)   // bottom
-    g.fillRect(0, 0, 2, 16)    // left
-    g.fillRect(14, 0, 2, 16)   // right
-    g.generateTexture(PANEL_KEY, 16, 16)
+    g.fillStyle(0x0d1827, 1)
+    g.fillRect(0, 0, 24, 24)
+    g.fillStyle(0x3d7099, 1)
+    g.fillRect(1, 1, 22, 2)   // top border band
+    g.fillRect(1, 21, 22, 2)  // bottom border band
+    g.fillRect(1, 1, 2, 22)   // left border band
+    g.fillRect(21, 1, 2, 22)  // right border band
+    g.fillStyle(0x5a96be, 1)
+    g.fillRect(3, 3, 18, 1)   // top inner highlight
+    g.fillRect(3, 20, 18, 1)  // bottom inner highlight
+    g.fillRect(3, 3, 1, 18)   // left inner highlight
+    g.fillRect(20, 3, 1, 18)  // right inner highlight
+    g.generateTexture(PANEL_KEY, 24, 24)
     g.destroy()
   }
 

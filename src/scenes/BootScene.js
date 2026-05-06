@@ -38,7 +38,8 @@ export class BootScene extends Phaser.Scene {
       const isOptionalAudio    = file?.type === 'audio' && optionalAudioKeys.has(file.key)
       const isOptionalLoopJson = file?.type === 'json' && file.key === 'bgmLoopPoints'
       const isOptionalSprite   = optionalSpriteKeys.has(file.key) || (file?.type === 'spritesheet' && incidentSpriteKeys.has(file.key))
-      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite) {
+      const isOptionalUi       = file?.type === 'image' && file.key === 'ui_window'
+      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite || isOptionalUi) {
         console.warn(`[BootScene] Optional asset unavailable, continuing without it: ${file?.type}:${file?.key}`)
         return
       }
@@ -56,6 +57,11 @@ export class BootScene extends Phaser.Scene {
     }
 
     this.load.json('bgmLoopPoints', 'assets/audio/bgm-loop-points.json')
+
+    // Load Ninja Adventure UI window panel for 9-slice panels.
+    // Optional — UI components fall back to procedural stub when missing.
+    // Replace with the actual Ninja Adventure HUD/Panel sprite once integrated.
+    this.load.image('ui_window', 'assets/ui/window.png')
 
     // Load character sprite sheets (4-row × 3-col walk-cycle, 48×48 px per frame).
     // Files live in assets/sprites/characters/<key>.png and are optional — if absent

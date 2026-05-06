@@ -29,7 +29,7 @@ const ARROW_OFFSET  = 24
 const COLOR_NORMAL   = '#f8f8f8'
 const COLOR_SELECTED = '#ffe066'
 const COLOR_DISABLED = '#555555'
-const PANEL_KEY     = 'menu_panel_9slice'
+const PANEL_KEY     = 'ui_window'
 
 // Maximum visible items before the list would clip the panel.
 // Derived from: (BOX_HEIGHT - PADDING_Y*2 - LINE_HEIGHT for title) / LINE_HEIGHT
@@ -167,15 +167,22 @@ export class Menu {
   _ensureTexture() {
     if (this.scene.textures.exists(PANEL_KEY)) return
 
+    // Procedural fallback — matches the Ninja Adventure dark-tech palette.
+    // Reuses PANEL_KEY = 'ui_window' so DialogBox and Menu share one texture.
     const g = this.scene.make.graphics({ x: 0, y: 0, add: false })
-    g.fillStyle(0x0d1117, 1)
-    g.fillRect(0, 0, 16, 16)
-    g.fillStyle(0x334155, 1)
-    g.fillRect(0, 0, 16, 2)
-    g.fillRect(0, 14, 16, 2)
-    g.fillRect(0, 0, 2, 16)
-    g.fillRect(14, 0, 2, 16)
-    g.generateTexture(PANEL_KEY, 16, 16)
+    g.fillStyle(0x0d1827, 1)
+    g.fillRect(0, 0, 24, 24)
+    g.fillStyle(0x3d7099, 1)
+    g.fillRect(1, 1, 22, 2)
+    g.fillRect(1, 21, 22, 2)
+    g.fillRect(1, 1, 2, 22)
+    g.fillRect(21, 1, 2, 22)
+    g.fillStyle(0x5a96be, 1)
+    g.fillRect(3, 3, 18, 1)
+    g.fillRect(3, 20, 18, 1)
+    g.fillRect(3, 3, 1, 18)
+    g.fillRect(20, 3, 1, 18)
+    g.generateTexture(PANEL_KEY, 24, 24)
     g.destroy()
   }
 
