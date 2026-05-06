@@ -489,6 +489,7 @@ describe('bgm-loop-points.json', () => {
 
   it('is parseable JSON with an object at the root', () => {
     expect(loopPoints).toBeDefined()
+    expect(loopPoints).not.toBeNull()
     expect(typeof loopPoints).toBe('object')
     expect(Array.isArray(loopPoints)).toBe(false)
   })
@@ -502,6 +503,7 @@ describe('bgm-loop-points.json', () => {
   it('every BGM entry has numeric start and end values >= 0', () => {
     getAllBgm().forEach(bgm => {
       const entry = loopPoints[bgm.id]
+      expect(entry).toBeDefined()
       expect(typeof entry.start).toBe('number')
       expect(typeof entry.end).toBe('number')
       expect(entry.start).toBeGreaterThanOrEqual(0)
@@ -511,7 +513,9 @@ describe('bgm-loop-points.json', () => {
 
   it('end >= start for every BGM entry', () => {
     getAllBgm().forEach(bgm => {
-      const { start, end } = loopPoints[bgm.id]
+      const entry = loopPoints[bgm.id]
+      expect(entry).toBeDefined()
+      const { start, end } = entry
       expect(end).toBeGreaterThanOrEqual(start)
     })
   })
@@ -521,6 +525,7 @@ describe('bgm-loop-points.json', () => {
       .filter(bgm => !bgm.loop)
       .forEach(bgm => {
         const entry = loopPoints[bgm.id]
+        expect(entry).toBeDefined()
         expect(entry.start).toBe(0)
         expect(entry.end).toBe(0)
       })
