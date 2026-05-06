@@ -1,0 +1,375 @@
+{
+  "columns": 12,
+  "image": "wasteland_tiles.png",
+  "imageheight": 48,
+  "imagewidth": 576,
+  "margin": 0,
+  "name": "wasteland_tiles",
+  "spacing": 0,
+  "tilecount": 12,
+  "tiledversion": "1.10.0",
+  "tileheight": 48,
+  "tilewidth": 48,
+  "tiles": [
+    {
+      "id": 0,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_ground"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Base cracked-earth tile — warm brown with subtle crack pattern"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 1,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_ground_heavy"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Heavily cracked ground — large crack network"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 2,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_concrete"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Broken concrete slab — weathered grey with crack"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 3,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_rubble"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Pile of rubble/debris — mixed brown and grey fragments"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 4,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_dead_grass"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Dead/dry grass tuft — thin, yellowed blades"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 5,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_rusted_pipe"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Rusted horizontal pipe section"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 6,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_server_rack"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Abandoned server rack silhouette"
+        }
+      ],
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 48,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 48,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "type": "object"
+    },
+    {
+      "id": 7,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_caution_tape"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Horizontal caution tape strip — yellow/black stripe"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 8,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_warning_sign"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Small warning sign icon tile — caution on faded yellow"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 9,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_azure_logo"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Faded Azure logo on concrete — decorative flavour tile"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 10,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_wire_fence"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Chain-link fence section — semi-transparent overlay"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 11,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_wall"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "wall"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Solid collision tile — invisible/transparent"
+        }
+      ],
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 48,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 48,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "type": "wall"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

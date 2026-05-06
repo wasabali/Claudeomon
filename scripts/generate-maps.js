@@ -41,6 +41,38 @@ const TILESET_TECH = {
   tilewidth: TILE,
 }
 
+// Void tileset (GIDs 6–17) — appended for /dev/null Void region.
+// Image lives at assets/tiles/void_tiles.png (576×48, 12 tiles, single row).
+const TILESET_VOID = {
+  columns: 12,
+  firstgid: 6,
+  image: '../tiles/void_tiles.png',
+  imageheight: TILE,
+  imagewidth: 576,
+  margin: 0,
+  name: 'void_tiles',
+  spacing: 0,
+  tilecount: 12,
+  tileheight: TILE,
+  tilewidth: TILE,
+}
+
+// Wasteland tileset (GIDs 6–17) — appended for Deprecated Azure Region.
+// Image lives at assets/tiles/wasteland_tiles.png (576×48, 12 tiles, single row).
+const TILESET_WASTELAND = {
+  columns: 12,
+  firstgid: 6,
+  image: '../tiles/wasteland_tiles.png',
+  imageheight: TILE,
+  imagewidth: 576,
+  margin: 0,
+  name: 'wasteland_tiles',
+  spacing: 0,
+  tilecount: 12,
+  tileheight: TILE,
+  tilewidth: TILE,
+}
+
 // Tech GID offset (add to 1-based tile ID to get map GID)
 const TECH_GID_OFFSET = TILESET_TECH.firstgid - 1  // 5
 
@@ -325,12 +357,14 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const { w, h } = SIZE[type] || SIZE.main
   const rng = seededRng(hashSeed(regionId))
 
-  const isTech = !!region.hasTechTileset
+  const isTech      = !!region.hasTechTileset
+  const isVoid      = !!region.hasVoidTileset
+  const isWasteland = !!region.hasWastelandTileset
   const openings = getOpeningTiles(w, h, connections)
   const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech)
 
-  // Tech regions use the tech floor as their ground tile instead of stub tile 1
-  const groundGid = isTech ? techGid(T.TECH_FLOOR) : 1
+  // Ground tile: supplemental tilesets use GID 6 (their first tile); stub regions use GID 1
+  const groundGid = isTech ? techGid(T.TECH_FLOOR) : (isVoid || isWasteland) ? 6 : 1
   const groundLayer = makeTileLayer(1, 'Ground', w, h, groundGid)
   const overlayLayer = makeTileLayer(4, 'Overlay', w, h, 0)
 
@@ -417,7 +451,10 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
       renderorder: 'right-down',
       tiledversion: '1.10.0',
       tileheight: TILE,
-      tilesets: isTech ? [TILESET_STUB, TILESET_TECH] : [TILESET_STUB],
+      tilesets: isTech      ? [TILESET_STUB, TILESET_TECH]
+              : isVoid      ? [TILESET_STUB, TILESET_VOID]
+              : isWasteland ? [TILESET_STUB, TILESET_WASTELAND]
+              :               [TILESET_STUB],
       tilewidth: TILE,
       type: 'map',
       version: '1.10',

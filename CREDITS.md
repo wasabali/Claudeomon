@@ -75,6 +75,21 @@ CC0 — no attribution required; credited here as good practice.
 
 ---
 
+## Kenney Space Kit (CC0)
+
+**Supplemental tiles** for the `/dev/null Void` space/void region.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/space-kit |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Palette and tile layout adapted to 48×48px; generated as `assets/tiles/void_tiles.png` per spec in `assets/maps/TILE_SPECS.md` |
+
+CC0 — no attribution required; credited here as good practice.
+
+---
+
 ## Press Start 2P (SIL Open Font License)
 
 **Game font** — used for all in-game text.

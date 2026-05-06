@@ -26,13 +26,21 @@ const STUB_TEXTURE_KEYS = new Set(['npc_default', 'azure_terminal', 'player',
 // Depth layer for world-space characters and NPCs.
 const CHAR_DEPTH = 5
 
-const TILESET_KEY      = 'stub_tiles'
-const TECH_TILESET_KEY = 'kenney_tech_office'
-const NINJA_TILESETS   = ['village', 'dungeon', 'nature', 'interior']
+const TILESET_KEY         = 'stub_tiles'
+const TECH_TILESET_KEY    = 'kenney_tech_office'
+const VOID_TILESET_KEY    = 'void_tiles'
+const WASTELAND_TILESET_KEY = 'wasteland_tiles'
+const NINJA_TILESETS      = ['village', 'dungeon', 'nature', 'interior']
 
-// Derived from src/data/regions.js hasTechTileset flag — single source of truth
+// Derived from src/data/regions.js flags — single source of truth
 const TECH_TILESET_REGIONS = new Set(
   getAllRegions().filter(r => r.hasTechTileset).map(r => r.id)
+)
+const VOID_TILESET_REGIONS = new Set(
+  getAllRegions().filter(r => r.hasVoidTileset).map(r => r.id)
+)
+const WASTELAND_TILESET_REGIONS = new Set(
+  getAllRegions().filter(r => r.hasWastelandTileset).map(r => r.id)
 )
 const TILE_SIZE   = CONFIG.TILE_SIZE
 
@@ -133,6 +141,62 @@ export class WorldScene extends BaseScene {
         g.strokeRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE)
       })
       g.generateTexture(TECH_TILESET_KEY, TILE_SIZE * TECH_COLS, TILE_SIZE * TECH_ROWS)
+      g.destroy()
+    }
+
+    // Void tileset stub — 12 tiles (1 row × 12 cols, 576×48px)
+    // Placeholder colours follow the /dev/null Void space/void palette from TILE_SPECS.md
+    if (!this.textures.exists(VOID_TILESET_KEY)) {
+      const VOID_COLORS = [
+        0x050510, // void_ground — near-black space
+        0x0a0a1a, // void_ground_corrupted
+        0x1e1e3f, // void_platform — dark slate
+        0x6600cc, // void_platform_edge_l — neon purple
+        0x6600cc, // void_platform_edge_r — neon purple
+        0x1a1a2e, // void_star_dense
+        0x2a1a3e, // void_debris
+        0x00ffcc, // void_glitch_h — cyan glitch
+        0x4a0080, // void_glitch_v — purple glitch
+        0xff00ff, // void_dissolution — magenta scatter
+        0x6600cc, // void_portal_glow
+        0x000000, // void_wall — invisible collision
+      ]
+      const g = this.make.graphics({ add: false })
+      VOID_COLORS.forEach((color, i) => {
+        g.fillStyle(color)
+        g.fillRect(i * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
+        g.lineStyle(1, 0x000000, 0.3)
+        g.strokeRect(i * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
+      })
+      g.generateTexture(VOID_TILESET_KEY, TILE_SIZE * VOID_COLORS.length, TILE_SIZE)
+      g.destroy()
+    }
+
+    // Wasteland tileset stub — 12 tiles (1 row × 12 cols, 576×48px)
+    // Placeholder colours follow the Deprecated Azure Region wasteland palette from TILE_SPECS.md
+    if (!this.textures.exists(WASTELAND_TILESET_KEY)) {
+      const WASTELAND_COLORS = [
+        0x8b6914, // waste_ground — cracked earth
+        0x7a5810, // waste_ground_heavy
+        0x9a9a8a, // waste_concrete — weathered grey
+        0x7a6a5a, // waste_rubble
+        0x4a5a20, // waste_dead_grass — desaturated olive
+        0x8b3a1a, // waste_rusted_pipe — rust orange-red
+        0x1c1c2d, // waste_server_rack — dark silhouette
+        0xffcc00, // waste_caution_tape — warning yellow
+        0xffcc00, // waste_warning_sign
+        0x2060a0, // waste_azure_logo — faded Azure blue
+        0x888888, // waste_wire_fence
+        0x000000, // waste_wall — invisible collision
+      ]
+      const g = this.make.graphics({ add: false })
+      WASTELAND_COLORS.forEach((color, i) => {
+        g.fillStyle(color)
+        g.fillRect(i * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
+        g.lineStyle(1, 0x000000, 0.3)
+        g.strokeRect(i * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
+      })
+      g.generateTexture(WASTELAND_TILESET_KEY, TILE_SIZE * WASTELAND_COLORS.length, TILE_SIZE)
       g.destroy()
     }
 
@@ -319,6 +383,16 @@ export class WorldScene extends BaseScene {
     if (isTech) {
       const techTileset = this._map.addTilesetImage('kenney_tech_office', TECH_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
       if (techTileset) tilesets.push(techTileset)
+    }
+    // /dev/null Void region carries the void/space tileset
+    if (VOID_TILESET_REGIONS.has(mapKey)) {
+      const voidTileset = this._map.addTilesetImage('void_tiles', VOID_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (voidTileset) tilesets.push(voidTileset)
+    }
+    // Deprecated Azure Region carries the wasteland tileset
+    if (WASTELAND_TILESET_REGIONS.has(mapKey)) {
+      const wastelandTileset = this._map.addTilesetImage('wasteland_tiles', WASTELAND_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (wastelandTileset) tilesets.push(wastelandTileset)
     }
     // Register any Ninja Adventure tilesets declared by this map.
     // The four PNG files are preloaded unconditionally in preload() because

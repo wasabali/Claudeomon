@@ -1,0 +1,352 @@
+{
+  "columns": 12,
+  "image": "void_tiles.png",
+  "imageheight": 48,
+  "imagewidth": 576,
+  "margin": 0,
+  "name": "void_tiles",
+  "spacing": 0,
+  "tilecount": 12,
+  "tiledversion": "1.10.0",
+  "tileheight": 48,
+  "tilewidth": 48,
+  "tiles": [
+    {
+      "id": 0,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_ground"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Deep space base tile — scattered tiny stars on near-black"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 1,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_ground_corrupted"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Ground tile with magenta/cyan glitch lines across it"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 2,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_platform"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Floating island tile — dark slate with neon edge"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 3,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_platform_edge_l"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Platform left-edge tile"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 4,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_platform_edge_r"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Platform right-edge tile"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 5,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_star_dense"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Star cluster tile — brighter star field, used for accents"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 6,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_debris"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Floating bit-debris — scattered pixel fragments"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 7,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_glitch_h"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Horizontal glitch streak — decorative overlay tile"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 8,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_glitch_v"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Vertical glitch streak — decorative overlay tile"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 9,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_dissolution"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Dissolving ground edge — ground fading into void"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 10,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_portal_glow"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "object"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Soft circular glow tile — marks the exit portal"
+        }
+      ],
+      "type": "object"
+    },
+    {
+      "id": 11,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_wall"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "wall"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Solid collision tile — invisible/transparent"
+        }
+      ],
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 48,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 48,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "type": "wall"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}
