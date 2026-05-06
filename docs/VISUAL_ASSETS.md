@@ -115,6 +115,20 @@ scene or engine code.
 
 ---
 
+## Alternative: Node.js upscale script (recommended)
+
+For a full recursive batch upscale with directory-tree mirroring:
+
+```bash
+node scripts/upscale-assets.js \
+  --input /path/to/NinjaAdventure \
+  --output assets/ninja-adventure-upscaled
+# Add --force to reprocess existing files
+```
+
+Requires **ImageMagick** (`sudo apt install imagemagick` / `brew install imagemagick`).  
+Uses `-filter Point` (nearest-neighbor) and `+profile '*'` (strips ICC profiles).
+
 ## Alternative: ImageMagick one-liner
 
 For a quick ad-hoc conversion of a single directory:
