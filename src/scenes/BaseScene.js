@@ -151,15 +151,17 @@ export class BaseScene extends Phaser.Scene {
   }
 
   // 9-slice window factory — shared panel builder for all UI chrome.
-  // Uses a 9-slice texture when available (PokeRogue-style window assets),
-  // falls back to a stroked rectangle otherwise.
-  // Following PokeRogue's ui-theme.ts pattern: thin border, dark fill.
+  // Prefers the Kenney UI Pack window sprite loaded as 'ui_window' by BootScene.
+  // Falls back to a procedurally generated dark-navy stub when the sprite file
+  // is not present (i.e. Kenney assets not yet downloaded / placed).
   // Returns a game object with origin (0, 0) — top-left positioning.
   createPanel(x, y, width, height, { slice = 4 } = {}) {
     const FILL   = 0x1a1a2a
     const BORDER = 0x334155
-    const key = '__base_window_9slice__'
-    if (!this.textures.exists(key)) {
+    // Use the Kenney UI Pack panel if it was loaded by BootScene; otherwise
+    // generate a procedural stub texture that matches the same 9-slice contract.
+    const key = this.textures.exists('ui_window') ? 'ui_window' : '__base_window_9slice__'
+    if (key === '__base_window_9slice__' && !this.textures.exists(key)) {
       const g = this.make.graphics({ x: 0, y: 0, add: false })
       g.fillStyle(FILL, 1)
       g.fillRect(0, 0, 24, 24)

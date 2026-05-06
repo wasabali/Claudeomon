@@ -32,6 +32,27 @@ CC0 means no attribution is legally required. We credit the author here as good 
 
 ---
 
+## Kenney UI Pack (CC0)
+
+**UI chrome source** for dialog boxes, menus, HUD panels, and all 9-slice window frames.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/ui-pack |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Scaled to match 48×48px tile grid using nearest-neighbor interpolation |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney UI Pack assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Window / panel sprites (9-slice) | `assets/ui/window.png` |
+
+---
+
 ## PokeRogue (CC-BY-NC-SA-4.0)
 
 **Battle arena backgrounds** and **battle UI chrome** (9-slice panels, HUD elements).
