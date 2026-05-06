@@ -24,7 +24,7 @@ Any directory name not in that list is counted under "other".
 
 Exit codes:
     0 — success (at least one file processed)
-    1 — no PNG files found under --input
+    1 — invalid or missing command-line arguments, or no PNG files found under --input
     2 — import error (Pillow not installed)
 """
 
@@ -52,11 +52,12 @@ def upscale_png(src_path: str, dst_path: str, scale: int) -> None:
     Preserves the full alpha channel (RGBA).
     """
     with Image.open(src_path) as img:
-        # Strip ICC profile by converting to a fresh RGBA image without info.
-        # This also normalises palette, greyscale, and other modes to RGBA,
-        # preserving full transparency regardless of the source mode.
+        # Convert to RGBA to normalise mode and preserve transparency.
         if img.mode != "RGBA":
             img = img.convert("RGBA")
+        # Explicitly strip any ICC profile — resize() propagates img.info,
+        # so we must clear it before scaling even if the image is already RGBA.
+        img.info.pop("icc_profile", None)
 
         new_w = img.width * scale
         new_h = img.height * scale

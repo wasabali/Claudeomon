@@ -23,7 +23,7 @@ upscale of the entire asset pack in one pass.
 
 ### Requirements
 
-- Python 3.8+
+- Python 3.9+
 - [Pillow](https://pypi.org/project/Pillow/) — `pip install Pillow`
 
 ### Usage
@@ -57,9 +57,9 @@ Only nearest-neighbor scaling is permitted. Using any other algorithm
 (bilinear, bicubic, Lanczos) will introduce sub-pixel blurring that destroys
 the pixel-art look at 48 px.
 
-The Pillow constant for nearest-neighbor is `Image.NEAREST` (also aliased as
-`Image.NEAREST` / the integer constant `0` in older Pillow versions). The equivalent ImageMagick flag is
-`-filter point`.
+The Pillow constant for nearest-neighbor is `Image.Resampling.NEAREST`, with
+`Image.NEAREST` retained as a legacy alias and the integer constant `0` used
+in older Pillow versions. The equivalent ImageMagick flag is `-filter point`.
 
 ### Example manifest output
 
