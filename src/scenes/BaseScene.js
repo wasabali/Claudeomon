@@ -158,6 +158,13 @@ export class BaseScene extends Phaser.Scene {
   createPanel(x, y, width, height, { slice = 4 } = {}) {
     const FILL   = 0x1a1a2a
     const BORDER = 0x334155
+
+    // Prefer the shared 'ui_window' texture (48×48, 8px inset) when present.
+    const UI_WINDOW_INSET = 8
+    if (this.textures.exists('ui_window') && typeof this.add.nineslice === 'function') {
+      return this.add.nineslice(x, y, 'ui_window', undefined, width, height, UI_WINDOW_INSET, UI_WINDOW_INSET, UI_WINDOW_INSET, UI_WINDOW_INSET).setOrigin(0, 0)
+    }
+
     const key = '__base_window_9slice__'
     if (!this.textures.exists(key)) {
       const g = this.make.graphics({ x: 0, y: 0, add: false })

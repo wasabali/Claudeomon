@@ -196,10 +196,17 @@ export class DialogBox {
     this._container = this.scene.add.container(0, 0)
     this._container.setDepth(100)
 
-    // Background panel.
-    if (typeof this.scene.add.nineslice === 'function' && this.scene.textures.exists(PANEL_KEY)) {
-      this._bg = this.scene.add.nineslice(0, BOX_Y, PANEL_KEY, 0, CONFIG.WIDTH, BOX_HEIGHT, 4, 4, 4, 4)
-        .setOrigin(0, 0)
+    // Background panel — prefer the shared 'ui_window' 9-slice texture (48×48, 8px inset)
+    // loaded by BootScene when assets/ui/window.png is present.  Falls back to the
+    // procedural PANEL_KEY stub generated in _ensureTexture().
+    if (typeof this.scene.add.nineslice === 'function') {
+      if (this.scene.textures.exists('ui_window')) {
+        this._bg = this.scene.add.nineslice(0, BOX_Y, 'ui_window', 0, CONFIG.WIDTH, BOX_HEIGHT, 8, 8, 8, 8)
+          .setOrigin(0, 0)
+      } else {
+        this._bg = this.scene.add.nineslice(0, BOX_Y, PANEL_KEY, 0, CONFIG.WIDTH, BOX_HEIGHT, 4, 4, 4, 4)
+          .setOrigin(0, 0)
+      }
     } else {
       this._bg = this.scene.add.rectangle(0, BOX_Y, CONFIG.WIDTH, BOX_HEIGHT, 0x0d1117)
         .setOrigin(0, 0)
