@@ -37,6 +37,17 @@ const BUDGET_BAR_H     = 4
 const LOG_X            = 4
 const LOG_Y            = CONFIG.HEIGHT - 76
 
+// Portrait placement — opponent portrait sits left of its HP block; player portrait
+// sits to the right of the player HP text so it never overlaps the bars.
+const PORTRAIT_SIZE       = CONFIG.PORTRAIT_SIZE
+const PORTRAIT_HALF_SIZE  = Math.floor(PORTRAIT_SIZE / 2)
+// Gap between end of player HP bar block and the player portrait
+const PLAYER_PORTRAIT_OFFSET = 30
+const OPPONENT_PORTRAIT_X = ENEMY_HP_BAR_X - PORTRAIT_SIZE - 4
+const OPPONENT_PORTRAIT_Y = ENEMY_HP_BAR_Y
+const PLAYER_PORTRAIT_X   = Math.floor(CONFIG.WIDTH * 0.475) + PLAYER_PORTRAIT_OFFSET
+const PLAYER_PORTRAIT_Y   = PLAYER_HP_BAR_Y - PORTRAIT_HALF_SIZE
+
 // ---------------------------------------------------------------------------
 // BattleScene
 // Phaser rendering layer for all battle encounters.
@@ -45,10 +56,12 @@ const LOG_Y            = CONFIG.HEIGHT - 76
 export class BattleScene extends BaseScene {
   constructor() {
     super({ key: 'BattleScene' })
-    this._battleState  = null
-    this._eventQueue   = []
-    this._animating    = false
-    this._activeSkills = []
+    this._battleState     = null
+    this._eventQueue      = []
+    this._animating       = false
+    this._activeSkills    = []
+    this._opponentPortrait = null
+    this._playerPortrait   = null
   }
 
   // -------------------------------------------------------------------------
@@ -152,6 +165,27 @@ export class BattleScene extends BaseScene {
       this._slaText = this.add.text(SLA_TIMER_X, SLA_TIMER_Y, this._slaLabel(), {
         ...textStyle, color: '#ff6666',
       })
+    }
+
+    // Battle portraits — shown only when texture is available (assets/sprites/portraits/)
+    this._buildPortrait(`portrait_${opponent.id}`, OPPONENT_PORTRAIT_X, OPPONENT_PORTRAIT_Y, 'opponent')
+    this._buildPortrait('portrait_player', PLAYER_PORTRAIT_X, PLAYER_PORTRAIT_Y, 'player')
+  }
+
+  // -------------------------------------------------------------------------
+  // _buildPortrait — render a 48×48px portrait if its texture has been loaded.
+  // Silently skips when the texture is absent (portrait assets are optional).
+  // -------------------------------------------------------------------------
+  _buildPortrait(textureKey, x, y, side) {
+    if (!this.textures.exists(textureKey)) return
+    const portrait = this.add.image(x, y, textureKey)
+      .setOrigin(0, 0)
+      .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
+      .setDepth(1)
+    if (side === 'opponent') {
+      this._opponentPortrait = portrait
+    } else {
+      this._playerPortrait = portrait
     }
   }
 
