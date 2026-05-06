@@ -169,7 +169,7 @@ If the Ninja Adventure pack is updated, delete the relevant subdirectories
 under `assets/sprites/` and re-run the script.
 # Visual Assets Specification
 
-Cloud Quest uses a pixel-art style based on the [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) asset pack.
+Cloud Quest uses a pixel-art style drawing on the [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) asset pack for world sprites and audio, and the [Kenney UI Pack](https://kenney.nl/assets/ui-pack) for all UI chrome.
 All sprites are scaled 3× from their source resolution for consistent clarity at 1920×1080.
 
 ---
@@ -181,8 +181,8 @@ All sprites are scaled 3× from their source resolution for consistent clarity a
 | Ninja Adventure tiles | 16×16px | 48×48px | 3× |
 | Ninja Adventure characters | 16×16px | 48×48px | 3× |
 | Ninja Adventure facesets | 16×16px | 48×48px | 3× |
+| Kenney UI Pack panels | varies | 48×48px+ | scaled |
 | PokeRogue battle backgrounds | native | native | 1× |
-| PokeRogue UI chrome | native | native | 1× |
 
 ---
 
@@ -374,7 +374,8 @@ HP bar colours are rendered programmatically: green (`#00cc44`) > 50%, yellow (`
 | Asset | Source | Licence |
 |---|---|---|
 | Tiles, characters, facesets | [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) — Pixel-Boy & AAA | CC0 (public domain) |
-| Battle backgrounds, UI chrome | [PokeRogue](https://github.com/pagefaultgames/pokerogue) — pagefaultgames | CC-BY-NC-SA-4.0 |
+| UI chrome (panels, dialog frames) | [Kenney UI Pack](https://kenney.nl/assets/ui-pack) — Kenney | CC0 (public domain) |
+| Battle backgrounds | [PokeRogue](https://github.com/pagefaultgames/pokerogue) — pagefaultgames | CC-BY-NC-SA-4.0 |
 | Font | [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) — CodeMan38 | OFL-1.1 |
 
 See `assets/arenas/CREDITS.md` and `assets/ui/CREDITS.md` for per-file attribution.
@@ -390,8 +391,9 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 | Source | Role | License |
 |--------|------|---------|
-| **Ninja Adventure** | Primary — characters, monsters, tiles, VFX, items, UI, BGM, SFX | CC0 1.0 (Public Domain) |
-| **PokeRogue** | Battle backgrounds and UI chrome | CC-BY-NC-SA-4.0 |
+| **Ninja Adventure** | Primary — characters, monsters, tiles, VFX, items, BGM, SFX | CC0 1.0 (Public Domain) |
+| **Kenney UI Pack** | UI chrome — dialog panels, menus, HUD window frames | CC0 1.0 (Public Domain) |
+| **PokeRogue** | Battle backgrounds | CC-BY-NC-SA-4.0 |
 | **Kenney RPG Urban** | Supplemental tech/urban tiles | CC0 1.0 (Public Domain) |
 
 ---
@@ -420,7 +422,6 @@ Cloud Quest uses a **multi-source asset strategy**:
 | World / overworld tiles | `TileSet/` | `assets/maps/tilesets/` |
 | VFX (magic, explosions) | `FX/` | `assets/sprites/vfx/` |
 | Item icons | `Items/` | `assets/sprites/items/` |
-| UI elements | `HUD/` | `assets/ui/` |
 | Background music | `BGM/` | `assets/audio/bgm/` |
 | Sound effects | `SFX/` | `assets/audio/sfx/` |
 
@@ -506,6 +507,32 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 
 ---
 
+## Kenney UI Pack
+
+### Overview
+
+[Kenney UI Pack](https://kenney.nl/assets/ui-pack) by [Kenney](https://kenney.nl) provides the UI chrome for Cloud Quest — dialog box frames, menu backgrounds, and all 9-slice window panels.
+
+```
+Kenney UI Pack
+- Author:  Kenney (kenney.nl)
+- Source:  https://kenney.nl/assets/ui-pack
+- License: CC0 1.0 Universal (Public Domain Dedication)
+- Usage:   9-slice window panels, dialog frames, menu backgrounds
+```
+
+### Usage
+
+Download the pack from https://kenney.nl/assets/ui-pack and place a suitable panel PNG at `assets/ui/window.png`. `BootScene` loads it as `'ui_window'`; `BaseScene.createPanel()` uses it automatically when present, falling back to a procedural dark-navy stub otherwise.
+
+Scale the sprite to match the Cloud Quest tile grid (48×48px) using `scripts/upscale-assets.js` with nearest-neighbor interpolation.
+
+### License
+
+CC0 1.0 Universal — public domain. No attribution required; credited anyway.
+
+---
+
 ## Asset Categories
 
 ### Sprites (`assets/sprites/`)
@@ -528,8 +555,7 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 
 | Source | Assets |
 |--------|--------|
-| PokeRogue | 9-slice window panels, cursor, HP/XP/stat bars |
-| Ninja Adventure | Additional HUD icons and status indicators |
+| Kenney UI Pack | 9-slice window panels, dialog frames, menu backgrounds |
 
 ### Audio (`assets/audio/`)
 

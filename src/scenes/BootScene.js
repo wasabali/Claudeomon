@@ -22,7 +22,7 @@ export class BootScene extends Phaser.Scene {
     ])
 
     // All character sprite keys are optional — the game falls back to procedurally
-    // generated stub textures when the Ninja Adventure sprite files are not present.
+    // generated stub textures when the character sprite files are not present.
     const optionalSpriteKeys = new Set(getAllSpriteKeys())
 
     // Collect all known incident spriteKeys so we can suppress load errors for them.
@@ -32,13 +32,14 @@ export class BootScene extends Phaser.Scene {
         .map(e => e.spriteKey),
     )
 
-    // Ignore missing optional assets — audio files, loop-points JSON, character sprites, and incident sprites.
+    // Ignore missing optional assets — audio files, loop-points JSON, character sprites, incident sprites, and UI pack.
     // Logs a warning for each; surface all other failures as errors.
     this.load.on('loaderror', (file) => {
       const isOptionalAudio    = file?.type === 'audio' && optionalAudioKeys.has(file.key)
       const isOptionalLoopJson = file?.type === 'json' && file.key === 'bgmLoopPoints'
       const isOptionalSprite   = optionalSpriteKeys.has(file.key) || (file?.type === 'spritesheet' && incidentSpriteKeys.has(file.key))
-      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite) {
+      const isOptionalUi       = file?.type === 'image' && file.key === 'ui_window'
+      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite || isOptionalUi) {
         console.warn(`[BootScene] Optional asset unavailable, continuing without it: ${file?.type}:${file?.key}`)
         return
       }
@@ -56,6 +57,12 @@ export class BootScene extends Phaser.Scene {
     }
 
     this.load.json('bgmLoopPoints', 'assets/audio/bgm-loop-points.json')
+
+    // Load Kenney UI Pack window panel — optional. When present, BaseScene.createPanel()
+    // uses this 9-slice texture for all dialog boxes, menus, and HUD panels.
+    // Source: https://kenney.nl/assets/ui-pack (CC0)
+    // Place the chosen panel PNG at assets/ui/window.png after downloading the pack.
+    this.load.image('ui_window', 'assets/ui/window.png')
 
     // Load character sprite sheets (4-row × 3-col walk-cycle, 48×48 px per frame).
     // Files live in assets/sprites/characters/<key>.png and are optional — if absent
