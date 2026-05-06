@@ -6,7 +6,7 @@ Cloud Quest is a browser-based RPG by wasabali. The following third-party asset 
 
 ## Ninja Adventure (CC0)
 
-**Primary asset source** for characters, monsters, world tiles, VFX, items, music, and SFX.
+**Primary asset source** for characters, monsters, world tiles, VFX, items, and music. SFX are currently generated procedurally via jsfxr — Ninja Adventure SFX may supplement in future.
 
 | Field | Value |
 |---|---|
@@ -28,7 +28,6 @@ CC0 means no attribution is legally required. We credit the author here as good 
 | VFX sprites | `assets/sprites/effects/` |
 | Item icons | `assets/sprites/items/` |
 | BGM tracks (37 tracks) | `assets/audio/bgm/` |
-| SFX (100+ sounds) | `assets/audio/sfx/` |
 
 ---
 

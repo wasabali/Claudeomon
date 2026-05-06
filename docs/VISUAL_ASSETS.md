@@ -60,9 +60,9 @@ After upscaling, copy assets from the staging directory to the locations below.
 | `Actor/Monsters/` | `assets/sprites/incidents/` |
 | `Items/Icons/` | `assets/sprites/items/` |
 | `FX/` | `assets/sprites/effects/` |
-| `Maps/Tiles/` | `assets/tilesets/` |
+| `Maps/Tilesets/` | `assets/tilesets/` |
 | `Audio/BGM/` | `assets/audio/bgm/` |
-| `Audio/SFX/` | `assets/audio/sfx/` |
+| `Audio/SFX/` | `assets/audio/sfx/` *(future — SFX are currently procedural, see below)* |
 
 ---
 
@@ -78,7 +78,7 @@ After upscaling, copy assets from the staging directory to the locations below.
 | Battle VFX / effects | Ninja Adventure effects (3× upscale) | — | ⏳ Pending upscale |
 | Item icons | Ninja Adventure items (3× upscale) | — | ⏳ Pending upscale |
 | Music | Ninja Adventure (37 tracks, BGM IDs in `src/data/audio.js`) | — | ⏳ Pending integration |
-| Sound effects | Ninja Adventure (100+ SFX) | — | ⏳ Pending integration |
+| Sound effects | **Currently procedural** via jsfxr seeds in `src/data/audio.js`. Ninja Adventure SFX may supplement file-based effects in future. | — | ✅ Procedural (jsfxr) |
 | Font | Press Start 2P (Google Fonts, keep current) | — | ✅ Integrated |
 | Space/void/wasteland tiles | — | Kenney or custom | 🔴 Gap — see below |
 | Battle portraits | Ninja Adventure facesets (3× upscale → 48×48px) | — | ⏳ Pending spec change |

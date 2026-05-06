@@ -55,12 +55,41 @@ if (!args.input || !args.output) {
   process.exit(1)
 }
 
+const SCALE = args.scale
+if (!Number.isFinite(SCALE) || SCALE <= 0 || !Number.isInteger(SCALE)) {
+  console.error(`--scale must be a positive integer (got: ${args.scale})`)
+  process.exit(1)
+}
+
 const INPUT  = path.resolve(ROOT, args.input)
 const OUTPUT = path.resolve(ROOT, args.output)
-const SCALE  = args.scale
 
 if (!fs.existsSync(INPUT)) {
   console.error(`Input directory not found: ${INPUT}`)
+  process.exit(1)
+}
+
+if (!fs.statSync(INPUT).isDirectory()) {
+  console.error(`Input path is not a directory: ${INPUT}`)
+  process.exit(1)
+}
+
+if (fs.existsSync(OUTPUT) && !fs.statSync(OUTPUT).isDirectory()) {
+  console.error(`Output path exists but is not a directory: ${OUTPUT}`)
+  process.exit(1)
+}
+
+function isSameOrNestedPath(parentPath, childPath) {
+  const rel = path.relative(parentPath, childPath)
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))
+}
+
+if (isSameOrNestedPath(INPUT, OUTPUT)) {
+  console.error(
+    'Output directory must not be the same as or inside the input directory.\n' +
+    `  input:  ${INPUT}\n` +
+    `  output: ${OUTPUT}`
+  )
   process.exit(1)
 }
 
