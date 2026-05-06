@@ -66,10 +66,7 @@ export class BootScene extends Phaser.Scene {
         frameHeight: 48,
       })
     }
-<<<<<<< copilot/add-tech-office-themed-tiles
-=======
 
->>>>>>> main
     // Load incident spritesheets for encounters that have a spriteKey defined.
     for (const encounter of getAllEncounters()) {
       if (!encounter.spriteKey) continue

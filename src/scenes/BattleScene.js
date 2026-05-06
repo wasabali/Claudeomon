@@ -85,6 +85,7 @@ export class BattleScene extends BaseScene {
     this._taunts     = data.taunts ?? null
 
     this._buildHUD(mode, opponent)
+    this._buildOpponentSprite(opponent)
     this._buildSkillMenu()
     this._buildLogBox()
     this._setupInput()
@@ -162,6 +163,26 @@ export class BattleScene extends BaseScene {
   _slaLabel() {
     const timer = this._battleState.slaTimer
     return `SLA:${timer ?? '-'}`
+  }
+
+  // -------------------------------------------------------------------------
+  // Opponent sprite — animated spritesheet if available, nothing if not
+  // -------------------------------------------------------------------------
+  _buildOpponentSprite(opponent) {
+    this._opponentSprite = null
+    const key = opponent.spriteKey
+    if (!key || !this.textures.exists(key)) return
+
+    const x = Math.floor(CONFIG.WIDTH * 0.75)
+    const y = Math.floor(CONFIG.HEIGHT * 0.35)
+    this._opponentSprite = this.add.sprite(x, y, key, 0)
+      .setScale(3)
+      .setDepth(2)
+
+    const animKey = `${key}_idle`
+    if (this.anims.exists(animKey)) {
+      this._opponentSprite.play(animKey)
+    }
   }
 
   // -------------------------------------------------------------------------

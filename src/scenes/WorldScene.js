@@ -26,7 +26,6 @@ const STUB_TEXTURE_KEYS = new Set(['npc_default', 'azure_terminal', 'player',
 // Depth layer for world-space characters and NPCs.
 const CHAR_DEPTH = 5
 
-<<<<<<< copilot/add-tech-office-themed-tiles
 const TILESET_KEY      = 'stub_tiles'
 const TECH_TILESET_KEY = 'kenney_tech_office'
 const NINJA_TILESETS   = ['village', 'dungeon', 'nature', 'interior']
@@ -35,9 +34,6 @@ const NINJA_TILESETS   = ['village', 'dungeon', 'nature', 'interior']
 const TECH_TILESET_REGIONS = new Set(
   getAllRegions().filter(r => r.hasTechTileset).map(r => r.id)
 )
-=======
-const TILESET_KEY = 'stub_tiles'
->>>>>>> main
 const TILE_SIZE   = CONFIG.TILE_SIZE
 
 // 4-frame stepped fade for region transitions (overlay alpha per step)
@@ -307,7 +303,6 @@ export class WorldScene extends BaseScene {
     this._map = this.make.tilemap({ key: mapKey })
     const stubTileset = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
 
-<<<<<<< copilot/add-tech-office-themed-tiles
     // Tech regions carry a second tileset for server rooms, offices, and data centres
     const isTech = TECH_TILESET_REGIONS.has(mapKey)
     const tilesets = [stubTileset]
@@ -315,16 +310,10 @@ export class WorldScene extends BaseScene {
       const techTileset = this._map.addTilesetImage('kenney_tech_office', TECH_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
       if (techTileset) tilesets.push(techTileset)
     }
-=======
->>>>>>> main
     // Register any Ninja Adventure tilesets declared by this map.
     // The four PNG files are preloaded unconditionally in preload() because
     // they are small (~3 KB each) and knowing which tilesets a map uses
     // requires the tilemap to already be constructed.
-<<<<<<< copilot/add-tech-office-themed-tiles
-=======
-    const tilesets = [stubTileset]
->>>>>>> main
     for (const name of NINJA_TILESETS) {
       if (this._map.tilesets.some(ts => ts.name === name) && this.textures.exists(name)) {
         const ts = this._map.addTilesetImage(name, name, TILE_SIZE, TILE_SIZE, 0, 0)
