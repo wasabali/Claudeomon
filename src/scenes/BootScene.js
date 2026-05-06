@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { getAllBgm } from '#data/audio.js'
-import { getAllSpriteKeys, PLAYER_SPRITE_KEY } from '#data/trainers.js'
+import { getAllSpriteKeys } from '#data/trainers.js'
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -21,7 +21,7 @@ export class BootScene extends Phaser.Scene {
     this.load.on('loaderror', (file) => {
       const isOptionalBgm    = file?.type === 'audio' && optionalBgmKeys.has(file.key)
       const isOptionalLoopJson = file?.type === 'json' && file.key === 'bgmLoopPoints'
-      const isOptionalSprite = file?.type === 'image' && optionalSpriteKeys.has(file.key)
+      const isOptionalSprite = optionalSpriteKeys.has(file.key)
       if (isOptionalBgm || isOptionalLoopJson || isOptionalSprite) {
         console.warn(`[BootScene] Optional asset unavailable, continuing without it: ${file?.type}:${file?.key}`)
         return

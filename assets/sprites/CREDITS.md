@@ -10,8 +10,8 @@ sourced from the **Ninja Adventure Asset Pack** by Robert and Pixel-Boy.
 
 ### What's included
 
-Each character sprite sheet is a 4-direction walk-cycle sheet (96 × 128 px at base 1×,
-upscaled 3× to 288 × 384 px for the 48 px tile size used by Cloud Quest).
+Each character sprite sheet is a 4-direction walk-cycle sheet (48 × 64 px at base 1×,
+upscaled 3× to 144 × 192 px for the 48 px tile size used by Cloud Quest).
 
 Sprite sheets live in `assets/sprites/characters/` and are named by archetype:
 

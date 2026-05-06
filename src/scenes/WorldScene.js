@@ -338,7 +338,10 @@ export class WorldScene extends BaseScene {
     const playerTextureKey = this.textures.exists(PLAYER_SPRITE_KEY)
       ? PLAYER_SPRITE_KEY
       : 'player'
-    this._player = this.physics.add.sprite(startX, startY, playerTextureKey, 1)
+    const playerUseSheet = playerTextureKey !== 'player'
+    this._player = playerUseSheet
+      ? this.physics.add.sprite(startX, startY, playerTextureKey, 1)
+      : this.physics.add.sprite(startX, startY, playerTextureKey)
     this._player.setDepth(CHAR_DEPTH)
 
     const persistedSpawn = persistPlayerTile(spawnTileX, spawnTileY)
