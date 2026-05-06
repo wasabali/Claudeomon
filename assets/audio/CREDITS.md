@@ -25,25 +25,29 @@ SFX files are placed in `assets/audio/sfx/` organised by category:
 BGM tracks are placed in `assets/audio/bgm/`. Each track is loaded as OGG with an
 MP3 fallback for full browser coverage (Phaser picks the first supported format).
 
-| Track ID | Scene / Region |
-|---|---|
-| `title` | Title screen |
-| `localhost_town` | Localhost Town (starting area) |
-| `pipeline_pass` | Pipeline Pass |
-| `container_port` | Container Port |
-| `cloud_citadel` | Cloud Citadel |
-| `kernel_caves` | Kernel Caves |
-| `serverless_steppes` | Serverless Steppes |
-| `three_am_tavern` | 3am Tavern |
-| `legacy_codebase` | Legacy Codebase area |
-| `outcast_network` | Outcast Network (hidden) |
-| `shadow_registry` | Shadow Registry (hidden) |
-| `battle_incident` | Battle — incident encounter |
-| `battle_engineer` | Battle — engineer encounter |
-| `battle_cursed` | Battle — cursed encounter |
-| `battle_throttlemaster` | Battle — ThrottleMaster boss |
-| `victory` | Victory fanfare (no loop) |
-| `game_over` | Game over (no loop) |
+The file stored at `assets/audio/bgm/<id>.ogg` is a copy/rename of the listed
+Ninja Adventure source track. Re-measure loop points in `bgm-loop-points.json`
+with an audio editor (e.g. Audacity) if any source file is replaced.
+
+| Cloud Quest track ID | Ninja Adventure source track | Scene / Region |
+|---|---|---|
+| `title` | `07 - MainMenu.ogg` | Title screen |
+| `localhost_town` | `18 - Town.ogg` | Localhost Town (starting area) |
+| `pipeline_pass` | `33 - Peaceful.ogg` | Pipeline Pass |
+| `container_port` | `35 - Energy.ogg` | Container Port |
+| `cloud_citadel` | `15 - Castle.ogg` | Cloud Citadel |
+| `kernel_caves` | `09 - WaterCave.ogg` | Kernel Caves |
+| `serverless_steppes` | `13 - Forest.ogg` | Serverless Steppes |
+| `three_am_tavern` | `21 - Inn.ogg` | 3am Tavern |
+| `legacy_codebase` | `34 - Ancient.ogg` | Legacy Codebase area |
+| `outcast_network` | `37 - Secret.ogg` | Outcast Network (hidden) |
+| `shadow_registry` | `26 - Mystery.ogg` | Shadow Registry (hidden) |
+| `battle_incident` | `22 - Battle.ogg` | Battle — incident encounter |
+| `battle_engineer` | `29 - Escape.ogg` | Battle — engineer encounter |
+| `battle_cursed` | `28 - Tension.ogg` | Battle — cursed encounter |
+| `battle_throttlemaster` | `08 - BossTheme.ogg` | Battle — ThrottleMaster boss |
+| `victory` | `23 - Victory.ogg` | Victory fanfare (no loop) |
+| `game_over` | `24 - GameOver.ogg` | Game over (no loop) |
 
 ### License
 

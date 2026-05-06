@@ -256,10 +256,13 @@ const SFX_PRESETS = {
  * BGM_CONFIG
  * Each entry points to a background music track on disk.
  *
- *   id     – snake_case, matches object key
- *   file   – relative path to the .ogg asset
- *   volume – 0.0–1.0 base playback volume
- *   loop   – whether the track loops continuously
+ *   id         – snake_case, matches object key
+ *   file       – relative path to the .ogg asset (rename the Ninja Adventure source
+ *                file to this name when placing it in assets/audio/bgm/)
+ *   volume     – 0.0–1.0 base playback volume
+ *   loop       – whether the track loops continuously
+ *   ninjaTrack – source track from the Ninja Adventure Asset Pack (CC0) by pixel-boy
+ *                https://pixel-boy.itch.io/ninja-adventure-asset-pack
  */
 const BGM_CONFIG = {
 
@@ -268,6 +271,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/title.ogg',
     volume: 0.6,
     loop: true,
+    ninjaTrack: '07 - MainMenu.ogg',
   },
 
   localhost_town: {
@@ -275,6 +279,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/localhost_town.ogg',
     volume: 0.4,
     loop: true,
+    ninjaTrack: '18 - Town.ogg',
   },
 
   pipeline_pass: {
@@ -282,6 +287,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/pipeline_pass.ogg',
     volume: 0.5,
     loop: true,
+    ninjaTrack: '33 - Peaceful.ogg',
   },
 
   container_port: {
@@ -289,6 +295,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/container_port.ogg',
     volume: 0.5,
     loop: true,
+    ninjaTrack: '35 - Energy.ogg',
   },
 
   cloud_citadel: {
@@ -296,6 +303,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/cloud_citadel.ogg',
     volume: 0.5,
     loop: true,
+    ninjaTrack: '15 - Castle.ogg',
   },
 
   kernel_caves: {
@@ -303,6 +311,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/kernel_caves.ogg',
     volume: 0.4,
     loop: true,
+    ninjaTrack: '09 - WaterCave.ogg',
   },
 
   serverless_steppes: {
@@ -310,6 +319,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/serverless_steppes.ogg',
     volume: 0.4,
     loop: true,
+    ninjaTrack: '13 - Forest.ogg',
   },
 
   three_am_tavern: {
@@ -317,6 +327,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/three_am_tavern.ogg',
     volume: 0.5,
     loop: true,
+    ninjaTrack: '21 - Inn.ogg',
   },
 
   legacy_codebase: {
@@ -324,6 +335,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/legacy_codebase.ogg',
     volume: 0.4,
     loop: true,
+    ninjaTrack: '34 - Ancient.ogg',
   },
 
   outcast_network: {
@@ -331,6 +343,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/outcast_network.ogg',
     volume: 0.5,
     loop: true,
+    ninjaTrack: '37 - Secret.ogg',
   },
 
   shadow_registry: {
@@ -338,6 +351,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/shadow_registry.ogg',
     volume: 0.3,
     loop: true,
+    ninjaTrack: '26 - Mystery.ogg',
   },
 
   battle_incident: {
@@ -345,6 +359,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_incident.ogg',
     volume: 0.7,
     loop: true,
+    ninjaTrack: '22 - Battle.ogg',
   },
 
   battle_engineer: {
@@ -352,6 +367,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_engineer.ogg',
     volume: 0.7,
     loop: true,
+    ninjaTrack: '29 - Escape.ogg',
   },
 
   battle_cursed: {
@@ -359,6 +375,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_cursed.ogg',
     volume: 0.7,
     loop: true,
+    ninjaTrack: '28 - Tension.ogg',
   },
 
   battle_throttlemaster: {
@@ -366,6 +383,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_throttlemaster.ogg',
     volume: 0.8,
     loop: true,
+    ninjaTrack: '08 - BossTheme.ogg',
   },
 
   victory: {
@@ -373,6 +391,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/victory.ogg',
     volume: 0.7,
     loop: false,
+    ninjaTrack: '23 - Victory.ogg',
   },
 
   game_over: {
@@ -380,6 +399,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/game_over.ogg',
     volume: 0.6,
     loop: false,
+    ninjaTrack: '24 - GameOver.ogg',
   },
 }
 
