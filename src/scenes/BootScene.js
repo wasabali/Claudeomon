@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { getAllBgm } from '#data/audio.js'
+import { getAllSpriteKeys } from '#data/trainers.js'
 import { getAll as getAllEncounters } from '#data/encounters.js'
 
 // Incident spritesheets — 48×48 px per frame, horizontal strip.
@@ -16,6 +17,10 @@ export class BootScene extends Phaser.Scene {
     const bgmTracks = getAllBgm()
     const optionalBgmKeys = new Set(bgmTracks.map((bgm) => bgm.id))
 
+    // All character sprite keys are optional — the game falls back to procedurally
+    // generated stub textures when the Ninja Adventure sprite files are not present.
+    const optionalSpriteKeys = new Set(getAllSpriteKeys())
+
     // Collect all known incident spriteKeys so we can suppress load errors for them.
     const incidentSpriteKeys = new Set(
       getAllEncounters()
@@ -23,12 +28,12 @@ export class BootScene extends Phaser.Scene {
         .map(e => e.spriteKey),
     )
 
-    // Ignore missing optional assets — BGM, loop-points JSON, and incident sprites.
+    // Ignore missing optional assets — BGM, loop-points JSON, character sprites, and incident sprites.
     // Logs a warning for each; surface all other failures as errors.
     this.load.on('loaderror', (file) => {
-      const isOptionalBgm = file?.type === 'audio' && optionalBgmKeys.has(file.key)
+      const isOptionalBgm      = file?.type === 'audio' && optionalBgmKeys.has(file.key)
       const isOptionalLoopJson = file?.type === 'json' && file.key === 'bgmLoopPoints'
-      const isOptionalSprite = file?.type === 'spritesheet' && incidentSpriteKeys.has(file.key)
+      const isOptionalSprite   = optionalSpriteKeys.has(file.key) || (file?.type === 'spritesheet' && incidentSpriteKeys.has(file.key))
       if (isOptionalBgm || isOptionalLoopJson || isOptionalSprite) {
         console.warn(`[BootScene] Optional asset unavailable, continuing without it: ${file?.type}:${file?.key}`)
         return
@@ -43,6 +48,16 @@ export class BootScene extends Phaser.Scene {
     }
 
     this.load.json('bgmLoopPoints', 'assets/audio/bgm-loop-points.json')
+
+    // Load character sprite sheets (4-row × 3-col walk-cycle, 48×48 px per frame).
+    // Files live in assets/sprites/characters/<key>.png and are optional — if absent
+    // the game uses procedurally generated stub textures (coloured rectangles).
+    for (const key of optionalSpriteKeys) {
+      this.load.spritesheet(key, `assets/sprites/characters/${key}.png`, {
+        frameWidth:  48,
+        frameHeight: 48,
+      })
+    }
 
     // Load incident spritesheets for encounters that have a spriteKey defined.
     for (const encounter of getAllEncounters()) {
