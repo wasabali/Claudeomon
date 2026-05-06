@@ -1,15 +1,16 @@
 // Region definitions — world map areas, gyms, dungeons, and hidden zones.
 //
 // Fields:
-//   id            — snake_case, matches object key
-//   name          — display name shown on map / UI
-//   domain        — primary domain (null for tutorial / mixed / cursed / hidden)
-//   act           — game act this region unlocks in (1–4)
-//   type          — main | gym | dungeon | hidden
-//   parentRegion  — ID of containing region (null for main / hidden)
-//   hasFastTravel — true if region has an Azure Terminal
-//   mvp           — true if in MVP scope (Act 1 core path)
-//   accessTrigger — (hidden only) string describing unlock condition
+//   id               — snake_case, matches object key
+//   name             — display name shown on map / UI
+//   domain           — primary domain (null for tutorial / mixed / cursed / hidden)
+//   act              — game act this region unlocks in (1–4)
+//   type             — main | gym | dungeon | hidden
+//   parentRegion     — ID of containing region (null for main / hidden)
+//   hasFastTravel    — true if region has an Azure Terminal
+//   hasTechTileset   — true if region uses kenney_tech_office as a supplemental tileset
+//   mvp              — true if in MVP scope (Act 1 core path)
+//   accessTrigger    — (hidden only) string describing unlock condition
 
 const REGIONS = {
 
@@ -38,34 +39,37 @@ const REGIONS = {
     mvp:           true,
   },
   azure_town: {
-    id:            'azure_town',
-    name:          'Azure Town',
-    domain:        'cloud',
-    act:           1,
-    type:          'main',
-    parentRegion:  null,
-    hasFastTravel: true,
-    mvp:           false,
+    id:              'azure_town',
+    name:            'Azure Town',
+    domain:          'cloud',
+    act:             1,
+    type:            'main',
+    parentRegion:    null,
+    hasFastTravel:   true,
+    hasTechTileset:  true,
+    mvp:             false,
   },
   production_plains: {
-    id:            'production_plains',
-    name:          'Production Plains',
-    domain:        'cloud',
-    act:           2,
-    type:          'main',
-    parentRegion:  null,
-    hasFastTravel: true,
-    mvp:           false,
+    id:              'production_plains',
+    name:            'Production Plains',
+    domain:          'cloud',
+    act:             2,
+    type:            'main',
+    parentRegion:    null,
+    hasFastTravel:   true,
+    hasTechTileset:  true,
+    mvp:             false,
   },
   kubernetes_colosseum: {
-    id:            'kubernetes_colosseum',
-    name:          'Kubernetes Colosseum',
-    domain:        'kubernetes',
-    act:           2,
-    type:          'main',
-    parentRegion:  null,
-    hasFastTravel: true,
-    mvp:           false,
+    id:              'kubernetes_colosseum',
+    name:            'Kubernetes Colosseum',
+    domain:          'kubernetes',
+    act:             2,
+    type:            'main',
+    parentRegion:    null,
+    hasFastTravel:   true,
+    hasTechTileset:  true,
+    mvp:             false,
   },
   three_am_tavern: {
     id:            'three_am_tavern',
@@ -113,14 +117,15 @@ const REGIONS = {
     mvp:           false,
   },
   cloud_console_gym: {
-    id:            'cloud_console_gym',
-    name:          'Cloud Console',
-    domain:        'cloud',
-    act:           1,
-    type:          'gym',
-    parentRegion:  'azure_town',
-    hasFastTravel: false,
-    mvp:           false,
+    id:              'cloud_console_gym',
+    name:            'Cloud Console',
+    domain:          'cloud',
+    act:             1,
+    type:            'gym',
+    parentRegion:    'azure_town',
+    hasFastTravel:   false,
+    hasTechTileset:  true,
+    mvp:             false,
   },
   container_harbor: {
     id:            'container_harbor',
@@ -153,14 +158,15 @@ const REGIONS = {
     mvp:           false,
   },
   sre_command_center: {
-    id:            'sre_command_center',
-    name:          'SRE Command Center',
-    domain:        'observability',
-    act:           2,
-    type:          'gym',
-    parentRegion:  'production_plains',
-    hasFastTravel: false,
-    mvp:           false,
+    id:              'sre_command_center',
+    name:            'SRE Command Center',
+    domain:          'observability',
+    act:             2,
+    type:            'gym',
+    parentRegion:    'production_plains',
+    hasFastTravel:   false,
+    hasTechTileset:  true,
+    mvp:             false,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -198,24 +204,26 @@ const REGIONS = {
     mvp:           false,
   },
   cloud_console_1: {
-    id:            'cloud_console_1',
-    name:          'Portal Lobby',
-    domain:        'cloud',
-    act:           2,
-    type:          'dungeon',
-    parentRegion:  'azure_town',
-    hasFastTravel: false,
-    mvp:           false,
+    id:              'cloud_console_1',
+    name:            'Portal Lobby',
+    domain:          'cloud',
+    act:             2,
+    type:            'dungeon',
+    parentRegion:    'azure_town',
+    hasFastTravel:   false,
+    hasTechTileset:  true,
+    mvp:             false,
   },
   cloud_console_2: {
-    id:            'cloud_console_2',
-    name:          'Resource Group Chamber',
-    domain:        'cloud',
-    act:           2,
-    type:          'dungeon',
-    parentRegion:  'azure_town',
-    hasFastTravel: false,
-    mvp:           false,
+    id:              'cloud_console_2',
+    name:            'Resource Group Chamber',
+    domain:          'cloud',
+    act:             2,
+    type:            'dungeon',
+    parentRegion:    'azure_town',
+    hasFastTravel:   false,
+    hasTechTileset:  true,
+    mvp:             false,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -223,15 +231,16 @@ const REGIONS = {
   // ═══════════════════════════════════════════════════════════════════════════
 
   server_graveyard: {
-    id:            'server_graveyard',
-    name:          'Server Graveyard',
-    domain:        null,
-    act:           1,
-    type:          'hidden',
-    parentRegion:  null,
-    hasFastTravel: false,
-    mvp:           false,
-    accessTrigger: 'SSH to decommissioned terminal',
+    id:              'server_graveyard',
+    name:            'Server Graveyard',
+    domain:          null,
+    act:             1,
+    type:            'hidden',
+    parentRegion:    null,
+    hasFastTravel:   false,
+    hasTechTileset:  true,
+    mvp:             false,
+    accessTrigger:   'SSH to decommissioned terminal',
   },
   node_modules_maze: {
     id:            'node_modules_maze',
@@ -267,15 +276,16 @@ const REGIONS = {
     accessTrigger: 'Select greyed-out region at Azure Terminal',
   },
   oldcorp_basement: {
-    id:            'oldcorp_basement',
-    name:          'OldCorp Basement',
-    domain:        null,
-    act:           1,
-    type:          'hidden',
-    parentRegion:  null,
-    hasFastTravel: false,
-    mvp:           false,
-    accessTrigger: 'Open despite 3 warnings in Jira Dungeon',
+    id:              'oldcorp_basement',
+    name:            'OldCorp Basement',
+    domain:          null,
+    act:             1,
+    type:            'hidden',
+    parentRegion:    null,
+    hasFastTravel:   false,
+    hasTechTileset:  true,
+    mvp:             false,
+    accessTrigger:   'Open despite 3 warnings in Jira Dungeon',
   },
 }
 

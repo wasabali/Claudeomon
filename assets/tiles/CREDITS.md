@@ -38,7 +38,10 @@ by [Kenney](https://kenney.nl).
 convert kenney_tilemap_packed.png \
   -filter point -resize 300% \
   kenney_tech_office_raw.png
-# Then slice and arrange into the Cloud Quest grid using scripts/slice-kenney-tiles.js
+# Then manually slice the upscaled sheet into 48×48 tiles and place the
+# Kenney-derived tiles listed above into the matching Cloud Quest grid slots.
+# Once individual tile PNGs are ready, run scripts/compose-tech-tileset.js
+# to stitch them into kenney_tech_office.png.
 ```
 
 ---

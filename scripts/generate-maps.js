@@ -41,20 +41,6 @@ const TILESET_TECH = {
   tilewidth: TILE,
 }
 
-// Regions that should receive the supplemental tech tileset.
-// GID offset: tech tile ID N (1-based) → map GID = N + 5 (firstgid 6 - 1 = 5 offset)
-const TECH_REGIONS = new Set([
-  'production_plains',
-  'kubernetes_colosseum',
-  'server_graveyard',
-  'azure_town',
-  'cloud_console_1',
-  'cloud_console_2',
-  'cloud_console_gym',
-  'sre_command_center',
-  'oldcorp_basement',
-])
-
 // Tech GID offset (add to 1-based tile ID to get map GID)
 const TECH_GID_OFFSET = TILESET_TECH.firstgid - 1  // 5
 
@@ -220,10 +206,9 @@ function generateCollision(w, h, connections, occupiedTiles) {
   return layer
 }
 
-function generateObjects(w, h, regionType, openings, rng, regionId) {
+function generateObjects(w, h, regionType, openings, rng, isTech) {
   const layer = makeTileLayer(2, 'Objects', w, h, 0)
   const occupied = new Set()
-  const isTech = TECH_REGIONS.has(regionId)
 
   const safeZone = 2
   function canPlace(bx, by, bw, bh) {
@@ -340,10 +325,10 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const { w, h } = SIZE[type] || SIZE.main
   const rng = seededRng(hashSeed(regionId))
 
+  const isTech = !!region.hasTechTileset
   const openings = getOpeningTiles(w, h, connections)
-  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, regionId)
+  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech)
 
-  const isTech = TECH_REGIONS.has(regionId)
   // Tech regions use the tech floor as their ground tile instead of stub tile 1
   const groundGid = isTech ? techGid(T.TECH_FLOOR) : 1
   const groundLayer = makeTileLayer(1, 'Ground', w, h, groundGid)

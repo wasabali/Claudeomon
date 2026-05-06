@@ -141,23 +141,13 @@ describe('transition spawn coordinates are in-bounds for target maps', () => {
   })
 })
 
-const TECH_REGION_IDS = [
-  'production_plains',
-  'kubernetes_colosseum',
-  'server_graveyard',
-  'azure_town',
-  'cloud_console_1',
-  'cloud_console_2',
-  'cloud_console_gym',
-  'sre_command_center',
-  'oldcorp_basement',
-]
+// Derived from region data — single source of truth for which regions carry the tech tileset
+const TECH_REGION_IDS = getAllRegions().filter(r => r.hasTechTileset).map(r => r.id)
 
 describe('tech regions carry kenney_tech_office tileset', () => {
-  it.each(TECH_REGION_IDS.filter(id => {
-    const p = path.join(MAPS_DIR, `${id}.tmj`)
-    return fs.existsSync(p)
-  }))('%s includes kenney_tech_office as second tileset', (regionId) => {
+  it.each(TECH_REGION_IDS)('%s includes kenney_tech_office as second tileset', (regionId) => {
+    const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)
+    expect(fs.existsSync(mapPath)).toBe(true)
     const map = loadMap(regionId)
     const techTs = map.tilesets.find(ts => ts.name === 'kenney_tech_office')
     expect(techTs).toBeDefined()

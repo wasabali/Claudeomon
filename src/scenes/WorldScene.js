@@ -15,25 +15,17 @@ import {
 import { getById as getTrainerById } from '#data/trainers.js'
 import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
-import { getById as getRegionById } from '#data/regions.js'
+import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { Menu } from '#ui/Menu.js'
 import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
 
 const TILESET_KEY      = 'stub_tiles'
 const TECH_TILESET_KEY = 'kenney_tech_office'
 
-// Regions that carry the supplemental tech/office tileset
-const TECH_TILESET_REGIONS = new Set([
-  'production_plains',
-  'kubernetes_colosseum',
-  'server_graveyard',
-  'azure_town',
-  'cloud_console_1',
-  'cloud_console_2',
-  'cloud_console_gym',
-  'sre_command_center',
-  'oldcorp_basement',
-])
+// Derived from src/data/regions.js hasTechTileset flag — single source of truth
+const TECH_TILESET_REGIONS = new Set(
+  getAllRegions().filter(r => r.hasTechTileset).map(r => r.id)
+)
 const TILE_SIZE   = CONFIG.TILE_SIZE
 
 // 4-frame stepped fade for region transitions (overlay alpha per step)

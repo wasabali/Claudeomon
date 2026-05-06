@@ -23,7 +23,7 @@
  */
 
 import { createCanvas, loadImage } from 'canvas'
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs'
+import { writeFileSync, existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 

@@ -7,7 +7,7 @@
   "name": "kenney_tech_office",
   "spacing": 0,
   "tilecount": 50,
-  "tiled_version": "1.10.0",
+  "tiledversion": "1.10.0",
   "tileheight": 48,
   "tilewidth": 48,
   "tiles": [
