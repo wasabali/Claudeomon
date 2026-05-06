@@ -156,15 +156,24 @@ export class BaseScene extends Phaser.Scene {
   // Following PokeRogue's ui-theme.ts pattern: thin border, dark fill.
   // Returns a game object with origin (0, 0) — top-left positioning.
   createPanel(x, y, width, height, { slice = 4 } = {}) {
-    const FILL   = 0x1a1a2a
-    const BORDER = 0x334155
-    const key = '__base_window_9slice__'
+    const FILL   = 0x0d1827
+    const BORDER = 0x3d7099
+    const key    = 'ui_window'
     if (!this.textures.exists(key)) {
+      // Procedural fallback — used until assets/ui/window.png is present.
       const g = this.make.graphics({ x: 0, y: 0, add: false })
       g.fillStyle(FILL, 1)
       g.fillRect(0, 0, 24, 24)
-      g.lineStyle(2, BORDER, 1)
-      g.strokeRect(1, 1, 22, 22)
+      g.fillStyle(BORDER, 1)
+      g.fillRect(1, 1, 22, 2)
+      g.fillRect(1, 21, 22, 2)
+      g.fillRect(1, 1, 2, 22)
+      g.fillRect(21, 1, 2, 22)
+      g.fillStyle(0x5a96be, 1)
+      g.fillRect(3, 3, 18, 1)
+      g.fillRect(3, 20, 18, 1)
+      g.fillRect(3, 3, 1, 18)
+      g.fillRect(20, 3, 1, 18)
       g.generateTexture(key, 24, 24)
       g.destroy()
     }
