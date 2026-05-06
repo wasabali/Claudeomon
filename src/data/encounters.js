@@ -146,6 +146,8 @@ const ENCOUNTERS = {
     difficulty: 1,
     attacks: ['skill_block'],
     optimalFix: 'kubectl_rollout_restart',
+    spriteKey: 'incident_npm_install_hang',
+    animFrameRate: 2,
     layers: null,
   },
   '503_error': {
@@ -160,6 +162,8 @@ const ENCOUNTERS = {
     difficulty: 1,
     attacks: ['budget_spike'],
     optimalFix: 'az_webapp_deploy',
+    spriteKey: 'incident_503_error',
+    animFrameRate: 2,
     layers: null,
   },
   failed_pipeline: {
@@ -174,6 +178,8 @@ const ENCOUNTERS = {
     difficulty: 2,
     attacks: ['skill_block'],
     optimalFix: 'az_pipelines_run',
+    spriteKey: 'incident_failed_pipeline',
+    animFrameRate: 2,
     layers: null,
   },
   merge_conflict: {
@@ -188,6 +194,8 @@ const ENCOUNTERS = {
     difficulty: 2,
     attacks: ['skill_block'],
     optimalFix: 'git_revert',
+    spriteKey: 'incident_merge_conflict',
+    animFrameRate: 3,
     layers: null,
   },
   port_conflict: {
@@ -202,6 +210,8 @@ const ENCOUNTERS = {
     difficulty: 2,
     attacks: ['skill_block'],
     optimalFix: 'kill_9',
+    spriteKey: 'incident_port_conflict',
+    animFrameRate: 2,
     layers: null,
   },
   stale_ticket: {
@@ -474,6 +484,8 @@ const ENCOUNTERS = {
     difficulty: 1,
     attacks: ['skill_block'],
     optimalFix: 'az_pipelines_run',
+    spriteKey: 'incident_missing_semicolon',
+    animFrameRate: 2,
     layers: null,
   },
 
@@ -613,6 +625,8 @@ const ENCOUNTERS = {
     difficulty: 1,
     attacks: ['confusion'],
     optimalFix: 'az_webapp_deploy',
+    spriteKey: 'incident_404_not_found',
+    animFrameRate: 2,
     layers: null,
   },
   ssl_certificate_expired: {

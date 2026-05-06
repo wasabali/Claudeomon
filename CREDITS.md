@@ -1,45 +1,101 @@
-# Credits
+# Cloud Quest — Asset Credits
 
-Cloud Quest is built on the shoulders of generous creators. Thank you.
-
----
-
-## Ninja Adventure Asset Pack
-
-- **Author:** pixel-boy (AAA)
-- **Source:** https://pixel-boy.itch.io/ninja-adventure-asset-pack
-- **License:** CC0 1.0 Universal (Public Domain Dedication)
-- **Usage:** Characters, monsters, world tiles, VFX, items, UI elements, BGM, SFX
-- **Modifications:** 3× nearest-neighbor upscale from 16×16 to 48×48px
+Cloud Quest is built on the shoulders of generous creators. All assets are either public domain (CC0) or used in accordance with their respective licenses.
 
 ---
 
-## PokeRogue
+## Ninja Adventure (CC0)
 
-- **Author:** pagefaultgames
-- **Source:** https://github.com/pagefaultgames/pokerogue
-- **Assets source:** https://github.com/pagefaultgames/pokerogue-assets
-- **License:** CC-BY-NC-SA-4.0
-- **Usage:** Battle backgrounds (arena layers), UI window panels (9-slice), cursor, HP/XP bars, stat overlays
-- **Note:** This license restricts Cloud Quest to non-commercial use and requires share-alike on derived assets
+**Primary asset source** for characters, monsters, world tiles, VFX, items, music, and SFX.
+
+| Field | Value |
+|---|---|
+| Author | pixel-boy and AAA |
+| Source | https://pixel-boy.itch.io/ninja-adventure-asset-pack |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | All sprites upscaled 3× (16px → 48px) using nearest-neighbor interpolation |
+
+CC0 means no attribution is legally required. We credit the author here as good practice.
+
+### Ninja Adventure assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Character sprites (walk/idle/attack) | `assets/sprites/player/`, `assets/sprites/trainers/` |
+| Character facesets (battle portraits, 48×48px) | `assets/sprites/portraits/` |
+| Monster sprites | `assets/sprites/incidents/` |
+| World tilesets | `assets/tilesets/` |
+| VFX sprites | `assets/sprites/effects/` |
+| Item icons | `assets/sprites/items/` |
+| BGM tracks (37 tracks) | `assets/audio/bgm/` |
+| SFX (100+ sounds) | `assets/audio/sfx/` |
 
 ---
 
-## Kenney RPG Urban Pack
+## PokeRogue (CC-BY-NC-SA-4.0)
 
-- **Author:** Kenney (kenney.nl)
-- **Source:** https://kenney.nl/assets/rpg-urban-pack
-- **License:** CC0 1.0 Universal (Public Domain Dedication)
-- **Usage:** Supplemental tech/urban tiles for indoor maps (server rooms, data centres, office corridors)
+**Battle arena backgrounds** and **battle UI chrome** (9-slice panels, HUD elements).
+
+| Field | Value |
+|---|---|
+| Author | pagefaultgames |
+| Source | https://github.com/pagefaultgames/pokerogue |
+| Assets source | https://github.com/pagefaultgames/pokerogue-assets |
+| License | [CC-BY-NC-SA-4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) |
+| Modifications | Recoloured / reframed for Cloud Quest regions and tech theme |
+
+**CC-BY-NC-SA-4.0 requirements:**
+- **Attribution** — Credit PokeRogue / pagefaultgames (done here and in `assets/arenas/CREDITS.md`, `assets/ui/CREDITS.md`)
+- **Non-commercial** — Cloud Quest must remain non-commercial while these assets are included
+- **Share-alike** — Assets derived from PokeRogue must be released under the same license
+
+### PokeRogue assets used
+
+| Asset | Cloud Quest location |
+|---|---|
+| Arena backgrounds (`plains`, `cave`, `forest`, `factory`, `stadium`, `abyss`, `ruins`, `space`, `wasteland`, `construction`) | `assets/arenas/` |
+| 9-slice UI panels (`window_1`–`window_5`) | `assets/ui/` |
+| Cursor / selection indicators | `assets/ui/` |
+| HP / XP bars, battle stat overlays | `assets/ui/` |
 
 ---
 
-## Press Start 2P Font
+## Kenney RPG Urban Pack (CC0)
 
-- **Author:** CodeMan38
-- **Source:** https://fonts.google.com/specimen/Press+Start+2P
-- **License:** OFL (SIL Open Font License)
-- **Usage:** All in-game text
+**Supplemental tiles** for tech/office/server-room regions not covered by Ninja Adventure.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/rpg-urban-pack |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Upscaled to match 48×48px tile grid (if sourced from a 16px base) |
+
+CC0 — no attribution required; credited here as good practice.
+
+---
+
+## Press Start 2P (SIL Open Font License)
+
+**Game font** — used for all in-game text.
+
+| Field | Value |
+|---|---|
+| Author | Cody "CodeMan38" Boisclair |
+| Source | https://fonts.google.com/specimen/Press+Start+2P |
+| License | [SIL Open Font License 1.1](https://openfontlicense.org/) |
+| Modifications | None — loaded from Google Fonts CDN |
+
+---
+
+## Procedural SFX fallback (jsfxr)
+
+When Ninja Adventure SFX files are absent at runtime, BootScene falls back gracefully and the game runs silently. Each SFX entry in `src/data/audio.js` retains a `seed` field for future procedural fallback implementation via [jsfxr](https://github.com/grumdrig/jsfxr).
+
+| Field | Value |
+|---|---|
+| Library | jsfxr |
+| License | MIT |
 
 ---
 
@@ -60,4 +116,5 @@ Cloud Quest is built on the shoulders of generous creators. Thank you.
 
 ---
 
-*Cloud Quest is a non-commercial fan project. All third-party assets are used in accordance with their respective licenses.*
+*Cloud Quest is a non-commercial fan project. All third-party assets are used in accordance with their respective licenses.*  
+*See `docs/VISUAL_ASSETS.md` for the full asset source matrix, upscale pipeline instructions, and gap analysis.*
