@@ -47,20 +47,26 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   plugins: [
-    {
-      // Copy the game assets/ directory into dist/assets/ so that runtime-loaded
+    (() => {
+      // Copy the game assets/ directory into <outDir>/assets/ so that runtime-loaded
       // files (tilemaps, sprites, audio) are available in production builds and
       // on GitHub Pages deployments.  Vite's dev server already serves the project
       // root, so this plugin only runs during `vite build`.
-      name: 'copy-game-assets',
-      apply: 'build',
-      closeBundle() {
-        const srcDir  = resolve('./assets')
-        const destDir = resolve('./dist/assets')
-        if (existsSync(srcDir)) {
-          cpSync(srcDir, destDir, { recursive: true })
-        }
-      },
-    },
+      let outDir
+      return {
+        name: 'copy-game-assets',
+        apply: 'build',
+        configResolved(config) {
+          outDir = config.build.outDir
+        },
+        closeBundle() {
+          const srcDir  = resolve('./assets')
+          const destDir = resolve(outDir, 'assets')
+          if (existsSync(srcDir)) {
+            cpSync(srcDir, destDir, { recursive: true })
+          }
+        },
+      }
+    })(),
   ],
 })
