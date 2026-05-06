@@ -1,19 +1,37 @@
-# Character Sprite Credits
+# Sprite Asset Credits
 
-## Ninja Adventure Asset Pack (CC0)
+## Ninja Adventure Asset Pack (CC0 1.0)
 
-Character sprites used for Cloud Quest trainers, the player character, and NPCs are
-sourced from the **Ninja Adventure Asset Pack** by Robert and Pixel-Boy.
+Character sprites, NPC sprites, monster sprites, VFX sprites, and item icons are
+sourced from [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack)
+by **pixel-boy (AAA)**.
 
-- **Source:** https://pixel-boy.itch.io/ninja-adventure-asset-pack  
-- **License:** CC0 (Public Domain) — no attribution required, but credited here for transparency.
+- **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions, no attribution required, but credited here for transparency.
+- **Source:** https://pixel-boy.itch.io/ninja-adventure-asset-pack
+- **Source folders:** `Actor/Characters/`, `Actor/Monsters/`, `FX/`, `Items/Icons/`, `Maps/Tilesets/`, `Audio/BGM/`, `Audio/SFX/`
+- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
 
-### What's included
+---
 
-Each character sprite sheet is a 4-direction walk-cycle sheet (48 × 64 px at base 1×,
-upscaled 3× to 144 × 192 px for the 48 px tile size used by Cloud Quest).
+## Folder Mapping
 
-Sprite sheets live in `assets/sprites/characters/` and are named by archetype:
+| Ninja Adventure folder | Cloud Quest folder |
+|------------------------|--------------------|
+| `Actor/Characters/` | `assets/sprites/player/` |
+| `Actor/Monsters/` | `assets/sprites/incidents/` |
+| `FX/` | `assets/sprites/effects/` |
+| `Items/Icons/` | `assets/sprites/items/` |
+| `Maps/Tilesets/` | `assets/tilesets/` |
+| `Audio/BGM/` | `assets/audio/bgm/` |
+| `Audio/SFX/` | `assets/audio/sfx/` |
+
+---
+
+## Character Archetypes
+
+Each character sprite sheet is a 4-direction walk-cycle sheet. Sprite sheets are
+placed in `assets/sprites/player/` (player selectable) or `assets/sprites/trainers/`
+(trainer NPCs) and named by archetype:
 
 | File | Archetype |
 |------|-----------|
@@ -48,9 +66,9 @@ Sprite sheets live in `assets/sprites/characters/` and are named by archetype:
 | `ninja_magician.png` | Stage-magician trickster |
 | `ninja_king.png` | Final-boss authority figure |
 
-### Sprite sheet layout
+### Sprite Sheet Layout
 
-Each `.png` is a **4-row × 3-column** grid at 3× scale (48 × 48 px per frame):
+Each `.png` is a **4-row × 3-column** grid at 3× scale (48×48px per frame):
 
 | Row | Direction |
 |-----|-----------|
@@ -61,26 +79,23 @@ Each `.png` is a **4-row × 3-column** grid at 3× scale (48 × 48 px per frame)
 
 Columns 0–2 are the three walk-cycle frames per direction.
 
-### Obtaining the files
+---
+
+## Obtaining the Files
 
 1. Download **Ninja Adventure Asset Pack** from https://pixel-boy.itch.io/ninja-adventure-asset-pack
-2. Run the upscale script (3×): `node scripts/upscale-sprites.js` (see that file for usage)
-3. Name the outputs following the table above and place them in `assets/sprites/characters/`
-# Sprite Asset Credits
+2. Upscale (3×): `node scripts/upscale-assets.js --input /path/to/NinjaAdventure --output /tmp/ninja-upscaled`
+3. Install: `node scripts/install-ninja-assets.js --input /tmp/ninja-upscaled`
 
-## Ninja Adventure Asset Pack (CC0 1.0)
+Or use the npm shortcut after upscaling:
 
-Character sprites, NPC sprites, monster sprites, VFX sprites, and item icons are sourced from [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)**.
+```bash
+npm run assets:install -- --input /tmp/ninja-upscaled
+```
 
-- **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions
-- **Source folders:** `Actor/Characters/`, `Actor/Monsters/`, `FX/`, `Items/`
-- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
+For development without the real pack, generate placeholder stubs:
 
-### Folder Mapping
+```bash
+npm run assets:stubs
+```
 
-| Ninja Adventure folder | Cloud Quest folder |
-|------------------------|--------------------|
-| `Actor/Characters/` | `assets/sprites/characters/` |
-| `Actor/Monsters/` | `assets/sprites/monsters/` |
-| `FX/` | `assets/sprites/vfx/` |
-| `Items/` | `assets/sprites/items/` |

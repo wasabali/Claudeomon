@@ -10,7 +10,9 @@
     "test:stress": "vitest run tests/stress/",
     "test:watch": "vitest --exclude tests/stress/**",
     "gen:maps": "node scripts/generate-maps.js",
-    "gen:tilesets": "node scripts/generate-tilesets.js"
+    "gen:tilesets": "node scripts/generate-tilesets.js",
+    "assets:stubs": "node scripts/stub-sprites.js",
+    "assets:install": "node scripts/install-ninja-assets.js"
   },
   "dependencies": {
     "phaser": "3.90.0"
