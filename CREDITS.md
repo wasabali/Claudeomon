@@ -1,12 +1,12 @@
 # Cloud Quest — Asset Credits
 
-Cloud Quest is a browser-based RPG by wasabali. The following third-party asset packs are used. All assets are either public domain (CC0) or used in accordance with their respective licenses.
+Cloud Quest is built on the shoulders of generous creators. All assets are either public domain (CC0) or used in accordance with their respective licenses.
 
 ---
 
 ## Ninja Adventure (CC0)
 
-**Primary asset source** for characters, monsters, world tiles, VFX, items, and music. SFX are currently generated procedurally via jsfxr — Ninja Adventure SFX may supplement in future.
+**Primary asset source** for characters, monsters, world tiles, VFX, items, music, and SFX.
 
 | Field | Value |
 |---|---|
@@ -28,6 +28,7 @@ CC0 means no attribution is legally required. We credit the author here as good 
 | VFX sprites | `assets/sprites/effects/` |
 | Item icons | `assets/sprites/items/` |
 | BGM tracks (37 tracks) | `assets/audio/bgm/` |
+| SFX (100+ sounds) | `assets/audio/sfx/` |
 
 ---
 
@@ -39,6 +40,7 @@ CC0 means no attribution is legally required. We credit the author here as good 
 |---|---|
 | Author | pagefaultgames |
 | Source | https://github.com/pagefaultgames/pokerogue |
+| Assets source | https://github.com/pagefaultgames/pokerogue-assets |
 | License | [CC-BY-NC-SA-4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) |
 | Modifications | Recoloured / reframed for Cloud Quest regions and tech theme |
 
@@ -58,19 +60,6 @@ CC0 means no attribution is legally required. We credit the author here as good 
 
 ---
 
-## Press Start 2P (SIL Open Font License)
-
-**Game font** — used for all in-game text.
-
-| Field | Value |
-|---|---|
-| Author | Cody "CodeMan38" Boisclair |
-| Source | https://fonts.google.com/specimen/Press+Start+2P |
-| License | [SIL Open Font License 1.1](https://openfontlicense.org/) |
-| Modifications | None — loaded from Google Fonts CDN |
-
----
-
 ## Kenney RPG Urban Pack (CC0)
 
 **Supplemental tiles** for tech/office/server-room regions not covered by Ninja Adventure.
@@ -86,9 +75,22 @@ CC0 — no attribution required; credited here as good practice.
 
 ---
 
-## Procedural SFX (jsfxr)
+## Press Start 2P (SIL Open Font License)
 
-All in-game sound effects are procedurally generated at runtime using [jsfxr](https://github.com/grumdrig/jsfxr) from deterministic seeds defined in `src/data/audio.js`. No audio files are required for SFX.
+**Game font** — used for all in-game text.
+
+| Field | Value |
+|---|---|
+| Author | Cody "CodeMan38" Boisclair |
+| Source | https://fonts.google.com/specimen/Press+Start+2P |
+| License | [SIL Open Font License 1.1](https://openfontlicense.org/) |
+| Modifications | None — loaded from Google Fonts CDN |
+
+---
+
+## Procedural SFX fallback (jsfxr)
+
+When Ninja Adventure SFX files are absent at runtime, BootScene falls back gracefully and the game runs silently. Each SFX entry in `src/data/audio.js` retains a `seed` field for future procedural fallback implementation via [jsfxr](https://github.com/grumdrig/jsfxr).
 
 | Field | Value |
 |---|---|
@@ -97,4 +99,22 @@ All in-game sound effects are procedurally generated at runtime using [jsfxr](ht
 
 ---
 
+## Open-Source Libraries
+
+| Library | License | Purpose |
+|---------|---------|---------|
+| [Phaser 3](https://phaser.io) | MIT | Game engine |
+| [Vite](https://vitejs.dev) | MIT | Dev server and bundler |
+
+---
+
+## Tools
+
+| Tool | Purpose |
+|------|---------|
+| [Tiled Map Editor](https://www.mapeditor.org/) | Tile map authoring |
+
+---
+
+*Cloud Quest is a non-commercial fan project. All third-party assets are used in accordance with their respective licenses.*  
 *See `docs/VISUAL_ASSETS.md` for the full asset source matrix, upscale pipeline instructions, and gap analysis.*
