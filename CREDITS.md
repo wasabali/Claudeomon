@@ -6,7 +6,7 @@ Cloud Quest is built on the shoulders of generous creators. All assets are eithe
 
 ## Ninja Adventure (CC0)
 
-**Primary asset source** for characters, monsters, world tiles, VFX, items, music, and SFX.
+**Supplemental asset source** for world tiles, VFX, and character sprite archetypes (texture keys for player/trainer sprites).
 
 | Field | Value |
 |---|---|
@@ -21,13 +21,10 @@ CC0 means no attribution is legally required. We credit the author here as good 
 
 | Category | Cloud Quest location |
 |---|---|
-| Character sprites (walk/idle/attack) | `assets/sprites/player/`, `assets/sprites/trainers/` |
-| Monster sprites | `assets/sprites/incidents/` |
+| Character sprite sheets (player + trainers, keyed by `spriteKey`) | `assets/sprites/characters/` |
+| Character facesets (battle portraits, 48×48px) | `assets/sprites/portraits/` |
 | World tilesets | `assets/tilesets/` |
 | VFX sprites | `assets/sprites/effects/` |
-| Item icons | `assets/sprites/items/` |
-| BGM tracks (37 tracks) | `assets/audio/bgm/` |
-| SFX (100+ sounds) | `assets/audio/sfx/` |
 
 ---
 
@@ -122,6 +119,49 @@ CC0 — no attribution required; credited here as good practice.
 | `prod_incident` | `assets/sprites/incidents/prod_incident.png` | Flaming server / alert icon |
 | `sev1_at_3am` | `assets/sprites/incidents/sev1_at_3am.png` | Bleary-eyed pager monster |
 | `infinite_loop` | `assets/sprites/incidents/infinite_loop.png` | Snake eating its own tail (ouroboros) |
+
+---
+
+## Kenney RPG Audio (CC0)
+
+**BGM tracks and SFX** — background music for regions and battles, and sound effects for UI and gameplay events.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/rpg-audio |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | None — OGG files used directly |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney RPG Audio assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Background music tracks | `assets/audio/bgm/` |
+| Sound effects | `assets/audio/sfx/` |
+
+---
+
+## Kenney Game Icons (CC0)
+
+**Item icons** — inventory items, tools, key items, and consumables.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/game-icons |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Scaled to 48×48px using nearest-neighbor interpolation |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Game Icons assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Item icons (tools, consumables, key items) | `assets/sprites/items/` |
 
 ---
 
