@@ -1,6 +1,6 @@
 # Quests
 
-Quests are conversations and multi-stage tasks given by NPCs across the world. Unlike battles, quests are solved through **dialog choices** — the quality of your answer determines your reward tier (Optimal, Standard, Shortcut, or Nuclear).
+Quests are conversations and multi-stage tasks given by NPCs across the world. Unlike battles, quests are solved through **dialog choices** — the quality of your answer determines your reward tier (Optimal, Standard, Shortcut, Cursed, or Nuclear).
 
 ---
 

@@ -5,6 +5,7 @@ import { CONFIG, MOVEMENT } from '../config.js'
 import { GameState, hasItem, addItem, markDirty, grantXpOnce } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
 import { getById as getQuestById } from '#data/quests.js'
+import { getById as getSkillById } from '#data/skills.js'
 import {
   resolveChoice, isQuestCompleted, getCompletedDialog,
   isQuestAvailable, startQuest, getCurrentStage, advanceStage,
@@ -1085,25 +1086,17 @@ export class WorldScene extends BaseScene {
       return
     }
 
-    const quest   = getQuestById('margaret_website')
-    const stage   = quest.stages[0]
+    const { started } = startQuest('margaret_website', GameState.story)
+    if (started) markDirty()
+
+    const stage = getCurrentStage('margaret_website', GameState.story)
     const choices = stage.choices.map(c => c.text)
 
     this.dialog.show(stage.dialog, () => {
       this.dialog.showChoices('What do you suggest?', choices, (idx) => {
-        const result = resolveChoice('margaret_website', idx)
-        if (result.correct) {
-          grantXpOnce('margaret_website_xp', result.xp)
-          for (const reward of result.items) {
-            addItem(reward.tab, reward.id, reward.qty)
-          }
-          GameState.story.completedQuests.push('margaret_website')
-          markDirty()
-        } else {
-          GameState.player.hp = Math.max(1, GameState.player.hp - result.hpLoss)
-          markDirty()
-        }
-        this.dialog.show(result.dialog, () => { this._interacting = false })
+        const result = resolveChoice('margaret_website', idx, GameState.story, GameState.player)
+        if (!result) { this._interacting = false; return }
+        this._applyQuestChoiceResult('margaret_website', result, stage)
       })
     })
   }
@@ -1142,7 +1135,8 @@ export class WorldScene extends BaseScene {
       return
     }
 
-    startQuest(questId, GameState.story)
+    const { started } = startQuest(questId, GameState.story)
+    if (started) markDirty()
 
     const stage = getCurrentStage(questId, GameState.story)
     if (!stage) { this._interacting = false; return }
@@ -1212,6 +1206,11 @@ export class WorldScene extends BaseScene {
         if (quest?.rewards?.reputation) {
           GameState.player.reputation = Math.min(100, (GameState.player.reputation || 0) + quest.rewards.reputation)
         }
+        if (quest?.rewards?.items) {
+          for (const item of quest.rewards.items) {
+            addItem(item.tab ?? 'tools', item.id, item.qty)
+          }
+        }
         GameState.story.completedQuests.push(questId)
         markDirty()
         const transition = checkActTransition(GameState.story.act, GameState.story.flags)
@@ -1222,6 +1221,8 @@ export class WorldScene extends BaseScene {
       } else {
         markDirty()
       }
+    } else {
+      markDirty()
     }
 
     this.dialog.show(respDialog, () => { this._interacting = false })
@@ -1244,7 +1245,8 @@ export class WorldScene extends BaseScene {
       return
     }
 
-    startQuest(questId, GameState.story)
+    const { started: dagnyStarted } = startQuest(questId, GameState.story)
+    if (dagnyStarted) markDirty()
 
     const stage = getCurrentStage(questId, GameState.story)
     const stageDialog = stage?.dialog ?? quest.stages[0].dialog
@@ -1260,12 +1262,12 @@ export class WorldScene extends BaseScene {
         const quizEvent    = events.find(e => e.type === 'quiz_start')
 
         if (triggerEvent) {
-          // Branch 'open': trigger encounter, then apply battle outcome on return.
-          // Pending state is stored in _session (not persisted) so it's cleared on reload.
-          GameState._session.pendingBranchQuest = questId
-          GameState._session.pendingBranchKey   = branchKey
+          // Branch 'open': store encounter + branch context in _session (not persisted)
+          // so the encounter system can launch the right battle and apply the outcome.
+          GameState._session.pendingBranchQuest      = questId
+          GameState._session.pendingBranchKey        = branchKey
+          GameState._session.pendingBranchEncounter  = triggerEvent.value
           this._interacting = false
-          // Encounter handling is wired separately via the encounter step system
           return
         }
 
@@ -1298,6 +1300,14 @@ export class WorldScene extends BaseScene {
         GameState.player.hp = Math.max(1, GameState.player.hp - ev.value)
       } else if (ev.type === 'heal') {
         GameState.player.hp = Math.min(GameState.player.maxHp, GameState.player.hp + ev.value)
+      } else if (ev.type === 'teach_skill') {
+        if (!GameState.skills.learned.includes(ev.value)) {
+          GameState.skills.learned.push(ev.value)
+        }
+        const skill = getSkillById(ev.value)
+        if (skill?.isCursed && !GameState.skills.cursed.includes(ev.value)) {
+          GameState.skills.cursed.push(ev.value)
+        }
       }
     }
     markDirty()
