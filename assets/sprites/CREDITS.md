@@ -68,9 +68,43 @@ Columns 0–2 are the three walk-cycle frames per direction.
 3. Name the outputs following the table above and place them in `assets/sprites/characters/`
 # Sprite Asset Credits
 
+## Kenney Micro Roguelike (CC0 1.0)
+
+Player character sprites, trainer NPC sprites, and incident/monster sprites are sourced from
+[Kenney Micro Roguelike](https://kenney.nl/assets/micro-roguelike) by [Kenney](https://kenney.nl).
+
+- **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions
+- **Source:** https://kenney.nl/assets/micro-roguelike
+- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
+
+### Folder Mapping
+
+| Kenney Micro Roguelike folder | Cloud Quest folder |
+|-------------------------------|--------------------|
+| `Tilemap/` (characters) | `assets/sprites/player/`, `assets/sprites/trainers/` |
+| `Tilemap/` (monsters/enemies) | `assets/sprites/incidents/` |
+
+---
+
+## Kenney Game Icons (CC0 1.0)
+
+Item icons are sourced from [Kenney Game Icons](https://kenney.nl/assets/game-icons) by [Kenney](https://kenney.nl).
+
+- **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions
+- **Source:** https://kenney.nl/assets/game-icons
+- **Modifications:** Scaled to 48×48px using nearest-neighbor interpolation
+
+### Folder Mapping
+
+| Source | Cloud Quest folder |
+|--------|--------------------|
+| Kenney Game Icons | `assets/sprites/items/` |
+
+---
+
 ## Ninja Adventure Asset Pack (CC0 1.0)
 
-Character sprites, NPC sprites, monster sprites, VFX sprites, and item icons are sourced from [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)**.
+Supplemental character sprites, NPC sprites, monster sprites, VFX sprites, and item icons are sourced from [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)**.
 
 - **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions
 - **Source folders:** `Actor/Characters/`, `Actor/Monsters/`, `FX/`, `Items/`

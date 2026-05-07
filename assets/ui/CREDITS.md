@@ -1,5 +1,21 @@
 # UI Asset Credits
 
+## Kenney UI Pack (CC0)
+
+9-slice window panels for dialog boxes, menus, and HUD frames are sourced from the
+[Kenney UI Pack](https://kenney.nl/assets/ui-pack) by [Kenney](https://kenney.nl).
+
+- **License:** CC0 1.0 Universal (Public Domain) — no attribution required; credited here as good practice.
+- **Source:** https://kenney.nl/assets/ui-pack
+
+### Assets used
+
+| Asset | Used for |
+|-------|---------|
+| `window.png` (panel_brown or equivalent 9-slice panel) | Dialog boxes, menu frames, battle info panels, HUD overlays |
+
+---
+
 ## PokeRogue (CC-BY-NC-SA-4.0)
 
 UI window panels (9-slice), cursor/selection indicators, ability bars, health/exp labels,

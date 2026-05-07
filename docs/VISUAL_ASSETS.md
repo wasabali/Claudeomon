@@ -391,10 +391,13 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 | Source | Role | License |
 |--------|------|---------|
-| **Ninja Adventure** | Primary — characters, monsters, tiles, VFX, items, BGM, SFX | CC0 1.0 (Public Domain) |
+| **Kenney Micro Roguelike** | Player sprites, trainer sprites, incident sprites | CC0 1.0 (Public Domain) |
+| **Kenney RPG Audio** | BGM tracks and SFX | CC0 1.0 (Public Domain) |
+| **Kenney Game Icons** | Item icons | CC0 1.0 (Public Domain) |
 | **Kenney UI Pack** | UI chrome — dialog panels, menus, HUD window frames | CC0 1.0 (Public Domain) |
-| **PokeRogue** | Battle backgrounds | CC-BY-NC-SA-4.0 |
 | **Kenney RPG Urban** | Supplemental tech/urban tiles | CC0 1.0 (Public Domain) |
+| **Ninja Adventure** | Supplemental characters, monsters, tiles, VFX | CC0 1.0 (Public Domain) |
+| **PokeRogue** | Battle backgrounds | CC-BY-NC-SA-4.0 |
 
 ---
 
@@ -507,6 +510,117 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 
 ---
 
+## Kenney Micro Roguelike
+
+### Overview
+
+[Kenney Micro Roguelike](https://kenney.nl/assets/micro-roguelike) by [Kenney](https://kenney.nl) provides the primary character, trainer, and incident sprites for Cloud Quest.
+
+```
+Kenney Micro Roguelike
+- Author:  Kenney (kenney.nl)
+- Source:  https://kenney.nl/assets/micro-roguelike
+- License: CC0 1.0 Universal (Public Domain Dedication)
+- Usage:   Player sprites, trainer NPCs, incident/monster sprites
+- Modifications: 3× nearest-neighbor upscale from 16×16px to 48×48px
+```
+
+### Folder Mapping
+
+| Kenney Micro Roguelike source | Cloud Quest folder |
+|-------------------------------|-------------------|
+| `Tilemap/` characters | `assets/sprites/player/` |
+| `Tilemap/` characters (NPCs) | `assets/sprites/trainers/` |
+| `Tilemap/` enemies/monsters | `assets/sprites/incidents/` |
+
+### Integration Notes
+
+All Kenney Micro Roguelike sprites are **16×16px**. Run the upscale pipeline (3×) to produce 48×48px outputs:
+
+```bash
+node scripts/upscale-assets.js \
+  --input /tmp/kenney-packs/micro-roguelike \
+  --output /tmp/kenney-upscaled
+```
+
+After upscaling, copy and rename sprites by archetype:
+- **Player sprites** → `assets/sprites/player/player_<archetype>.png`  
+  (select the hero/protagonist character sheets)
+- **Trainer sprites** → `assets/sprites/trainers/<trainer_id>.png`  
+  (select NPC character sheets matching trainer IDs in `src/data/trainers.js`)
+- **Incident sprites** → `assets/sprites/incidents/<encounter_id>.png`  
+  (select enemy/monster sheets matching encounter IDs in `src/data/encounters.js`)
+
+### License
+
+CC0 1.0 Universal — public domain. No attribution required; credited anyway.
+
+---
+
+## Kenney RPG Audio
+
+### Overview
+
+[Kenney RPG Audio](https://kenney.nl/assets/rpg-audio) by [Kenney](https://kenney.nl) provides all BGM tracks and SFX for Cloud Quest.
+
+```
+Kenney RPG Audio
+- Author:  Kenney (kenney.nl)
+- Source:  https://kenney.nl/assets/rpg-audio
+- License: CC0 1.0 Universal (Public Domain Dedication)
+- Usage:   BGM tracks and SFX
+- Modifications: None — OGG files used directly
+```
+
+### Folder Mapping
+
+| Kenney RPG Audio source | Cloud Quest folder |
+|--------------------------|-------------------|
+| `Audio/Background/` | `assets/audio/bgm/` |
+| `Audio/SFX/` | `assets/audio/sfx/` |
+
+### Integration Notes
+
+```bash
+cp /tmp/kenney-packs/rpg-audio/Audio/Background/*.ogg assets/audio/bgm/
+cp /tmp/kenney-packs/rpg-audio/Audio/SFX/*.ogg assets/audio/sfx/
+```
+
+Rename the files to match the expected track IDs listed in `assets/audio/CREDITS.md`.
+
+### License
+
+CC0 1.0 Universal — public domain. No attribution required; credited anyway.
+
+---
+
+## Kenney Game Icons
+
+### Overview
+
+[Kenney Game Icons](https://kenney.nl/assets/game-icons) by [Kenney](https://kenney.nl) provides item icons for inventory items, tools, key items, and consumables.
+
+```
+Kenney Game Icons
+- Author:  Kenney (kenney.nl)
+- Source:  https://kenney.nl/assets/game-icons
+- License: CC0 1.0 Universal (Public Domain Dedication)
+- Usage:   Item icons (48×48px)
+- Modifications: Scaled to 48×48px using nearest-neighbor interpolation
+```
+
+### Folder Mapping
+
+| Source | Cloud Quest folder |
+|--------|--------------------|
+| Kenney Game Icons PNG | `assets/sprites/items/` |
+
+### License
+
+CC0 1.0 Universal — public domain. No attribution required; credited anyway.
+
+---
+
 ## Kenney UI Pack
 
 ### Overview
@@ -539,9 +653,12 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 
 | Subfolder | Source | Notes |
 |-----------|--------|-------|
-| `characters/` | Ninja Adventure | Player and NPC sprites; 3× upscaled from 16×16 |
-| `monsters/` | Ninja Adventure | Enemy sprites; 3× upscaled from 16×16 |
-| `items/` | Ninja Adventure | Item icons; 3× upscaled from 16×16 |
+| `player/` | Kenney Micro Roguelike | Player walk cycles; 3× upscaled from 16×16 |
+| `trainers/` | Kenney Micro Roguelike | Trainer NPC sprites; 3× upscaled from 16×16 |
+| `incidents/` | Kenney Micro Roguelike | Incident/enemy sprites; 3× upscaled from 16×16 |
+| `items/` | Kenney Game Icons | Item icons; scaled to 48×48 |
+| `characters/` | Ninja Adventure | Supplemental character sprites; 3× upscaled from 16×16 |
+| `monsters/` | Ninja Adventure | Supplemental enemy sprites; 3× upscaled from 16×16 |
 | `vfx/` | Ninja Adventure | Hit sparks, magic rings, explosions; 3× upscaled |
 
 ### Maps & Tilesets (`assets/maps/`)
@@ -553,16 +670,16 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 
 ### UI (`assets/ui/`)
 
-| Source | Assets |
-|--------|--------|
-| Kenney UI Pack | 9-slice window panels, dialog frames, menu backgrounds |
+| Asset | Source | Notes |
+|-------|--------|-------|
+| `window.png` | Kenney UI Pack | 9-slice window panel for dialog boxes, menus, HUD |
 
 ### Audio (`assets/audio/`)
 
 | Subfolder | Source | Notes |
 |-----------|--------|-------|
-| `bgm/` | Ninja Adventure | Background music tracks |
-| `sfx/` | Ninja Adventure | Sound effects (attacks, UI, ambient) |
+| `bgm/` | Kenney RPG Audio | Background music tracks (OGG + MP3 fallback) |
+| `sfx/` | Kenney RPG Audio | Sound effects (attacks, UI, ambient) |
 
 ### Battle Backgrounds (`assets/arenas/`)
 

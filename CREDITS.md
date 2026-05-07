@@ -81,6 +81,71 @@ CC0 — no attribution required; credited here as good practice.
 
 ---
 
+## Kenney Micro Roguelike (CC0)
+
+**Character and trainer sprites** — player character walk cycles, trainer NPCs, and incident monster sprites.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/micro-roguelike |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Upscaled 3× (16px → 48px) using nearest-neighbor interpolation |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Micro Roguelike assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Character sprites (walk cycles) | `assets/sprites/player/`, `assets/sprites/trainers/` |
+| Monster / incident sprites | `assets/sprites/incidents/` |
+
+---
+
+## Kenney RPG Audio (CC0)
+
+**BGM tracks and SFX** — background music for regions and battles, and sound effects for UI and gameplay events.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/rpg-audio |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | None — OGG files used directly |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney RPG Audio assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Background music tracks | `assets/audio/bgm/` |
+| Sound effects | `assets/audio/sfx/` |
+
+---
+
+## Kenney Game Icons (CC0)
+
+**Item icons** — inventory items, tools, key items, and consumables.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/game-icons |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Scaled to 48×48px using nearest-neighbor interpolation |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Game Icons assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Item icons (tools, consumables, key items) | `assets/sprites/items/` |
+
+---
+
 ## Kenney RPG Urban Pack (CC0)
 
 **Supplemental tiles** for tech/office/server-room regions not covered by Ninja Adventure.
