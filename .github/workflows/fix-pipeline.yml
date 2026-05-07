@@ -125,18 +125,17 @@ jobs:
               : '';
             const targetBranch = isFork ? 'main' : headBranch;
 
-            const agentTask = `## Task for AI Agent
-
-@Copilot Please diagnose the pipeline failure above and open a pull request with a fix.
-${forkNotice}
-Suggested approach:
-1. Click the job log links above to read the full error output and identify the root cause.
-2. Locate the relevant source file(s) that need to change.
-3. Make the **minimal** code change that resolves the failure.
-4. Open a PR against \`${targetBranch}\` with a clear description of your fix.
-5. Ensure \`npm test\` and \`npm run build\` pass locally before opening the PR.
-
-> _This issue was opened automatically by the **Fix Failing Pipeline** workflow._`;
+            const agentTask =
+              '## Task for AI Agent\n\n' +
+              '@Copilot Please diagnose the pipeline failure above and open a pull request with a fix.\n' +
+              forkNotice +
+              'Suggested approach:\n' +
+              '1. Click the job log links above to read the full error output and identify the root cause.\n' +
+              '2. Locate the relevant source file(s) that need to change.\n' +
+              '3. Make the **minimal** code change that resolves the failure.\n' +
+              `4. Open a PR against \`${targetBranch}\` with a clear description of your fix.\n` +
+              '5. Ensure `npm test` and `npm run build` pass locally before opening the PR.\n\n' +
+              '> _This issue was opened automatically by the **Fix Failing Pipeline** workflow._';
 
             if (existingIssue) {
               // Re-failure on the same commit: add a comment rather than a new issue
@@ -144,39 +143,31 @@ Suggested approach:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: existingIssue.number,
-                body: `## New failure on the same commit 🔴
-
-**Run:** [View run](${runUrl})
-
-## Failed Jobs
-${jobSections}
-
----
-
-${agentTask}`,
+                body:
+                  '## New failure on the same commit 🔴\n\n' +
+                  `**Run:** [View run](${runUrl})\n\n` +
+                  '## Failed Jobs\n' +
+                  `${jobSections}\n\n` +
+                  '---\n\n' +
+                  agentTask,
               });
               console.log(`Commented on existing issue #${existingIssue.number}: ${existingIssue.html_url}`);
               return;
             }
 
             const title = `[CI Fix] ${workflowName} failed on \`${headBranch}\` (${shortSha})`;
-            const body = `## Pipeline Failure Detected 🔴
-
-**Workflow:** ${workflowName}
-**Branch:** \`${headBranch}\`
-**Commit:** [\`${shortSha}\`](https://github.com/${thisRepo}/commit/${headSha})
-**Triggered by:** @${actor}
-**Run:** [View run](${runUrl})
-
----
-
-## Failed Jobs
-${jobSections}
-
----
-
-${agentTask}
-`;
+            const body =
+              '## Pipeline Failure Detected 🔴\n\n' +
+              `**Workflow:** ${workflowName}\n` +
+              `**Branch:** \`${headBranch}\`\n` +
+              `**Commit:** [\`${shortSha}\`](https://github.com/${thisRepo}/commit/${headSha})\n` +
+              `**Triggered by:** @${actor}\n` +
+              `**Run:** [View run](${runUrl})\n\n` +
+              '---\n\n' +
+              '## Failed Jobs\n' +
+              `${jobSections}\n\n` +
+              '---\n\n' +
+              `${agentTask}\n`;
 
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
