@@ -142,8 +142,11 @@ export const GameState = {
 | Filing issues for contradictions, bugs, or gaps | `.github/skills/triage-issues.md` |
 | Answering a `[Design Question]` issue | `.github/skills/resolve-question.md` |
 | Regenerating the wiki after content changes | `.github/skills/update-wiki.md` |
+| End of any coding session that touched `src/data/` | `.github/skills/update-wiki.md` |
 
 After **every** issue implementation you **must** also follow `.github/skills/post-implementation.md`. This is not optional.
+
+At the **end of every coding session** that modified any file in `src/data/` (skills, trainers, items, encounters, emblems, quests, regions), you **must** run `update-wiki` to keep the player wiki current. This is not optional.
 
 ## Available Skills
 
