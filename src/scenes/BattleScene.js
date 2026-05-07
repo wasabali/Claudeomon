@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { BaseScene } from '#scenes/BaseScene.js'
-import { CONFIG, ENDING_CONDITIONS } from '../config.js'
+import { CONFIG, ENDING_CONDITIONS, JIRA_DUNGEON_REGIONS, CLOUD_CONSOLE_REGIONS } from '../config.js'
 import { GameState, markDirty } from '#state/GameState.js'
 import { getById as getSkillById } from '#data/skills.js'
 import {
@@ -17,6 +17,7 @@ import { calculateXP, computeShameFlags } from '#engine/SkillEngine.js'
 import { checkLevelUp } from '#engine/ProgressionEngine.js'
 import { calculatePostBattleBudget } from '#engine/EconomyEngine.js'
 import { addDungeonPoints, addResourceLock } from '#engine/RegionEngine.js'
+import { getById as getGymById } from '#data/gyms.js'
 import { Menu } from '#ui/Menu.js'
 import { DialogBox } from '#ui/DialogBox.js'
 
@@ -80,6 +81,7 @@ export class BattleScene extends BaseScene {
     }
     this._returnScene  = data.returnScene ?? 'WorldScene'
     this._originRegion = data.originRegion ?? null
+    this._gymId        = data.gymId ?? null
     this._activeSkills = GameState.skills.active
       .filter(Boolean)
       .map(id => getSkillById(id))
@@ -87,9 +89,11 @@ export class BattleScene extends BaseScene {
 
     // Build engine-side state (pure logic, no Phaser)
     this._battleState = createBattleState(mode, { ...GameState.player }, opponent, {
-      slaTimer:        data.slaTimer ?? 10,
-      telegraphedMove: data.telegraphedMove ?? null,
-      emblems:         GameState.emblems ?? {},
+      slaTimer:         data.slaTimer ?? 10,
+      telegraphedMove:  data.telegraphedMove ?? null,
+      gymMechanic:      data.gymMechanic ?? null,
+      gymMechanicConfig: data.gymMechanicConfig ?? null,
+      emblems:          GameState.emblems ?? {},
     })
 
     this._animating  = false
@@ -667,13 +671,29 @@ export class BattleScene extends BaseScene {
 
       // Region-specific win rewards: dungeon story points / resource locks
       if (this._originRegion) {
-        const jiraDungeons = ['jira_dungeon', 'jira_dungeon_1', 'jira_dungeon_2', 'jira_dungeon_3']
-        const cloudConsoles = ['cloud_console_1', 'cloud_console_2']
         const difficulty = opponent.difficulty ?? 1
-        if (jiraDungeons.includes(this._originRegion)) {
+        if (JIRA_DUNGEON_REGIONS.includes(this._originRegion)) {
           addDungeonPoints(GameState.story.flags, difficulty)
-        } else if (cloudConsoles.includes(this._originRegion)) {
+        } else if (CLOUD_CONSOLE_REGIONS.includes(this._originRegion)) {
           addResourceLock(GameState.story.flags)
+        }
+      }
+
+      // Gym leader win — award emblem and set gym beaten flag
+      if (this._gymId) {
+        const gym = getGymById(this._gymId)
+        if (gym) {
+          const beatFlag = `gym_${this._gymId}_beaten`
+          if (!GameState.story.flags[beatFlag]) {
+            GameState.story.flags[beatFlag] = true
+            if (gym.emblemReward) {
+              GameState.emblems[gym.emblemReward] = {
+                ...(GameState.emblems[gym.emblemReward] ?? {}),
+                earned: true,
+                shine:  GameState.emblems[gym.emblemReward]?.shine ?? false,
+              }
+            }
+          }
         }
       }
     } else {
@@ -701,10 +721,12 @@ export class BattleScene extends BaseScene {
         // Fully restore HP to new max on level-up
         GameState.player.hp = evt.payload.maxHp
       } else if (evt.type === 'slot_unlock') {
-        // Normalise active deck to new slot count
+        // Normalise active deck to the new slot count
         const existing = GameState.skills.active ?? []
-        while (existing.length < evt.payload.activeSlots) existing.push(null)
-        GameState.skills.active = existing.slice(0, evt.payload.activeSlots)
+        GameState.skills.active = Array.from(
+          { length: evt.payload.activeSlots },
+          (_, i) => existing[i] ?? null,
+        )
       }
     }
     // Collapse to a single level-up message showing the final reached level

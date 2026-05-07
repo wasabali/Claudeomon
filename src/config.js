@@ -285,3 +285,8 @@ export const BATTLE_REWARDS = {
     lose:  0,
   },
 }
+
+// Region groups used by BattleScene to grant region-specific win rewards.
+// Centralised here so region IDs are a single source of truth.
+export const JIRA_DUNGEON_REGIONS   = Object.freeze(['jira_dungeon', 'jira_dungeon_1', 'jira_dungeon_2', 'jira_dungeon_3'])
+export const CLOUD_CONSOLE_REGIONS  = Object.freeze(['cloud_console_1', 'cloud_console_2'])

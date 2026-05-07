@@ -13,7 +13,8 @@ import {
   clampTileToInterior, findNearestWalkableTile, persistPlayerTile, syncPlayerTileFromPixels,
 } from '#engine/MovementEngine.js'
 import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
-import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene, getVisibleNpcs, getKristofferLocation } from '#engine/StoryEngine.js'
+import { getBy as getGymsBy } from '#data/gyms.js'
+import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene, getVisibleNpcs, getKristofferLocation, getKristofferShameDialog } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { roll as encounterRoll } from '#engine/EncounterEngine.js'
@@ -492,14 +493,14 @@ export class WorldScene extends BaseScene {
     // Determine which NPC IDs are visible for the current act.
     const act        = GameState.story?.act ?? 1
     const visibleIds = getVisibleNpcs(act)   // null means show all
-    const kristofferId = getKristofferLocation(act)
+    const kristofferRegionId = getKristofferLocation(act)
 
     for (const def of this._npcDefs) {
       // Filter NPCs that are act-gated (visibleIds is null = show all)
       if (visibleIds !== null && !visibleIds.includes(def.name)) continue
 
       // Kristoffer NPC: only show in the region he's assigned to for this act
-      if (def.name === 'kristoffer' && kristofferId !== this._regionId) continue
+      if (def.name === 'kristoffer' && kristofferRegionId !== this._regionId) continue
 
       const cx     = def.x + def.width / 2
       const cy     = def.y + def.height / 2
@@ -926,6 +927,15 @@ export class WorldScene extends BaseScene {
       return
     }
 
+    if (npcName === 'kristoffer') {
+      // Kristoffer's dialog reacts to player shame — use the shame-aware resolver
+      const shameLines = getKristofferShameDialog(GameState.player.shamePoints ?? 0)
+      const fallback = getStoryById('npc_kristoffer')?.pages ?? ['...']
+      const lines = shameLines.length > 0 ? shameLines : fallback
+      this.dialog.show(lines, () => { this._interacting = false })
+      return
+    }
+
     const entry   = getStoryById(`npc_${npcName}`)
     const trainer = getTrainerById(npcName)
     const lines   = this._resolveNpcDialog(entry, trainer)
@@ -947,6 +957,10 @@ export class WorldScene extends BaseScene {
         this.dialog.show(postLines, () => { this._interacting = false })
         return
       }
+
+      // Look up gym data if this trainer is a gym leader
+      const gym = getGymsBy('leader', npcName)[0] ?? null
+
       const introLines = Array.isArray(trainer.introDialog) ? trainer.introDialog : lines
       this.dialog.show(introLines, () => {
         this.choiceMenu.open(
@@ -954,10 +968,13 @@ export class WorldScene extends BaseScene {
           (idx) => {
             if (idx === 0) {
               this.scene.start('BattleScene', {
-                mode:            BATTLE_MODES.ENGINEER,
-                opponent:        trainer,
-                telegraphedMove: trainer.telegraphs?.[0] ?? null,
-                returnScene:     'WorldScene',
+                mode:             BATTLE_MODES.ENGINEER,
+                opponent:         trainer,
+                telegraphedMove:  trainer.telegraphs?.[0] ?? null,
+                gymId:            gym?.id ?? null,
+                gymMechanic:      gym?.mechanic ?? null,
+                gymMechanicConfig: gym?.mechanicConfig ?? null,
+                returnScene:      'WorldScene',
               })
             } else {
               this._interacting = false
