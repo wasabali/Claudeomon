@@ -15,7 +15,6 @@ import { getAll as getAllSkills } from '#data/skills.js'
 //   Z        — open selected thread (list mode)
 //   X        — back (detail → list, list → return scene)
 
-const PANEL_KEY = 'ui_so_panel_9slice'
 const SO_DARK         = '#0f380f'
 const SO_MID          = '#306230'
 const SO_LIGHT        = '#8bac0f'
@@ -299,28 +298,11 @@ export class StackOverflowScene extends BaseScene {
   }
 
   _ensurePanelTexture() {
-    if (this.textures.exists(PANEL_KEY)) return
-    const g = this.make.graphics({ x: 0, y: 0, add: false })
-    g.fillStyle(0xe0f8d0, 1)
-    g.fillRect(0, 0, 24, 24)
-    g.fillStyle(0x306230, 1)
-    g.fillRect(0, 0, 24, 2)
-    g.fillRect(0, 22, 24, 2)
-    g.fillRect(0, 0, 2, 24)
-    g.fillRect(22, 0, 2, 24)
-    g.fillStyle(0x0f380f, 1)
-    g.fillRect(0, 0, 24, 1)
-    g.fillRect(0, 23, 24, 1)
-    g.fillRect(0, 0, 1, 24)
-    g.fillRect(23, 0, 1, 24)
-    g.generateTexture(PANEL_KEY, 24, 24)
-    g.destroy()
+    // No-op: BaseScene.createPanel() handles 'ui_window' loading via BootScene.
   }
 
   _addPanel(x, y, width, height) {
-    if (typeof this.add.nineslice === 'function') {
-      return this.add.nineslice(x, y, PANEL_KEY, undefined, width, height, 4, 4, 4, 4)
-    }
-    return this.add.rectangle(x, y, width, height, 0xe0f8d0).setStrokeStyle(1, 0x306230)
+    // Delegate to BaseScene which uses the loaded 'ui_window' asset with 8px corners
+    return this.createPanel(x, y, width, height)
   }
 }

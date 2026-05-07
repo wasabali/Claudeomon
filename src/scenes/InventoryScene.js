@@ -72,13 +72,8 @@ export class InventoryScene extends BaseScene {
   }
 
   createPanel(x, y, width, height) {
-    if (typeof this.add.nineslice === 'function' && this.textures.exists('ui_window_9slice')) {
-      return this.add.nineslice(x, y, width, height, 'ui_window_9slice', 4, 4, 4, 4).setOrigin(0, 0)
-    }
-
-    const panel = this.add.rectangle(x, y, width, height, 0x1a1a2a).setOrigin(0, 0)
-    panel.setStrokeStyle(1, 0xffffff)
-    return panel
+    // Delegate to BaseScene which uses the loaded 'ui_window' asset with 8px corners
+    return super.createPanel(x, y, width, height)
   }
 
   registerInputs() {

@@ -2,7 +2,7 @@
 
 Welcome to the Cloud Quest wiki — your guide to surviving the cloud, one CLI command at a time.
 
-Cloud Quest is a GameBoy Color-style RPG where you play as a junior cloud engineer ascending to Principal Engineer. You solve incidents using **real CLI commands**, battle named engineers, earn certification emblems, and try very hard not to `rm -rf /` anything important.
+Cloud Quest is a GameBoy Color-style RPG where you play as a junior cloud engineer ascending to Principal Engineer. You solve incidents with real CLI commands, battle other engineers, earn certification emblems, and try not to `rm -rf /` anything important.
 
 ---
 
@@ -10,30 +10,43 @@ Cloud Quest is a GameBoy Color-style RPG where you play as a junior cloud engine
 
 | Page | What's Inside |
 |---|---|
-| [Getting Started](getting-started.md) | Starter deck, first quest, basic mechanics |
-| [Combat Guide](combat-guide.md) | Domain matchups, solution quality tiers, SLA timers |
-| [Skills Reference](skills-reference.md) | All skills by domain — effects, tiers, costs, how to learn |
-| [World Map](world-map.md) | All regions, what to expect, where to go |
-| [Trainers](trainers.md) | Named engineers, gym leaders, difficulty, signature skills |
-| [Items & Inventory](items-and-inventory.md) | Tools, key items, credentials, docs, junk |
-| [Encounters](encounters.md) | Encounter pools per region, incident stats |
-| [Emblems](emblems.md) | All 9 emblems, passive bonuses, how to earn them |
-| [Reputation & Shame](reputation-and-shame.md) | How rep and shame work, thresholds, consequences |
-| [Tips & Tricks](tips-and-tricks.md) | Pro strats from senior engineers who've been here before |
-| [Hidden Areas](hidden-areas.md) | ⚠️ SPOILERS — the outcast network, cursed paths |
+| [Getting Started](getting-started.md) | How to play, controls, your first steps in Localhost Town |
+| [Combat Guide](combat-guide.md) | Battle system, domain matchups, solution tiers, SLA timers |
+| [Skills Reference](skills-reference.md) | Every skill in the game, organized by domain |
+| [World Map](world-map.md) | All regions, what you'll find there, and how to get around |
+| [Trainers](trainers.md) | Every engineer NPC — their domain, location, and what they teach |
+| [Items & Inventory](items-and-inventory.md) | Tools, key items, credentials, docs, and junk |
+| [Encounters](encounters.md) | How random encounters work, incident stats, encounter pools |
+| [Emblems](emblems.md) | Certification badges and their passive bonuses |
+| [Reputation & Shame](reputation-and-shame.md) | How rep and shame work, and what happens when you cross the line |
+| [Tips & Tricks](tips-and-tricks.md) | Stuck? Start here. Strategy advice, hints, and a matchup cheatsheet |
+| [Quests](quests.md) | Every quest — NPCs, choices, reward tiers, and outcomes |
+| [Hidden Areas](hidden-areas.md) | The Outcast Network and how to find the game's secrets |
+| [Audio Reference](audio.md) | All SFX and BGM tracks — what plays and when |
 
 ---
 
-## 🎮 Quick Reference
+## Quick Reference
 
-- **Max active skills:** 6
-- **Starting budget:** 500 Azure Credits
-- **Starting reputation:** 50
-- **Starting shame:** 0
-- **Encounter rates:** 0% (Localhost Town) up to 40% (Three AM Tavern)
-- **Encounter pool weights:** Common 70% · Rare 25% · Cursed 5%
-- **Domain cycle:** Linux → Security → Serverless → Cloud → IaC → Containers → Kubernetes → Linux
+### Domain Matchup Cycle
+
+```
+Linux → beats → Security → beats → Serverless → beats → Cloud
+Cloud → beats → IaC → beats → Containers → beats → Kubernetes → beats → Linux
+```
+
+**Observability** is a support domain — it reveals information instead of dealing damage.
+
+### Solution Tiers
+
+| Tier | XP Multiplier | Reputation | Shame |
+|---|---|---|---|
+| Optimal | ×2 | +++ | 0 |
+| Standard | ×1 | + | 0 |
+| Shortcut | ×0.5 | − | 0 |
+| Cursed | ×0.25 | −− | +1 |
+| Nuclear | ×0 | −−− | +2 |
 
 ---
 
-> *"It's always DNS."* — blame DNS (Starter Deck, Tier: Shortcut)
+*"It's always DNS." — Every engineer, every time*

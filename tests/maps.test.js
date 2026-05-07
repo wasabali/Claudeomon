@@ -306,8 +306,7 @@ describe('Interactions object layer', () => {
     }
   })
 
-  it('each Interactions layer object has type "interaction" and a valid type property', () => {
-    const VALID_INTERACTION_TYPES = ['sign', 'flavor', 'chest', 'door']
+  it('each Interactions layer object has type "interaction" and an interaction property matching its name', () => {
     for (const region of allRegions) {
       const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
       if (!fs.existsSync(mapPath)) continue
@@ -316,10 +315,84 @@ describe('Interactions object layer', () => {
       if (!interLayer) continue
       for (const obj of interLayer.objects) {
         expect(obj.type).toBe('interaction')
-        const typeProp = obj.properties?.find(p => p.name === 'type')
-        expect(typeProp).toBeDefined()
-        expect(VALID_INTERACTION_TYPES).toContain(typeProp.value)
+        const interactionProp = obj.properties?.find(p => p.name === 'interaction')
+        expect(interactionProp).toBeDefined()
+        expect(interactionProp.value).toBe(obj.name)
       }
+    }
+  })
+})
+
+describe('localhost_town NPC and interaction objects', () => {
+  it('has all localhost_town trainers in NPCs layer', async () => {
+    const { getAll: getAllTrainers } = await import('../src/data/trainers.js')
+    const map = loadMap('localhost_town')
+    const npcLayer = map.layers.find(l => l.name === 'NPCs')
+    expect(npcLayer).toBeDefined()
+    const placedNames = npcLayer.objects.map(o => o.name)
+    const regionTrainers = getAllTrainers().filter(t => t.location === 'localhost_town')
+    for (const trainer of regionTrainers) {
+      expect(placedNames).toContain(trainer.id)
+    }
+  })
+
+  it('has Interactions layer with all localhost_town interaction objects', async () => {
+    const { getBy: getInteractionsBy } = await import('../src/data/interactions.js')
+    const map = loadMap('localhost_town')
+    const interactionsLayer = map.layers.find(l => l.name === 'Interactions')
+    expect(interactionsLayer).toBeDefined()
+    expect(interactionsLayer.type).toBe('objectgroup')
+    const placedNames = interactionsLayer.objects.map(o => o.name)
+    const regionInteractions = getInteractionsBy('region', 'localhost_town')
+    for (const interaction of regionInteractions) {
+      expect(placedNames).toContain(interaction.id)
+    }
+  })
+
+  it('Interactions layer objects have interaction type property', async () => {
+    const map = loadMap('localhost_town')
+    const interactionsLayer = map.layers.find(l => l.name === 'Interactions')
+    expect(interactionsLayer).toBeDefined()
+    for (const obj of interactionsLayer.objects) {
+      const prop = obj.properties?.find(p => p.name === 'interaction')
+      expect(prop).toBeDefined()
+      expect(prop.value).toBe(obj.name)
+    }
+  })
+
+  it('Transitions layer has bakery_door, lab_door, and apartment_door entries', () => {
+    const map = loadMap('localhost_town')
+    const transLayer = map.layers.find(l => l.name === 'Transitions')
+    expect(transLayer).toBeDefined()
+    const doorNames = transLayer.objects.map(o => o.name)
+    expect(doorNames).toContain('bakery_door')
+    expect(doorNames).toContain('lab_door')
+    expect(doorNames).toContain('apartment_door')
+  })
+
+  it('all Transitions objects target an existing region map with in-bounds spawn coordinates', () => {
+    const map = loadMap('localhost_town')
+    const transLayer = map.layers.find(l => l.name === 'Transitions')
+    expect(transLayer).toBeDefined()
+    for (const obj of transLayer.objects) {
+      const regionProp = obj.properties?.find(p => p.name === 'targetRegion')
+      const spawnXProp = obj.properties?.find(p => p.name === 'targetSpawnX')
+      const spawnYProp = obj.properties?.find(p => p.name === 'targetSpawnY')
+      expect(regionProp, `${obj.name} missing targetRegion`).toBeDefined()
+      expect(spawnXProp, `${obj.name} missing targetSpawnX`).toBeDefined()
+      expect(spawnYProp, `${obj.name} missing targetSpawnY`).toBeDefined()
+
+      const targetId = regionProp.value
+      const targetMapPath = path.join(MAPS_DIR, `${targetId}.tmj`)
+      expect(fs.existsSync(targetMapPath), `${obj.name} targets missing map: ${targetId}`).toBe(true)
+
+      const targetMap = loadMap(targetId)
+      const spawnX = spawnXProp.value
+      const spawnY = spawnYProp.value
+      expect(spawnX, `${obj.name} targetSpawnX out of bounds`).toBeGreaterThanOrEqual(0)
+      expect(spawnX, `${obj.name} targetSpawnX out of bounds`).toBeLessThan(targetMap.width)
+      expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeGreaterThanOrEqual(0)
+      expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeLessThan(targetMap.height)
     }
   })
 })

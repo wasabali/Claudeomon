@@ -3717,9 +3717,9 @@
           "name": "kubernetes_colosseum_locker",
           "properties": [
             {
-              "name": "type",
+              "name": "interaction",
               "type": "string",
-              "value": "flavor"
+              "value": "kubernetes_colosseum_locker"
             }
           ],
           "type": "interaction",

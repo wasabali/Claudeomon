@@ -13,7 +13,6 @@ import {
 } from '#engine/SkillDeckEngine.js'
 import { GameState, markDirty } from '#state/GameState.js'
 
-const PANEL_KEY = 'ui_window_9slice'
 const VISIBLE_KNOWN_COUNT = 6
 
 export class SkillManagementScene extends BaseScene {
@@ -61,23 +60,15 @@ export class SkillManagementScene extends BaseScene {
   }
 
   ensureWindowTexture() {
-    if (this.textures.exists(PANEL_KEY)) return
-    const g = this.make.graphics({ x: 0, y: 0, add: false })
-    g.fillStyle(0x0f380f, 1)
-    g.fillRect(0, 0, 8, 8)
-    g.fillStyle(0x9bbc0f, 1)
-    g.fillRect(1, 1, 6, 6)
-    g.fillStyle(0xe0f8d0, 1)
-    g.fillRect(2, 2, 4, 4)
-    g.generateTexture(PANEL_KEY, 8, 8)
-    g.destroy()
+    // No-op: BaseScene.createPanel() handles 'ui_window' loading via BootScene.
+    // This method is kept so renderChrome() callers don't break.
   }
 
   renderChrome() {
-    this.add.nineslice(80, 72, PANEL_KEY, 0, 156, 140, 2, 2, 2, 2)
-    this.add.nineslice(47, 66, PANEL_KEY, 0, 76, 88, 2, 2, 2, 2)
-    this.add.nineslice(114, 66, PANEL_KEY, 0, 74, 88, 2, 2, 2, 2)
-    this.add.nineslice(80, 130, PANEL_KEY, 0, 156, 20, 2, 2, 2, 2)
+    this.createPanel(80, 72, 156, 140)
+    this.createPanel(47, 66, 76, 88)
+    this.createPanel(114, 66, 74, 88)
+    this.createPanel(80, 130, 156, 20)
 
     this.add.text(8, 8, this.replaceSkillId ? 'REPLACE A SKILL?' : 'AZURE TERMINAL', {
       fontFamily: CONFIG.FONT,

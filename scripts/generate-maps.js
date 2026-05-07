@@ -83,6 +83,47 @@ const BIOME_GID_OFFSET = TILESET_VOID.firstgid - 1  // 5
 const VOID_GROUND_GID      = TILESET_VOID.firstgid       // 6 — tile index 0 (void_ground)
 const WASTELAND_GROUND_GID = TILESET_WASTELAND.firstgid  // 6 — tile index 0 (waste_ground)
 
+// Ninja Adventure tileset definitions (village, dungeon, nature, interior).
+// Images live at assets/maps/tilesets/{name}.png (384×192, 8×4 tiles).
+// The image path in .tmj is relative to assets/maps/, so no navigation needed.
+const BIOME_COLS = 8
+const BIOME_ROWS = 4
+const BIOME_TILE_COUNT = BIOME_COLS * BIOME_ROWS  // 32
+
+// Solid tile IDs (0-indexed within each biome tileset) — kept in sync with
+// generate-tilesets.js SOLID_TILES so collision properties match the PNG layout.
+const BIOME_SOLID_TILES = {
+  village:  [6, 8, 9, 10, 11, 13, 15, 16, 18, 23, 24, 27, 28],
+  dungeon:  [8, 9, 10, 11, 12, 13, 14, 15, 24, 25],
+  nature:   [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 24, 25, 26, 27],
+  interior: [8, 9, 10, 11, 24, 25],
+}
+
+// Build the `tiles` array (solid property metadata) for a biome tileset entry.
+function biomeTiles(name) {
+  return (BIOME_SOLID_TILES[name] || []).map(id => ({
+    id,
+    properties: [{ name: 'solid', type: 'bool', value: true }],
+  }))
+}
+
+function makeBiomeTileset(name) {
+  return {
+    columns:     BIOME_COLS,
+    firstgid:    6,
+    image:       `tilesets/${name}.png`,
+    imageheight: BIOME_ROWS * TILE,
+    imagewidth:  BIOME_COLS * TILE,
+    margin:      0,
+    name,
+    spacing:     0,
+    tilecount:   BIOME_TILE_COUNT,
+    tileheight:  TILE,
+    tilewidth:   TILE,
+    tiles:       biomeTiles(name),
+  }
+}
+
 // Well-known tech tile local IDs (1-based within kenney_tech_office)
 const T = {
   TECH_FLOOR:           1,
@@ -184,12 +225,12 @@ function makeNpcObject(objId, npcName, tileX, tileY) {
   }
 }
 
-function makeInteractionObject(objId, interactionId, interactionType, tileX, tileY) {
+function makeInteractionObject(objId, interactionId, tileX, tileY) {
   return {
     height: TILE,
     id: objId,
     name: interactionId,
-    properties: [{ name: 'type', type: 'string', value: interactionType }],
+    properties: [{ name: 'interaction', type: 'string', value: interactionId }],
     type: 'interaction',
     visible: true,
     width: TILE,
@@ -381,22 +422,46 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const isTech = !!region.hasTechTileset
   const isVoid = !!region.hasVoidTileset
   const isWasteland = !!region.hasWastelandTileset
+  const biome = (!isTech && !isVoid && !isWasteland) ? (region.biome || null) : null
   const openings = getOpeningTiles(w, h, connections)
   const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech)
 
   // Biome regions use their biome floor as the ground tile; tech regions use tech_floor;
-  // all others fall back to stub tile 1.
-  const groundGid = isTech ? techGid(T.TECH_FLOOR)
-                  : isVoid ? VOID_GROUND_GID
+  // void/wasteland use their own ground tile; all others fall back to stub tile 1.
+  const biomeFirstGid = 6  // biome tileset always starts at GID 6 (after stub_tiles GIDs 1–5)
+  const groundGid = isTech     ? techGid(T.TECH_FLOOR)
+                  : isVoid     ? VOID_GROUND_GID
                   : isWasteland ? WASTELAND_GROUND_GID
+                  : biome      ? biomeFirstGid
                   : 1
-  const groundLayer = makeTileLayer(1, 'Ground', w, h, groundGid)
+
+  // Scatter alt-ground tile (GID+1) using seeded RNG for visual variety in biome regions.
+  // ~25% of tiles use the alt variant so the ground looks textured rather than uniform.
+  const groundData = new Array(w * h)
+  if (biome) {
+    const altGid = biomeFirstGid + 1
+    for (let i = 0; i < w * h; i++) {
+      groundData[i] = rng() < 0.25 ? altGid : groundGid
+    }
+  } else {
+    groundData.fill(groundGid)
+  }
+  const groundLayer = { ...makeTileLayer(1, 'Ground', w, h, groundGid), data: groundData }
   const overlayLayer = makeTileLayer(4, 'Overlay', w, h, 0)
 
   const npcObjects = []
   const interactionObjects = []
   const usedSpots = new Set([...occupied])
   let objId = 1
+
+  // Reserve fixed interaction coordinates first so that randomly-placed NPCs
+  // (trainers, azure_terminal) never land on a fixed sign/flavor/chest tile.
+  const regionInteractions = interactions.filter(i => i.region === regionId)
+  for (const i of regionInteractions) {
+    const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
+    const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
+    usedSpots.add(`${tx},${ty}`)
+  }
 
   // Trainers in this region
   const regionTrainers = trainers.filter(t => t.location === regionId)
@@ -411,29 +476,24 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     npcObjects.push(makeNpcObject(objId++, 'azure_terminal', spot.tileX, spot.tileY))
   }
 
-  // Interactions in this region — placed in a separate Interactions object layer
-  const regionInteractions = interactions.filter(i => i.region === regionId)
-  let interObjId = 200
+  // Interactions in this region — placed in a separate Interactions layer
   for (const i of regionInteractions) {
     const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
     const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
-    interactionObjects.push(makeInteractionObject(interObjId++, i.id, i.type, tx, ty))
+    interactionObjects.push(makeInteractionObject(objId++, i.id, tx, ty))
     usedSpots.add(`${tx},${ty}`)
   }
 
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)
+  const interactionsLayer = makeObjectGroup(6, 'Interactions', interactionObjects)
   const collisionLayer = generateCollision(w, h, connections, occupied)
 
-  const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer]
-  let nextLayerId = 6
-
-  if (interactionObjects.length > 0) {
-    layers.push(makeObjectGroup(nextLayerId++, 'Interactions', interactionObjects))
-  }
+  const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer, interactionsLayer]
+  let nextLayerId = 7
 
   // Transitions layer
   const transitionObjects = []
-  let transObjId = 300
+  let transObjId = 100
 
   // Track gym_door placements so gym exit_doors can reference them
   const placedGymDoors = {}
@@ -482,9 +542,10 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
       renderorder: 'right-down',
       tiledversion: '1.10.0',
       tileheight: TILE,
-      tilesets: isTech      ? [TILESET_STUB, TILESET_TECH]
-               : isVoid     ? [TILESET_STUB, TILESET_VOID]
+      tilesets: isTech       ? [TILESET_STUB, TILESET_TECH]
+               : isVoid      ? [TILESET_STUB, TILESET_VOID]
                : isWasteland ? [TILESET_STUB, TILESET_WASTELAND]
+               : biome       ? [TILESET_STUB, makeBiomeTileset(biome)]
                : [TILESET_STUB],
       tilewidth: TILE,
       type: 'map',
@@ -519,6 +580,28 @@ async function main() {
 
   // Accumulated gym_door positions from parent maps (gymId → {tileX, tileY})
   const gymDoorPositions = {}
+
+  // Pre-seed gymDoorPositions from hand-made parent maps that already exist on disk.
+  // This ensures gym exit_doors get correct spawn coords even when their parent
+  // map was not generated in this run.
+  for (const region of allRegions) {
+    if (region.type === 'gym') continue
+    const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
+    if (!fs.existsSync(mapPath)) continue
+    const existingMap = JSON.parse(fs.readFileSync(mapPath, 'utf8'))
+    const transLayer = existingMap.layers?.find(l => l.name === 'Transitions')
+    if (!transLayer) continue
+    for (const obj of transLayer.objects ?? []) {
+      if (obj.name !== 'gym_door') continue
+      const targetRegion = obj.properties?.find(p => p.name === 'targetRegion')?.value
+      if (targetRegion) {
+        gymDoorPositions[targetRegion] = {
+          tileX: Math.floor(obj.x / TILE),
+          tileY: Math.floor(obj.y / TILE),
+        }
+      }
+    }
+  }
 
   // Pass 1: Generate non-gym maps first (main, dungeon, hidden)
   // so we know where gym_doors land in parent maps

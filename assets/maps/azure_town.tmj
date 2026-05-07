@@ -3632,9 +3632,9 @@
           "name": "azure_town_vending_machine",
           "properties": [
             {
-              "name": "type",
+              "name": "interaction",
               "type": "string",
-              "value": "chest"
+              "value": "azure_town_vending_machine"
             }
           ],
           "type": "interaction",
