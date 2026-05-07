@@ -83,6 +83,47 @@ const BIOME_GID_OFFSET = TILESET_VOID.firstgid - 1  // 5
 const VOID_GROUND_GID      = TILESET_VOID.firstgid       // 6 — tile index 0 (void_ground)
 const WASTELAND_GROUND_GID = TILESET_WASTELAND.firstgid  // 6 — tile index 0 (waste_ground)
 
+// Ninja Adventure tileset definitions (village, dungeon, nature, interior).
+// Images live at assets/maps/tilesets/{name}.png (384×192, 8×4 tiles).
+// The image path in .tmj is relative to assets/maps/, so no navigation needed.
+const BIOME_COLS = 8
+const BIOME_ROWS = 4
+const BIOME_TILE_COUNT = BIOME_COLS * BIOME_ROWS  // 32
+
+// Solid tile IDs (0-indexed within each biome tileset) — kept in sync with
+// generate-tilesets.js SOLID_TILES so collision properties match the PNG layout.
+const BIOME_SOLID_TILES = {
+  village:  [6, 8, 9, 10, 11, 13, 15, 16, 18, 23, 24, 27, 28],
+  dungeon:  [8, 9, 10, 11, 12, 13, 14, 15, 24, 25],
+  nature:   [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 24, 25, 26, 27],
+  interior: [8, 9, 10, 11, 24, 25],
+}
+
+// Build the `tiles` array (solid property metadata) for a biome tileset entry.
+function biomeTiles(name) {
+  return (BIOME_SOLID_TILES[name] || []).map(id => ({
+    id,
+    properties: [{ name: 'solid', type: 'bool', value: true }],
+  }))
+}
+
+function makeBiomeTileset(name) {
+  return {
+    columns:     BIOME_COLS,
+    firstgid:    6,
+    image:       `tilesets/${name}.png`,
+    imageheight: BIOME_ROWS * TILE,
+    imagewidth:  BIOME_COLS * TILE,
+    margin:      0,
+    name,
+    spacing:     0,
+    tilecount:   BIOME_TILE_COUNT,
+    tileheight:  TILE,
+    tilewidth:   TILE,
+    tiles:       biomeTiles(name),
+  }
+}
+
 // Well-known tech tile local IDs (1-based within kenney_tech_office)
 const T = {
   TECH_FLOOR:           1,
@@ -284,7 +325,7 @@ function generateObjects(w, h, regionType, openings, rng, isTech) {
       { w: 2, h: 2, tile: techGid(T.COOLING_UNIT) },
       { w: 2, h: 2, tile: techGid(T.MONITORING_DASHBOARD) },
     ]
-  } else if (isTech && regionType === 'dungeon') {
+  } else if (isTech && (regionType === 'dungeon' || regionType === 'hidden')) {
     // Server Graveyard-style: decommissioned hardware, tombstones
     buildings = [
       { w: 1, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
@@ -367,16 +408,31 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const isTech = !!region.hasTechTileset
   const isVoid = !!region.hasVoidTileset
   const isWasteland = !!region.hasWastelandTileset
+  const biome = (!isTech && !isVoid && !isWasteland) ? (region.biome || null) : null
   const openings = getOpeningTiles(w, h, connections)
   const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech)
 
   // Biome regions use their biome floor as the ground tile; tech regions use tech_floor;
-  // all others fall back to stub tile 1.
-  const groundGid = isTech ? techGid(T.TECH_FLOOR)
-                  : isVoid ? VOID_GROUND_GID
+  // void/wasteland use their own ground tile; all others fall back to stub tile 1.
+  const biomeFirstGid = 6  // biome tileset always starts at GID 6 (after stub_tiles GIDs 1–5)
+  const groundGid = isTech     ? techGid(T.TECH_FLOOR)
+                  : isVoid     ? VOID_GROUND_GID
                   : isWasteland ? WASTELAND_GROUND_GID
+                  : biome      ? biomeFirstGid
                   : 1
-  const groundLayer = makeTileLayer(1, 'Ground', w, h, groundGid)
+
+  // Scatter alt-ground tile (GID+1) using seeded RNG for visual variety in biome regions.
+  // ~25% of tiles use the alt variant so the ground looks textured rather than uniform.
+  const groundData = new Array(w * h)
+  if (biome) {
+    const altGid = biomeFirstGid + 1
+    for (let i = 0; i < w * h; i++) {
+      groundData[i] = rng() < 0.25 ? altGid : groundGid
+    }
+  } else {
+    groundData.fill(groundGid)
+  }
+  const groundLayer = { ...makeTileLayer(1, 'Ground', w, h, groundGid), data: groundData }
   const overlayLayer = makeTileLayer(4, 'Overlay', w, h, 0)
 
   const npcObjects = []
@@ -462,9 +518,10 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
       renderorder: 'right-down',
       tiledversion: '1.10.0',
       tileheight: TILE,
-      tilesets: isTech      ? [TILESET_STUB, TILESET_TECH]
-               : isVoid     ? [TILESET_STUB, TILESET_VOID]
+      tilesets: isTech       ? [TILESET_STUB, TILESET_TECH]
+               : isVoid      ? [TILESET_STUB, TILESET_VOID]
                : isWasteland ? [TILESET_STUB, TILESET_WASTELAND]
+               : biome       ? [TILESET_STUB, makeBiomeTileset(biome)]
                : [TILESET_STUB],
       tilewidth: TILE,
       type: 'map',
