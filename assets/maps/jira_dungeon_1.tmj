@@ -1113,7 +1113,59 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
-      "objects": [],
+      "objects": [
+        {
+          "height": 48,
+          "id": 1,
+          "name": "bjorn_breaker",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "bjorn_breaker"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 1056,
+          "y": 288
+        },
+        {
+          "height": 48,
+          "id": 2,
+          "name": "scrum_siri",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "scrum_siri"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 816,
+          "y": 384
+        },
+        {
+          "height": 48,
+          "id": 3,
+          "name": "devops_apprentice_a",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "devops_apprentice_a"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 528,
+          "y": 432
+        }
+      ],
       "opacity": 1,
       "type": "objectgroup",
       "visible": true,

@@ -1113,7 +1113,42 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
-      "objects": [],
+      "objects": [
+        {
+          "height": 48,
+          "id": 1,
+          "name": "pipeline_per",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "pipeline_per"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 960,
+          "y": 624
+        },
+        {
+          "height": 48,
+          "id": 2,
+          "name": "devops_apprentice_b",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "devops_apprentice_b"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 528,
+          "y": 480
+        }
+      ],
       "opacity": 1,
       "type": "objectgroup",
       "visible": true,

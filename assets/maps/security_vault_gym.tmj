@@ -633,7 +633,110 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
-      "objects": [],
+      "objects": [
+        {
+          "height": 48,
+          "id": 1,
+          "name": "ingrid_iam",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "ingrid_iam"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 768,
+          "y": 432
+        },
+        {
+          "height": 48,
+          "id": 2,
+          "name": "policy_pal",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "policy_pal"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 288,
+          "y": 528
+        },
+        {
+          "height": 48,
+          "id": 3,
+          "name": "security_apprentice_a",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "security_apprentice_a"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 672,
+          "y": 384
+        },
+        {
+          "height": 48,
+          "id": 4,
+          "name": "security_apprentice_b",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "security_apprentice_b"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 576,
+          "y": 192
+        },
+        {
+          "height": 48,
+          "id": 5,
+          "name": "firewall_frida",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "firewall_frida"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 192,
+          "y": 288
+        },
+        {
+          "height": 48,
+          "id": 6,
+          "name": "env_var_erik",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "env_var_erik"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 336,
+          "y": 144
+        }
+      ],
       "opacity": 1,
       "type": "objectgroup",
       "visible": true,
@@ -1269,6 +1372,17 @@
     {
       "draworder": "topdown",
       "id": 6,
+      "name": "Interactions",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
       "name": "Transitions",
       "objects": [
         {
@@ -1306,7 +1420,7 @@
       "y": 0
     }
   ],
-  "nextlayerid": 7,
+  "nextlayerid": 8,
   "nextobjectid": 101,
   "orientation": "orthogonal",
   "renderorder": "right-down",

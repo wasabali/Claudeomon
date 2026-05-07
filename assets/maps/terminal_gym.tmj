@@ -633,7 +633,59 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
-      "objects": [],
+      "objects": [
+        {
+          "height": 48,
+          "id": 1,
+          "name": "tux_wizard",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "tux_wizard"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 672,
+          "y": 288
+        },
+        {
+          "height": 48,
+          "id": 2,
+          "name": "nfs_nora",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "nfs_nora"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 432,
+          "y": 144
+        },
+        {
+          "height": 48,
+          "id": 3,
+          "name": "sudo_su_saga",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "sudo_su_saga"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 192,
+          "y": 336
+        }
+      ],
       "opacity": 1,
       "type": "objectgroup",
       "visible": true,
@@ -1269,6 +1321,35 @@
     {
       "draworder": "topdown",
       "id": 6,
+      "name": "Interactions",
+      "objects": [
+        {
+          "height": 48,
+          "id": 4,
+          "name": "shell_cavern_bash_history",
+          "properties": [
+            {
+              "name": "interaction",
+              "type": "string",
+              "value": "shell_cavern_bash_history"
+            }
+          ],
+          "type": "interaction",
+          "visible": true,
+          "width": 48,
+          "x": 192,
+          "y": 528
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
       "name": "Transitions",
       "objects": [
         {
@@ -1306,7 +1387,7 @@
       "y": 0
     }
   ],
-  "nextlayerid": 7,
+  "nextlayerid": 8,
   "nextobjectid": 101,
   "orientation": "orthogonal",
   "renderorder": "right-down",
