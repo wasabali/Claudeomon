@@ -22,13 +22,33 @@ CC0 means no attribution is legally required. We credit the author here as good 
 | Category | Cloud Quest location |
 |---|---|
 | Character sprites (walk/idle/attack) | `assets/sprites/player/`, `assets/sprites/trainers/` |
-| Character facesets (battle portraits, 48×48px) | `assets/sprites/portraits/` |
 | Monster sprites | `assets/sprites/incidents/` |
 | World tilesets | `assets/tilesets/` |
 | VFX sprites | `assets/sprites/effects/` |
 | Item icons | `assets/sprites/items/` |
 | BGM tracks (37 tracks) | `assets/audio/bgm/` |
 | SFX (100+ sounds) | `assets/audio/sfx/` |
+
+---
+
+## Kenney Micro Roguelike (CC0)
+
+**Battle portrait source** for player and trainer portraits in the battle HUD.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/micro-roguelike |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Selected character tiles upscaled 3× (16px → 48px) using nearest-neighbor interpolation |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Micro Roguelike assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Character portrait sprites (battle portraits, 48×48px) | `assets/sprites/portraits/` |
 
 ---
 
