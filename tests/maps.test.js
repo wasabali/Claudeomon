@@ -281,11 +281,9 @@ describe('tech regions carry kenney_tech_office tileset', () => {
 
 describe('Interactions object layer', () => {
   it('interaction objects are in Interactions layer, not NPCs layer', () => {
-    const regionsWithInteractions = [...new Set(getInteractionsBy('type', 'sign').concat(
-      getInteractionsBy('type', 'flavor'),
-      getInteractionsBy('type', 'chest'),
-      getInteractionsBy('type', 'door'),
-    ).map(i => i.region))]
+    const regionsWithInteractions = [...new Set(
+      ['sign', 'flavor', 'chest', 'door'].flatMap(type => getInteractionsBy('type', type)).map(i => i.region)
+    )]
 
     for (const regionId of regionsWithInteractions) {
       const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)

@@ -715,23 +715,20 @@ export class WorldScene extends BaseScene {
 
   _tryInteract() {
     const { dx, dy } = DIR_OFFSETS[this._facing]
-    const targetTileX  = this._tileX + dx
-    const targetTileY  = this._tileY + dy
-    const targetWorldX = targetTileX * TILE_SIZE + TILE_SIZE / 2
-    const targetWorldY = targetTileY * TILE_SIZE + TILE_SIZE / 2
+    const facingTileX  = this._tileX + dx
+    const facingTileY  = this._tileY + dy
+    const facingWorldX = facingTileX * TILE_SIZE + TILE_SIZE / 2
+    const facingWorldY = facingTileY * TILE_SIZE + TILE_SIZE / 2
 
     for (const { def } of this._npcSprites) {
       const cx = def.x + def.width  / 2
       const cy = def.y + def.height / 2
-      if (Math.abs(targetWorldX - cx) < TILE_SIZE && Math.abs(targetWorldY - cy) < TILE_SIZE) {
+      if (Math.abs(facingWorldX - cx) < TILE_SIZE && Math.abs(facingWorldY - cy) < TILE_SIZE) {
         this._interactWithNpc(def.name)
         return
       }
     }
 
-    const { dx: fdx, dy: fdy } = DIR_OFFSETS[this._facing]
-    const facingTileX = this._tileX + fdx
-    const facingTileY = this._tileY + fdy
     const facingInteraction = this._interactionLookup?.get(`${facingTileX},${facingTileY}`)
     if (facingInteraction && facingInteraction.type !== 'door') {
       this._resolveInteraction(facingInteraction)
