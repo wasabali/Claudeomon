@@ -13,15 +13,18 @@ import {
   clampTileToInterior, findNearestWalkableTile, persistPlayerTile, syncPlayerTileFromPixels,
 } from '#engine/MovementEngine.js'
 import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
-import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene } from '#engine/StoryEngine.js'
+import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene, getVisibleNpcs, getKristofferLocation } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { roll as encounterRoll } from '#engine/EncounterEngine.js'
 import { getById as getEncounterById } from '#data/encounters.js'
 import { BATTLE_MODES } from '#engine/BattleEngine.js'
+import {
+  isGateResolved, getAvailableSolutions, evaluateSolution, getAll as getAllGates,
+} from '#engine/GateEngine.js'
 import { Menu } from '#ui/Menu.js'
 import { HUD } from '#ui/HUD.js'
-import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
+import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial, addDungeonPoints, addResourceLock } from '#engine/RegionEngine.js'
 
 // Texture keys that are statically generated as stub rectangles — not walk-cycle sheets.
 const STUB_TEXTURE_KEYS = new Set(['npc_default', 'azure_terminal', 'player',
@@ -417,10 +420,11 @@ export class WorldScene extends BaseScene {
     markDirty()
     const firstEncounter = getEncounterById('high_cpu')
     this.scene.start('BattleScene', {
-      mode:        BATTLE_MODES.SCRIPTED,
-      opponent:    firstEncounter ?? { id: 'high_cpu', name: 'High CPU', domain: 'observability', hp: 50, maxHp: 50, difficulty: 3 },
-      slaTimer:    firstEncounter?.sla ?? 8,
-      returnScene: 'WorldScene',
+      mode:         BATTLE_MODES.SCRIPTED,
+      opponent:     firstEncounter ?? { id: 'high_cpu', name: 'High CPU', domain: 'observability', hp: 50, maxHp: 50, difficulty: 3 },
+      slaTimer:     firstEncounter?.sla ?? 8,
+      originRegion: this._regionId,
+      returnScene:  'WorldScene',
     })
   }
 
@@ -484,7 +488,19 @@ export class WorldScene extends BaseScene {
 
   _setupNpcSprites() {
     this._npcSprites = []
+
+    // Determine which NPC IDs are visible for the current act.
+    const act        = GameState.story?.act ?? 1
+    const visibleIds = getVisibleNpcs(act)   // null means show all
+    const kristofferId = getKristofferLocation(act)
+
     for (const def of this._npcDefs) {
+      // Filter NPCs that are act-gated (visibleIds is null = show all)
+      if (visibleIds !== null && !visibleIds.includes(def.name)) continue
+
+      // Kristoffer NPC: only show in the region he's assigned to for this act
+      if (def.name === 'kristoffer' && kristofferId !== this._regionId) continue
+
       const cx     = def.x + def.width / 2
       const cy     = def.y + def.height / 2
 
@@ -702,7 +718,7 @@ export class WorldScene extends BaseScene {
 
     if (Phaser.Input.Keyboard.JustDown(this._keyI)) {
       this.scene.pause()
-      this.scene.launch('InventoryScene', { returnScene: 'WorldScene' })
+      this.scene.launch('InventoryScene', { returnSceneKey: 'WorldScene' })
     }
   }
 
@@ -914,6 +930,14 @@ export class WorldScene extends BaseScene {
     const trainer = getTrainerById(npcName)
     const lines   = this._resolveNpcDialog(entry, trainer)
 
+    // Gate-blocking NPCs: check if this NPC guards an unresolved hard gate.
+    // If so, present available skill choices first; fall through to battle/dialog otherwise.
+    const gateForNpc = getAllGates().find(g => g.npcId === npcName)
+    if (gateForNpc && !isGateResolved(gateForNpc.id, GameState.story.flags)) {
+      this._resolveGateNpc(gateForNpc, lines)
+      return
+    }
+
     // Battle-capable trainers: show intro dialog then offer the fight.
     if (trainer?.hp && trainer?.deck?.length > 0) {
       const alreadyDefeated = GameState.story.flags[`trainer_${npcName}_defeated`]
@@ -946,6 +970,59 @@ export class WorldScene extends BaseScene {
     }
 
     this.dialog.show(lines, () => { this._interacting = false })
+  }
+
+  // Generic gate-NPC interaction. Shows the gate hint then presents the player's
+  // available solutions as a skill-choice menu. Applies repDelta, shameDelta, and
+  // the gate flag when a solution is selected.
+  _resolveGateNpc(gate, introLines) {
+    const learnedSkills  = GameState.skills.learned ?? []
+    const available = getAvailableSolutions(gate.id, learnedSkills)
+
+    if (available.length === 0) {
+      // Player doesn't have any solution commands yet — show hint and exit
+      const hintLines = introLines.length > 0 ? introLines : [gate.hintText ?? 'I need your help.']
+      this.dialog.show(hintLines, () => { this._interacting = false })
+      return
+    }
+
+    const choices = available.map(sol => sol.commandId)
+    this.dialog.show(introLines.length > 0 ? introLines : [gate.hintText ?? 'I need your help.'], () => {
+      this.choiceMenu.open(
+        choices,
+        (idx) => {
+          const sol    = available[idx]
+          const result = evaluateSolution(gate.id, sol.commandId)
+
+          // Apply rep and shame deltas
+          if (result.repDelta) {
+            GameState.player.reputation = Math.max(0, Math.min(100,
+              (GameState.player.reputation ?? 50) + result.repDelta))
+          }
+          if (result.shameDelta) {
+            GameState.player.shamePoints = (GameState.player.shamePoints ?? 0) + result.shameDelta
+          }
+
+          // Set quest flag effect
+          if (result.questFlagEffect) {
+            GameState.story.flags[result.questFlagEffect] = true
+          }
+
+          // Resolve the gate if pathEffect is 'open'
+          if (result.resolved && result.flag) {
+            GameState.story.flags[result.flag] = true
+          }
+
+          markDirty()
+
+          // Show confirmation line from story registry if available
+          const confirmLines = getStoryById(`gate_resolved_${gate.id}`)?.pages
+            ?? [`${sol.commandId} — done. You may pass.`]
+          this.dialog.show(confirmLines, () => { this._interacting = false })
+        },
+        () => { this._interacting = false },
+      )
+    })
   }
 
   // Delegates to the pure StoryEngine resolver, then applies any state mutation
@@ -1033,6 +1110,7 @@ export class WorldScene extends BaseScene {
       [DENIAL_REASONS.ACT_GATE]:       'region_under_construction',
       [DENIAL_REASONS.DUNGEON_POINTS]: 'dungeon_points_required',
       [DENIAL_REASONS.RESOURCE_LOCKS]: 'resource_locks_required',
+      [DENIAL_REASONS.HARD_GATE]:      'region_gate_blocked',
     }
     const storyId = REASON_TO_STORY[reasonId]
     const entry   = storyId ? getStoryById(storyId) : null
@@ -1109,10 +1187,11 @@ export class WorldScene extends BaseScene {
         const enemyDef = getEncounterById(encounter.enemyId)
         if (enemyDef) {
           this.scene.start('BattleScene', {
-            mode:        BATTLE_MODES.INCIDENT,
-            opponent:    enemyDef,
-            slaTimer:    enemyDef.sla ?? 10,
-            returnScene: 'WorldScene',
+            mode:         BATTLE_MODES.INCIDENT,
+            opponent:     enemyDef,
+            slaTimer:     enemyDef.sla ?? 10,
+            originRegion: this._regionId,
+            returnScene:  'WorldScene',
           })
         }
       }

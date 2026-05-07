@@ -16,6 +16,7 @@ import {
 import { calculateXP, computeShameFlags } from '#engine/SkillEngine.js'
 import { checkLevelUp } from '#engine/ProgressionEngine.js'
 import { calculatePostBattleBudget } from '#engine/EconomyEngine.js'
+import { addDungeonPoints, addResourceLock } from '#engine/RegionEngine.js'
 import { Menu } from '#ui/Menu.js'
 import { DialogBox } from '#ui/DialogBox.js'
 
@@ -78,6 +79,7 @@ export class BattleScene extends BaseScene {
       domain: 'cloud', hp: 60, maxHp: 60, difficulty: 2,
     }
     this._returnScene  = data.returnScene ?? 'WorldScene'
+    this._originRegion = data.originRegion ?? null
     this._activeSkills = GameState.skills.active
       .filter(Boolean)
       .map(id => getSkillById(id))
@@ -661,6 +663,18 @@ export class BattleScene extends BaseScene {
       // Mark trainer as defeated so WorldScene shows post-battle dialog
       if (this._battleState.mode === BATTLE_MODES.ENGINEER && opponent.id) {
         GameState.story.flags[`trainer_${opponent.id}_defeated`] = true
+      }
+
+      // Region-specific win rewards: dungeon story points / resource locks
+      if (this._originRegion) {
+        const jiraDungeons = ['jira_dungeon', 'jira_dungeon_1', 'jira_dungeon_2', 'jira_dungeon_3']
+        const cloudConsoles = ['cloud_console_1', 'cloud_console_2']
+        const difficulty = opponent.difficulty ?? 1
+        if (jiraDungeons.includes(this._originRegion)) {
+          addDungeonPoints(GameState.story.flags, difficulty)
+        } else if (cloudConsoles.includes(this._originRegion)) {
+          addResourceLock(GameState.story.flags)
+        }
       }
     } else {
       // Budget restore on loss (partial)

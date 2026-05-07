@@ -2,6 +2,7 @@
 // Pure logic only — no Phaser imports. Fully unit-testable with plain Node.js.
 
 import { getById, REGION_CONNECTIONS } from '#data/regions.js'
+import { isPathBlocked } from '#engine/GateEngine.js'
 
 // ===========================================================================
 // Denial reason IDs — returned by canTravel so the scene layer can resolve
@@ -12,6 +13,7 @@ export const DENIAL_REASONS = Object.freeze({
   ACT_GATE:           'act_gate',
   DUNGEON_POINTS:     'dungeon_points',
   RESOURCE_LOCKS:     'resource_locks',
+  HARD_GATE:          'hard_gate',
 })
 
 // ===========================================================================
@@ -88,6 +90,17 @@ export function canTravel(regionId, direction, gameState) {
           entry,
         }
       }
+    }
+  }
+
+  // Hard gate check — GateEngine owns the gate definitions and flags
+  if (isPathBlocked(regionId, target, gameState.story.flags)) {
+    return {
+      allowed: false,
+      reasonId: DENIAL_REASONS.HARD_GATE,
+      reasonParams: { fromRegion: regionId, toRegion: target },
+      target,
+      entry,
     }
   }
 
