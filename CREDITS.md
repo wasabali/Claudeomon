@@ -22,13 +22,33 @@ CC0 means no attribution is legally required. We credit the author here as good 
 | Category | Cloud Quest location |
 |---|---|
 | Character sprites (walk/idle/attack) | `assets/sprites/player/`, `assets/sprites/trainers/` |
-| Character facesets (battle portraits, 48×48px) | `assets/sprites/portraits/` |
 | Monster sprites | `assets/sprites/incidents/` |
 | World tilesets | `assets/tilesets/` |
 | VFX sprites | `assets/sprites/effects/` |
 | Item icons | `assets/sprites/items/` |
 | BGM tracks (37 tracks) | `assets/audio/bgm/` |
 | SFX (100+ sounds) | `assets/audio/sfx/` |
+
+---
+
+## Kenney Micro Roguelike (CC0)
+
+**Battle portrait source** for player and trainer portraits in the battle HUD.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/micro-roguelike |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Selected character tiles upscaled 3× (16px → 48px) using nearest-neighbor interpolation |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Micro Roguelike assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Character portrait sprites (battle portraits, 48×48px) | `assets/sprites/portraits/` |
 
 ---
 
@@ -78,6 +98,30 @@ CC0 — no attribution required; credited here as good practice.
 | 9-slice UI panels (`window_1`–`window_5`) | `assets/ui/` |
 | Cursor / selection indicators | `assets/ui/` |
 | HP / XP bars, battle stat overlays | `assets/ui/` |
+
+---
+
+## Kenney Micro Roguelike (CC0)
+
+**Incident creature stand-ins** — creature sprites used as placeholders for tech-themed incidents until custom pixel art is created.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/micro-roguelike |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Sprites selected and upscaled 3× (16px → 48px) using nearest-neighbor interpolation; mapped to incident IDs |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Micro Roguelike assets used
+
+| Incident ID | Sprite file | Visual concept |
+|---|---|---|
+| `runaway_process` | `assets/sprites/incidents/runaway_process.png` | Spinning CPU with legs |
+| `prod_incident` | `assets/sprites/incidents/prod_incident.png` | Flaming server / alert icon |
+| `sev1_at_3am` | `assets/sprites/incidents/sev1_at_3am.png` | Bleary-eyed pager monster |
+| `infinite_loop` | `assets/sprites/incidents/infinite_loop.png` | Snake eating its own tail (ouroboros) |
 
 ---
 

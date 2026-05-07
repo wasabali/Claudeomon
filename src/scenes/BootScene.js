@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { getAllBgm, getAllSfx } from '#data/audio.js'
-import { getAllSpriteKeys } from '#data/trainers.js'
+import { getAllSpriteKeys, getAllPortraitKeys } from '#data/trainers.js'
 import { getAll as getAllEncounters } from '#data/encounters.js'
 
 // Incident spritesheets — 48×48 px per frame, horizontal strip.
@@ -25,6 +25,10 @@ export class BootScene extends Phaser.Scene {
     // generated stub textures when the character sprite files are not present.
     const optionalSpriteKeys = new Set(getAllSpriteKeys())
 
+    // Portrait keys — all optional. Source: Kenney Micro Roguelike (CC0), 16×16px × 3 upscale.
+    // Files live in assets/sprites/portraits/<id>.png and are silently skipped when absent.
+    const portraitKeys = new Set(getAllPortraitKeys())
+
     // Collect all known incident spriteKeys so we can suppress load errors for them.
     const incidentSpriteKeys = new Set(
       getAllEncounters()
@@ -32,14 +36,15 @@ export class BootScene extends Phaser.Scene {
         .map(e => e.spriteKey),
     )
 
-    // Ignore missing optional assets — audio files, loop-points JSON, character sprites, incident sprites, and UI pack.
+    // Ignore missing optional assets — audio files, loop-points JSON, character sprites, incident sprites, portraits, and UI pack.
     // Logs a warning for each; surface all other failures as errors.
     this.load.on('loaderror', (file) => {
       const isOptionalAudio    = file?.type === 'audio' && optionalAudioKeys.has(file.key)
       const isOptionalLoopJson = file?.type === 'json' && file.key === 'bgmLoopPoints'
       const isOptionalSprite   = optionalSpriteKeys.has(file.key) || (file?.type === 'spritesheet' && incidentSpriteKeys.has(file.key))
+      const isOptionalPortrait = file?.type === 'image' && portraitKeys.has(file.key)
       const isOptionalUi       = file?.type === 'image' && file.key === 'ui_window'
-      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite || isOptionalUi) {
+      if (isOptionalAudio || isOptionalLoopJson || isOptionalSprite || isOptionalPortrait || isOptionalUi) {
         console.warn(`[BootScene] Optional asset unavailable, continuing without it: ${file?.type}:${file?.key}`)
         return
       }
@@ -82,6 +87,14 @@ export class BootScene extends Phaser.Scene {
         `assets/sprites/incidents/${encounter.id}.png`,
         INCIDENT_SPRITE_FRAME_SIZE,
       )
+    }
+
+    // Load battle portraits — optional static images, 48×48px.
+    // Source: Kenney Micro Roguelike (CC0). Place upscaled PNGs in assets/sprites/portraits/.
+    // Portrait key convention: 'portrait_player' for the player, 'portrait_{id}' for trainers.
+    for (const key of portraitKeys) {
+      const filename = key.replace(/^portrait_/, '')
+      this.load.image(key, `assets/sprites/portraits/${filename}.png`)
     }
   }
 

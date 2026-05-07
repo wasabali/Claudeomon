@@ -76,12 +76,12 @@ const TILESET_WASTELAND = {
 // Tech GID offset (add to 1-based tile ID to get map GID)
 const TECH_GID_OFFSET = TILESET_TECH.firstgid - 1  // 5
 
-// Void/Wasteland GID offset — same firstgid as tech (each biome uses its own second tileset slot)
-const BIOME_GID_OFFSET = 5  // firstgid 6 − 1
+// Void/Wasteland GID offset — derived from firstgid (each biome uses its own second tileset slot)
+const BIOME_GID_OFFSET = TILESET_VOID.firstgid - 1  // 5
 
-// GIDs for the first (ground) tile in each biome tileset (local ID 1 = void_ground / waste_ground)
-const VOID_GROUND_GID      = BIOME_GID_OFFSET + 1  // 6
-const WASTELAND_GROUND_GID = BIOME_GID_OFFSET + 1  // 6
+// GIDs for the ground tile in each biome tileset (local tile id 0 / firstgid = GID 6)
+const VOID_GROUND_GID      = TILESET_VOID.firstgid       // 6 — tile index 0 (void_ground)
+const WASTELAND_GROUND_GID = TILESET_WASTELAND.firstgid  // 6 — tile index 0 (waste_ground)
 
 // Well-known tech tile local IDs (1-based within kenney_tech_office)
 const T = {

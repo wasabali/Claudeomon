@@ -2297,3 +2297,20 @@ const _allSpriteKeys = (() => {
  * BootScene uses this list to attempt loading each sheet as an optional asset.
  */
 export const getAllSpriteKeys = () => _allSpriteKeys
+
+// Portrait keys — one per trainer + one for the player.
+// Convention: portrait_{id} → assets/sprites/portraits/{id}.png
+// Source: Kenney Micro Roguelike (CC0), 16×16px upscaled 3× to 48×48px.
+const _allPortraitKeys = (() => {
+  const keys = new Set(['portrait_player'])
+  for (const trainer of Object.values(TRAINERS)) {
+    keys.add(`portrait_${trainer.id}`)
+  }
+  return Object.freeze([...keys])
+})()
+
+/**
+ * All portrait texture keys (player + all trainers).
+ * BootScene uses this list to attempt loading each portrait as an optional asset.
+ */
+export const getAllPortraitKeys = () => _allPortraitKeys

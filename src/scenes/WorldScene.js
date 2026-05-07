@@ -82,6 +82,18 @@ export class WorldScene extends BaseScene {
         this.load.image(name, `assets/maps/tilesets/${name}.png`)
       }
     }
+
+    // Preload biome-specific tileset PNGs for the current region so _setupMap
+    // can bind the real textures instead of falling back to generated stubs.
+    if (VOID_TILESET_REGIONS.has(regionId) && !this.textures.exists(VOID_TILESET_KEY)) {
+      this.load.image(VOID_TILESET_KEY, 'assets/tiles/void_tiles.png')
+    }
+    if (WASTELAND_TILESET_REGIONS.has(regionId) && !this.textures.exists(WASTELAND_TILESET_KEY)) {
+      this.load.image(WASTELAND_TILESET_KEY, 'assets/tiles/wasteland_tiles.png')
+    }
+    if (TECH_TILESET_REGIONS.has(regionId) && !this.textures.exists(TECH_TILESET_KEY)) {
+      this.load.image(TECH_TILESET_KEY, 'assets/tiles/kenney_tech_office.png')
+    }
   }
 
   _generateStubTextures() {

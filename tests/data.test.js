@@ -452,6 +452,8 @@ describe('audio registry', () => {
       expect(bgm.volume).toBeGreaterThanOrEqual(0)
       expect(bgm.volume).toBeLessThanOrEqual(1)
       expect(typeof bgm.loop).toBe('boolean')
+      expect(typeof bgm.kenneyTrack).toBe('string')
+      expect(bgm.kenneyTrack).toMatch(/\.ogg$/)
     })
   })
 
