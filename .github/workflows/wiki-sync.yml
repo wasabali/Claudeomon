@@ -1,0 +1,54 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/wiki/**'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Push docs/wiki to GitHub Wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          WIKI_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.wiki.git"
+
+          # Clone the wiki repo
+          git clone "$WIKI_URL" wiki-out
+
+          # Copy all wiki pages (nullglob-safe)
+          shopt -s nullglob
+          files=(docs/wiki/*.md)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No wiki markdown files found. Skipping."
+            exit 0
+          fi
+          cp "${files[@]}" wiki-out/
+
+          # GitHub Wiki uses Home.md as the landing page
+          if [ -f "wiki-out/README.md" ]; then
+            cp wiki-out/README.md wiki-out/Home.md
+            rm wiki-out/README.md
+          fi
+
+          cd wiki-out
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No wiki changes to commit."
+          else
+            git commit -m "chore: sync wiki from docs/wiki/ [skip ci]"
+            git push
+          fi

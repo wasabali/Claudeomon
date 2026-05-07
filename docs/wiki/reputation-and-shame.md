@@ -1,113 +1,130 @@
-# ⚖️ Reputation & Shame
+# ⭐ Reputation & Shame
 
-Cloud Quest tracks two independent character stats that shape your experience: **Reputation** (rebuildable) and **Shame** (permanent). Together they determine NPC treatment, shop pricing, content access, and which ending you get.
+Two stats shape who you are in the cloud engineering world. They're independent, they move differently, and only one of them can be rebuilt.
 
 ---
 
 ## Reputation
 
-**Range:** −100 to 100  
-**Default start:** 50  
-**Effect:** Shop prices scale inversely with Reputation.
+Reputation measures how much people trust your work. It ranges from **-100 to 100** and can go up or down.
 
 ### Reputation Thresholds
 
-| Reputation | Title | Shop Modifier |
-|---|---|---|
-| 90–100 | Distinguished Engineer | −20% (significant discount) |
-| 80–89 | Senior Engineer | −10% |
-| 60–79 | Competent | No change |
-| 40–59 | Adequate | No change |
-| 20–39 | Liability | +20% (prices rise) |
-| 0–19 | Walking Incident | +50% |
-| −25–−1 | Known Incident | +50% |
-| −50–−26 | Do Not Pair With | +50% |
-| −100–−51 | The Reason We Have Runbooks | +50% |
+| Score | Title |
+|---|---|
+| 90+ | Distinguished Engineer |
+| 80–89 | Senior Engineer |
+| 60–79 | Competent |
+| 40–59 | Adequate |
+| 20–39 | Liability |
+| 0–19 | Walking Incident |
+| -25 to -1 | Known Incident |
+| -50 to -26 | Do Not Pair With |
+| -100 to -51 | The Reason We Have Runbooks |
 
-### How Reputation Changes
+### Gaining Reputation
 
 | Action | Rep Change |
 |---|---|
-| Optimal solution (incident) | +++ |
-| Standard solution | + |
-| Shortcut solution | − |
-| Cursed technique | −− |
-| Nuclear technique | −−− |
-| Win a trainer battle | + |
-| Lose a trainer battle | − |
-| SLA breach | −− |
-| Complete a quest (good path) | +++ |
+| Win a battle with Optimal solution | +3 |
+| Win a battle with Standard solution | +1 |
+| Win a battle with Shortcut solution | -1 |
+| Complete a quest (Optimal path) | +5 to +10 |
+| Beat a gym leader | +5 |
+| Use a cursed technique | -10 to -20 |
+| Use a nuclear technique | -15 to -20 |
+| Shame breach action | -10 |
+| Post-Mortem Published item | +5 |
 
-Reputation can be rebuilt by completing quests, winning battles with optimal solutions, and using Coffee & Apology items.
+### Losing Reputation
+
+Reputation loss from cursed/nuclear techniques is **immediate and steep**. You can rebuild it with quests, optimal solutions, and time — but some actions (like `hardcode the secret`) apply a **permanent -20** that stacks with your current value.
 
 ---
 
 ## Shame
 
-**Range:** 0 to ∞ (never decremented by normal means)  
-**Default start:** 0  
-**Effect:** Permanent — gates evil path content, affects endings.
+Shame measures how many shortcuts, disasters, and unforgivable things you've done. It **only goes up**. It never declines naturally.
 
-Shame accumulates slowly and cannot be undone. The **Vault Emblem** reduces each Shame gain by 1 (minimum 0).
+> *"Shame points are permanent. The only way to move forward is to face them."*
 
 ### Shame Thresholds
 
-| Shame | Title | World Effect |
-|---|---|---|
-| 1 | It Was Like That When I Got Here | NPCs remember |
-| 3 | Cowboy Coder | Some shop items cost more |
-| 5 | The Shortcutter | Gym Leaders become wary; may add extra conditions |
-| 7 | Person of Interest | THROTTLEMASTER references you in dialog |
-| 10 | Shadow Engineer | Passive unlocks, cursed content gates open |
-| 15 | The Other Principal | Fork the Company ending becomes available |
-
-### Shadow Engineer (Shame ≥ 10)
-
-Reaching Shadow Engineer status unlocks a passive skill set modification:
-
-| Effect | Detail |
+| Shame | Title |
 |---|---|
-| Optimal skills | +10 budget cost |
-| Cursed skills | −5 budget cost |
-| Heal items | −20% effectiveness |
-| Auto-learn | `exec_xp_cmdshell` |
-| Grime rate | Doubles (0.05 → 0.10 per Shame Point) |
-| Gym Leaders | May refuse to teach at Shame ≥ 10 |
+| 0 | *(No title — you're fine)* |
+| 1 | It Was Like That When I Got Here |
+| 3 | Cowboy Coder |
+| 5 | The Shortcutter |
+| 7 | Person of Interest |
+| 10 | Shadow Engineer |
+| 15 | The Other Principal |
+
+### Gaining Shame
+
+| Action | Shame Gain |
+|---|---|
+| Use any cursed technique | +1 |
+| Use any nuclear technique | +2 |
+| `kubectl delete ns production --force` | +3 |
+| `EXEC xp_cmdshell` | +3 |
+| SLA breach (certain incidents) | +1 |
+
+### Reducing Shame (Rare)
+
+| Method | Shame Reduction | Notes |
+|---|---|---|
+| Coffee and an Apology item | -1 | Available at Three AM Tavern. |
+| Published Post-Mortem | -1 | Docs tab item — use outside of battle. |
+
+> ⚠️ Shame cannot be reduced below 0. These items are rare and should be used intentionally.
+
+---
+
+## Shadow Engineer Mode
+
+At **Shame ≥ 10**, you become a **Shadow Engineer**. This permanently changes some mechanics:
+
+| Mechanic | Change |
+|---|---|
+| Optimal skill budget cost | +10 (costs more to do it right) |
+| Cursed skill budget cost | -5 (cheaper to do it wrong) |
+| Healing from items/skills | -20% |
+| Available trainers (Three AM Tavern) | All trainers now accessible |
+| `kubectl delete ns production --force` | Unlocked |
+
+Shadow Engineer status also unlocks alternate dialogue in Architecture District and changes the final act ending.
 
 ---
 
 ## The Evil Path
 
-> ⚠️ **Spoiler section** — this covers content you may prefer to discover yourself.
+Accumulating high Shame isn't just a penalty — it's an alternate route through the game:
 
-Using cursed and nuclear techniques accumulates Shame. The path gradually changes the world:
+- **Shame 1:** Three AM Tavern door appears in Localhost Town
+- **Shame 2:** Hidden trainers appear in standard gym areas
+- **Shame 3:** YOLO Yaml Ylva appears in Kubernetes Colosseum inner ring; .env Erik in Security Vault
+- **Shame 5:** Legacy Leif in Deprecated Azure Region
+- **Shame 7:** Person of Interest — certain NPCs refuse to talk to you; others become friendly
+- **Shame 10:** Shadow Engineer — cursed economics flip; alternate ending branch opens
+- **Shame 15:** The Other Principal — special final act credits sequence
 
-- **Shame 1–4:** Cosmetic — some NPCs react differently
-- **Shame 5–9:** Wary Gym Leaders, some NPC dialog trees branch
-- **Shame 10–14:** Shadow Engineer passive activates; Three AM Tavern regulars respect you; THROTTLEMASTER's crew becomes accessible
-- **Shame 15+:** The Outcast Network is fully open; Fork the Company ending unlocks
+### Outcast Network
 
-### Ending Conditions
-
-| Ending | Requirement |
-|---|---|
-| Shadow Post-Mortem | Shame 10–14, defeat the CTO |
-| Fork the Company | Shame ≥ 15, accept THROTTLEMASTER's recruitment |
-| Certified Engineer (good) | Defeat all 8 Gym Leaders, Shame < 5 |
-| The Grind Never Ends | Complete the game without defeating the CTO |
+Doing things NPCs tell you **not** to do reveals hidden areas with exclusive cursed trainers. These are the most powerful techniques in the game — and the most consequences-heavy. See [Hidden Areas](hidden-areas.md).
 
 ---
 
-## Shame Reduction
+## Reputation vs. Shame: Summary
 
-Shame is permanent, but two items can directly reduce it:
-
-| Method | Effect |
-|---|---|
-| **Vault Emblem** | –1 to every Shame gain (minimum 0) |
-| **Coffee and an Apology** | Immediately reduces Shame by 1 |
-| **Published Post-Mortem** | Immediately reduces Shame by 1 |
+| | Reputation | Shame |
+|---|---|---|
+| Direction | Bidirectional (-100 to 100) | One-way (0+) |
+| Rebuilding | ✅ Yes — quests, optimal play | ❌ No — only rare items reduce it |
+| Effect on gameplay | Title display, NPC dialogue | Unlocks cursed content, changes economics |
+| Reflects | Professional standing | Accumulated bad decisions |
 
 ---
 
-See [Items & Inventory](items-and-inventory.md) for item details. See [Hidden Areas](hidden-areas.md) for Outcast Network content.
+*See [Items & Inventory](items-and-inventory.md) for the Coffee & Apology and Post-Mortem Published items.*  
+*See [Hidden Areas](hidden-areas.md) for what high Shame unlocks.*
