@@ -177,6 +177,8 @@ export class DialogBox {
   // ── Private ─────────────────────────────────────────────────────────────────
 
   _ensureTexture() {
+    // Prefer the Kenney UI Pack panel loaded as 'ui_window' by BootScene.
+    if (this.scene.textures.exists('ui_window')) return
     if (this.scene.textures.exists(PANEL_KEY)) return
 
     // Procedural dark panel with a subtle light border.
@@ -196,9 +198,10 @@ export class DialogBox {
     this._container = this.scene.add.container(0, 0)
     this._container.setDepth(100)
 
-    // Background panel.
-    if (typeof this.scene.add.nineslice === 'function' && this.scene.textures.exists(PANEL_KEY)) {
-      this._bg = this.scene.add.nineslice(0, BOX_Y, PANEL_KEY, 0, CONFIG.WIDTH, BOX_HEIGHT, 4, 4, 4, 4)
+    // Background panel — prefer the Kenney UI Pack window when loaded.
+    const panelKey = this.scene.textures.exists('ui_window') ? 'ui_window' : PANEL_KEY
+    if (typeof this.scene.add.nineslice === 'function' && this.scene.textures.exists(panelKey)) {
+      this._bg = this.scene.add.nineslice(0, BOX_Y, panelKey, 0, CONFIG.WIDTH, BOX_HEIGHT, 4, 4, 4, 4)
         .setOrigin(0, 0)
     } else {
       this._bg = this.scene.add.rectangle(0, BOX_Y, CONFIG.WIDTH, BOX_HEIGHT, 0x0d1117)
