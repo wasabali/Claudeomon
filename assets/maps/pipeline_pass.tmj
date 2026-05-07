@@ -1899,40 +1899,6 @@
         {
           "height": 48,
           "id": 7,
-          "name": "pipeline_terminal_todo",
-          "properties": [
-            {
-              "name": "npc",
-              "type": "string",
-              "value": "pipeline_terminal_todo"
-            }
-          ],
-          "type": "npc",
-          "visible": true,
-          "width": 48,
-          "x": 336,
-          "y": 144
-        },
-        {
-          "height": 48,
-          "id": 8,
-          "name": "pipeline_chest_01",
-          "properties": [
-            {
-              "name": "npc",
-              "type": "string",
-              "value": "pipeline_chest_01"
-            }
-          ],
-          "type": "npc",
-          "visible": true,
-          "width": 48,
-          "x": 576,
-          "y": 384
-        },
-        {
-          "height": 48,
-          "id": 9,
           "name": "azure_terminal",
           "properties": [
             {
@@ -3743,11 +3709,57 @@
     {
       "draworder": "topdown",
       "id": 6,
+      "name": "Interactions",
+      "objects": [
+        {
+          "height": 48,
+          "id": 200,
+          "name": "pipeline_terminal_todo",
+          "properties": [
+            {
+              "name": "interaction",
+              "type": "string",
+              "value": "pipeline_terminal_todo"
+            }
+          ],
+          "type": "interaction",
+          "visible": true,
+          "width": 48,
+          "x": 336,
+          "y": 144
+        },
+        {
+          "height": 48,
+          "id": 201,
+          "name": "pipeline_chest_01",
+          "properties": [
+            {
+              "name": "interaction",
+              "type": "string",
+              "value": "pipeline_chest_01"
+            }
+          ],
+          "type": "interaction",
+          "visible": true,
+          "width": 48,
+          "x": 576,
+          "y": 384
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
       "name": "Transitions",
       "objects": [
         {
           "height": 48,
-          "id": 100,
+          "id": 300,
           "name": "gym_door",
           "properties": [
             {
@@ -3780,8 +3792,8 @@
       "y": 0
     }
   ],
-  "nextlayerid": 7,
-  "nextobjectid": 101,
+  "nextlayerid": 8,
+  "nextobjectid": 301,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.10.0",

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { REGION_CONNECTIONS, getAll as getAllRegions } from '../src/data/regions.js'
+import { getBy as getInteractionsBy } from '../src/data/interactions.js'
 
 const MAPS_DIR = path.join(process.cwd(), 'assets', 'maps')
 
@@ -275,6 +276,50 @@ describe('tech regions carry kenney_tech_office tileset', () => {
     expect(nonZero.length).toBeGreaterThan(0)
     // All non-zero GIDs should be in range 6–55 (kenney_tech_office tiles)
     expect(nonZero.every(gid => gid >= 6 && gid <= 55)).toBe(true)
+  })
+})
+
+describe('Interactions object layer', () => {
+  const knownRegionIds = new Set(allRegions.map(r => r.id))
+
+  it('interaction objects are in Interactions layer, not NPCs layer', () => {
+    const regionsWithInteractions = [...new Set(
+      ['sign', 'flavor', 'chest', 'door'].flatMap(type => getInteractionsBy('type', type))
+        .map(i => i.region)
+        .filter(id => knownRegionIds.has(id))
+    )]
+
+    for (const regionId of regionsWithInteractions) {
+      const map = loadMap(regionId)
+      const npcLayer = map.layers.find(l => l.name === 'NPCs')
+      const interLayer = map.layers.find(l => l.name === 'Interactions')
+
+      expect(interLayer).toBeDefined()
+
+      const interactionIds = getInteractionsBy('region', regionId).map(i => i.id)
+      for (const id of interactionIds) {
+        if (npcLayer) {
+          expect(npcLayer.objects.find(o => o.name === id)).toBeUndefined()
+        }
+        expect(interLayer.objects.find(o => o.name === id)).toBeDefined()
+      }
+    }
+  })
+
+  it('each Interactions layer object has type "interaction" and an interaction property matching its name', () => {
+    for (const region of allRegions) {
+      const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
+      if (!fs.existsSync(mapPath)) continue
+      const map = loadMap(region.id)
+      const interLayer = map.layers.find(l => l.name === 'Interactions')
+      if (!interLayer) continue
+      for (const obj of interLayer.objects) {
+        expect(obj.type).toBe('interaction')
+        const interactionProp = obj.properties?.find(p => p.name === 'interaction')
+        expect(interactionProp).toBeDefined()
+        expect(interactionProp.value).toBe(obj.name)
+      }
+    }
   })
 })
 

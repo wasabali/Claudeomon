@@ -1,127 +1,102 @@
-# Trainers
+# 🧑‍💻 Trainers
 
-Trainers are engineer NPCs scattered across the world. Beat them in battle and they may teach you their **signature skill**.
+Trainers are the engineers you battle in Cloud Quest. Gym Leaders award emblems on defeat. Named trainers teach their signature skill if you win at **Optimal quality**. Cursed trainers require Shame Points to access and teach forbidden techniques.
 
 ---
 
-## Good Trainers
+## Gym Leaders
 
-These are the engineers who fight fair and teach you real skills.
+Beat all 7 Gym Leaders to challenge the CTO.
 
-| Name | Domain | Location | Difficulty | Signature Skill | Notes |
+| Name | Location | Domain | Difficulty | HP | Signature Skill | Emblem | Battle Mechanic |
+|---|---|---|---|---|---|---|---|
+| Bjørn the Build Breaker | Jira Dungeon | IaC | ★★ (2) | 80 | `az pipelines run` | Pipeline Emblem | Build queue (telegraphs 3 moves) |
+| Captain Nines | Production Plains | Cloud | ★★★★ (4) | 90 | `blue-green deploy` | Cloud Emblem | SLA timer (8 turns, -15 rep on breach) |
+| Scrum Siri | Jira Dungeon | Observability | ★★★ (3) | 85 | `az monitor alert create` | *(none)* | Kanban tracker (idle gives enemy attack bonus) |
+| Docker Dag | Helm Repository | Containers | ★★★★ (4) | 100 | `docker build` | Container Emblem | Layered defence (3 layers) |
+| The Kube-rnetes Master | Kubernetes Colosseum | Kubernetes | ★★★★★ (5) | 120 | `kubectl apply -f` | Helm Emblem | Respawn (3× at 50% HP) |
+| Ingrid the IAM Inspector | Security Vault | Security | ★★★ (3) | 90 | `ssh-keygen` | Vault Emblem | Auth challenge (3 choices, wrong = turn wasted) |
+| The Solutions Oracle | Architecture District | Observability | ★★★★ (4) | 100 | `az monitor alert create` | SRE Emblem | Review board (architecture trivia before damage) |
+
+> Gym Leaders with **≥10 Shame** on your record will refuse to teach their signature skill. At **≥5 Shame** they add wary pre-battle dialog.
+
+---
+
+## Named Field Trainers
+
+These trainers are found in the world and can be battled repeatedly. Win at Optimal quality the first time to learn their skill.
+
+| Name | Location | Domain | Difficulty | HP | Signature Skill | Notes |
+|---|---|---|---|---|---|---|
+| Ola the Ops Guy | Localhost Town | Linux | ★ (1) | 60 | `systemctl restart` | First trainer battle |
+| Tux the Terminal Wizard | Shell Cavern | Linux | ★★ (2) | 80 | `grep "ERROR" /var/log/*` | Gym leader of Fundamentals Gym |
+| Fatima the Function Witch | Pipeline Pass | Serverless | ★★★ (3) | 80 | `az functionapp deploy` | Gym leader of Developer Gym |
+| Helm Hansen | Helm Repository | Containers | ★★★★ (4) | 100 | `helm upgrade --install` | Teaches Helm charts |
+| Lambda Lars | Staging Valley | Serverless | ★★ (2) | 70 | `az functionapp deploy` | Proud of 0.3s cold starts |
+| Docker Diana | Node_modules Maze | Containers | ★★ (2) | 75 | `docker compose up` | Containerises her lunch |
+| Terraform Tore | Staging Valley | IaC | ★★★ (3) | 80 | `terraform plan` | Always plans before apply |
+| Firewall Frida | Security Vault | Security | ★★ (2) | 65 | `ufw deny incoming` | Sub-leader of Security Gym |
+| Grafana Gerd | Architecture District | Observability | ★★★ (3) | 70 | `az monitor alert create` | If it's not on a dashboard... |
+| CI Carl | Pipeline Pass | IaC | ★ (1) | 50 | `az pipelines run` | Always. Commit. Small. |
+| Cloud Costas | Azure Town | Cloud | ★★★ (3) | 85 | `az scale out` | Spins up VMs for fun |
+| NFS Nora | Shell Cavern | Linux | ★★★ (3) | 75 | `mount /dev/sdb1 /mnt` | Everything is a file |
+| DevOps Dave | Pipeline Pass | IaC | ★★ (2) | 65 | `az devops configure` | Automates the automation |
+| Scale Set Sven | Production Plains | Cloud | ★★★★ (4) | 95 | `az scale out` | More replicas solve everything |
+
+---
+
+## Sub-Leaders
+
+Sub-leaders guard the path to each gym leader. No emblem reward, but some teach skills.
+
+| Name | Gym | Domain | Difficulty | HP | Signature Skill |
 |---|---|---|---|---|---|
-| **Ola the Ops Guy** | 🐧 Linux | Localhost Town | ⭐ | `systemctl restart` | You dare challenge the Ops Guy? I've been running Linux sinc… |
-| **Tux the Terminal Wizard** | 🐧 Linux | Shell Cavern | ⭐⭐ | `grep "ERROR" /var/log/*` | You think GUIs are real engineering? Step into my terminal a… |
-| **Fatima the Function Witch** | ⚡ Serverless | Pipeline Pass | ⭐⭐⭐ | `az functionapp deploy` | Functions everywhere. No servers. No limits. No mercy. |
-| **Bjørn the Build Breaker** | 🏗️ IaC | Jira Dungeon | ⭐⭐ | `az pipelines run` | Every PR I touch breaks something. That's not a bug, that's … |
-| **Ingrid the IAM Inspector** | 🔒 Security | Security Vault | ⭐⭐⭐ | `ssh-keygen` | You have Owner role on a production subscription. We need to… |
-| **The Kube-rnetes Master** | ☸️ Kubernetes | Kubernetes Colosseum | ⭐⭐⭐⭐⭐ | `kubectl apply -f` | You dare enter my colosseum? I've been running pods since be… |
-| **Helm Hansen** | 🐳 Containers | Helm Repository | ⭐⭐⭐⭐ | `helm upgrade --install` | Charts, values, releases. If you can't helm upgrade, you can… |
-| **The Solutions Oracle** | 📊 Observability | Architecture District | ⭐⭐⭐⭐ | `az monitor alert create` | Every solution you have is technically correct but architect… |
-| **Captain Nines** | ☁️ Cloud | Production Plains | ⭐⭐⭐⭐ | `blue-green deploy` | 99.999% uptime. That's my religion. Can you match it? |
-| **Scrum Siri** | 📊 Observability | Jira Dungeon | ⭐⭐⭐ | `az monitor alert create` | Let's time-box this fight to 14 minutes. That's the sprint. |
-| **Docker Dag** | 🐳 Containers | Helm Repository | ⭐⭐⭐⭐ | `docker build` | My image is 12 megabytes. Scratch-based. Distroless. Perfect… |
-| **SLA Signe** | ☁️ Cloud | Production Plains | ⭐⭐ | `az webapp deploy` | I monitor the SLA. If it drops below four nines, I page the … |
-| **Story Point Søren** | 📊 Observability | Jira Dungeon | ⭐⭐ | `az monitor alert create` | I estimate everything. This fight? 8 story points. Maybe 13. |
-| **Layer Lars** | 🐳 Containers | Helm Repository | ⭐⭐ | `docker build` | My base image is ubuntu:latest. 4 gigabytes. It has everythi… |
-| **Replica Set Ragnhild** | ☸️ Kubernetes | Kubernetes Colosseum | ⭐⭐⭐ | `kubectl scale --replicas=10` | I am one of many. Delete me and I come back. That's the poin… |
-| **Architect Aleksander** | 📊 Observability | Architecture District | ⭐⭐⭐ | `az monitor alert create` | Before you see the Oracle, show me your architecture diagram… |
-| **Logging Lena** | 🐧 Linux | Localhost Town | ⭐ | `tail -f /var/log/syslog` | Every problem has a log entry. Let me show you how to find i… |
-| **Alert Anders** | ☁️ Cloud | Production Plains | ⭐⭐ | `az monitor alert create` | I get 200 alerts a day. Most of them are real. Can you handl… |
-| **Pipeline Per** | 🏗️ IaC | Jira Dungeon | ⭐⭐ | `az pipelines run` | My pipeline has 47 stages. Each one is a chance to fail. Rea… |
-| **Trigger Trude** | ⚡ Serverless | Pipeline Pass | ⭐⭐ | `set trigger` | Every action has a trigger. Every trigger has a consequence.… |
-| **Manifest Magnus** | ☸️ Kubernetes | Kubernetes Colosseum | ⭐⭐⭐ | `kubectl apply -f` | YAML is my first language. Indentation is my second. You won… |
-| **Policy Pål** | 🔒 Security | Security Vault | ⭐⭐ | `az role assignment create` | You have too many permissions. Let me fix that. By force. |
-| **Metrics Maja** | 📊 Observability | Architecture District | ⭐⭐⭐ | `az monitor metrics list` | If you can't measure it, you can't manage it. Let me measure… |
-| **Deploy Diana** | ☁️ Cloud | Production Plains | ⭐⭐⭐⭐⭐ | `blue-green deploy` | Zero-downtime deployments. That's not a goal, it's a minimum… |
-| **Incident Ivan** | 📊 Observability | Production Plains | ⭐⭐⭐⭐⭐ | `canary release` | I've managed 300 SEV-1 incidents. You're about to be 301. |
-| **Apprentice Engineer A** | 🐧 Linux | Localhost Town | ⭐ | — | I just started learning Linux. But I can still grep! |
-| **Apprentice Engineer B** | 🐧 Linux | Localhost Town | ⭐ | — | Have you tried restarting the service? |
-| **Apprentice Engineer A** | ☁️ Cloud | Production Plains | ⭐ | — | The alerts are firing! Quick, do something! |
-| **Apprentice Engineer B** | ☁️ Cloud | Production Plains | ⭐ | — | I've been on-call for 72 hours. Let's make this quick. |
-| **Apprentice Engineer A** | 🏗️ IaC | Jira Dungeon | ⭐ | — | My pipeline has been red for 3 days. Want to see why? |
-| **Apprentice Engineer B** | 🏗️ IaC | Jira Dungeon | ⭐ | — | Tabs or spaces? Wrong answer means I deploy to prod. |
-| **Apprentice Engineer A** | ⚡ Serverless | Pipeline Pass | ⭐ | — | Cold starts are just... character building. |
-| **Apprentice Engineer B** | ⚡ Serverless | Pipeline Pass | ⭐ | — | Pay per invocation. Let me invoke some pain. |
-| **Apprentice Engineer A** | ☸️ Kubernetes | Kubernetes Colosseum | ⭐⭐ | — | My pods keep crashing. Yours will too. |
-| **Apprentice Engineer B** | ☸️ Kubernetes | Kubernetes Colosseum | ⭐⭐ | — | I scale to zero. Then to infinity. There is no in-between. |
-| **Apprentice Engineer A** | 🔒 Security | Security Vault | ⭐⭐ | — | Your permissions are wrong. Let me show you. |
-| **Apprentice Engineer B** | 🔒 Security | Security Vault | ⭐⭐ | — | Scanning your ports. Found 47 open. This won't take long. |
-| **Apprentice Engineer A** | 📊 Observability | Architecture District | ⭐⭐ | — | I designed this architecture. It's beautiful. And expensive. |
-| **Apprentice Engineer B** | 📊 Observability | Architecture District | ⭐⭐ | — | The metrics don't lie. But the dashboards sometimes do. |
-| **Apprentice Engineer A** | ☁️ Cloud | Production Plains | ⭐⭐⭐ | — | The CTO hired me personally. That should scare you. |
-| **Apprentice Engineer B** | ☸️ Kubernetes | Production Plains | ⭐⭐⭐ | — | I manage the CTO's personal Kubernetes cluster. Yes, they ha… |
-| **Apprentice Engineer C** | 🔒 Security | Production Plains | ⭐⭐⭐ | — | Executive-level security clearance required. You don't have … |
-| **Lambda Lars** | ⚡ Serverless | Staging Valley | ⭐⭐ | `az functionapp deploy` | My functions start in 0.3 seconds. What about yours? Let's f… |
-| **Docker Diana** | 🐳 Containers | Node Modules Maze | ⭐⭐ | `docker compose up` | I containerise everything. My lunch. My feelings. Mostly my … |
-| **Terraform Tore** | 🏗️ IaC | Staging Valley | ⭐⭐⭐ | `terraform plan` | I never apply without a plan. Unlike some people I've met on… |
-| **Firewall Frida** | 🔒 Security | Security Vault | ⭐⭐ | `ufw deny incoming` | Nothing gets past me. Nothing. Prove me wrong. |
-| **Grafana Gerd** | 📊 Observability | Architecture District | ⭐⭐⭐ | `az monitor alert create` | If it's not on a dashboard, did it really happen? Let's test… |
-| **CI Carl** | 🏗️ IaC | Pipeline Pass | ⭐ | `az pipelines run` | Always. Commit. Small. This is the way. Let me show you. |
-| **Cloud Costas** | ☁️ Cloud | Azure Town | ⭐⭐⭐ | `az scale out` | I spin up VMs like they're going out of fashion. They are. B… |
-| **NFS Nora** | 🐧 Linux | Shell Cavern | ⭐⭐⭐ | `grep "ERROR" /var/log/*` | Everything is a file. Even you. Let's see what you're made o… |
-| **DevOps Dave** | 🏗️ IaC | Pipeline Pass | ⭐⭐ | `az pipelines run` | I automate the automation of automations. It's automations a… |
-| **Scale Set Sven** | ☁️ Cloud | Production Plains | ⭐⭐⭐⭐ | `az scale out` | More replicas solve everything. Don't @ me. Prove me wrong i… |
-| **The CTO** | ☁️ Cloud | Cto Office | ⭐⭐⭐⭐⭐ | — | Ah. You. Sit down. We need to talk about the site. |
-
-### Beating Trainers
-
-- **Win** → Trainer teaches you their **signature skill** + XP reward
-- **Optimal win** → Full XP (×2 multiplier)
-- **Standard win** → Normal XP (×1 multiplier)
-- **Shortcut/Cursed/Nuclear win** → Reduced XP, reputation damage
-
-**Tip:** Aim for Optimal solutions — they give double XP even if the signature skill is taught on any win.
+| Logging Lena | Fundamentals Gym (Localhost Town) | Linux | ★ (1) | 50 | `tail -f /var/log/syslog` |
+| Pipeline Per | DevOps Gym (Jira Dungeon) | IaC | ★★ (2) | 55 | `az pipelines run` |
+| Alert Anders | Admin Gym (Production Plains) | Cloud | ★★ (2) | 60 | `az monitor alert create` |
+| SLA Signe | Admin Gym (Production Plains) | Cloud | ★★ (2) | 60 | `az webapp deploy` |
+| Story Point Søren | Sprint Sanctum (Jira Dungeon) | Observability | ★★ (2) | 55 | `az monitor alert create` |
+| Layer Lars | Container Yard (Helm Repository) | Containers | ★★ (2) | 70 | `docker build` |
+| Replica Set Ragnhild | Cluster Ring (Kubernetes Colosseum) | Kubernetes | ★★★ (3) | 65 | `kubectl scale --replicas=10` |
+| Manifest Magnus | Cluster Ring (Kubernetes Colosseum) | Kubernetes | ★★★ (3) | 70 | `kubectl apply -f` |
+| Policy Pål | Vault Chamber (Security Vault) | Security | ★★ (2) | 60 | `az role assignment create` |
+| Architect Aleksander | Whiteboard Summit (Architecture District) | Observability | ★★★ (3) | 70 | `az monitor alert create` |
+| Metrics Maja | Whiteboard Summit (Architecture District) | Observability | ★★★ (3) | 60 | `az monitor metrics list` |
+| Trigger Trude | Developer Gym (Pipeline Pass) | Serverless | ★★ (2) | 55 | `set trigger` |
+| Deploy Diana | CTO Office (Production Plains) | Cloud | ★★★★★ (5) | 80 | `blue-green deploy` |
+| Incident Ivan | CTO Office (Production Plains) | Observability | ★★★★★ (5) | 80 | `canary release` |
 
 ---
 
 ## Cursed Trainers
 
-These engineers have gone to the dark side. They hang out in shady corners of the world — mostly **The 3am Tavern** and the hidden **Outcast Network** areas. They teach cursed techniques that are powerful but accumulate **Shame**.
+These trainers are hidden in lawless areas. They require **Shame Points** to access and teach techniques that no respectable engineer would document.
 
-| Name | Domain | Cursed Skill | Shame Required | Location |
-|---|---|---|---|---|
-| **The Force Pusher** | 🏗️ IaC | `git push --force` | 1 | Three Am Tavern |
-| **Hotfix Håkon** | ☁️ Cloud | `deploy directly to prod` | 2 | Three Am Tavern |
-| **Merge Magda** | 🏗️ IaC | `merge without review` | 1 | Three Am Tavern |
-| **The Root Whisperer** | 🔒 Security | `sudo chmod 777 /` | 2 | Three Am Tavern |
-| **kubectl Karen** | ☸️ Kubernetes | `kubectl delete pod --all` | 2 | Three Am Tavern |
-| **Skip-Tests Sigrid** | 🏗️ IaC | `git commit --no-verify` | 4 | Three Am Tavern |
-| **Hardcode Henrik** | 🔒 Security | `hardcode the secret` | 1 | Three Am Tavern |
-| **The Rebase Reverend** | 🏗️ IaC | `git rebase -i HEAD~999` | 2 | Three Am Tavern |
-| **rm-rf Rune** | 🐧 Linux | `rm -rf /` | 8 | Three Am Tavern |
-| **The Downtime Dealer** | ☁️ Cloud | `restart prod without notice` | 6 | Three Am Tavern |
-| **Deprecated Dagfinn** | 🐧 Linux | — | 0 | Server Graveyard |
-| **Privileged Petra** | 🐳 Containers | — | 0 | Node Modules Maze |
-| **The Null Pointer** | 📊 Observability | — | 0 | Dev Null Void |
-| **West-EU-2 Wilhelm** | ☁️ Cloud | — | 0 | Deprecated Azure Region |
-| **YOLO Yaml Ylva** | ☸️ Kubernetes | `kubectl apply -f /dev/stdin` | 3 | Kubernetes Colosseum |
-| **sudo su Saga** | 🐧 Linux | `sudo su -` | 2 | Shell Cavern |
-| **.env Erik** | 🔒 Security | `git add .env && git commit` | 3 | Security Vault |
-| **Cron Kristina** | 🐧 Linux | `*/1 * * * * ./attack.sh` | 3 | Server Graveyard |
-| **Legacy Leif** | ☁️ Cloud | `java -jar app-2006-FINAL-v2-REAL.jar` | 5 | Deprecated Azure Region |
+> ⚠️ Teaching and learning from these trainers is not recommended by HR, the CTO, or your own future self.
 
-### About Cursed Trainers
-
-- Cursed trainers often require **Shame Points** to access (usually Shame ≥ 2)
-- Their techniques bypass domain matchups — they work on everything
-- Every cursed technique costs Shame (+1) and Reputation loss
-- Nuclear techniques are even worse: +2 Shame, massive rep loss, lasting side effects
-- Shame is **permanent** — it never goes down. See [Reputation & Shame](reputation-and-shame.md)
+| Name | Location | Domain | Difficulty | HP | Teaches | Shame Required |
+|---|---|---|---|---|---|---|
+| The Force Pusher | Three AM Tavern | IaC | ★★★ (3) | 80 | `git push --force` | 1 |
+| Merge Magda | Three AM Tavern | IaC | ★★ (2) | 70 | `merge without review` | 1 |
+| Hotfix Håkon | Three AM Tavern | Cloud | ★★ (2) | 70 | `deploy directly to prod` | 2 |
+| The Root Whisperer | Three AM Tavern | Security | ★★★ (3) | 90 | `sudo chmod 777 /` | *Exploration* |
 
 ---
 
-## Wild Encounters
+## Rematch Decks
 
-These trainers appear randomly in the world.
-
-| Name | Domain | Difficulty | Location |
-|---|---|---|---|
-| **Lost Intern** | 🐧 Linux | ⭐ | Any |
-| **Rival Cloud Engineer** | 🎲 Random | ⭐⭐ | Any |
-| **Sales Rep** | ☁️ Cloud | ⭐⭐ | Any |
-| **Senior Engineer** | 🎲 Random | ⭐⭐⭐⭐ | Any |
+Named trainers have stronger rematch decks when challenged again after post-game. They also get a +5 level bonus and face you with reduced XP rewards (×0.5 multiplier) and a harder SLA timer.
 
 ---
 
-*Auto-generated from `src/data/trainers.js` by `scripts/generate-wiki.js`*
+## Shame Reactions
+
+Most named trainers notice your Shame Points. Reactions at key thresholds:
+
+| Shame | Trainer Reaction |
+|---|---|
+| 3 | "I've heard about you…" — wary opener |
+| 7 | Personal dig at your reputation |
+| 10 | Refuses to teach signature skill after defeat; cryptic comment or silence |
+
+See [Reputation & Shame](reputation-and-shame.md) for more on how Shame affects the world.

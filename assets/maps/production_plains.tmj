@@ -3798,7 +3798,7 @@
       "objects": [
         {
           "height": 48,
-          "id": 100,
+          "id": 300,
           "name": "gym_door",
           "properties": [
             {
@@ -3825,7 +3825,7 @@
         },
         {
           "height": 48,
-          "id": 101,
+          "id": 301,
           "name": "gym_door",
           "properties": [
             {
@@ -3859,7 +3859,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 102,
+  "nextobjectid": 302,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.10.0",

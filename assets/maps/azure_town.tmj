@@ -1814,23 +1814,6 @@
         {
           "height": 48,
           "id": 2,
-          "name": "azure_town_vending_machine",
-          "properties": [
-            {
-              "name": "npc",
-              "type": "string",
-              "value": "azure_town_vending_machine"
-            }
-          ],
-          "type": "npc",
-          "visible": true,
-          "width": 48,
-          "x": 672,
-          "y": 288
-        },
-        {
-          "height": 48,
-          "id": 3,
           "name": "azure_terminal",
           "properties": [
             {
@@ -3641,11 +3624,40 @@
     {
       "draworder": "topdown",
       "id": 6,
+      "name": "Interactions",
+      "objects": [
+        {
+          "height": 48,
+          "id": 200,
+          "name": "azure_town_vending_machine",
+          "properties": [
+            {
+              "name": "interaction",
+              "type": "string",
+              "value": "azure_town_vending_machine"
+            }
+          ],
+          "type": "interaction",
+          "visible": true,
+          "width": 48,
+          "x": 672,
+          "y": 288
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
       "name": "Transitions",
       "objects": [
         {
           "height": 48,
-          "id": 100,
+          "id": 300,
           "name": "gym_door",
           "properties": [
             {
@@ -3672,7 +3684,7 @@
         },
         {
           "height": 48,
-          "id": 101,
+          "id": 301,
           "name": "gym_door",
           "properties": [
             {
@@ -3705,8 +3717,8 @@
       "y": 0
     }
   ],
-  "nextlayerid": 7,
-  "nextobjectid": 102,
+  "nextlayerid": 8,
+  "nextobjectid": 302,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.10.0",

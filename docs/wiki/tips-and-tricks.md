@@ -1,148 +1,87 @@
-# Tips & Tricks
+# 💡 Tips & Tricks
 
-Stuck? Not sure what to do next? Here's a spoiler-light guide to help you through Cloud Quest.
-
----
-
-## General Strategy
-
-### 1. Always Diagnose First
-
-In incident battles, spend your first turn using an Observability skill (`read the docs`, `grep "ERROR" /var/log/*`, `az monitor alert create`). Revealing the enemy domain lets you hit with ×2 damage — that one turn investment pays for itself immediately.
-
-With the current encounter data, incident SLAs give you at least 2 turns, so diagnosing first is almost always the right call.
-
-### 2. Build a Balanced Deck
-
-You can hold 6 active skills. A good deck includes:
-- **1 Observability skill** — for revealing domains (essential)
-- **2–3 damage skills** from different domains — for matchup flexibility
-- **1 heal/utility skill** — for staying alive
-- **1–2 situational picks** — shields, buffs, or your strongest attack
-
-### 3. Pay Attention to Telegraphs
-
-In engineer battles, trainers telegraph their next move through dialog. If the trainer says something like *"This cluster hasn't been healthy since the last deploy..."* they're probably about to use a Kubernetes skill. Counter with a Linux skill (Linux beats Kubernetes in the matchup cycle).
-
-### 4. Don't Ignore Budget
-
-Skills with budget costs are often powerful, but budget doesn't regenerate quickly. Save expensive skills for when they'll make the biggest difference. `docker system prune -a` restores 10 budget and heals 15 HP — a great utility option.
-
-### 5. Read Everything
-
-- **Outdated Runbook** gives +5 XP on first read
-- **Incident Postmortem** gives +20 XP (but only after a loss)
-- NPC dialog often contains hints about domain matchups and hidden areas
-- The in-game StackOverflow threads teach you which skills are effective where
+Practical advice for surviving Cloud Quest — from your first `az webapp deploy` to your last `helm upgrade`.
 
 ---
 
-## Domain Matchup Cheatsheet
+## Early Game
 
-Print this. Tape it to your monitor. You'll need it.
+**Always diagnose before attacking.**  
+Use `grep "ERROR" /var/log/*` or another Observability skill on the first turn against any incident you haven't seen before. Dealing ×2 damage (strong matchup) is better than swinging blind with the wrong domain.
 
-```
-Linux     → beats → Security
-Security  → beats → Serverless
-Serverless→ beats → Cloud
-Cloud     → beats → IaC
-IaC       → beats → Containers
-Containers→ beats → Kubernetes
-Kubernetes→ beats → Linux
-```
+**Learn the domain cycle.**  
+Linux → Security → Serverless → Cloud → IaC → Containers → Kubernetes → Linux. Tattoo it on your brain. One lap around the table and you're golden.
 
-**Strong = ×2 damage. Weak = ×0.5 damage. Neutral = ×1.**
+**Don't let the SLA timer hit zero.**  
+SLA breach deals a big Reputation penalty on top of any HP loss. If you can't one-shot an incident, use your fastest high-damage skill rather than a perfect-but-slow one.
 
-**Quick memory trick:** Think of it as a cycle of "what solves the problem at a lower level":
-- Linux fundamentals beat Security misconfigs
-- Security policies beat Serverless chaos
-- Serverless simplicity beats Cloud complexity
-- Cloud platforms beat IaC drift
-- IaC automation beats Container sprawl
-- Container isolation beats Kubernetes complexity
-- Kubernetes orchestration beats Linux manual work
+**Keep `az webapp deploy` in your active deck.**  
+Cloud is one of the most common encounter domains in the early game. A 30-damage Cloud skill is your bread and butter.
 
 ---
 
-## When You're Stuck
+## Combat
 
-### "I can't beat this trainer"
+**Optimal > Standard > Shortcut.**  
+Optimal gives ×2 XP and maximum Reputation gain. If you can identify the domain first, always use the matching domain — even if the damage number is slightly lower than a mismatched skill.
 
-- Check the matchup cycle. What domain is the trainer? Bring skills from the domain that beats them.
-- Level up a bit. Fight some common encounters in the area for XP.
-- Bring a heal skill. `systemctl restart` (20 HP) or `follow the runbook` (25 HP) keep you alive.
-- Equip your best Observability skill and study the trainer's pattern before going all-in.
+**Budget matters.**  
+Every skill use costs budget. Cursed skills are cheaper but cost Shame. Keep an eye on your budget bar — running out mid-battle means your last few turns are free skills only.
 
-### "I can't find the right skill for this area"
+**Status effects are real.**  
+`tech_debt_active` reduces all your skill damage by 25%. `on_call` drains HP each turn. Clear status conditions before they compound.
 
-- Talk to every NPC. They often point you toward where to learn specific commands.
-- Backtrack to previous areas. Some trainers teach skills that are useful later.
-- Check your quest log. Quest rewards often include skill unlocks.
-
-### "I keep running out of budget"
-
-- Use budget-free skills as your staples
-- `docker system prune -a` restores 10 budget
-- The **FinOps Emblem** restores 10% budget after each battle
-- Azure Credit Vouchers restore 50 budget — save them for tough fights
-- `cost optimization` drains enemy budget instead of spending yours
-
-### "The SLA timer keeps running out"
-
-- Use `PagerDuty acknowledge` to pause the SLA timer for 2 turns
-- Diagnose ASAP — knowing the domain means ×2 damage, which ends fights faster
-- For short-SLA encounters (2–3 turns), memorize common encounter domains per region (see [Encounters](encounters.md))
-- Bring high-damage skills. Sometimes raw power is better than being clever.
-
-### "My HP is too low"
-
-- Technical Debt reduces Max HP. Do cleanup quests to clear it.
-- Healing skills: `systemctl restart` (20 HP), `follow the runbook` (25 HP), `certbot renew` (15 HP)
-- Healing items: Red Bull (30 HP), Rollback Potion (20 HP)
-- The **SRE Emblem** adds +10 Max HP permanently
-
-### "I have too much Shame"
-
-Shame is permanent — you can't reduce it. But you can:
-- Embrace it. The evil path has great content.
-- Lean into it — at Shame 7, THROTTLEMASTER makes contact and opens new storyline options.
-- Focus on keeping Reputation high — a high-Rep, high-Shame character sees unique content.
+**Boss incidents telegraph their next move.**  
+Watch the top-right corner of the battle screen during boss turns — the message tells you what they'll do next turn. Plan accordingly.
 
 ---
 
-## Region-Specific Tips
+## Exploration
 
-### Pipeline Pass (Act 1)
-- Most encounters here are IaC or Containers domain
-- `git revert` is your best friend — free heal for 20 HP
-- Bjørn's gym queues 3 moves ahead — read his queue and counter each move
+**Talk to every NPC twice.**  
+Most NPCs have a second dialog on the second interaction. Vendors may reveal a discount, NPCs may hint at hidden areas.
 
-### Production Plains (Act 2)
-- Cloud-domain encounters dominate. Bring Serverless skills (Serverless beats Cloud).
-- The SEV1 at 3am encounter is brutal — SLA 2, difficulty 5. Avoid if you're underleveled.
-- Captain Nines' gym has an SLA timer. Speed kills.
+**Encounter cooldown is 4 steps.**  
+After a random encounter you get 4 free steps. Use them to reach the next safe zone or town.
 
-### Jira Dungeon (Act 3)
-- Many Observability-domain encounters. These are tricky because Observability has no matchup weakness.
-- The Gantt Chart is a cursed encounter with SLA 3 — bring your strongest skills.
-- Stale Tickets can be surprisingly annoying. Don't underestimate them.
-
-### Kubernetes Colosseum (Act 3)
-- All Kubernetes, all the time. Bring Linux skills (Linux beats Kubernetes).
-- The YAML Labyrinth is the hardest encounter here — SLA 2, 60 HP, difficulty 5.
-- The Kube-rnetes Master's pods respawn 3× — you need sustained damage, not burst.
+**The Jira Dungeon is slow but worth it.**  
+Its Rare encounters include Scope Creep and Infinite Sprint — beating them gives above-average XP and unique items.
 
 ---
 
-## Miscellaneous Tips
+## Progression
 
-- **Save often.** Export your `.cloudquest` file regularly. There's no auto-save.
-- **Try wrong answers.** The game never blocks you. Bad solutions lead to interesting consequences.
-- **Check the time.** Something special happens between 2:57am and 3:05am.
-- **Don't drop the node_modules.** Just trust me.
-- **NPCs say "don't do this."** Sometimes that's exactly what you should do.
-- **The Rubber Duck** is your debug companion. Use it in the overworld for hints.
+**Defeat Gym Leaders in order.**  
+Each emblem's passive bonus makes the next region easier. The intended order is: Rex → Cipher → Evie → CloudChad → TerraMax → Dock → Kube → Dashia.
+
+**Learn cursed skills from the Outcast Network only if you accept the consequences.**  
+Each use adds Shame. Once you hit Shadow Engineer (Shame 10), several costs change permanently.
+
+**Save often.**  
+The `.cloudquest` save format is portable — you can export it and import on any device. Use `git commit` as the metaphor: commit before risky encounters.
 
 ---
 
-*"It's always DNS." — The correct answer to approximately 40% of Cloud Quest encounters*
+## Resource Management
+
+**Budget resets partially after each battle.**  
+Win = 15% budget restored. Lose = 5% restored. Optimal win bonus = +25 credits. Keeping your Reputation above 80 unlocks the Senior Engineer shop discount (−10%), which compounds over time.
+
+**Healing items are limited.**  
+`stack_overflow_thread` (heal 25 HP) is common but `post_mortem_doc` (heal 50 HP) is rare. Don't burn post-mortems on anything less than a boss fight.
+
+**Budget Injections are finite.**  
+You get a fixed number of `budget_injection` items per act. Hoard them for boss battles.
+
+---
+
+## Secrets
+
+- Something special happens between 2:57am and 3:05am real-world time.
+- NPCs who say "don't do this" sometimes mean exactly the opposite.
+- The Rubber Duck item gives a context-sensitive hint when used from the overworld.
+- Losing to the same incident five times in a row changes its dialog.
+
+---
+
+See [Combat Guide](combat-guide.md) for detailed mechanics and [Hidden Areas](hidden-areas.md) for spoilers.

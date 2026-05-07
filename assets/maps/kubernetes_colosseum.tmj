@@ -1899,23 +1899,6 @@
         {
           "height": 48,
           "id": 7,
-          "name": "kubernetes_colosseum_locker",
-          "properties": [
-            {
-              "name": "npc",
-              "type": "string",
-              "value": "kubernetes_colosseum_locker"
-            }
-          ],
-          "type": "npc",
-          "visible": true,
-          "width": 48,
-          "x": 144,
-          "y": 384
-        },
-        {
-          "height": 48,
-          "id": 8,
           "name": "azure_terminal",
           "properties": [
             {
@@ -3726,11 +3709,40 @@
     {
       "draworder": "topdown",
       "id": 6,
+      "name": "Interactions",
+      "objects": [
+        {
+          "height": 48,
+          "id": 200,
+          "name": "kubernetes_colosseum_locker",
+          "properties": [
+            {
+              "name": "interaction",
+              "type": "string",
+              "value": "kubernetes_colosseum_locker"
+            }
+          ],
+          "type": "interaction",
+          "visible": true,
+          "width": 48,
+          "x": 144,
+          "y": 384
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
       "name": "Transitions",
       "objects": [
         {
           "height": 48,
-          "id": 100,
+          "id": 300,
           "name": "gym_door",
           "properties": [
             {
@@ -3757,7 +3769,7 @@
         },
         {
           "height": 48,
-          "id": 101,
+          "id": 301,
           "name": "gym_door",
           "properties": [
             {
@@ -3790,8 +3802,8 @@
       "y": 0
     }
   ],
-  "nextlayerid": 7,
-  "nextobjectid": 102,
+  "nextlayerid": 8,
+  "nextobjectid": 302,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.10.0",

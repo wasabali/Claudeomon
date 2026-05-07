@@ -482,6 +482,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
     const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
     interactionObjects.push(makeInteractionObject(objId++, i.id, tx, ty))
+    usedSpots.add(`${tx},${ty}`)
   }
 
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)
@@ -528,7 +529,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     layers.push(makeObjectGroup(nextLayerId++, 'Transitions', transitionObjects))
   }
 
-  const nextObjectId = Math.max(objId, transObjId)
+  const nextObjectId = Math.max(objId, interObjId, transObjId)
 
   return {
     map: {

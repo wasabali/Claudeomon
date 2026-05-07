@@ -623,6 +623,7 @@ export class WorldScene extends BaseScene {
     this._keyZ     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
     this._keyX     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
     this._keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
+    this._keyE     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     this._keyI     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I)
   }
 
@@ -741,6 +742,11 @@ export class WorldScene extends BaseScene {
       this._tryInteract()
     }
 
+    if (Phaser.Input.Keyboard.JustDown(this._keyE)) {
+      this.scene.pause()
+      this.scene.launch('EmblemScene', { returnSceneKey: 'WorldScene' })
+    }
+
     if (Phaser.Input.Keyboard.JustDown(this._keyI)) {
       this.scene.pause()
       this.scene.launch('InventoryScene', { returnSceneKey: 'WorldScene' })
@@ -802,30 +808,27 @@ export class WorldScene extends BaseScene {
 
   _tryInteract() {
     const { dx, dy } = DIR_OFFSETS[this._facing]
-    const targetTileX  = this._tileX + dx
-    const targetTileY  = this._tileY + dy
-    const targetWorldX = targetTileX * TILE_SIZE + TILE_SIZE / 2
-    const targetWorldY = targetTileY * TILE_SIZE + TILE_SIZE / 2
+    const facingTileX  = this._tileX + dx
+    const facingTileY  = this._tileY + dy
+    const facingWorldX = facingTileX * TILE_SIZE + TILE_SIZE / 2
+    const facingWorldY = facingTileY * TILE_SIZE + TILE_SIZE / 2
 
     for (const { def } of this._npcSprites) {
       const cx = def.x + def.width  / 2
       const cy = def.y + def.height / 2
-      if (Math.abs(targetWorldX - cx) < TILE_SIZE && Math.abs(targetWorldY - cy) < TILE_SIZE) {
+      if (Math.abs(facingWorldX - cx) < TILE_SIZE && Math.abs(facingWorldY - cy) < TILE_SIZE) {
         this._interactWithNpc(def.name)
         return
       }
     }
 
-    const TILE_OFFSETS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }
-    const playerTileX = Math.floor(this._player.x / TILE_SIZE)
-    const playerTileY = Math.floor(this._player.y / TILE_SIZE)
-    const [tdx, tdy]  = TILE_OFFSETS[this._facing]
-    const tileX = playerTileX + tdx
-    const tileY = playerTileY + tdy
-    const interaction = this._interactionLookup?.get(`${tileX},${tileY}`)
-    if (interaction && interaction.type !== 'door') {
-      this._resolveInteraction(interaction)
+    const facingInteraction = this._interactionLookup?.get(`${facingTileX},${facingTileY}`)
+    if (facingInteraction && facingInteraction.type !== 'door') {
+      this._resolveInteraction(facingInteraction)
+      return
     }
+
+    this._checkInteractionTile()
   }
 
   _buildInteractionLookup() {
@@ -834,6 +837,15 @@ export class WorldScene extends BaseScene {
     const regionInteractions = getInteractionsBy('region', region)
     for (const interaction of regionInteractions) {
       this._interactionLookup.set(`${interaction.tileX},${interaction.tileY}`, interaction)
+    }
+  }
+
+  _checkInteractionTile() {
+    const tileX = Math.floor(this._player.x / TILE_SIZE)
+    const tileY = Math.floor(this._player.y / TILE_SIZE)
+    const interaction = this._interactionLookup?.get(`${tileX},${tileY}`)
+    if (interaction && interaction.type !== 'door' && interaction.type !== 'npc') {
+      this._resolveInteraction(interaction)
     }
   }
 
