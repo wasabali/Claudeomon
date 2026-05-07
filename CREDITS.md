@@ -6,7 +6,7 @@ Cloud Quest is built on the shoulders of generous creators. All assets are eithe
 
 ## Ninja Adventure (CC0)
 
-**Primary asset source** for characters, monsters, world tiles, VFX, items, music, and SFX.
+**Supplemental asset source** for world tiles, VFX, and character archetypes (used as texture keys for player/trainer sprites).
 
 | Field | Value |
 |---|---|
@@ -21,14 +21,10 @@ CC0 means no attribution is legally required. We credit the author here as good 
 
 | Category | Cloud Quest location |
 |---|---|
-| Character sprites (walk/idle/attack) | `assets/sprites/player/`, `assets/sprites/trainers/` |
+| Character sprite sheets (player + trainers, keyed by `spriteKey`) | `assets/sprites/characters/` |
 | Character facesets (battle portraits, 48×48px) | `assets/sprites/portraits/` |
-| Monster sprites | `assets/sprites/incidents/` |
 | World tilesets | `assets/tilesets/` |
 | VFX sprites | `assets/sprites/effects/` |
-| Item icons | `assets/sprites/items/` |
-| BGM tracks (37 tracks) | `assets/audio/bgm/` |
-| SFX (100+ sounds) | `assets/audio/sfx/` |
 
 ---
 
@@ -98,7 +94,7 @@ CC0 — no attribution required; credited here as good practice.
 
 | Category | Cloud Quest location |
 |---|---|
-| Character sprites (walk cycles) | `assets/sprites/player/`, `assets/sprites/trainers/` |
+| Character sprite sheets (player + trainers, keyed by `spriteKey`) | `assets/sprites/characters/` |
 | Monster / incident sprites | `assets/sprites/incidents/` |
 
 ---

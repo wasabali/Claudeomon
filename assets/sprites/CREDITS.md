@@ -1,4 +1,8 @@
-# Character Sprite Credits
+# Sprite Asset Credits
+
+All sprite assets are CC0 (public domain). Attribution is not legally required; we credit sources here as good practice.
+
+---
 
 ## Ninja Adventure Asset Pack (CC0)
 
@@ -6,18 +10,21 @@ Character sprites used for Cloud Quest trainers, the player character, and NPCs 
 sourced from the **Ninja Adventure Asset Pack** by Robert and Pixel-Boy.
 
 - **Source:** https://pixel-boy.itch.io/ninja-adventure-asset-pack  
-- **License:** CC0 (Public Domain) — no attribution required, but credited here for transparency.
+- **License:** CC0 (Public Domain)
+- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
 
 ### What's included
 
-Each character sprite sheet is a 4-direction walk-cycle sheet (48 × 64 px at base 1×,
-upscaled 3× to 144 × 192 px for the 48 px tile size used by Cloud Quest).
+Each character sprite sheet is a **4-row × 3-column** walk-cycle sheet at 48×48 px per frame.
+
+**Important:** BootScene loads all player/trainer sprites by `spriteKey` from `assets/sprites/characters/<spriteKey>.png`.
+`PLAYER_SPRITE_KEY` is `'ninja_hero'`; each trainer entry in `src/data/trainers.js` sets its own `spriteKey`.
 
 Sprite sheets live in `assets/sprites/characters/` and are named by archetype:
 
 | File | Archetype |
 |------|-----------|
-| `ninja_hero.png` | Versatile young hero (player default) |
+| `ninja_hero.png` | Versatile young hero (**player default**) |
 | `ninja_old_samurai.png` | Grizzled veteran warrior |
 | `ninja_mage.png` | Robed wizard/spell-caster |
 | `ninja_sorceress.png` | Female magic user |
@@ -48,41 +55,19 @@ Sprite sheets live in `assets/sprites/characters/` and are named by archetype:
 | `ninja_magician.png` | Stage-magician trickster |
 | `ninja_king.png` | Final-boss authority figure |
 
-### Sprite sheet layout
+### Folder Mapping
 
-Each `.png` is a **4-row × 3-column** grid at 3× scale (48 × 48 px per frame):
-
-| Row | Direction |
-|-----|-----------|
-| 0   | Down (south) |
-| 1   | Left (west) |
-| 2   | Right (east) |
-| 3   | Up (north) |
-
-Columns 0–2 are the three walk-cycle frames per direction.
+| Ninja Adventure folder | Cloud Quest folder |
+|------------------------|--------------------|
+| `Actor/Characters/` | `assets/sprites/characters/` |
+| `Actor/Monsters/` | `assets/sprites/monsters/` |
+| `FX/` | `assets/sprites/vfx/` |
 
 ### Obtaining the files
 
 1. Download **Ninja Adventure Asset Pack** from https://pixel-boy.itch.io/ninja-adventure-asset-pack
-2. Run the upscale script (3×): `node scripts/upscale-sprites.js` (see that file for usage)
-3. Name the outputs following the table above and place them in `assets/sprites/characters/`
-# Sprite Asset Credits
-
-## Kenney Micro Roguelike (CC0 1.0)
-
-Player character sprites, trainer NPC sprites, and incident/monster sprites are sourced from
-[Kenney Micro Roguelike](https://kenney.nl/assets/micro-roguelike) by [Kenney](https://kenney.nl).
-
-- **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions
-- **Source:** https://kenney.nl/assets/micro-roguelike
-- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
-
-### Folder Mapping
-
-| Kenney Micro Roguelike folder | Cloud Quest folder |
-|-------------------------------|--------------------|
-| `Tilemap/` (characters) | `assets/sprites/player/`, `assets/sprites/trainers/` |
-| `Tilemap/` (monsters/enemies) | `assets/sprites/incidents/` |
+2. Run the upscale script (3×): `node scripts/upscale-assets.js --input /tmp/NinjaAdventure --output /tmp/ninja-upscaled`
+3. Copy character sheets matching the table above into `assets/sprites/characters/`
 
 ---
 
@@ -99,22 +84,3 @@ Item icons are sourced from [Kenney Game Icons](https://kenney.nl/assets/game-ic
 | Source | Cloud Quest folder |
 |--------|--------------------|
 | Kenney Game Icons | `assets/sprites/items/` |
-
----
-
-## Ninja Adventure Asset Pack (CC0 1.0)
-
-Supplemental character sprites, NPC sprites, monster sprites, VFX sprites, and item icons are sourced from [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)**.
-
-- **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions
-- **Source folders:** `Actor/Characters/`, `Actor/Monsters/`, `FX/`, `Items/`
-- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
-
-### Folder Mapping
-
-| Ninja Adventure folder | Cloud Quest folder |
-|------------------------|--------------------|
-| `Actor/Characters/` | `assets/sprites/characters/` |
-| `Actor/Monsters/` | `assets/sprites/monsters/` |
-| `FX/` | `assets/sprites/vfx/` |
-| `Items/` | `assets/sprites/items/` |

@@ -405,14 +405,14 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 ### Overview
 
-[Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)** is the primary visual source for Cloud Quest. It is released under the **CC0 1.0 Universal** license — no restrictions, no attribution required — but we attribute anyway.
+[Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)** provides the **character sprite archetypes** used by Cloud Quest's player and trainer sprites. It is released under the **CC0 1.0 Universal** license.
 
 ```
 ## Ninja Adventure Asset Pack
 - Author:        pixel-boy (AAA)
 - Source:        https://pixel-boy.itch.io/ninja-adventure-asset-pack
 - License:       CC0 1.0 Universal (Public Domain Dedication)
-- Usage:         Characters, monsters, world tiles, VFX, items, UI elements, BGM, SFX
+- Usage:         Character/trainer sprite sheets (loaded by spriteKey), world tiles, VFX
 - Modifications: 3× nearest-neighbor upscale from 16×16 to 48×48px
 ```
 
@@ -420,13 +420,10 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 | Category | Ninja Adventure folder | Cloud Quest folder |
 |----------|------------------------|-------------------|
-| Player & NPC characters | `Actor/Characters/` | `assets/sprites/characters/` |
+| Character sprite sheets (player + trainers, by `spriteKey`) | `Actor/Characters/` | `assets/sprites/characters/` |
 | Monster sprites | `Actor/Monsters/` | `assets/sprites/monsters/` |
 | World / overworld tiles | `TileSet/` | `assets/maps/tilesets/` |
 | VFX (magic, explosions) | `FX/` | `assets/sprites/vfx/` |
-| Item icons | `Items/` | `assets/sprites/items/` |
-| Background music | `BGM/` | `assets/audio/bgm/` |
-| Sound effects | `SFX/` | `assets/audio/sfx/` |
 
 ### License
 
@@ -437,6 +434,9 @@ We attribute anyway because it's the right thing to do.
 ### Integration Notes
 
 All Ninja Adventure source sprites are **16×16px**. Cloud Quest uses a **3× nearest-neighbor upscale** to reach the 48×48px tile size. See [Asset Pipeline](#asset-pipeline) below for the upscale script.
+
+**Player sprite:** BootScene loads `PLAYER_SPRITE_KEY` (`'ninja_hero'`) from `assets/sprites/characters/ninja_hero.png`.  
+**Trainer sprites:** Each trainer in `src/data/trainers.js` has a `spriteKey` field. BootScene loads it from `assets/sprites/characters/<spriteKey>.png`.
 
 ---
 
@@ -543,13 +543,14 @@ node scripts/upscale-assets.js \
   --output /tmp/kenney-upscaled
 ```
 
-After upscaling, copy and rename sprites by archetype:
-- **Player sprites** → `assets/sprites/player/player_<archetype>.png`  
-  (select the hero/protagonist character sheets)
-- **Trainer sprites** → `assets/sprites/trainers/<trainer_id>.png`  
-  (select NPC character sheets matching trainer IDs in `src/data/trainers.js`)
+After upscaling, copy and rename sprites to match the game's loading convention:
+
+- **Player sprite** → `assets/sprites/characters/ninja_hero.png`  
+  (or update `PLAYER_SPRITE_KEY` in `src/data/trainers.js` and copy to the matching key path)
+- **Trainer sprites** → `assets/sprites/characters/<spriteKey>.png`  
+  (one file per trainer; the filename must match the `spriteKey` field in `src/data/trainers.js`)
 - **Incident sprites** → `assets/sprites/incidents/<encounter_id>.png`  
-  (select enemy/monster sheets matching encounter IDs in `src/data/encounters.js`)
+  (the filename must match the `id` of the encounter in `src/data/encounters.js`)
 
 ### License
 
@@ -653,13 +654,13 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 
 | Subfolder | Source | Notes |
 |-----------|--------|-------|
-| `player/` | Kenney Micro Roguelike | Player walk cycles; 3× upscaled from 16×16 |
-| `trainers/` | Kenney Micro Roguelike | Trainer NPC sprites; 3× upscaled from 16×16 |
-| `incidents/` | Kenney Micro Roguelike | Incident/enemy sprites; 3× upscaled from 16×16 |
-| `items/` | Kenney Game Icons | Item icons; scaled to 48×48 |
-| `characters/` | Ninja Adventure | Supplemental character sprites; 3× upscaled from 16×16 |
+| `characters/` | Ninja Adventure | **Game-loaded path.** Player sprite (`ninja_hero.png`) and all trainer sprites (named by `spriteKey`) live here. 3× upscaled from 16×16. |
+| `incidents/` | Kenney Micro Roguelike | Incident/enemy sprites; 3× upscaled from 16×16; named by encounter `id` |
+| `items/` | Kenney Game Icons | Item icon stubs; scaled to 48×48 |
 | `monsters/` | Ninja Adventure | Supplemental enemy sprites; 3× upscaled from 16×16 |
 | `vfx/` | Ninja Adventure | Hit sparks, magic rings, explosions; 3× upscaled |
+| `player/` | — | Staging area only — copy finalized player sprite to `characters/ninja_hero.png` |
+| `trainers/` | — | Staging area only — copy finalized trainer sprites to `characters/<spriteKey>.png` |
 
 ### Maps & Tilesets (`assets/maps/`)
 

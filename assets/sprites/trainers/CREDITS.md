@@ -1,16 +1,39 @@
-# Trainer Sprite Credits
+# Trainer Sprite — Reference
 
-## Kenney Micro Roguelike (CC0 1.0)
+## Runtime loading convention
 
-Trainer NPC sprites are sourced from [Kenney Micro Roguelike](https://kenney.nl/assets/micro-roguelike) by [Kenney](https://kenney.nl).
+**BootScene loads each trainer's sprite by `spriteKey` (from `src/data/trainers.js`) from `assets/sprites/characters/<spriteKey>.png`.**
 
-- **License:** CC0 1.0 Universal (Public Domain Dedication) — no restrictions
-- **Source:** https://kenney.nl/assets/micro-roguelike
-- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
+For example, the trainer with `spriteKey: 'ninja_old_samurai'` is loaded from:
+```
+assets/sprites/characters/ninja_old_samurai.png
+```
 
-### Sprite sheet layout
+This directory (`assets/sprites/trainers/`) is a **staging area** for real Kenney Micro Roguelike sprites
+before renaming and copying to `assets/sprites/characters/`. `trainer_default.png` is a colour-coded
+placeholder stub (144×192px, 3-col × 4-row walk-cycle sheet, 48×48px per frame).
 
-Each `.png` is a **4-row × 3-column** grid at 3× scale (48×48 px per frame):
+## Source
+
+**Kenney Micro Roguelike** — https://kenney.nl/assets/micro-roguelike  
+License: CC0 1.0 Universal (Public Domain). No attribution required; credited anyway.  
+Modifications: 3× nearest-neighbor upscale from 16×16px to 48×48px.
+
+## Integration steps
+
+1. Download **Kenney Micro Roguelike** from https://kenney.nl/assets/micro-roguelike
+2. Upscale 3×:
+   ```bash
+   node scripts/upscale-assets.js \
+     --input /tmp/kenney-packs/micro-roguelike \
+     --output /tmp/kenney-upscaled
+   ```
+3. For each trainer defined in `src/data/trainers.js`, identify the matching character sheet in the upscaled output.
+4. Copy it to `assets/sprites/characters/<spriteKey>.png` where `<spriteKey>` matches the trainer's `spriteKey` field (e.g., `ninja_old_samurai.png`, `ninja_mage.png`, etc.).
+
+## Sprite sheet layout
+
+Each sprite sheet is a **4-row × 3-column** grid at 48×48 px per frame:
 
 | Row | Direction |
 |-----|-----------|
@@ -20,19 +43,4 @@ Each `.png` is a **4-row × 3-column** grid at 3× scale (48×48 px per frame):
 | 3   | Up (north) |
 
 Columns 0–2 are the three walk-cycle frames per direction.
-
-### Obtaining the files
-
-1. Download **Kenney Micro Roguelike** from https://kenney.nl/assets/micro-roguelike
-2. Run the upscale script (3×):
-   ```bash
-   node scripts/upscale-assets.js \
-     --input /tmp/kenney-packs/micro-roguelike \
-     --output /tmp/kenney-upscaled
-   cp -r /tmp/kenney-upscaled/characters/* assets/sprites/trainers/
-   ```
-3. Name the outputs to match the trainer archetype IDs defined in `src/data/trainers.js`
-
-### Stub files
-
-`trainer_default.png` is a placeholder stub (144×192px sheet — 3 columns × 4 rows of 48×48px frames). Replace with the real Kenney Micro Roguelike sprite after downloading the pack.
+Total sheet size: 144×192 px.

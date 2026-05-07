@@ -8,18 +8,18 @@ Item icons are sourced from [Kenney Game Icons](https://kenney.nl/assets/game-ic
 - **Source:** https://kenney.nl/assets/game-icons
 - **Modifications:** Scaled to 48×48px using nearest-neighbor interpolation
 
-### Items provided
+### Icon stubs provided
 
-| Item ID | File | Source icon |
-|---------|------|-------------|
-| `bandwidth_boost` | `bandwidth_boost.png` | Kenney Game Icons |
-| `budget_pack` | `budget_pack.png` | Kenney Game Icons |
-| `cache_clear` | `cache_clear.png` | Kenney Game Icons |
-| `debug_lens` | `debug_lens.png` | Kenney Game Icons |
-| `log_tail` | `log_tail.png` | Kenney Game Icons |
-| `patch_note` | `patch_note.png` | Kenney Game Icons |
-| `reboot_token` | `reboot_token.png` | Kenney Game Icons |
-| `runbook_page` | `runbook_page.png` | Kenney Game Icons |
+| Icon stub filename | Intended item concept | Source pack |
+|--------------------|-----------------------|-------------|
+| `bandwidth_boost.png` | Network throughput boost | Kenney Game Icons |
+| `budget_pack.png` | Budget/credits replenishment | Kenney Game Icons |
+| `cache_clear.png` | Cache/state wipe utility | Kenney Game Icons |
+| `debug_lens.png` | Diagnostic / reveal tool | Kenney Game Icons |
+| `log_tail.png` | Log-tail monitoring tool | Kenney Game Icons |
+| `patch_note.png` | Software patch / fix | Kenney Game Icons |
+| `reboot_token.png` | Reboot / restart consumable | Kenney Game Icons |
+| `runbook_page.png` | Runbook / documentation item | Kenney Game Icons |
 
 ---
 
