@@ -201,7 +201,7 @@ export class DialogBox {
     // Background panel — prefer the Kenney UI Pack window when loaded.
     const panelKey = this.scene.textures.exists('ui_window') ? 'ui_window' : PANEL_KEY
     if (typeof this.scene.add.nineslice === 'function' && this.scene.textures.exists(panelKey)) {
-      this._bg = this.scene.add.nineslice(0, BOX_Y, panelKey, 0, CONFIG.WIDTH, BOX_HEIGHT, 4, 4, 4, 4)
+      this._bg = this.scene.add.nineslice(0, BOX_Y, panelKey, 0, CONFIG.WIDTH, BOX_HEIGHT, 8, 8, 8, 8)
         .setOrigin(0, 0)
     } else {
       this._bg = this.scene.add.rectangle(0, BOX_Y, CONFIG.WIDTH, BOX_HEIGHT, 0x0d1117)
