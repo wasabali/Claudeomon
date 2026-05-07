@@ -13,7 +13,7 @@ Each contains exclusive cursed trainers and skills you cannot learn anywhere els
 
 ### 💀 Server Graveyard
 
-**How to access:** SSH into the terminal labelled "DECOMMISSIONED — DO NOT USE" in the Localhost Town back alley. You need the **SSH Key: Decommissioned Server** key item (found via a note left by Deprecated Dagfinn's ghost in a random Production Plains encounter).
+**How to access:** SSH into the terminal labeled "DECOMMISSIONED — DO NOT USE" in the Localhost Town back alley. You need the **SSH Key: Decommissioned Server** key item (found via a note left by Deprecated Dagfinn's ghost in a random Production Plains encounter).
 
 **Who's there:**
 - **Deprecated Dagfinn** — Field trainer. Teaches `terraform apply` and `az group delete --yes --force-deletion-types`

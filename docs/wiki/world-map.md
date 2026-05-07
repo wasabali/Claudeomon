@@ -97,7 +97,7 @@ Hidden areas branch off from specific trigger points. See [Hidden Areas](hidden-
 ### ⛵ Kubernetes Colosseum
 - **Act:** 3
 - **Domain:** Kubernetes
-- **Trainers:** The Kube-rnetes Master (Gym 5), Kubectl Karen (sub-leader), YOLO Yaml Ylva (inner ring, Shame ≥ 3)
+- **Trainers:** The Kube-rnetes Master (Gym 5), Kubectl Karen (sub-leader in outer ring; also appears at Three AM Tavern as Shame ≥ 2), YOLO Yaml Ylva (inner ring, Shame ≥ 3)
 - **Encounters:** `crashloopbackoff`, `evicted_pod`, `pending_forever`, `node_pressure`, `delete_all_pods` (rare), `sev1_at_3am` (cursed)
 - **Notes:** Inner ring is a hidden area. See [Hidden Areas](hidden-areas.md).
 

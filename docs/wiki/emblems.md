@@ -12,7 +12,7 @@ You can view and polish your emblems in the Emblem Case (`E` key). Polish them w
 
 - **Gym:** Terminal Gym (Tutorial)
 - **Gym Leader:** Tux the Terminal Wizard
-- **Passive Bonus:** Linux skills cost 0 budget (they were already free, but now also bypass budget starvation effects).
+- **Passive Bonus:** Linux skills bypass budget starvation effects — when your budget hits 0 and other skills are locked, Linux skills still execute normally.
 - **Grime Description:** *Smells faintly of old server rooms and stale coffee. There's a kernel panic log scratched into the back.*
 
 ---
