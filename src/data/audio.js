@@ -256,10 +256,13 @@ const SFX_PRESETS = {
  * BGM_CONFIG
  * Each entry points to a background music track on disk.
  *
- *   id     – snake_case, matches object key
- *   file   – relative path to the .ogg asset
- *   volume – 0.0–1.0 base playback volume
- *   loop   – whether the track loops continuously
+ *   id           – snake_case, matches object key
+ *   file         – relative path to the .ogg asset
+ *   volume       – 0.0–1.0 base playback volume
+ *   loop         – whether the track loops continuously
+ *   kenneyTrack  – source filename from the Kenney RPG Audio pack (CC0)
+ *                  https://kenney.nl/assets/rpg-audio
+ *                  Verify exact filename after downloading the pack.
  */
 const BGM_CONFIG = {
 
@@ -268,6 +271,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/title.ogg',
     volume: 0.6,
     loop: true,
+    kenneyTrack: 'rpgTitle.ogg',
   },
 
   localhost_town: {
@@ -275,6 +279,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/localhost_town.ogg',
     volume: 0.4,
     loop: true,
+    kenneyTrack: 'rpgExploration.ogg',
   },
 
   pipeline_pass: {
@@ -282,6 +287,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/pipeline_pass.ogg',
     volume: 0.5,
     loop: true,
+    kenneyTrack: 'rpgExploration.ogg',
   },
 
   container_port: {
@@ -289,6 +295,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/container_port.ogg',
     volume: 0.5,
     loop: true,
+    kenneyTrack: 'rpgExploration.ogg',
   },
 
   cloud_citadel: {
@@ -296,6 +303,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/cloud_citadel.ogg',
     volume: 0.5,
     loop: true,
+    kenneyTrack: 'rpgBattleTheme.ogg',
   },
 
   kernel_caves: {
@@ -303,6 +311,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/kernel_caves.ogg',
     volume: 0.4,
     loop: true,
+    kenneyTrack: 'rpgExploration.ogg',
   },
 
   serverless_steppes: {
@@ -310,6 +319,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/serverless_steppes.ogg',
     volume: 0.4,
     loop: true,
+    kenneyTrack: 'rpgExploration.ogg',
   },
 
   three_am_tavern: {
@@ -317,6 +327,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/three_am_tavern.ogg',
     volume: 0.5,
     loop: true,
+    kenneyTrack: 'rpgTitle.ogg',
   },
 
   legacy_codebase: {
@@ -324,6 +335,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/legacy_codebase.ogg',
     volume: 0.4,
     loop: true,
+    kenneyTrack: 'rpgExploration.ogg',
   },
 
   outcast_network: {
@@ -331,6 +343,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/outcast_network.ogg',
     volume: 0.5,
     loop: true,
+    kenneyTrack: 'rpgBattleTheme.ogg',
   },
 
   shadow_registry: {
@@ -338,6 +351,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/shadow_registry.ogg',
     volume: 0.3,
     loop: true,
+    kenneyTrack: 'rpgBattleTheme.ogg',
   },
 
   battle_incident: {
@@ -345,6 +359,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_incident.ogg',
     volume: 0.7,
     loop: true,
+    kenneyTrack: 'rpgBattleTheme.ogg',
   },
 
   battle_engineer: {
@@ -352,6 +367,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_engineer.ogg',
     volume: 0.7,
     loop: true,
+    kenneyTrack: 'rpgBattleTheme.ogg',
   },
 
   battle_cursed: {
@@ -359,6 +375,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_cursed.ogg',
     volume: 0.7,
     loop: true,
+    kenneyTrack: 'rpgBattleTheme.ogg',
   },
 
   battle_throttlemaster: {
@@ -366,6 +383,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/battle_throttlemaster.ogg',
     volume: 0.8,
     loop: true,
+    kenneyTrack: 'rpgBattleTheme.ogg',
   },
 
   victory: {
@@ -373,6 +391,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/victory.ogg',
     volume: 0.7,
     loop: false,
+    kenneyTrack: 'rpgVictoryJingle.ogg',
   },
 
   game_over: {
@@ -380,6 +399,7 @@ const BGM_CONFIG = {
     file: 'assets/audio/bgm/game_over.ogg',
     volume: 0.6,
     loop: false,
+    kenneyTrack: 'rpgDefeatJingle.ogg',
   },
 }
 
