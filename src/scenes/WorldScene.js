@@ -5,7 +5,12 @@ import { CONFIG, MOVEMENT } from '../config.js'
 import { GameState, hasItem, addItem, markDirty, grantXpOnce } from '#state/GameState.js'
 import { getById as getStoryById } from '#data/story.js'
 import { getById as getQuestById } from '#data/quests.js'
-import { resolveChoice, isQuestCompleted, getCompletedDialog } from '#engine/QuestEngine.js'
+import {
+  resolveChoice, isQuestCompleted, getCompletedDialog,
+  isQuestAvailable, startQuest, getCurrentStage, advanceStage,
+  getBranchLabels, resolveBranchChoice, resolveBranchBattleOutcome,
+  resolveQuizAnswer,
+} from '#engine/QuestEngine.js'
 import {
   DIR_OFFSETS, lerp, canRun, resolveDirection, isTileWalkable,
   updateBump, updateStep, commitStep, onStepComplete,
@@ -13,7 +18,7 @@ import {
   clampTileToInterior, findNearestWalkableTile, persistPlayerTile, syncPlayerTileFromPixels,
 } from '#engine/MovementEngine.js'
 import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
-import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
+import { resolveNpcDialog, resolveNpcPages, checkActTransition } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { Menu } from '#ui/Menu.js'
@@ -799,6 +804,26 @@ export class WorldScene extends BaseScene {
       return
     }
 
+    if (npcName === 'dagny_dba') {
+      this._interactDagny()
+      return
+    }
+
+    if (npcName === 'intern_ivan') {
+      this._resolveQuestNpc('intern_ivan_roaming')
+      return
+    }
+
+    if (npcName === 'architect_alice') {
+      this._resolveQuestNpc('architect_alice_design')
+      return
+    }
+
+    if (npcName === 'tech_debt_auditor') {
+      this._interactTechDebtAuditor()
+      return
+    }
+
     if (npcName === 'azure_terminal') {
       // Unlock terminal flag on interaction
       const terminalFlag = `terminal_unlocked_${this._regionId}`
@@ -1081,6 +1106,220 @@ export class WorldScene extends BaseScene {
         this.dialog.show(result.dialog, () => { this._interacting = false })
       })
     })
+  }
+
+  _interactTechDebtAuditor() {
+    const chain = [
+      'tech_debt_cleanup_01', 'tech_debt_cleanup_02', 'tech_debt_cleanup_03',
+      'tech_debt_cleanup_04', 'tech_debt_cleanup_05', 'tech_debt_cleanup_06',
+      'tech_debt_cleanup_07', 'tech_debt_cleanup_08', 'tech_debt_cleanup_09',
+      'tech_debt_cleanup_10',
+    ]
+    const currentQuestId = chain.find(id => !isQuestCompleted(id, GameState.story.completedQuests))
+    if (!currentQuestId) {
+      const lines = getCompletedDialog('tech_debt_cleanup_10')
+      this.dialog.show(lines, () => { this._interacting = false })
+      return
+    }
+    this._resolveQuestNpc(currentQuestId)
+  }
+
+  _resolveQuestNpc(questId) {
+    const quest = getQuestById(questId)
+    const isComplete = (quest?.completionFlag && GameState.story.flags[quest.completionFlag])
+      || isQuestCompleted(questId, GameState.story.completedQuests)
+
+    if (isComplete) {
+      const lines = getCompletedDialog(questId)
+      this.dialog.show(lines, () => { this._interacting = false })
+      return
+    }
+
+    const { available, reason } = isQuestAvailable(questId, GameState.story)
+    if (!available) {
+      const msg = quest?.reminderDialog ?? [reason ?? "Come back later."]
+      this.dialog.show(Array.isArray(msg) ? msg : [msg], () => { this._interacting = false })
+      return
+    }
+
+    startQuest(questId, GameState.story)
+
+    const stage = getCurrentStage(questId, GameState.story)
+    if (!stage) { this._interacting = false; return }
+
+    if (stage.requiresFlags && !stage.requiresFlags.every(f => GameState.story.flags[f])) {
+      const msg = quest?.reminderDialog ?? ["Come back when you're ready."]
+      this.dialog.show(Array.isArray(msg) ? msg : [msg], () => { this._interacting = false })
+      return
+    }
+
+    const choices = stage.choices.map(c => c.text)
+    this.dialog.show(stage.dialog, () => {
+      this.dialog.showChoices('What do you do?', choices, (idx) => {
+        const result = resolveChoice(questId, idx, GameState.story, GameState.player)
+        if (!result) { this._interacting = false; return }
+        this._applyQuestChoiceResult(questId, result, stage)
+      })
+    })
+  }
+
+  _applyQuestChoiceResult(questId, result, stage) {
+    const quest = getQuestById(questId)
+
+    if (result.penalty && !result.stageReset) {
+      if (result.penalty.type === 'hp' && result.penalty.value < 0) {
+        GameState.player.hp = Math.max(1, GameState.player.hp + result.penalty.value)
+      } else if (result.penalty.type === 'budget') {
+        GameState.player.budget = Math.max(0, (GameState.player.budget || 0) + result.penalty.value)
+      } else if (result.penalty.type === 'reputation') {
+        GameState.player.reputation = Math.max(0, (GameState.player.reputation || 0) + result.penalty.value)
+      }
+    }
+    if (result.repDelta) {
+      GameState.player.reputation = Math.max(0, Math.min(100, (GameState.player.reputation || 0) + result.repDelta))
+    }
+    if (result.shameDelta) {
+      GameState.player.shamePoints = (GameState.player.shamePoints || 0) + result.shameDelta
+    }
+    if (result.flag) {
+      GameState.story.flags[result.flag] = true
+    }
+    if (result.itemReward) {
+      addItem('tools', result.itemReward.id, result.itemReward.qty)
+    }
+
+    if (result.stageReset) {
+      GameState.story.activeQuests[questId].stage = result.stageIndex
+      markDirty()
+      const respDialog = result.responseDialog.length > 0 ? result.responseDialog : (stage.wrongDialog ?? ["Try again."])
+      this.dialog.show(respDialog, () => { this._interacting = false })
+      return
+    }
+
+    let respDialog = result.responseDialog.length > 0
+      ? result.responseDialog
+      : (result.correct ? (stage.correctDialog ?? []) : (stage.wrongDialog ?? []))
+    if (!respDialog.length) respDialog = ['OK.']
+
+    if (result.correct) {
+      if (result.xp > 0) grantXpOnce(`${questId}_stage_${result.stageIndex}_xp`, result.xp)
+      const { questComplete } = advanceStage(questId, GameState.story)
+      if (questComplete) {
+        if (quest?.rewards?.xp > 0) grantXpOnce(`${questId}_completion_xp`, quest.rewards.xp)
+        if (quest?.rewards?.technicalDebtClear) {
+          GameState.player.technicalDebt = Math.max(0, (GameState.player.technicalDebt || 0) - quest.rewards.technicalDebtClear)
+        }
+        if (quest?.rewards?.reputation) {
+          GameState.player.reputation = Math.min(100, (GameState.player.reputation || 0) + quest.rewards.reputation)
+        }
+        GameState.story.completedQuests.push(questId)
+        markDirty()
+        const transition = checkActTransition(GameState.story.act, GameState.story.flags)
+        if (transition) {
+          GameState.story.act = transition.toAct
+          markDirty()
+        }
+      } else {
+        markDirty()
+      }
+    }
+
+    this.dialog.show(respDialog, () => { this._interacting = false })
+  }
+
+  _interactDagny() {
+    const questId = 'do_not_touch'
+    const quest = getQuestById(questId)
+
+    if (quest?.completionFlag && GameState.story.flags[quest.completionFlag]) {
+      const lines = getCompletedDialog(questId)
+      this.dialog.show(lines, () => { this._interacting = false })
+      return
+    }
+
+    const { available, reason } = isQuestAvailable(questId, GameState.story)
+    if (!available) {
+      const msg = quest?.reminderDialog ?? [reason ?? "Come back later."]
+      this.dialog.show(Array.isArray(msg) ? msg : [msg], () => { this._interacting = false })
+      return
+    }
+
+    startQuest(questId, GameState.story)
+
+    const stage = getCurrentStage(questId, GameState.story)
+    const stageDialog = stage?.dialog ?? quest.stages[0].dialog
+    const labels = getBranchLabels(questId)
+    const branchTexts = labels.map(l => l.label)
+
+    this.dialog.show(stageDialog, () => {
+      this.dialog.showChoices('What do you do?', branchTexts, (idx) => {
+        const { key: branchKey } = labels[idx]
+        const events = resolveBranchChoice(questId, branchKey)
+
+        const triggerEvent = events.find(e => e.type === 'trigger_encounter')
+        const quizEvent    = events.find(e => e.type === 'quiz_start')
+
+        if (triggerEvent) {
+          // Branch 'open': trigger encounter, then apply battle outcome on return.
+          // Pending state is stored in _session (not persisted) so it's cleared on reload.
+          GameState._session.pendingBranchQuest = questId
+          GameState._session.pendingBranchKey   = branchKey
+          this._interacting = false
+          // Encounter handling is wired separately via the encounter step system
+          return
+        }
+
+        if (quizEvent) {
+          const quizChoices = quizEvent.value.map(q => q.text)
+          this.dialog.showChoices('Choose your approach:', quizChoices, (qIdx) => {
+            const quizEvents = resolveQuizAnswer(questId, branchKey, qIdx)
+            this._applyBranchEvents(questId, branchKey, quizEvents)
+          })
+        }
+      })
+    })
+  }
+
+  _applyBranchEvents(questId, branchKey, events) {
+    for (const ev of events) {
+      if (ev.type === 'xp_gain' && ev.value > 0) {
+        grantXpOnce(`${questId}_${branchKey}_xp_${ev.value}`, ev.value)
+      } else if (ev.type === 'budget_drain') {
+        GameState.player.budget = Math.max(0, (GameState.player.budget || 0) - ev.value)
+      } else if (ev.type === 'item_drop') {
+        addItem('tools', ev.value, 1)
+      } else if (ev.type === 'set_flag') {
+        GameState.story.flags[ev.value] = true
+      } else if (ev.type === 'shame') {
+        GameState.player.shamePoints = (GameState.player.shamePoints || 0) + ev.value
+      } else if (ev.type === 'reputation') {
+        GameState.player.reputation = Math.max(0, Math.min(100, (GameState.player.reputation || 0) + ev.value))
+      } else if (ev.type === 'damage') {
+        GameState.player.hp = Math.max(1, GameState.player.hp - ev.value)
+      } else if (ev.type === 'heal') {
+        GameState.player.hp = Math.min(GameState.player.maxHp, GameState.player.hp + ev.value)
+      }
+    }
+    markDirty()
+
+    const dialogLines = events.filter(e => e.type === 'dialog').map(e => e.text)
+    const questComplete = events.some(e => e.type === 'set_flag' && e.value === getQuestById(questId)?.completionFlag)
+
+    if (questComplete) {
+      GameState.story.completedQuests.push(questId)
+      markDirty()
+      const transition = checkActTransition(GameState.story.act, GameState.story.flags)
+      if (transition) {
+        GameState.story.act = transition.toAct
+        markDirty()
+      }
+    }
+
+    if (dialogLines.length > 0) {
+      this.dialog.show(dialogLines, () => { this._interacting = false })
+    } else {
+      this._interacting = false
+    }
   }
 
   shutdown() {
