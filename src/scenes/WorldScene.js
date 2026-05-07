@@ -1153,7 +1153,7 @@ export class WorldScene extends BaseScene {
       return
     }
 
-    const choices = stage.choices.map(c => c.text)
+    const choices = stage.choices?.map(c => c.text) ?? []
     this.dialog.show(stage.dialog, () => {
       this.dialog.showChoices('What do you do?', choices, (idx) => {
         const result = resolveChoice(questId, idx, GameState.story, GameState.player)
@@ -1249,7 +1249,7 @@ export class WorldScene extends BaseScene {
     const stage = getCurrentStage(questId, GameState.story)
     const stageDialog = stage?.dialog ?? quest.stages[0].dialog
     const labels = getBranchLabels(questId)
-    const branchTexts = labels.map(l => l.label)
+    const branchTexts = labels?.map(l => l.label) ?? []
 
     this.dialog.show(stageDialog, () => {
       this.dialog.showChoices('What do you do?', branchTexts, (idx) => {
