@@ -81,18 +81,46 @@ CC0 — no attribution required; credited here as good practice.
 
 ---
 
+## Kenney Space Kit (CC0)
+
+**Supplemental tiles** for the `/dev/null Void` (`dev_null_void`) region — space / void biome.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/space-kit |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Tiles adapted to 48×48px (3× nearest-neighbor upscale from 16px source); recoloured to match void palette |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Space Kit assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Void / space biome tileset (12 tiles) | `assets/tiles/void_tiles.png` |
+
+---
+
 ## Kenney RPG Urban Pack (CC0)
 
-**Supplemental tiles** for tech/office/server-room regions not covered by Ninja Adventure.
+**Supplemental tiles** for tech/office/server-room regions and the `Deprecated Azure Region` (`deprecated_azure_region`) wasteland biome.
 
 | Field | Value |
 |---|---|
 | Author | Kenney (kenney.nl) |
 | Source | https://kenney.nl/assets/rpg-urban-pack |
 | License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
-| Modifications | Upscaled to match 48×48px tile grid (if sourced from a 16px base) |
+| Modifications | Upscaled to match 48×48px tile grid (if sourced from a 16px base); wasteland tiles recoloured to rust/decay palette |
 
 CC0 — no attribution required; credited here as good practice.
+
+### Kenney RPG Urban Pack assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Tech / office tileset (50 tiles) | `assets/tiles/kenney_tech_office.png` |
+| Wasteland / ruins biome tileset (12 tiles) | `assets/tiles/wasteland_tiles.png` |
 
 ---
 

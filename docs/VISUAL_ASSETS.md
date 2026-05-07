@@ -182,6 +182,8 @@ All sprites are scaled 3× from their source resolution for consistent clarity a
 | Ninja Adventure characters | 16×16px | 48×48px | 3× |
 | Ninja Adventure facesets | 16×16px | 48×48px | 3× |
 | Kenney UI Pack panels | varies | 48×48px+ | scaled |
+| Kenney Space Kit tiles | 16×16px | 48×48px | 3× |
+| Kenney RPG Urban Pack tiles | 16×16px | 48×48px | 3× |
 | PokeRogue battle backgrounds | native | native | 1× |
 
 ---
@@ -313,10 +315,60 @@ These can ship without a sprite until custom art is created. Do not set a placeh
 
 All tile sets use 48×48px tiles on a single-row sprite sheet.
 
-| Tile set | Purpose | Sheet dimensions |
+| Tile set | Purpose | Region(s) | Sheet dimensions |
+|---|---|---|---|
+| `stub_tiles.png` | Dev placeholder (5 tiles) | All (fallback) | 240×48px |
+| `kenney_tech_office.png` | Tech / office / server-room biome (50 tiles) | `oldcorp_basement`, `sre_command_center`, `server_graveyard` | 240×480px |
+| `void_tiles.png` | Space / void biome (12 tiles) | `dev_null_void` | 576×48px |
+| `wasteland_tiles.png` | Wasteland / ruined infrastructure biome (12 tiles) | `deprecated_azure_region` | 576×48px |
+
+All tileset PNGs live in `assets/tiles/`. Matching `.tsj` (Tiled JSON) descriptor files live alongside them.
+
+### Kenney Space Kit — void biome
+
+`void_tiles.png` is adapted from the [Kenney Space Kit](https://kenney.nl/assets/space-kit) (CC0).  
+Source tiles are 16×16px, upscaled 3× to 48×48px using nearest-neighbor interpolation.
+
+| Tile index | Tile name | Layer role |
 |---|---|---|
-| `stub_tiles.png` | Dev placeholder (5 tiles) | 240×48px |
-| *(production tiles TBD)* | Overworld terrain | TBD |
+| 0 | `void_ground` | Ground |
+| 1 | `void_ground_corrupted` | Ground |
+| 2 | `void_platform` | Objects |
+| 3 | `void_platform_edge_l` | Objects |
+| 4 | `void_platform_edge_r` | Objects |
+| 5 | `void_star_dense` | Ground |
+| 6 | `void_debris` | Objects |
+| 7 | `void_glitch_h` | Overlay |
+| 8 | `void_glitch_v` | Overlay |
+| 9 | `void_dissolution` | Overlay |
+| 10 | `void_portal_glow` | Objects |
+| 11 | `void_wall` | Collision |
+
+**Palette:** near-black void (`#0a0a1a`), corruption purple (`#7c00ff`), glitch cyan (`#00ffc8`), portal glow (`#b030f0`).  
+Full spec: `assets/maps/TILE_SPECS.md §1`.
+
+### Kenney RPG Urban Pack — wasteland biome
+
+`wasteland_tiles.png` is adapted from the [Kenney RPG Urban Pack](https://kenney.nl/assets/rpg-urban-pack) (CC0).  
+Source tiles are 16×16px, upscaled 3× to 48×48px and recoloured to a rust/decay palette.
+
+| Tile index | Tile name | Layer role |
+|---|---|---|
+| 0 | `waste_ground` | Ground |
+| 1 | `waste_ground_heavy` | Ground |
+| 2 | `waste_concrete` | Ground |
+| 3 | `waste_rubble` | Objects |
+| 4 | `waste_dead_grass` | Objects |
+| 5 | `waste_rusted_pipe` | Objects |
+| 6 | `waste_server_rack` | Objects |
+| 7 | `waste_caution_tape` | Objects |
+| 8 | `waste_warning_sign` | Objects |
+| 9 | `waste_azure_logo` | Objects |
+| 10 | `waste_wire_fence` | Overlay |
+| 11 | `waste_wall` | Collision |
+
+**Palette:** cracked earth (`#a07820`), rust (`#8b3a1a`), concrete (`#9a9a8a`), caution yellow (`#ffcc00`), faded Azure blue (`#2060a0`).  
+Full spec: `assets/maps/TILE_SPECS.md §2`.
 
 ---
 

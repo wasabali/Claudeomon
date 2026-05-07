@@ -2264,6 +2264,19 @@
       "tilecount": 5,
       "tileheight": 48,
       "tilewidth": 48
+    },
+    {
+      "columns": 12,
+      "firstgid": 6,
+      "image": "../tiles/void_tiles.png",
+      "imageheight": 48,
+      "imagewidth": 576,
+      "margin": 0,
+      "name": "void_tiles",
+      "spacing": 0,
+      "tilecount": 12,
+      "tileheight": 48,
+      "tilewidth": 48
     }
   ],
   "tilewidth": 48,

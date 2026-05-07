@@ -41,8 +41,47 @@ const TILESET_TECH = {
   tilewidth: TILE,
 }
 
+// Void tileset (GIDs 6–17) — appended for void-themed regions.
+// Image lives at assets/tiles/void_tiles.png (576×48, 12 tiles in a single row).
+const TILESET_VOID = {
+  columns: 12,
+  firstgid: 6,
+  image: '../tiles/void_tiles.png',
+  imageheight: TILE,
+  imagewidth: TILE * 12,
+  margin: 0,
+  name: 'void_tiles',
+  spacing: 0,
+  tilecount: 12,
+  tileheight: TILE,
+  tilewidth: TILE,
+}
+
+// Wasteland tileset (GIDs 6–17) — appended for wasteland-themed regions.
+// Image lives at assets/tiles/wasteland_tiles.png (576×48, 12 tiles in a single row).
+const TILESET_WASTELAND = {
+  columns: 12,
+  firstgid: 6,
+  image: '../tiles/wasteland_tiles.png',
+  imageheight: TILE,
+  imagewidth: TILE * 12,
+  margin: 0,
+  name: 'wasteland_tiles',
+  spacing: 0,
+  tilecount: 12,
+  tileheight: TILE,
+  tilewidth: TILE,
+}
+
 // Tech GID offset (add to 1-based tile ID to get map GID)
 const TECH_GID_OFFSET = TILESET_TECH.firstgid - 1  // 5
+
+// Void/Wasteland GID offset — same firstgid as tech (each biome uses its own second tileset slot)
+const BIOME_GID_OFFSET = 5  // firstgid 6 − 1
+
+// GIDs for the first (ground) tile in each biome tileset (local ID 1 = void_ground / waste_ground)
+const VOID_GROUND_GID      = BIOME_GID_OFFSET + 1  // 6
+const WASTELAND_GROUND_GID = BIOME_GID_OFFSET + 1  // 6
 
 // Well-known tech tile local IDs (1-based within kenney_tech_office)
 const T = {
@@ -326,11 +365,17 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const rng = seededRng(hashSeed(regionId))
 
   const isTech = !!region.hasTechTileset
+  const isVoid = !!region.hasVoidTileset
+  const isWasteland = !!region.hasWastelandTileset
   const openings = getOpeningTiles(w, h, connections)
   const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech)
 
-  // Tech regions use the tech floor as their ground tile instead of stub tile 1
-  const groundGid = isTech ? techGid(T.TECH_FLOOR) : 1
+  // Biome regions use their biome floor as the ground tile; tech regions use tech_floor;
+  // all others fall back to stub tile 1.
+  const groundGid = isTech ? techGid(T.TECH_FLOOR)
+                  : isVoid ? VOID_GROUND_GID
+                  : isWasteland ? WASTELAND_GROUND_GID
+                  : 1
   const groundLayer = makeTileLayer(1, 'Ground', w, h, groundGid)
   const overlayLayer = makeTileLayer(4, 'Overlay', w, h, 0)
 
@@ -417,7 +462,10 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
       renderorder: 'right-down',
       tiledversion: '1.10.0',
       tileheight: TILE,
-      tilesets: isTech ? [TILESET_STUB, TILESET_TECH] : [TILESET_STUB],
+      tilesets: isTech      ? [TILESET_STUB, TILESET_TECH]
+               : isVoid     ? [TILESET_STUB, TILESET_VOID]
+               : isWasteland ? [TILESET_STUB, TILESET_WASTELAND]
+               : [TILESET_STUB],
       tilewidth: TILE,
       type: 'map',
       version: '1.10',
