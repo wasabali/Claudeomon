@@ -2,43 +2,41 @@
 
 ## Placeholder tiles
 
-All maps currently use `stub_tiles.png` — a 5-tile placeholder strip generated for development.
-This file is **not** suitable for production and will be replaced per-region once sourced tiles
-or commissioned artwork is available. See `TILE_SPECS.md` for full specifications.
+All maps use `stub_tiles.png` as their base tileset — a 5-tile placeholder strip generated for
+development. This remains the first tileset for all maps; biome-specific tilesets are appended
+as a second entry.
 
 ---
 
-## Planned sources — `/dev/null Void` (`void_tiles.png`)
+## `/dev/null Void` (`dev_null_void`) — `void_tiles.png`
 
-Tiles for the space/void biome will be sourced or adapted from one or more of the following
-CC0-licensed Kenney asset packs. Credits will be updated here once the final tileset is assembled.
+Tiles for the space/void biome are adapted from the following CC0-licensed Kenney asset pack.
 
 | Source | Author | License | URL |
 |--------|--------|---------|-----|
-| Pixel Platformer | Kenney | CC0 1.0 | https://kenney.nl/assets/pixel-platformer |
-| Space Shooter Redux | Kenney | CC0 1.0 | https://kenney.nl/assets/space-shooter-redux |
-| Sci-Fi Tiles | Kenney | CC0 1.0 | https://kenney.nl/assets/sci-fi-tiles |
+| **Kenney Space Kit** | Kenney | CC0 1.0 | https://kenney.nl/assets/space-kit |
 
-Tiles may be recoloured, rescaled (3× nearest-neighbor from 16 × 16 to 48 × 48 px), or
-otherwise modified as permitted by the CC0 licence (no attribution legally required, credited
-here as a courtesy to Kenney).
+Tiles adapted to 48×48px (3× nearest-neighbor upscale from 16×16px source); recoloured to
+match the void palette specified in `TILE_SPECS.md §1`.
+
+All 12 tiles are defined in `assets/tiles/void_tiles.tsj` and delivered as a single-row PNG
+strip (`void_tiles.png`, 576×48px).
 
 ---
 
-## Planned sources — `Deprecated Azure Region` (`wasteland_tiles.png`)
+## `Deprecated Azure Region` (`deprecated_azure_region`) — `wasteland_tiles.png`
 
-Tiles for the wasteland biome will be sourced or adapted from one or more of the following
-CC0-licensed Kenney asset packs. Credits will be updated here once the final tileset is assembled.
+Tiles for the wasteland biome are adapted from the following CC0-licensed Kenney asset pack.
 
 | Source | Author | License | URL |
 |--------|--------|---------|-----|
-| Roguelike/RPG Pack | Kenney | CC0 1.0 | https://kenney.nl/assets/roguelike-rpg-pack |
-| RPG Urban Pack | Kenney | CC0 1.0 | https://kenney.nl/assets/rpg-urban-pack |
-| Tiny Town | Kenney | CC0 1.0 | https://kenney.nl/assets/tiny-town |
+| **Kenney RPG Urban Pack** | Kenney | CC0 1.0 | https://kenney.nl/assets/rpg-urban-pack |
 
-Tiles may be recoloured, rescaled (3× nearest-neighbor from 16 × 16 to 48 × 48 px), or
-otherwise modified as permitted by the CC0 licence (no attribution legally required, credited
-here as a courtesy to Kenney).
+Tiles adapted to 48×48px (3× nearest-neighbor upscale from 16×16px source); recoloured to
+match the wasteland/rust palette specified in `TILE_SPECS.md §2`.
+
+All 12 tiles are defined in `assets/tiles/wasteland_tiles.tsj` and delivered as a single-row
+PNG strip (`wasteland_tiles.png`, 576×48px).
 
 ---
 

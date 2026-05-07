@@ -1,0 +1,329 @@
+{
+  "columns": 12,
+  "image": "void_tiles.png",
+  "imageheight": 48,
+  "imagewidth": 576,
+  "margin": 0,
+  "name": "void_tiles",
+  "spacing": 0,
+  "tilecount": 12,
+  "tiledversion": "1.10.0",
+  "tileheight": 48,
+  "tilewidth": 48,
+  "tiles": [
+    {
+      "id": 0,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_ground"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Deep space void floor — featureless dark ground"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 1,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_ground_corrupted"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Corrupted void floor — glitch artefacts on dark ground"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 2,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_platform"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Floating void platform — walkable raised surface"
+        }
+      ],
+      "type": "prop"
+    },
+    {
+      "id": 3,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_platform_edge_l"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Void platform left edge tile"
+        }
+      ],
+      "type": "prop"
+    },
+    {
+      "id": 4,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_platform_edge_r"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Void platform right edge tile"
+        }
+      ],
+      "type": "prop"
+    },
+    {
+      "id": 5,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_star_dense"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "floor"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Dense starfield — pure deep-space background tile"
+        }
+      ],
+      "type": "floor"
+    },
+    {
+      "id": 6,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_debris"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Drifting debris — deleted-data fragments"
+        }
+      ],
+      "type": "prop"
+    },
+    {
+      "id": 7,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_glitch_h"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Horizontal glitch bar — digital corruption effect"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 8,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_glitch_v"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Vertical glitch bar — digital corruption effect"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 9,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_dissolution"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "overlay"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Dissolution haze — tiles fading into the void"
+        }
+      ],
+      "type": "overlay"
+    },
+    {
+      "id": 10,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_portal_glow"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Portal glow marker — luminous void exit indicator"
+        }
+      ],
+      "type": "prop"
+    },
+    {
+      "id": 11,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_wall"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "wall"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Solid void wall — invisible collision boundary"
+        }
+      ],
+      "type": "wall"
+    }
+  ],
+  "type": "tileset",
+  "version": "1.10"
+}

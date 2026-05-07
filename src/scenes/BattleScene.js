@@ -36,6 +36,15 @@ const BUDGET_BAR_W     = Math.floor(CONFIG.WIDTH * 0.375)
 const BUDGET_BAR_H     = 4
 const LOG_X            = 4
 const LOG_Y            = CONFIG.HEIGHT - 76
+// Portrait layout — 48×48px static images next to HP bars.
+// Player portrait sits above the battle log (bottom-left), anchored to LOG_Y so it
+// never overlaps the log text or skill menu below it.
+// Opponent portrait sits to the left of the enemy name (top-center).
+const PORTRAIT_SIZE         = CONFIG.PORTRAIT_SIZE
+const PLAYER_PORTRAIT_X     = PLAYER_HP_BAR_X
+const PLAYER_PORTRAIT_Y     = LOG_Y - PORTRAIT_SIZE - 2
+const OPPONENT_PORTRAIT_X   = ENEMY_HP_BAR_X - PORTRAIT_SIZE - 4
+const OPPONENT_PORTRAIT_Y   = ENEMY_HP_BAR_Y
 
 // ---------------------------------------------------------------------------
 // BattleScene
@@ -152,6 +161,23 @@ export class BattleScene extends BaseScene {
       this._slaText = this.add.text(SLA_TIMER_X, SLA_TIMER_Y, this._slaLabel(), {
         ...textStyle, color: '#ff6666',
       })
+    }
+
+    // Battle portraits — 48×48px static images (Kenney Micro Roguelike, CC0).
+    // Rendered only when the portrait texture has been loaded; silently skipped otherwise.
+    const playerPortraitKey   = 'portrait_player'
+    const opponentPortraitKey = `portrait_${opponent.id}`
+    if (this.textures.exists(playerPortraitKey)) {
+      this.add.image(PLAYER_PORTRAIT_X, PLAYER_PORTRAIT_Y, playerPortraitKey)
+        .setOrigin(0, 0)
+        .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
+        .setDepth(1)
+    }
+    if (this.textures.exists(opponentPortraitKey)) {
+      this.add.image(OPPONENT_PORTRAIT_X, OPPONENT_PORTRAIT_Y, opponentPortraitKey)
+        .setOrigin(0, 0)
+        .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
+        .setDepth(1)
     }
   }
 

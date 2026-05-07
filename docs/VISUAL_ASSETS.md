@@ -180,8 +180,10 @@ All sprites are scaled 3× from their source resolution for consistent clarity a
 |---|---|---|---|
 | Ninja Adventure tiles | 16×16px | 48×48px | 3× |
 | Ninja Adventure characters | 16×16px | 48×48px | 3× |
-| Ninja Adventure facesets | 16×16px | 48×48px | 3× |
+| Kenney Micro Roguelike portraits | 16×16px | 48×48px | 3× |
 | Kenney UI Pack panels | varies | 48×48px+ | scaled |
+| Kenney Space Kit tiles | 16×16px | 48×48px | 3× |
+| Kenney RPG Urban Pack tiles | 16×16px | 48×48px | 3× |
 | PokeRogue battle backgrounds | native | native | 1× |
 
 ---
@@ -224,12 +226,12 @@ Small static portraits shown next to HP bars during battle.
 
 | Portrait type | Size | Source |
 |---|---|---|
-| Player portrait | 48×48px | Ninja Adventure faceset, 3× upscale |
-| Trainer portrait | 48×48px | Ninja Adventure faceset, 3× upscale |
+| Player portrait | 48×48px | Kenney Micro Roguelike, 3× upscale |
+| Trainer portrait | 48×48px | Kenney Micro Roguelike, 3× upscale |
 
-**Why 48×48px:** Ninja Adventure facesets are 16×16px native. A 3× upscale gives 48×48px, which matches
-the tile grid and all other in-game sprites. A 6× upscale (96×96px) would make each source pixel a 6×6 block
-and look too blocky at the game's resolution.
+**Why 48×48px:** Kenney Micro Roguelike sprites are 16×16px native. A 3× upscale gives 48×48px, which matches
+the tile grid and all other in-game sprites. See [Kenney Micro Roguelike](#kenney-micro-roguelike) below for the
+download URL and upscale instructions.
 
 ---
 ---
@@ -313,10 +315,60 @@ These can ship without a sprite until custom art is created. Do not set a placeh
 
 All tile sets use 48×48px tiles on a single-row sprite sheet.
 
-| Tile set | Purpose | Sheet dimensions |
+| Tile set | Purpose | Region(s) | Sheet dimensions |
+|---|---|---|---|
+| `stub_tiles.png` | Dev placeholder (5 tiles) | All (fallback) | 240×48px |
+| `kenney_tech_office.png` | Tech / office / server-room biome (50 tiles) | `oldcorp_basement`, `sre_command_center`, `server_graveyard` | 240×480px |
+| `void_tiles.png` | Space / void biome (12 tiles) | `dev_null_void` | 576×48px |
+| `wasteland_tiles.png` | Wasteland / ruined infrastructure biome (12 tiles) | `deprecated_azure_region` | 576×48px |
+
+All tileset PNGs live in `assets/tiles/`. Matching `.tsj` (Tiled JSON) descriptor files live alongside them.
+
+### Kenney Space Kit — void biome
+
+`void_tiles.png` is adapted from the [Kenney Space Kit](https://kenney.nl/assets/space-kit) (CC0).  
+Source tiles are 16×16px, upscaled 3× to 48×48px using nearest-neighbor interpolation.
+
+| Tile index | Tile name | Layer role |
 |---|---|---|
-| `stub_tiles.png` | Dev placeholder (5 tiles) | 240×48px |
-| *(production tiles TBD)* | Overworld terrain | TBD |
+| 0 | `void_ground` | Ground |
+| 1 | `void_ground_corrupted` | Ground |
+| 2 | `void_platform` | Objects |
+| 3 | `void_platform_edge_l` | Objects |
+| 4 | `void_platform_edge_r` | Objects |
+| 5 | `void_star_dense` | Ground |
+| 6 | `void_debris` | Objects |
+| 7 | `void_glitch_h` | Overlay |
+| 8 | `void_glitch_v` | Overlay |
+| 9 | `void_dissolution` | Overlay |
+| 10 | `void_portal_glow` | Objects |
+| 11 | `void_wall` | Collision |
+
+**Palette:** near-black void (`#0a0a1a`), corruption purple (`#7c00ff`), glitch cyan (`#00ffc8`), portal glow (`#b030f0`).  
+Full spec: `assets/maps/TILE_SPECS.md §1`.
+
+### Kenney RPG Urban Pack — wasteland biome
+
+`wasteland_tiles.png` is adapted from the [Kenney RPG Urban Pack](https://kenney.nl/assets/rpg-urban-pack) (CC0).  
+Source tiles are 16×16px, upscaled 3× to 48×48px and recoloured to a rust/decay palette.
+
+| Tile index | Tile name | Layer role |
+|---|---|---|
+| 0 | `waste_ground` | Ground |
+| 1 | `waste_ground_heavy` | Ground |
+| 2 | `waste_concrete` | Ground |
+| 3 | `waste_rubble` | Objects |
+| 4 | `waste_dead_grass` | Objects |
+| 5 | `waste_rusted_pipe` | Objects |
+| 6 | `waste_server_rack` | Objects |
+| 7 | `waste_caution_tape` | Objects |
+| 8 | `waste_warning_sign` | Objects |
+| 9 | `waste_azure_logo` | Objects |
+| 10 | `waste_wire_fence` | Overlay |
+| 11 | `waste_wall` | Collision |
+
+**Palette:** cracked earth (`#a07820`), rust (`#8b3a1a`), concrete (`#9a9a8a`), caution yellow (`#ffcc00`), faded Azure blue (`#2060a0`).  
+Full spec: `assets/maps/TILE_SPECS.md §2`.
 
 ---
 
@@ -374,6 +426,7 @@ HP bar colours are rendered programmatically: green (`#00cc44`) > 50%, yellow (`
 | Asset | Source | Licence |
 |---|---|---|
 | Tiles, characters, facesets | [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) — Pixel-Boy & AAA | CC0 (public domain) |
+| Battle portraits | [Kenney Micro Roguelike](https://kenney.nl/assets/micro-roguelike) — Kenney | CC0 (public domain) |
 | UI chrome (panels, dialog frames) | [Kenney UI Pack](https://kenney.nl/assets/ui-pack) — Kenney | CC0 (public domain) |
 | Battle backgrounds | [PokeRogue](https://github.com/pagefaultgames/pokerogue) — pagefaultgames | CC-BY-NC-SA-4.0 |
 | Font | [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) — CodeMan38 | OFL-1.1 |
@@ -391,12 +444,12 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 | Source | Role | License |
 |--------|------|---------|
-| **Kenney Micro Roguelike** | Player sprites, trainer sprites, incident sprites | CC0 1.0 (Public Domain) |
+| **Kenney Micro Roguelike** | Character sprite archetypes, incident sprites, battle portraits | CC0 1.0 (Public Domain) |
 | **Kenney RPG Audio** | BGM tracks and SFX | CC0 1.0 (Public Domain) |
 | **Kenney Game Icons** | Item icons | CC0 1.0 (Public Domain) |
 | **Kenney UI Pack** | UI chrome — dialog panels, menus, HUD window frames | CC0 1.0 (Public Domain) |
 | **Kenney RPG Urban** | Supplemental tech/urban tiles | CC0 1.0 (Public Domain) |
-| **Ninja Adventure** | Supplemental characters, monsters, tiles, VFX | CC0 1.0 (Public Domain) |
+| **Ninja Adventure** | Supplemental character archetypes, tiles, VFX | CC0 1.0 (Public Domain) |
 | **PokeRogue** | Battle backgrounds | CC-BY-NC-SA-4.0 |
 
 ---
@@ -648,6 +701,43 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 
 ---
 
+## Kenney Micro Roguelike
+
+### Overview
+
+[Kenney Micro Roguelike](https://kenney.nl/assets/micro-roguelike) by [Kenney](https://kenney.nl) provides
+the battle portrait sprites for the player and all trainer NPCs.
+
+```
+Kenney Micro Roguelike
+- Author:  Kenney (kenney.nl)
+- Source:  https://kenney.nl/assets/micro-roguelike
+- License: CC0 1.0 Universal (Public Domain Dedication)
+- Usage:   Battle portraits — player and trainer HUD portraits
+```
+
+### Usage
+
+1. Download the pack from https://kenney.nl/assets/micro-roguelike
+2. Select a suitable 16×16px character tile for each portrait
+3. Upscale 3× using nearest-neighbor interpolation:
+   ```bash
+   convert source.png -filter point -resize 300% output.png
+   ```
+4. Name the output file to match the portrait key convention:
+   - Player: `player.png`
+   - Trainer `<id>`: `<id>.png` (e.g. `ola_ops.png`, `tux_wizard.png`)
+5. Place the 48×48px PNGs in `assets/sprites/portraits/`
+
+Portrait files are **optional** — `BattleScene` renders the portrait slot blank when a file
+is absent, so missing portraits never cause a runtime error.
+
+### License
+
+CC0 1.0 Universal — public domain. No attribution required; credited anyway.
+
+---
+
 ## Asset Categories
 
 ### Sprites (`assets/sprites/`)
@@ -661,6 +751,7 @@ CC0 1.0 Universal — public domain. No attribution required; credited anyway.
 | `vfx/` | Ninja Adventure | Hit sparks, magic rings, explosions; 3× upscaled |
 | `player/` | — | Staging area only — copy finalized player sprite to `characters/ninja_hero.png` |
 | `trainers/` | — | Staging area only — copy finalized trainer sprites to `characters/<spriteKey>.png` |
+| `portraits/` | Kenney Micro Roguelike | Battle portraits; 3× upscaled from 16×16 |
 
 ### Maps & Tilesets (`assets/maps/`)
 

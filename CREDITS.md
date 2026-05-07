@@ -6,7 +6,7 @@ Cloud Quest is built on the shoulders of generous creators. All assets are eithe
 
 ## Ninja Adventure (CC0)
 
-**Supplemental asset source** for world tiles, VFX, and character archetypes (used as texture keys for player/trainer sprites).
+**Supplemental asset source** for world tiles, VFX, and character sprite archetypes (texture keys for player/trainer sprites).
 
 | Field | Value |
 |---|---|
@@ -25,6 +25,27 @@ CC0 means no attribution is legally required. We credit the author here as good 
 | Character facesets (battle portraits, 48×48px) | `assets/sprites/portraits/` |
 | World tilesets | `assets/tilesets/` |
 | VFX sprites | `assets/sprites/effects/` |
+
+---
+
+## Kenney Micro Roguelike (CC0)
+
+**Battle portrait source** for player and trainer portraits in the battle HUD.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/micro-roguelike |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Selected character tiles upscaled 3× (16px → 48px) using nearest-neighbor interpolation |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Micro Roguelike assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Character portrait sprites (battle portraits, 48×48px) | `assets/sprites/portraits/` |
 
 ---
 
@@ -79,23 +100,25 @@ CC0 — no attribution required; credited here as good practice.
 
 ## Kenney Micro Roguelike (CC0)
 
-**Character and trainer sprites** — player character walk cycles, trainer NPCs, and incident monster sprites.
+**Incident creature stand-ins** — creature sprites used as placeholders for tech-themed incidents until custom pixel art is created.
 
 | Field | Value |
 |---|---|
 | Author | Kenney (kenney.nl) |
 | Source | https://kenney.nl/assets/micro-roguelike |
 | License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
-| Modifications | Upscaled 3× (16px → 48px) using nearest-neighbor interpolation |
+| Modifications | Sprites selected and upscaled 3× (16px → 48px) using nearest-neighbor interpolation; mapped to incident IDs |
 
 CC0 — no attribution required; credited here as good practice.
 
 ### Kenney Micro Roguelike assets used
 
-| Category | Cloud Quest location |
-|---|---|
-| Character sprite sheets (player + trainers, keyed by `spriteKey`) | `assets/sprites/characters/` |
-| Monster / incident sprites | `assets/sprites/incidents/` |
+| Incident ID | Sprite file | Visual concept |
+|---|---|---|
+| `runaway_process` | `assets/sprites/incidents/runaway_process.png` | Spinning CPU with legs |
+| `prod_incident` | `assets/sprites/incidents/prod_incident.png` | Flaming server / alert icon |
+| `sev1_at_3am` | `assets/sprites/incidents/sev1_at_3am.png` | Bleary-eyed pager monster |
+| `infinite_loop` | `assets/sprites/incidents/infinite_loop.png` | Snake eating its own tail (ouroboros) |
 
 ---
 
@@ -142,18 +165,46 @@ CC0 — no attribution required; credited here as good practice.
 
 ---
 
+## Kenney Space Kit (CC0)
+
+**Supplemental tiles** for the `/dev/null Void` (`dev_null_void`) region — space / void biome.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/space-kit |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Tiles adapted to 48×48px (3× nearest-neighbor upscale from 16px source); recoloured to match void palette |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Space Kit assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Void / space biome tileset (12 tiles) | `assets/tiles/void_tiles.png` |
+
+---
+
 ## Kenney RPG Urban Pack (CC0)
 
-**Supplemental tiles** for tech/office/server-room regions not covered by Ninja Adventure.
+**Supplemental tiles** for tech/office/server-room regions and the `Deprecated Azure Region` (`deprecated_azure_region`) wasteland biome.
 
 | Field | Value |
 |---|---|
 | Author | Kenney (kenney.nl) |
 | Source | https://kenney.nl/assets/rpg-urban-pack |
 | License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
-| Modifications | Upscaled to match 48×48px tile grid (if sourced from a 16px base) |
+| Modifications | Upscaled to match 48×48px tile grid (if sourced from a 16px base); wasteland tiles recoloured to rust/decay palette |
 
 CC0 — no attribution required; credited here as good practice.
+
+### Kenney RPG Urban Pack assets used
+
+| Category | Cloud Quest location |
+|---|---|
+| Tech / office tileset (50 tiles) | `assets/tiles/kenney_tech_office.png` |
+| Wasteland / ruins biome tileset (12 tiles) | `assets/tiles/wasteland_tiles.png` |
 
 ---
 
