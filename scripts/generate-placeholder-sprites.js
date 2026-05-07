@@ -32,6 +32,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT      = path.resolve(__dirname, '..')
 
 // ---------------------------------------------------------------------------
+// Game data imports — derive asset lists live from source-of-truth modules
+// so this script stays in sync automatically as trainers/config evolve.
+// ---------------------------------------------------------------------------
+
+const { getAllSpriteKeys, getAll: getAllTrainers, getAllPortraitKeys } =
+  await import(path.join(ROOT, 'src', 'data', 'trainers.js'))
+
+const { BATTLE_BACKGROUNDS } =
+  await import(path.join(ROOT, 'src', 'config.js'))
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
@@ -145,7 +156,7 @@ function paintGrid(cols, rows, cell, r, g, b) {
   return pixels
 }
 
-/** Paint a solid-colour RGBA square with a 1px darker border. */
+/** Paint a solid-colour RGB square with a 1px darker border. */
 function paintSolid(size, r, g, b) {
   const br = Math.max(0, r - 60)
   const bg = Math.max(0, g - 60)
@@ -187,8 +198,9 @@ function paintArena(w, h, r, g, b) {
 // This matches the comment in BootScene.js ("4-row × 3-col walk-cycle") and
 // the Ninja Adventure spritesheet layout used after the 3× upscale pipeline.
 //
-// Each key gets a distinct hue so characters are visually distinguishable
-// during development before the real Ninja Adventure sprites are dropped in.
+// Colour is derived deterministically from the sprite key string (djb2 hash
+// → hue angle) so every key referenced by getAllSpriteKeys() gets a unique
+// placeholder automatically — including keys added in the future.
 // ---------------------------------------------------------------------------
 
 const FRAME_SIZE  = 48
@@ -197,44 +209,42 @@ const CHAR_ROWS   = 4
 const CHAR_W      = CHAR_COLS * FRAME_SIZE  // 144
 const CHAR_H      = CHAR_ROWS * FRAME_SIZE  // 192
 
-// [R, G, B] per sprite key — each character gets a unique hue.
-const SPRITE_COLOURS = {
-  ninja_hero:          [0x40, 0x80, 0xFF],  // blue          — player
-  ninja_old_samurai:   [0x60, 0xA0, 0x60],  // green
-  ninja_mage:          [0x90, 0x50, 0xC0],  // purple
-  ninja_sorceress:     [0xD0, 0x60, 0xB0],  // magenta
-  ninja_heavy_bandit:  [0xA0, 0x50, 0x30],  // brown-red
-  ninja_woman_fighter: [0xE0, 0x80, 0x40],  // orange
-  ninja_samurai:       [0x50, 0x70, 0xA0],  // steel blue
-  ninja_captain:       [0xD0, 0xA0, 0x30],  // gold
-  ninja_archwizard:    [0xB0, 0x40, 0x40],  // dark red
-  ninja_knight:        [0x70, 0x70, 0x70],  // grey
-  ninja_monk:          [0xC0, 0xA0, 0x60],  // tan
-  ninja_soldier:       [0x50, 0x60, 0x50],  // dark green
-  ninja_archer:        [0x70, 0x90, 0x40],  // olive
-  ninja_magician:      [0x80, 0x50, 0xD0],  // violet
-  ninja_warlock:       [0x30, 0x30, 0x60],  // dark navy
-  ninja_ninja:         [0x30, 0x30, 0x30],  // near-black
-  ninja_robot:         [0x80, 0xB0, 0xB0],  // cyan-grey
-  ninja_assassin:      [0x60, 0x30, 0x60],  // dark purple
-  ninja_warrior:       [0xC0, 0x50, 0x50],  // red
-  ninja_adventurer:    [0x40, 0xA0, 0x80],  // teal
-  ninja_burglar:       [0x60, 0x60, 0x40],  // olive-brown
-  ninja_demon:         [0xB0, 0x20, 0x20],  // bright red
-  ninja_goblin:        [0x50, 0x80, 0x30],  // goblin green
-  ninja_ogre:          [0x80, 0x60, 0x40],  // muddy brown
-  ninja_skeleton:      [0xD0, 0xD0, 0xC0],  // bone white
-  ninja_slime:         [0x60, 0xD0, 0x40],  // slime green
-  ninja_sheriff:       [0xB0, 0x90, 0x40],  // badge gold
-  ninja_clown:         [0xFF, 0x60, 0x80],  // hot pink
-  ninja_pirate:        [0x40, 0x40, 0x80],  // navy
-  ninja_king:          [0xD0, 0xC0, 0x30],  // royal gold
+/**
+ * Deterministic RGB colour from a string key.
+ * Uses a djb2 hash to pick a hue, then converts HSL(hue, 70%, 55%) → RGB.
+ * Returns [r, g, b] in 0–255.
+ */
+function keyToRgb(key) {
+  // djb2 hash → hue in [0, 360)
+  let hash = 5381
+  for (let i = 0; i < key.length; i++) hash = ((hash << 5) + hash) + key.charCodeAt(i)
+  const hue = ((hash >>> 0) % 360)
+
+  // HSL(hue, 0.70, 0.55) → RGB
+  const s = 0.70
+  const l = 0.55
+  const c = (1 - Math.abs(2 * l - 1)) * s
+  const x = c * (1 - Math.abs((hue / 60) % 2 - 1))
+  const m = l - c / 2
+  let r1, g1, b1
+  if      (hue < 60)  { r1 = c;  g1 = x;  b1 = 0  }
+  else if (hue < 120) { r1 = x;  g1 = c;  b1 = 0  }
+  else if (hue < 180) { r1 = 0;  g1 = c;  b1 = x  }
+  else if (hue < 240) { r1 = 0;  g1 = x;  b1 = c  }
+  else if (hue < 300) { r1 = x;  g1 = 0;  b1 = c  }
+  else                { r1 = c;  g1 = 0;  b1 = x  }
+  return [
+    Math.round((r1 + m) * 255),
+    Math.round((g1 + m) * 255),
+    Math.round((b1 + m) * 255),
+  ]
 }
 
 const CHARS_DIR = path.join(ROOT, 'assets', 'sprites', 'characters')
 
 console.log('\n── Character sprites (144×192px, 3×4 walk-cycle frames) ────────')
-for (const [key, [r, g, b]] of Object.entries(SPRITE_COLOURS)) {
+for (const key of getAllSpriteKeys()) {
+  const [r, g, b] = keyToRgb(key)
   const pixels = paintGrid(CHAR_COLS, CHAR_ROWS, FRAME_SIZE, r, g, b)
   writePng(path.join(CHARS_DIR, `${key}.png`), encodePngRgb(CHAR_W, CHAR_H, pixels))
 }
@@ -246,39 +256,32 @@ for (const [key, [r, g, b]] of Object.entries(SPRITE_COLOURS)) {
 //   portrait_player  → assets/sprites/portraits/player.png
 //   portrait_<id>    → assets/sprites/portraits/<id>.png
 //
-// Colour derived from the spriteKey each trainer uses so portraits share
-// the same hue family as the character sprite (just 70% brightness).
+// Colour is derived from the trainer's spriteKey using the same hash function
+// used for character sheets, dimmed to 70% brightness so portraits look
+// visually related but distinct from the full-size character sprites.
+// getAllPortraitKeys() / getAll() are imported live from src/data/trainers.js.
 // ---------------------------------------------------------------------------
 
 const PORTRAIT_SIZE = 48
 const PORTRAITS_DIR = path.join(ROOT, 'assets', 'sprites', 'portraits')
 
-// Extract trainer id → spriteKey pairs directly from the data file so this
-// script stays in sync without importing the ESM module.
-function readTrainerSpriteMap() {
-  const src = fs.readFileSync(path.join(ROOT, 'src', 'data', 'trainers.js'), 'utf8')
-  const map = new Map()
-  // Match trainer object blocks: two-space-indented key → spriteKey inside the block.
-  // Pattern: ^  <id>: {  ...  spriteKey: '<key>'
-  const blockRe = /^  (\w+):\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/gms
-  let block
-  while ((block = blockRe.exec(src)) !== null) {
-    const id       = block[1]
-    const body     = block[2]
-    const skMatch  = body.match(/spriteKey:\s*'([^']+)'/)
-    if (skMatch) map.set(id, skMatch[1])
-  }
-  return map
-}
-
-const trainerSpriteMap = readTrainerSpriteMap()
+// Build id → spriteKey map from the live trainer objects.
+const _spriteKeyById = new Map(getAllTrainers().filter(t => t.spriteKey).map(t => [t.id, t.spriteKey]))
 
 // Build the portrait list: player first, then all trainers.
-const portraitEntries = [{ file: 'player', r: 0x40, g: 0x80, b: 0xFF }]
-for (const [id, spriteKey] of trainerSpriteMap) {
-  const [r, g, b] = SPRITE_COLOURS[spriteKey] ?? [0x80, 0xA0, 0x80]
+// getAllPortraitKeys() returns ['portrait_player', 'portrait_<id>', …].
+const portraitEntries = []
+for (const portKey of getAllPortraitKeys()) {
+  const filename = portKey.replace(/^portrait_/, '')
+  let [r, g, b] = keyToRgb(filename)
+  if (filename !== 'player') {
+    const spriteKey = _spriteKeyById.get(filename)
+    if (spriteKey) {
+      [r, g, b] = keyToRgb(spriteKey)
+    }
+  }
   portraitEntries.push({
-    file: id,
+    file: filename,
     r: Math.floor(r * 0.7),
     g: Math.floor(g * 0.7),
     b: Math.floor(b * 0.7),
@@ -302,34 +305,26 @@ for (const { file, r, g, b } of portraitEntries) {
 // so files compress to <1 KB each; replace with real PokeRogue backgrounds
 // (CC-BY-NC-SA-4.0) once downloaded.
 //
-// Biome mapping from src/config.js BATTLE_BACKGROUNDS:
-//   localhost_town → plains, pipeline_pass → construction, …
+// The unique arena IDs are derived live from BATTLE_BACKGROUNDS in
+// src/config.js so this script stays in sync with gameplay configuration.
+// Each biome gets a deterministic sky/ground colour from keyToRgb().
 // ---------------------------------------------------------------------------
 
 const ARENA_W   = 1920
 const ARENA_H_A = 1080   // full-screen background
 const ARENA_H_B =  400   // foreground ground strip
 
-// Sky colour (used for _a layer) and ground colour (_b layer) per biome.
-const ARENA_COLOURS = {
-  plains:       { sky: [0x87, 0xCE, 0xEB], ground: [0x5D, 0xA0, 0x3C] },
-  construction: { sky: [0xB0, 0x90, 0x60], ground: [0x70, 0x60, 0x40] },
-  cave:         { sky: [0x20, 0x18, 0x28], ground: [0x40, 0x30, 0x40] },
-  factory:      { sky: [0x60, 0x70, 0x80], ground: [0x50, 0x50, 0x60] },
-  stadium:      { sky: [0x20, 0x30, 0x80], ground: [0x40, 0x60, 0x30] },
-  abyss:        { sky: [0x10, 0x08, 0x20], ground: [0x18, 0x10, 0x30] },
-  ruins:        { sky: [0x60, 0x50, 0x40], ground: [0x80, 0x70, 0x50] },
-  forest:       { sky: [0x40, 0x70, 0x30], ground: [0x20, 0x50, 0x20] },
-  space:        { sky: [0x08, 0x08, 0x20], ground: [0x18, 0x18, 0x40] },
-  wasteland:    { sky: [0x80, 0x60, 0x40], ground: [0x60, 0x40, 0x30] },
-}
+// Derive unique arena names from BATTLE_BACKGROUNDS (single source of truth).
+const arenaNames = [...new Set(Object.values(BATTLE_BACKGROUNDS).map(v => v.arena))]
 
 const ARENAS_DIR = path.join(ROOT, 'assets', 'arenas')
 
 console.log('\n── Arena backgrounds (1920×1080 _a + 1920×400 _b per biome) ───')
-for (const [name, { sky, ground }] of Object.entries(ARENA_COLOURS)) {
-  const [sr, sg, sb] = sky
-  const [gr, gg, gb] = ground
+for (const name of arenaNames) {
+  // Sky (_a): full-brightness hue derived from the arena name.
+  const [sr, sg, sb] = keyToRgb(name)
+  // Ground (_b): same hue, but 40% brightness so it reads as a floor/terrain strip.
+  const [gr, gg, gb] = keyToRgb(`${name}_ground`)
 
   writePng(
     path.join(ARENAS_DIR, `${name}_a.png`),
