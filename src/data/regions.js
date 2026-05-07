@@ -289,6 +289,41 @@ const REGIONS = {
     mvp:             false,
     accessTrigger:   'Open despite 3 warnings in Jira Dungeon',
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LOCALHOST TOWN — Building Interiors
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  bakery_interior: {
+    id:            'bakery_interior',
+    name:          "Margaret's Bakery",
+    domain:        null,
+    act:           1,
+    type:          'dungeon',
+    parentRegion:  'localhost_town',
+    hasFastTravel: false,
+    mvp:           true,
+  },
+  lab_interior: {
+    id:            'lab_interior',
+    name:          "Professor Pedersen's Lab",
+    domain:        null,
+    act:           1,
+    type:          'dungeon',
+    parentRegion:  'localhost_town',
+    hasFastTravel: false,
+    mvp:           true,
+  },
+  apartment_interior: {
+    id:            'apartment_interior',
+    name:          'Your Apartment',
+    domain:        null,
+    act:           1,
+    type:          'dungeon',
+    parentRegion:  'localhost_town',
+    hasFastTravel: false,
+    mvp:           true,
+  },
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

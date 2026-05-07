@@ -398,6 +398,15 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const usedSpots = new Set([...occupied])
   let objId = 1
 
+  // Reserve fixed interaction coordinates first so that randomly-placed NPCs
+  // (trainers, azure_terminal) never land on a fixed sign/flavor/chest tile.
+  const regionInteractions = interactions.filter(i => i.region === regionId)
+  for (const i of regionInteractions) {
+    const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
+    const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
+    usedSpots.add(`${tx},${ty}`)
+  }
+
   // Trainers in this region
   const regionTrainers = trainers.filter(t => t.location === regionId)
   for (const t of regionTrainers) {
@@ -412,12 +421,10 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   }
 
   // Interactions in this region — placed in a separate Interactions layer
-  const regionInteractions = interactions.filter(i => i.region === regionId)
   for (const i of regionInteractions) {
     const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
     const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
     interactionObjects.push(makeInteractionObject(objId++, i.id, tx, ty))
-    usedSpots.add(`${tx},${ty}`)
   }
 
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)

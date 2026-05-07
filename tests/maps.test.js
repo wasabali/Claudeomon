@@ -325,17 +325,29 @@ describe('localhost_town NPC and interaction objects', () => {
     expect(doorNames).toContain('apartment_door')
   })
 
-  it('all Transitions objects have targetRegion, targetSpawnX, targetSpawnY properties', () => {
+  it('all Transitions objects target an existing region map with in-bounds spawn coordinates', () => {
     const map = loadMap('localhost_town')
     const transLayer = map.layers.find(l => l.name === 'Transitions')
     expect(transLayer).toBeDefined()
     for (const obj of transLayer.objects) {
-      const region  = obj.properties?.find(p => p.name === 'targetRegion')
-      const spawnX  = obj.properties?.find(p => p.name === 'targetSpawnX')
-      const spawnY  = obj.properties?.find(p => p.name === 'targetSpawnY')
-      expect(region).toBeDefined()
-      expect(spawnX).toBeDefined()
-      expect(spawnY).toBeDefined()
+      const regionProp = obj.properties?.find(p => p.name === 'targetRegion')
+      const spawnXProp = obj.properties?.find(p => p.name === 'targetSpawnX')
+      const spawnYProp = obj.properties?.find(p => p.name === 'targetSpawnY')
+      expect(regionProp, `${obj.name} missing targetRegion`).toBeDefined()
+      expect(spawnXProp, `${obj.name} missing targetSpawnX`).toBeDefined()
+      expect(spawnYProp, `${obj.name} missing targetSpawnY`).toBeDefined()
+
+      const targetId = regionProp.value
+      const targetMapPath = path.join(MAPS_DIR, `${targetId}.tmj`)
+      expect(fs.existsSync(targetMapPath), `${obj.name} targets missing map: ${targetId}`).toBe(true)
+
+      const targetMap = loadMap(targetId)
+      const spawnX = spawnXProp.value
+      const spawnY = spawnYProp.value
+      expect(spawnX, `${obj.name} targetSpawnX out of bounds`).toBeGreaterThanOrEqual(0)
+      expect(spawnX, `${obj.name} targetSpawnX out of bounds`).toBeLessThan(targetMap.width)
+      expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeGreaterThanOrEqual(0)
+      expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeLessThan(targetMap.height)
     }
   })
 })
