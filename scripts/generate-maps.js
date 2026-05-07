@@ -470,6 +470,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     npcObjects.push(makeNpcObject(objId++, t.id, spot.tileX, spot.tileY))
   }
 
+
   // Azure terminal for fast-travel regions
   if (region.hasFastTravel) {
     const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
