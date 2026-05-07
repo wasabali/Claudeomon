@@ -277,3 +277,65 @@ describe('tech regions carry kenney_tech_office tileset', () => {
     expect(nonZero.every(gid => gid >= 6 && gid <= 55)).toBe(true)
   })
 })
+
+describe('localhost_town NPC and interaction objects', () => {
+  it('has all localhost_town trainers in NPCs layer', async () => {
+    const { getAll: getAllTrainers } = await import('../src/data/trainers.js')
+    const map = loadMap('localhost_town')
+    const npcLayer = map.layers.find(l => l.name === 'NPCs')
+    expect(npcLayer).toBeDefined()
+    const placedNames = npcLayer.objects.map(o => o.name)
+    const regionTrainers = getAllTrainers().filter(t => t.location === 'localhost_town')
+    for (const trainer of regionTrainers) {
+      expect(placedNames).toContain(trainer.id)
+    }
+  })
+
+  it('has Interactions layer with all localhost_town interaction objects', async () => {
+    const { getBy: getInteractionsBy } = await import('../src/data/interactions.js')
+    const map = loadMap('localhost_town')
+    const interactionsLayer = map.layers.find(l => l.name === 'Interactions')
+    expect(interactionsLayer).toBeDefined()
+    expect(interactionsLayer.type).toBe('objectgroup')
+    const placedNames = interactionsLayer.objects.map(o => o.name)
+    const regionInteractions = getInteractionsBy('region', 'localhost_town')
+    for (const interaction of regionInteractions) {
+      expect(placedNames).toContain(interaction.id)
+    }
+  })
+
+  it('Interactions layer objects have interaction type property', async () => {
+    const map = loadMap('localhost_town')
+    const interactionsLayer = map.layers.find(l => l.name === 'Interactions')
+    expect(interactionsLayer).toBeDefined()
+    for (const obj of interactionsLayer.objects) {
+      const prop = obj.properties?.find(p => p.name === 'interaction')
+      expect(prop).toBeDefined()
+      expect(prop.value).toBe(obj.name)
+    }
+  })
+
+  it('Transitions layer has bakery_door, lab_door, and apartment_door entries', () => {
+    const map = loadMap('localhost_town')
+    const transLayer = map.layers.find(l => l.name === 'Transitions')
+    expect(transLayer).toBeDefined()
+    const doorNames = transLayer.objects.map(o => o.name)
+    expect(doorNames).toContain('bakery_door')
+    expect(doorNames).toContain('lab_door')
+    expect(doorNames).toContain('apartment_door')
+  })
+
+  it('all Transitions objects have targetRegion, targetSpawnX, targetSpawnY properties', () => {
+    const map = loadMap('localhost_town')
+    const transLayer = map.layers.find(l => l.name === 'Transitions')
+    expect(transLayer).toBeDefined()
+    for (const obj of transLayer.objects) {
+      const region  = obj.properties?.find(p => p.name === 'targetRegion')
+      const spawnX  = obj.properties?.find(p => p.name === 'targetSpawnX')
+      const spawnY  = obj.properties?.find(p => p.name === 'targetSpawnY')
+      expect(region).toBeDefined()
+      expect(spawnX).toBeDefined()
+      expect(spawnY).toBeDefined()
+    }
+  })
+})
