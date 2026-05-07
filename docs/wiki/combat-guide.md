@@ -82,9 +82,9 @@ How you win determines what you earn:
 
 Incidents have an SLA (Service Level Agreement) timer measured in turns. When it hits zero:
 
-- You take a **reputation penalty**
-- You take **budget drain damage**
-- The incident gets angrier
+- You take a **20 HP penalty**
+- You take a **-10 reputation penalty**
+- If the incident is still alive, the battle ends as a **loss**
 
 Some skills interact with SLA:
 - `PagerDuty acknowledge` — pauses the SLA timer for 2 turns

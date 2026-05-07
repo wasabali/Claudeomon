@@ -24,12 +24,12 @@ Quests are story missions from NPCs. Most have multiple solution paths — the o
 
 **Solutions:**
 
-| Approach | Skill | Rep | XP Mult. | Reward |
+| Approach | Skills | Rep | XP Mult. | Reward |
 |---|---|---|---|---|
-| Optimal | `az webapp restart` (diagnose first) | +5 | ×2 | Unlock `feature flag` skill + Margaret becomes recurring NPC |
-| Standard | `az webapp restart` (no diagnose) | +2 | ×1 | Unlock `az webapp restart` skill only |
-| Shortcut | `blame DNS` | -2 | ×0.5 | Partial fix; Margaret calls again in Act 2 |
-| Cursed | `deploy directly to prod` | -10 | ×0.25 | Site works; Margaret's data corrupted; +1 Shame |
+| Optimal | `az monitor logs` then `az webapp deploy` | +10 | ×2 | `incident_postmortem` item + Margaret becomes recurring NPC |
+| Standard | `az webapp restart` | +3 | ×1 | `cold_coffee` item |
+| Shortcut | `az webapp stop` | -5 | ×0.5 | Quest line closed |
+| Nuclear | `rm -rf /` | -30 | ×0 | `scorched_server` item · Margaret flees · +2 Shame |
 
 **Notes:** Margaret reappears in Act 2 and Act 3 depending on how you solved this.
 

@@ -26,7 +26,7 @@ Hidden areas branch off from specific trigger points. See [Hidden Areas](hidden-
 - **Act:** 1 (starting area)
 - **Domain:** Linux
 - **Trainers:** Ola the Ops Guy, Tux the Terminal Wizard (Tutorial Gym)
-- **Encounters:** `503_error`, `npm_install_hang`, `env_not_set`, `process_zombie`
+- **Encounters:** `404_not_found`, `missing_semicolon`, `port_conflict` (common) · `failed_pipeline`, `npm_install_hang` (rare)
 - **Notes:** Safe starting zone. No cursed encounters. Margaret's bakery quest starts here.
 
 ---

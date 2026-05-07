@@ -74,10 +74,10 @@ Shame measures how many shortcuts, disasters, and unforgivable things you've don
 
 | Method | Shame Reduction | Notes |
 |---|---|---|
-| Coffee & Apology item | -1 | Max once per act. Costs 50 💰 at Three AM Tavern. |
-| Post-Mortem Published | -1 | Craft from an incident you solved as Optimal tier. |
+| Coffee and an Apology item | -1 | Available at Three AM Tavern. |
+| Published Post-Mortem | -1 | Docs tab item — use outside of battle. |
 
-> ⚠️ **Shame floor:** You cannot reduce Shame below your current act minimum (Act 1: 0, Act 2: 0, Act 3: 1). It represents choices that can't be taken back.
+> ⚠️ Shame cannot be reduced below 0. These items are rare and should be used intentionally.
 
 ---
 

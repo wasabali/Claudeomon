@@ -39,7 +39,7 @@ The game runs entirely in the browser — no installs, no backend, no excuses.
 - **Domain matchup cycle**: `Linux → Security → Serverless → Cloud → IaC → Containers → Kubernetes → Linux`  
 - **2× damage** when you use the strong domain; **0.5× damage** when you hit a domain that beats you  
 - **Observability is special**: no damage, no matchup — it reveals enemy stats and weaknesses  
-- **Reputation** (rebuildable, 0–100) vs **Shame** (permanent, never decremented) — choose your path  
+- **Reputation** (rebuildable, -100–100) vs **Shame** (permanent, never decremented) — choose your path  
 - **7 Gyms** to conquer, **6 hidden areas** to discover, **1 VB6 billing system** you probably shouldn't touch  
 
 ---
@@ -52,4 +52,4 @@ The game runs entirely in the browser — no installs, no backend, no excuses.
 
 ---
 
-*Wiki generated from game data files. Stats sourced directly from `src/data/`. Anything marked **Planned** or **Design Proposal** isn't in the game yet.*
+*Wiki generated from game data files in `src/data/`. Anything marked **Planned** or **Design Proposal** isn't in the game yet. Some descriptive content is editorial.*

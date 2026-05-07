@@ -33,7 +33,7 @@ Incidents don't show their domain until you use an Observability skill. One turn
 - **Rushing straight to damage** = Standard tier (×1 XP, +1 rep). Fine for grinding.
 
 ### Watch the SLA timer
-Incidents start with SLA timers (3–6 turns). Each turn over the limit adds +20-80% bonus enemy damage. `PagerDuty acknowledge` buys 2 extra turns. Don't ignore the clock.
+Incidents start with SLA timers (typically 4 turns). When the timer hits 0, you take 20 HP damage and -10 reputation — and if the incident is still alive, you lose. `PagerDuty acknowledge` buys 2 extra turns. Don't ignore the clock.
 
 ### Keep at least one heal in your active deck
 `systemctl restart` (20 HP), `disaster_recovery` (full heal after 2 turns), and `Energy Drink` items are your lifelines. Gym leaders hit hard in Acts 2–3.
@@ -43,16 +43,16 @@ Incidents start with SLA timers (3–6 turns). Each turn over the limit adds +20
 ## 💰 Budget Management
 
 - Starting budget: 500
-- Budget regenerates slowly (5/turn base) — or 10/turn with Cloud Emblem in cloud battles
+- Budget is restored after each battle (amount scales with your level)
 - **Budget at 0:** You can't use skills with a budget cost. Some optimal skills require budget.
-- **Budget under 50:** `cost_alert` status may trigger, causing skill costs to increase by 10% for 3 turns
+- **Budget under -100:** `cost_alert` status triggers, causing budget to drain 2× faster
 - **Save expensive skills** for gym leaders, not random encounters
 
 ### Budget tips
-- `docker system prune -a` restores 10 budget in addition to healing
-- `Cold Brew` item adds +20 budget for one battle — use before gym leaders
-- `az vm deallocate` stuns enemies without spending budget
-- The FinOps Emblem adds +100 to your budget ceiling permanently
+- `Azure Credit Voucher` restores 50 budget — use before gym leaders
+- `Azure Coupon Code` restores 100 budget — save for emergencies
+- `Reserved Instance Contract` makes the next 5 skills 50% cheaper
+- The FinOps Emblem adds +10% to budget restored after each battle
 
 ---
 

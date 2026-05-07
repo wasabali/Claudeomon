@@ -8,16 +8,28 @@ Your inventory has five tabs. Press `I` to open it during the overworld, or use 
 
 Consumable use items. Most can be used in battle.
 
-| Item | Effect | Battle Use? | Quantity |
-|---|---|---|---|
-| Energy Drink | Restore 30 HP immediately | ✅ | Stackable |
-| Premium Energy Drink | Restore 60 HP immediately | ✅ | Stackable |
-| Backup Script | Prevent KO once (full HP restore on death) | ✅ | Stackable |
-| Cold Brew | +20 budget for this battle | ✅ | Stackable |
-| Debug Mode | Reveal enemy domain, HP, and next move | ✅ | 1 per battle |
-| Pair Programming | Doubles skill effect this turn | ✅ | Rare |
-| Rubber Duck | Unstick yourself from "blocked" status | ✅ | Stackable |
-| Code Review Pass | Skip enemy's next attack | ✅ | Rare |
+| Item | Effect | Battle Use? |
+|---|---|---|
+| Red Bull | Restore 30 HP | ✅ |
+| Rollback Potion | Restore 20 HP | ✅ |
+| Coffee (Black) | Restore 15 HP | ✅ |
+| Energy Drink (Monster) | Restore 50 HP | ✅ |
+| Hot Chocolate | Restore 40 HP | ✅ |
+| Protein Bar | Restore 25 HP | ✅ |
+| Full English Breakfast | Restore HP to full | ✅ |
+| Azure Credit Voucher | Restore 50 Budget | ✅ |
+| Azure Coupon Code | Restore 100 Budget | ✅ |
+| Reserved Instance Contract | Next 5 skills cost 50% less budget | ✅ |
+| Spot Instance Ticket | One skill costs 0 budget (20% interrupt risk) | ✅ |
+| Cost Alert Suppressor | Ignore budget drain for 3 turns | ✅ |
+| Stack Overflow Printout | Reveal enemy domain and weakness | ✅ |
+| Feature Flag Toggle | Disable one enemy skill for 2 turns | ✅ |
+| Canary Token | Reduce next hit's damage by 50% | ✅ |
+| Load Balancer Cookie | Dodge next enemy attack | ✅ |
+| CI Green Badge | +25% damage for 3 turns | ✅ |
+| Rubber Duck | Reveal a hint about the current enemy | ✅ |
+| Skip Tests Scroll | Bypass one skill check | ✅ |
+| On-Call Phone | Apply `on_call` status | ❌ (world only) |
 
 ---
 
@@ -60,7 +72,7 @@ Passive reference items that unlock new mechanics or dialogue.
 | SLO Contract | `define SLIs` skill unlocked | Quest: Define Your SLOs |
 | Architecture Decision Record | Extra dialogue with Architect Aleksander | Whiteboard Summit |
 | On-Call Schedule | Reveals upcoming On-Call status turns | Quest: On-Call Survival Training |
-| Post-Mortem Published | **-1 Shame** | Craft from any incident you resolved as Optimal |
+| Published Post-Mortem | **-1 Shame** | Awarded after certain quest resolutions |
 
 ---
 
@@ -82,11 +94,11 @@ Useless items with flavour text. Sell them to vendors for pocket change.
 
 | Item | Effect | Source |
 |---|---|---|
-| Coffee & Apology | **-1 Shame** (max once per act) | Buy at Three AM Tavern for 50 💰 |
-| Post-Mortem Published | **-1 Shame** | Craft from resolved incident |
+| Coffee and an Apology | **-1 Shame** | Available at Three AM Tavern |
+| Published Post-Mortem | **-1 Shame** | Docs tab — use outside of battle |
 | Technical Debt Voucher | Clears 1 stack of `technical_debt` status | Tech Debt Cleanup quest reward |
 
-> ⚠️ Shame items are rare. **Shame never goes below 0** and cannot be reduced below your current act floor (Act 2 min: 0, Act 3 min: 1).
+> ⚠️ Shame items are rare. **Shame never goes below 0.**
 
 ---
 

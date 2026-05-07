@@ -8,14 +8,14 @@ All named trainers in Cloud Quest. Beat them for emblems, XP, and skill unlocks.
 
 | Name | Location | Domain | HP | Difficulty | Signature Skill | Teach Condition |
 |---|---|---|---|---|---|---|
-| Tux the Terminal Wizard | Terminal Gym, Localhost Town | Linux | 150 | Tutorial | `tail -f /var/log/syslog` | Complete tutorial battle |
-| Bjørn the Build Breaker | Pipeline Dojo, Pipeline Pass | IaC | 320 | ★★ | `az pipelines run` | Beat Gym 1 |
-| Captain Nines | Uptime Arena, Azure Town | Cloud | 420 | ★★★ | `blue-green deploy` | Beat Gym 2 |
-| Scrum Siri | Sprint Sanctum, Architecture District | Observability | 380 | ★★★ | `define SLIs` | Beat Gym 3 |
-| Docker Dag | Container Yard, Container Yard | Containers | 460 | ★★★★ | `docker compose up` | Beat Gym 4 |
-| The Kube-rnetes Master | Cluster Ring, Kubernetes Colosseum | Kubernetes | 520 | ★★★★ | `kubectl apply -f` | Beat Gym 5 |
-| Ingrid the IAM Inspector | Security Vault, Security Vault | Security | 500 | ★★★★ | `az role assignment create` | Beat Gym 6 |
-| The Solutions Oracle | Whiteboard Summit, Architecture District | Observability | 580 | ★★★★★ | `build Grafana dashboard` | Beat Gym 7 |
+| Tux the Terminal Wizard | Terminal Gym, Localhost Town | Linux | 80 | Tutorial | `grep "ERROR" /var/log/*` | Complete tutorial battle |
+| Bjørn the Build Breaker | Pipeline Dojo, Pipeline Pass | IaC | 80 | ★★ | `az pipelines run` | Beat Gym 1 |
+| Captain Nines | Uptime Arena, Production Plains | Cloud | 90 | ★★★ | `blue-green deploy` | Beat Gym 2 |
+| Scrum Siri | Sprint Sanctum, Jira Dungeon | Observability | 85 | ★★★ | `az monitor alert create` | Beat Gym 3 |
+| Docker Dag | Container Yard, Helm Repository | Containers | 100 | ★★★★ | `docker build` | Beat Gym 4 |
+| The Kube-rnetes Master | Cluster Ring, Kubernetes Colosseum | Kubernetes | 120 | ★★★★ | `kubectl apply -f` | Beat Gym 5 |
+| Ingrid the IAM Inspector | Security Vault | Security | 90 | ★★★★ | `ssh-keygen` | Beat Gym 6 |
+| The Solutions Oracle | Whiteboard Summit, Architecture District | Observability | 100 | ★★★★★ | `az monitor alert create` | Beat Gym 7 |
 
 ---
 
@@ -35,7 +35,7 @@ Sub-leaders guard inner rooms before the gym leader. Beat them to unlock the fin
 | Pipeline Per | Jira Dungeon floor 2 | IaC | 200 | YAML syntax error |
 | Trigger Trude | Jira Dungeon floor 2 | Serverless | 190 | Event storm |
 | Manifest Magnus | Jira Dungeon floor 3 | Kubernetes | 220 | Manifest conflict |
-| Policy Pal | Security Vault lobby | Security | 210 | IAM deny |
+| Policy Pål | Security Vault lobby | Security | 210 | IAM deny |
 | Metrics Maja | Production Plains | Observability | 175 | Metric reveal |
 | Deploy Diana | Azure Town edge | Cloud | 185 | Rapid deploy |
 | Incident Ivan | Production Plains late | Cloud | 230 | SLA countdown (3 turns) |
