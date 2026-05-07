@@ -325,16 +325,8 @@ function generateObjects(w, h, regionType, openings, rng, isTech) {
       { w: 2, h: 2, tile: techGid(T.COOLING_UNIT) },
       { w: 2, h: 2, tile: techGid(T.MONITORING_DASHBOARD) },
     ]
-  } else if (isTech && regionType === 'dungeon') {
+  } else if (isTech && (regionType === 'dungeon' || regionType === 'hidden')) {
     // Server Graveyard-style: decommissioned hardware, tombstones
-    buildings = [
-      { w: 1, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
-      { w: 1, h: 2, tile: techGid(T.DUSTY_RACK) },
-      { w: 1, h: 2, tile: techGid(T.SERVER_TOMBSTONE) },
-      { w: 2, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
-    ]
-  } else if (isTech && regionType === 'hidden') {
-    // Hidden tech regions (server_graveyard, oldcorp_basement): abandoned hardware
     buildings = [
       { w: 1, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
       { w: 1, h: 2, tile: techGid(T.DUSTY_RACK) },
@@ -440,8 +432,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   } else {
     groundData.fill(groundGid)
   }
-  const groundLayer = makeTileLayer(1, 'Ground', w, h, groundGid)
-  groundLayer.data = groundData
+  const groundLayer = { ...makeTileLayer(1, 'Ground', w, h, groundGid), data: groundData }
   const overlayLayer = makeTileLayer(4, 'Overlay', w, h, 0)
 
   const npcObjects = []
