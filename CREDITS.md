@@ -81,6 +81,30 @@ CC0 — no attribution required; credited here as good practice.
 
 ---
 
+## Kenney Micro Roguelike (CC0)
+
+**Incident creature stand-ins** — creature sprites used as placeholders for tech-themed incidents until custom pixel art is created.
+
+| Field | Value |
+|---|---|
+| Author | Kenney (kenney.nl) |
+| Source | https://kenney.nl/assets/micro-roguelike |
+| License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Modifications | Sprites selected and upscaled 3× (16px → 48px) using nearest-neighbor interpolation; mapped to incident IDs |
+
+CC0 — no attribution required; credited here as good practice.
+
+### Kenney Micro Roguelike assets used
+
+| Incident ID | Sprite file | Visual concept |
+|---|---|---|
+| `runaway_process` | `assets/sprites/incidents/runaway_process.png` | Spinning CPU with legs |
+| `prod_incident` | `assets/sprites/incidents/prod_incident.png` | Flaming server / alert icon |
+| `sev1_at_3am` | `assets/sprites/incidents/sev1_at_3am.png` | Bleary-eyed pager monster |
+| `infinite_loop` | `assets/sprites/incidents/infinite_loop.png` | Snake eating its own tail (ouroboros) |
+
+---
+
 ## Kenney RPG Urban Pack (CC0)
 
 **Supplemental tiles** for tech/office/server-room regions not covered by Ninja Adventure.

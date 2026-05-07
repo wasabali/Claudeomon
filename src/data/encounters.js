@@ -339,6 +339,8 @@ const ENCOUNTERS = {
     onCall: true,
     attacks: ['budget_spike', 'reputation_leak'],
     optimalFix: 'blue_green_deploy',
+    spriteKey: 'incident_prod_incident',
+    animFrameRate: 2,
     layers: null,
   },
   runaway_process: {
@@ -353,6 +355,8 @@ const ENCOUNTERS = {
     difficulty: 3,
     attacks: ['uptime_drain'],
     optimalFix: 'kill_9',
+    spriteKey: 'incident_runaway_process',
+    animFrameRate: 2,
     layers: null,
   },
   sev1_at_3am: {
@@ -368,6 +372,8 @@ const ENCOUNTERS = {
     onCall: true,
     attacks: ['uptime_drain', 'budget_spike', 'reputation_leak'],
     optimalFix: null,
+    spriteKey: 'incident_sev1_at_3am',
+    animFrameRate: 2,
     layers: null,
   },
   crashloopbackoff: {
