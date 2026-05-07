@@ -39,10 +39,11 @@ function makeStoryFlags(overrides = {}) {
 // ===========================================================================
 
 describe('DENIAL_REASONS', () => {
-  it('exports all three denial reason constants', () => {
+  it('exports all denial reason constants', () => {
     expect(DENIAL_REASONS.ACT_GATE).toBe('act_gate')
     expect(DENIAL_REASONS.DUNGEON_POINTS).toBe('dungeon_points')
     expect(DENIAL_REASONS.RESOURCE_LOCKS).toBe('resource_locks')
+    expect(DENIAL_REASONS.HARD_GATE).toBe('hard_gate')
   })
 
   it('is frozen', () => {
@@ -92,7 +93,8 @@ describe('canTravel', () => {
   })
 
   it('allows travel when no requirements exist', () => {
-    const gs = makeGameState()
+    // Use a path with the gate resolved flag set so GateEngine clears it
+    const gs = makeGameState({ flags: { margaret_gate_resolved: true } })
     const result = canTravel('localhost_town', 'east', gs)
     expect(result).toEqual({
       allowed: true,
@@ -101,6 +103,14 @@ describe('canTravel', () => {
       target: 'pipeline_pass',
       entry: 'west',
     })
+  })
+
+  it('blocks travel when a hard gate is unresolved', () => {
+    const gs = makeGameState()   // no margaret_gate_resolved flag
+    const result = canTravel('localhost_town', 'east', gs)
+    expect(result.allowed).toBe(false)
+    expect(result.reasonId).toBe('hard_gate')
+    expect(result.target).toBe('pipeline_pass')
   })
 
   // --- Act gate ---

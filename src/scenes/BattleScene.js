@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { BaseScene } from '#scenes/BaseScene.js'
-import { CONFIG, ENDING_CONDITIONS } from '../config.js'
+import { CONFIG, ENDING_CONDITIONS, JIRA_DUNGEON_REGIONS, CLOUD_CONSOLE_REGIONS } from '../config.js'
 import { GameState, markDirty } from '#state/GameState.js'
 import { getById as getSkillById } from '#data/skills.js'
 import {
@@ -14,6 +14,10 @@ import {
   turnEndPhase,
 } from '#engine/BattleEngine.js'
 import { calculateXP, computeShameFlags } from '#engine/SkillEngine.js'
+import { checkLevelUp } from '#engine/ProgressionEngine.js'
+import { calculatePostBattleBudget } from '#engine/EconomyEngine.js'
+import { addDungeonPoints, addResourceLock } from '#engine/RegionEngine.js'
+import { getById as getGymById } from '#data/gyms.js'
 import { Menu } from '#ui/Menu.js'
 import { DialogBox } from '#ui/DialogBox.js'
 
@@ -76,6 +80,8 @@ export class BattleScene extends BaseScene {
       domain: 'cloud', hp: 60, maxHp: 60, difficulty: 2,
     }
     this._returnScene  = data.returnScene ?? 'WorldScene'
+    this._originRegion = data.originRegion ?? null
+    this._gymId        = data.gymId ?? null
     this._activeSkills = GameState.skills.active
       .filter(Boolean)
       .map(id => getSkillById(id))
@@ -83,9 +89,11 @@ export class BattleScene extends BaseScene {
 
     // Build engine-side state (pure logic, no Phaser)
     this._battleState = createBattleState(mode, { ...GameState.player }, opponent, {
-      slaTimer:        data.slaTimer ?? 10,
-      telegraphedMove: data.telegraphedMove ?? null,
-      emblems:         GameState.emblems ?? {},
+      slaTimer:         data.slaTimer ?? 10,
+      telegraphedMove:  data.telegraphedMove ?? null,
+      gymMechanic:      data.gymMechanic ?? null,
+      gymMechanicConfig: data.gymMechanicConfig ?? null,
+      emblems:          GameState.emblems ?? {},
     })
 
     this._animating  = false
@@ -638,14 +646,94 @@ export class BattleScene extends BaseScene {
       const xp = calculateXP(opponent.difficulty ?? 1, this._battleState.winningTier ?? 'standard')
       GameState.player.xp = (GameState.player.xp ?? 0) + xp
 
+      // Apply budget reward + restore
+      const winMode = this._battleState.mode === BATTLE_MODES.INCIDENT ? 'incident' : 'trainer'
+      const winTier = this._battleState.winningTier ?? 'standard'
+      const maxBudget = GameState.player.maxBudget ?? GameState.player.budget ?? 100
+      GameState.player.budget = calculatePostBattleBudget(
+        GameState.player.budget ?? 0,
+        maxBudget,
+        true,
+        winMode,
+        winTier,
+      )
+
       // Apply any skill taught by an engineer opponent
       const teachEvent = this._battleState.log.slice().reverse().find(e => e.type === 'teach_skill')
       if (teachEvent?.value && !GameState.skills.learned.includes(teachEvent.value)) {
         GameState.skills.learned.push(teachEvent.value)
       }
+
+      // Mark trainer as defeated so WorldScene shows post-battle dialog
+      if (this._battleState.mode === BATTLE_MODES.ENGINEER && opponent.id) {
+        GameState.story.flags[`trainer_${opponent.id}_defeated`] = true
+      }
+
+      // Region-specific win rewards: dungeon story points / resource locks
+      if (this._originRegion) {
+        const difficulty = opponent.difficulty ?? 1
+        if (JIRA_DUNGEON_REGIONS.includes(this._originRegion)) {
+          addDungeonPoints(GameState.story.flags, difficulty)
+        } else if (CLOUD_CONSOLE_REGIONS.includes(this._originRegion)) {
+          addResourceLock(GameState.story.flags)
+        }
+      }
+
+      // Gym leader win — award emblem and set gym beaten flag
+      if (this._gymId) {
+        const gym = getGymById(this._gymId)
+        if (gym) {
+          const beatFlag = `gym_${this._gymId}_beaten`
+          if (!GameState.story.flags[beatFlag]) {
+            GameState.story.flags[beatFlag] = true
+            if (gym.emblemReward) {
+              GameState.emblems[gym.emblemReward] = {
+                ...(GameState.emblems[gym.emblemReward] ?? {}),
+                earned: true,
+                shine:  GameState.emblems[gym.emblemReward]?.shine ?? false,
+              }
+            }
+          }
+        }
+      }
     } else {
+      // Budget restore on loss (partial)
+      const lossMode = this._battleState.mode === BATTLE_MODES.INCIDENT ? 'incident' : 'trainer'
+      const maxBudget = GameState.player.maxBudget ?? GameState.player.budget ?? 100
+      GameState.player.budget = calculatePostBattleBudget(
+        GameState.player.budget ?? 0,
+        maxBudget,
+        false,
+        lossMode,
+        'lose',
+      )
       GameState.stats.battlesLost++
     }
+
+    // Level-up check — apply all pending level events
+    const levelEvents = checkLevelUp(GameState.player)
+    for (const evt of levelEvents) {
+      if (evt.type === 'level_up') {
+        GameState.player.level = evt.payload.newLevel
+      } else if (evt.type === 'stat_gain') {
+        GameState.player.maxHp     = evt.payload.maxHp
+        GameState.player.maxBudget = evt.payload.budget
+        // Fully restore HP to new max on level-up
+        GameState.player.hp = evt.payload.maxHp
+      } else if (evt.type === 'slot_unlock') {
+        // Normalise active deck to the new slot count
+        const existing = GameState.skills.active ?? []
+        GameState.skills.active = Array.from(
+          { length: evt.payload.activeSlots },
+          (_, i) => existing[i] ?? null,
+        )
+      }
+    }
+    // Collapse to a single level-up message showing the final reached level
+    const finalLevelUp = levelEvents.filter(e => e.type === 'level_up').pop()
+    this._levelUpMessage = finalLevelUp
+      ? `Level Up! You are now level ${finalLevelUp.payload.newLevel}!`
+      : null
 
     markDirty()
     this._showLog(result === 'win' ? 'Victory!' : 'Defeated...')
@@ -656,6 +744,15 @@ export class BattleScene extends BaseScene {
         markDirty()
         const ending = this._resolveEnding()
         this.fadeToScene('CreditsScene', { ending })
+        return
+      }
+      // Show level-up dialog (if any) before returning to world
+      if (this._levelUpMessage) {
+        const msg = this._levelUpMessage
+        this._levelUpMessage = null
+        this.dialog.show([msg], () => {
+          this.fadeToScene(this._returnScene ?? 'WorldScene')
+        })
         return
       }
       this.fadeToScene(this._returnScene ?? 'WorldScene')

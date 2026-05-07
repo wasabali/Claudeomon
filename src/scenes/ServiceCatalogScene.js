@@ -398,31 +398,11 @@ export class ServiceCatalogScene extends BaseScene {
   }
 
   _createPanelTexture() {
-    const key = 'ui_service_catalog_panel_9slice'
-    if (this.textures.exists(key)) return
-
-    const graphics = this.make.graphics({ x: 0, y: 0, add: false })
-    graphics.fillStyle(0xe0f8d0, 1)
-    graphics.fillRect(0, 0, 24, 24)
-    graphics.fillStyle(0x306230, 1)
-    graphics.fillRect(0, 0, 24, 2)
-    graphics.fillRect(0, 22, 24, 2)
-    graphics.fillRect(0, 0, 2, 24)
-    graphics.fillRect(22, 0, 2, 24)
-    graphics.fillStyle(0x0f380f, 1)
-    graphics.fillRect(0, 0, 24, 1)
-    graphics.fillRect(0, 23, 24, 1)
-    graphics.fillRect(0, 0, 1, 24)
-    graphics.fillRect(23, 0, 1, 24)
-    graphics.generateTexture(key, 24, 24)
-    graphics.destroy()
+    // No-op: BaseScene.createPanel() handles 'ui_window' loading via BootScene.
   }
 
   _addPanel(x, y, width, height) {
-    if (typeof this.add.nineslice === 'function') {
-      return this.add.nineslice(x, y, 'ui_service_catalog_panel_9slice', undefined, width, height, 4, 4, 4, 4)
-    }
-
-    return this.add.rectangle(x, y, width, height, 0xe0f8d0).setStrokeStyle(1, 0x306230)
+    // Delegate to BaseScene which uses the loaded 'ui_window' asset with 8px corners
+    return this.createPanel(x, y, width, height)
   }
 }

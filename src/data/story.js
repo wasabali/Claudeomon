@@ -1158,6 +1158,12 @@ const STORY = {
       "Unlock all 3 resource terminals to proceed.",
     ],
   },
+  region_gate_blocked: {
+    id:    'region_gate_blocked',
+    pages: [
+      "The path forward is blocked. Speak to the NPC here — they need your help before you can pass.",
+    ],
+  },
   fast_travel_prompt: {
     id:    'fast_travel_prompt',
     pages: [

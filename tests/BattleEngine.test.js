@@ -122,9 +122,9 @@ describe('statusTickPhase', () => {
 
   it('decrements status duration and emits status_tick event', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent())
-    state.playerStatuses = [{ name: 'throttled', duration: 3 }]
+    state.playerStatuses = [{ id: 'throttled', remaining: 3 }]
     const events = statusTickPhase(state)
-    expect(state.playerStatuses[0].duration).toBe(2)
+    expect(state.playerStatuses[0].remaining).toBe(2)
     expect(events).toContainEqual(
       expect.objectContaining({ type: 'status_tick', target: 'player' })
     )
@@ -132,7 +132,7 @@ describe('statusTickPhase', () => {
 
   it('removes expired status and emits status_remove event', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent())
-    state.playerStatuses = [{ name: 'cold_start', duration: 1 }]
+    state.playerStatuses = [{ id: 'cold_start', remaining: 1 }]
     const events = statusTickPhase(state)
     expect(state.playerStatuses).toHaveLength(0)
     expect(events).toContainEqual(
@@ -142,23 +142,23 @@ describe('statusTickPhase', () => {
 
   it('does not remove permanent statuses (duration -1)', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent())
-    state.playerStatuses = [{ name: 'technical_debt', duration: -1 }]
+    state.playerStatuses = [{ id: 'technical_debt', remaining: -1 }]
     const events = statusTickPhase(state)
     expect(state.playerStatuses).toHaveLength(1)
-    expect(state.playerStatuses[0].duration).toBe(-1)
+    expect(state.playerStatuses[0].remaining).toBe(-1)
   })
 
   it('ticks multiple statuses independently', () => {
     const state = createBattleState(BATTLE_MODES.INCIDENT, makePlayer(), makeOpponent())
     state.playerStatuses = [
-      { name: 'throttled', duration: 3 },
-      { name: 'cold_start', duration: 1 },
-      { name: 'technical_debt', duration: -1 },
+      { id: 'throttled',     remaining: 3  },
+      { id: 'cold_start',    remaining: 1  },
+      { id: 'technical_debt', remaining: -1 },
     ]
     statusTickPhase(state)
     expect(state.playerStatuses).toHaveLength(2) // cold_start expired
-    expect(state.playerStatuses.find(s => s.name === 'throttled').duration).toBe(2)
-    expect(state.playerStatuses.find(s => s.name === 'technical_debt').duration).toBe(-1)
+    expect(state.playerStatuses.find(s => s.id === 'throttled').remaining).toBe(2)
+    expect(state.playerStatuses.find(s => s.id === 'technical_debt').remaining).toBe(-1)
   })
 })
 
@@ -1060,7 +1060,7 @@ describe('incidentAttackPhase', () => {
     state.turn = 2
     const events = incidentAttackPhase(state)
     expect(events).toContainEqual(expect.objectContaining({ type: 'status_apply', target: 'player', statusName: 'skill_block' }))
-    expect(state.playerStatuses.some(s => s.name === 'skill_block')).toBe(true)
+    expect(state.playerStatuses.some(s => s.id === 'skill_block')).toBe(true)
   })
 
   it('emits status_apply event on confusion attack', () => {
@@ -2444,7 +2444,7 @@ describe('throttle attack', () => {
     state.turn = 2
     const events = incidentAttackPhase(state)
     expect(events).toContainEqual(expect.objectContaining({ type: 'status_apply', statusName: 'throttle' }))
-    expect(state.playerStatuses.some(s => s.name === 'throttle')).toBe(true)
+    expect(state.playerStatuses.some(s => s.id === 'throttle')).toBe(true)
   })
 
   it('throttle status halves outgoing damage', () => {
@@ -2454,7 +2454,7 @@ describe('throttle attack', () => {
       { slaTimer: 5 },
     )
     // Apply throttle status manually
-    state.playerStatuses.push({ name: 'throttle', duration: 2 })
+    state.playerStatuses.push({ id: 'throttle', remaining: 2 })
     const skill = makeDamageSkill({ domain: 'cloud', effect: { type: 'damage', value: 30 } })
     const events = skillPhase(state, skill)
     const dmgEvent = events.find(e => e.type === 'damage' && e.target === 'opponent')
@@ -2470,9 +2470,9 @@ describe('throttle attack', () => {
       { slaTimer: 5 },
     )
     state.turn = 2
-    state.playerStatuses.push({ name: 'throttle', duration: 2 })
+    state.playerStatuses.push({ id: 'throttle', remaining: 2 })
     incidentAttackPhase(state)
-    const throttleCount = state.playerStatuses.filter(s => s.name === 'throttle').length
+    const throttleCount = state.playerStatuses.filter(s => s.id === 'throttle').length
     expect(throttleCount).toBe(1)
   })
 })
