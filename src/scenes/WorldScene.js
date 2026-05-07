@@ -3,7 +3,7 @@ import { BaseScene } from '#scenes/BaseScene.js'
 import { DialogBox } from '#ui/DialogBox.js'
 import { CONFIG, MOVEMENT } from '../config.js'
 import { GameState, hasItem, addItem, markDirty, grantXpOnce } from '#state/GameState.js'
-import { getById as getStoryById } from '#data/story.js'
+import { getById as getStoryById, getNpcAppearance, getViralWave } from '#data/story.js'
 import { getById as getQuestById } from '#data/quests.js'
 import { resolveChoice, isQuestCompleted, getCompletedDialog } from '#engine/QuestEngine.js'
 import {
@@ -14,7 +14,7 @@ import {
 } from '#engine/MovementEngine.js'
 import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
 import { getBy as getGymsBy } from '#data/gyms.js'
-import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene, getVisibleNpcs, getKristofferLocation, getKristofferShameDialog } from '#engine/StoryEngine.js'
+import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene, getKristofferLocation, getKristofferShameDialog } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { roll as encounterRoll } from '#engine/EncounterEngine.js'
@@ -25,7 +25,7 @@ import {
 } from '#engine/GateEngine.js'
 import { Menu } from '#ui/Menu.js'
 import { HUD } from '#ui/HUD.js'
-import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial, addDungeonPoints, addResourceLock } from '#engine/RegionEngine.js'
+import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
 
 // Texture keys that are statically generated as stub rectangles — not walk-cycle sheets.
 const STUB_TEXTURE_KEYS = new Set(['npc_default', 'azure_terminal', 'player',
@@ -392,7 +392,7 @@ export class WorldScene extends BaseScene {
 
     // Viral Wave — scripted 3-encounter sequence on first Production Plains entry in Act 2
     if (shouldTriggerViralWave(GameState.story.act, regionId, GameState.story.flags)) {
-      this._triggerViralWave()
+      if (this._triggerViralWave()) return  // BattleScene takes over; skip further region-enter logic
     }
 
     // 3am scene — fires once after viral wave completes
@@ -414,19 +414,35 @@ export class WorldScene extends BaseScene {
     this.playBgm(regionId)
   }
 
-  // Launches the first viral-wave scripted encounter.
-  // After viral_wave_complete is set, re-entering production_plains won't re-trigger.
+  // Launches the next encounter in the viral-wave scripted sequence.
+  // Returns true when a battle is started; false when the final encounter
+  // already resolved and we only needed to set viral_wave_complete.
+  // Stage is stored in GameState.story.flags.viral_wave_stage (0-based index
+  // into VIRAL_WAVE.encounters), so it survives scene restarts.
   _triggerViralWave() {
-    GameState.story.flags.viral_wave_complete = true
+    const wave  = getViralWave()
+    const stage = GameState.story.flags.viral_wave_stage ?? 0
+
+    if (stage >= wave.encounters.length) {
+      // All encounters resolved — mark the sequence complete so the 3am scene can fire.
+      GameState.story.flags.viral_wave_complete = true
+      markDirty()
+      return false
+    }
+
+    GameState.story.flags.viral_wave_stage = stage + 1
     markDirty()
-    const firstEncounter = getEncounterById('high_cpu')
+
+    const encounterId = wave.encounters[stage].id
+    const encounter   = getEncounterById(encounterId)
     this.scene.start('BattleScene', {
       mode:         BATTLE_MODES.SCRIPTED,
-      opponent:     firstEncounter ?? { id: 'high_cpu', name: 'High CPU', domain: 'observability', hp: 50, maxHp: 50, difficulty: 3 },
-      slaTimer:     firstEncounter?.sla ?? 8,
+      opponent:     encounter ?? { id: encounterId, name: encounterId, domain: 'observability', hp: 50, maxHp: 50, difficulty: 3 },
+      slaTimer:     encounter?.sla ?? 8,
       originRegion: this._regionId,
       returnScene:  'WorldScene',
     })
+    return true
   }
 
   _setupMap(regionId) {
@@ -490,14 +506,16 @@ export class WorldScene extends BaseScene {
   _setupNpcSprites() {
     this._npcSprites = []
 
-    // Determine which NPC IDs are visible for the current act.
-    const act        = GameState.story?.act ?? 1
-    const visibleIds = getVisibleNpcs(act)   // null means show all
+    // Pre-compute per-act state used across the loop.
+    const act                = GameState.story?.act ?? 1
     const kristofferRegionId = getKristofferLocation(act)
 
     for (const def of this._npcDefs) {
-      // Filter NPCs that are act-gated (visibleIds is null = show all)
-      if (visibleIds !== null && !visibleIds.includes(def.name)) continue
+      // Only suppress NPCs that have an explicit appearance entry whose
+      // appearsInAct has not been reached yet.  NPCs without an entry are
+      // default/Act-1 NPCs and are always visible.
+      const appearance = getNpcAppearance(def.name)
+      if (appearance && appearance.appearsInAct > act) continue
 
       // Kristoffer NPC: only show in the region he's assigned to for this act
       if (def.name === 'kristoffer' && kristofferRegionId !== this._regionId) continue
@@ -1197,7 +1215,7 @@ export class WorldScene extends BaseScene {
   _checkEncounterStep() {
     if (shouldTriggerEncounter(this._stepsSinceEncounter, this._isRunning)) {
       this._stepsSinceEncounter = 0
-      // Use total lifetime steps as seed so every step produces a unique roll
+      // Use session step count as seed (resets each time WorldScene is created)
       const seed = this._totalSteps
       const encounter = encounterRoll(this._regionId, this._totalSteps, seed)
       if (encounter) {
