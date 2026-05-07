@@ -182,15 +182,17 @@ export class DialogBox {
     if (this.scene.textures.exists(PANEL_KEY)) return
 
     // Procedural dark panel with a subtle light border.
+    // Must be at least 32×32 so that 8px corners leave a non-zero (16px) center
+    // region when used as a 9-slice — a 16×16 texture would leave 0px center.
     const g = this.scene.make.graphics({ x: 0, y: 0, add: false })
     g.fillStyle(0x0d1117, 1)
-    g.fillRect(0, 0, 16, 16)
+    g.fillRect(0, 0, 32, 32)
     g.fillStyle(0x334155, 1)
-    g.fillRect(0, 0, 16, 2)    // top
-    g.fillRect(0, 14, 16, 2)   // bottom
-    g.fillRect(0, 0, 2, 16)    // left
-    g.fillRect(14, 0, 2, 16)   // right
-    g.generateTexture(PANEL_KEY, 16, 16)
+    g.fillRect(0, 0, 32, 2)    // top
+    g.fillRect(0, 30, 32, 2)   // bottom
+    g.fillRect(0, 0, 2, 32)    // left
+    g.fillRect(30, 0, 2, 32)   // right
+    g.generateTexture(PANEL_KEY, 32, 32)
     g.destroy()
   }
 
