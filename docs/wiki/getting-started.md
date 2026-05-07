@@ -1,106 +1,88 @@
-# Getting Started
+# 🚀 Getting Started
 
-Welcome to Cloud Quest! You're a fresh junior cloud engineer at NorCloud AS, a Norwegian cloud consultancy. Your goal? Survive incidents, beat other engineers, and climb all the way to Principal Engineer.
+Welcome to Cloud Quest! You're a junior cloud engineer in Localhost Town, armed with a starter deck of CLI commands and a dream of one day reaching Principal Engineer. The road is paved with 503 errors and passive-aggressive YAML.
 
 ---
 
-## How to Play
+## Your Starter Deck
 
-### Running the Game
+You begin with these skills equipped:
 
-```bash
-npm install
-npm run dev       # Opens at localhost:5173
-```
+| Skill | Domain | Effect |
+|---|---|---|
+| `az webapp deploy` | Cloud | 30 damage — bread-and-butter deployment |
+| `kubectl rollout restart` | Kubernetes | Removes all enemy buffs |
+| `blame DNS` | Linux | 50% chance to confuse *everyone* (including yourself) |
+| `read the docs` | Observability | Reveals enemy weaknesses |
+| `feature flag` | Cloud | Hides one enemy skill for 2 turns |
 
-The game runs in your browser — no install needed beyond npm.
+You can hold up to **6 active skills** at a time. Swap them in your inventory as you learn new ones.
 
-### Controls
+---
 
-Cloud Quest uses a classic D-pad + two-button layout, just like a GameBoy:
+## Your First Quest: Margaret's Website
 
-| Key | Action |
+**NPC:** Old Margaret, Localhost Town  
+**Goal:** Fix Margaret's bakery website, which keeps going down.
+
+The quest has multiple solution tiers — the better your fix, the better the reward:
+
+| Solution | Tier | Reward |
+|---|---|---|
+| Use `az monitor logs` + `az webapp deploy` | Optimal | ×2 XP, +10 rep, Incident Postmortem item |
+| Use `az webapp restart` | Standard | ×1 XP, +3 rep, Cold Coffee |
+| Use `az webapp stop` | Shortcut | ×0.5 XP, -5 rep, nothing |
+| Use `rm -rf /` on her server | Nuclear | ×0 XP, -30 rep, +2 shame, Scorched Server |
+
+Aim for Optimal on your first run. The follow-up rewards are worth it.
+
+**Base reward:** 50 XP + 1× Azure Credit Voucher
+
+---
+
+## The Basics
+
+### Battles
+
+There are two kinds of battles:
+
+- **Incidents** — technical problems with a visible *symptom* but hidden root cause. An SLA timer ticks down each turn. Diagnose fast, fix correctly.
+- **Engineer Battles** — PvP against named engineers. They telegraph their next move. Use domain matchups to counter.
+
+### Budget
+
+Budget is Azure Credits — your in-game currency. Some skills cost budget to use. Running out of budget is bad. Very bad. Starting budget: **500 Credits**.
+
+You earn credits by:
+- Winning incident battles (Optimal: 40, Standard: 25, Shortcut: 15, Cursed: 5, Nuclear: 0)
+- Winning trainer battles: 30 credits
+- Completing quests
+- Using `Azure Credit Voucher` items
+
+### Levelling Up
+
+Defeat enemies and complete quests to earn XP. Your solution quality multiplies XP:
+
+| Quality | XP Multiplier |
 |---|---|
-| **Arrow keys** | Move / Navigate menus |
-| **Z** | Confirm / Advance dialog |
-| **X** | Cancel / Back |
-| **Enter** | Interact in the world |
+| Optimal | ×2 |
+| Standard | ×1 |
+| Shortcut | ×0.5 |
+| Cursed | ×0.25 |
+| Nuclear | ×0 |
+
+### Learning New Skills
+
+Win engineer battles at **Optimal quality** to learn their signature skill. Some skills are locked behind quests or hidden areas. See [Skills Reference](skills-reference.md) for the full list.
 
 ---
 
-## Your First Steps
+## Where to Go Next
 
-### Prologue — "Hello World"
+Start with **Localhost Town** — it has no random encounters (encounter rate: 0%), so you can explore safely. Then head to **Pipeline Pass** to start Gym 1 with Bjørn the Build Breaker.
 
-You start in **Professor Pedersen's Lab** in Localhost Town. The professor gives you your **starter skill deck** — a small set of CLI commands across a few domains. Your first decision matters: which domain focus to start with.
-
-**Your starter skills include:**
-- `kubectl rollout restart` — Clears enemy buffs, Kubernetes domain
-- `read the docs` — Reveals enemy weaknesses (Observability)
-- `blame DNS` — A shortcut move that confuses everyone, including you
-- `az webapp deploy` — Your first cloud attack (30 damage)
-
-### First Quest — Old Margaret's Bakery
-
-Your first real quest comes from **Old Margaret**, who runs a bakery in Localhost Town. Her website keeps going down. Help her deploy it to Azure App Service. This teaches you the basics of cloud deployment and quest structure.
-
-**Tip:** Listen to what Margaret says. The correct answer involves Azure App Service, not "more RAM."
-
-### First Battle
-
-Step into the tall grass (metaphorically) and you'll encounter your first **incident** — a technical problem you need to solve. Incidents show you symptoms first. Use an Observability skill like `read the docs` to reveal the enemy's domain, then hit it with the right type of command.
+See the [World Map](world-map.md) for the full region overview.
 
 ---
 
-## Core Concepts
-
-### Skills = Real CLI Commands
-
-Every skill in the game is a real cloud, DevOps, or Linux command. When you use `kubectl apply -f` in battle, that's a real Kubernetes command. The game teaches you what these commands actually do.
-
-See the [Skills Reference](skills-reference.md) for every skill in the game.
-
-### Domains = Type System
-
-Every skill and every enemy belongs to one of 8 domains. Think of them like types in Pokémon:
-
-| Domain | What It Covers |
-|---|---|
-| 🐧 Linux | Processes, files, permissions, services |
-| 🔒 Security | IAM, certs, firewalls, secrets |
-| ⚡ Serverless | Functions, cold starts, event triggers |
-| ☁️ Cloud | Azure/AWS/GCP, billing, deployments |
-| 🏗️ IaC | Terraform, Git, CI/CD pipelines |
-| 🐳 Containers | Docker, images, registries |
-| ☸️ Kubernetes | Pods, Helm, kubectl, clusters |
-| 📊 Observability | Monitoring, logging, alerting (support — reveals info, no damage) |
-
-Domains have a matchup cycle — each one beats another. Check the [Combat Guide](combat-guide.md) for the full breakdown.
-
-### Two Types of Battles
-
-1. **Incidents** — Wild encounters. A technical problem appears with symptoms. You diagnose it, then fix it before the SLA timer runs out.
-2. **Engineer Battles** — Trainer fights. Another engineer challenges you. They telegraph their next move. Beat them well enough and they teach you their signature skill.
-
-### Saving Your Game
-
-Cloud Quest uses file-based saves — `.cloudquest` files. Think of it like `git commit` for your progress. There's no cloud save (ironic, right?). Export your save file and keep it safe.
-
----
-
-## What to Do Next
-
-1. **Explore Localhost Town** — Talk to every NPC. Margaret has a quest. Professor Pedersen has wisdom.
-2. **Build your skill deck** — You can hold up to 6 active skills. Choose wisely based on what domains you expect to face.
-3. **Head to Pipeline Pass** — Your first real challenge area. CI/CD encounters and your first gym await.
-4. **Read the [Combat Guide](combat-guide.md)** — Understanding domain matchups is the difference between Optimal and Nuclear solutions.
-
----
-
-## Stuck?
-
-Check the [Tips & Tricks](tips-and-tricks.md) page for hints, strategy advice, and spoiler-free guidance.
-
----
-
-*"Be careful in the tall grass — incidents love to ambush young engineers." — Old Margaret*
+> *"Have you tried restarting it?"* — `systemctl restart`, learned from Ola the Ops Guy
