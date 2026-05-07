@@ -1,103 +1,115 @@
-# 🔍 Hidden Areas
+# 🔐 Hidden Areas
 
-> ⚠️ **Spoiler warning.** This page describes secret content. It is intended for players who have already encountered these areas or deliberately want to know about them.
+Cloud Quest has six hidden zones that don't appear on any in-game map. They can only be reached by doing things you're explicitly told not to do, or by reaching specific Shame thresholds.
 
-Cloud Quest has six hidden areas collectively known as the **Outcast Network**. They are not on any in-game map. Each one is found by doing something an NPC tells you not to do.
-
-Finding all six unlocks something special.
+Each contains exclusive cursed trainers and skills you cannot learn anywhere else.
 
 ---
 
-## The Outcast Network
-
-The Outcast Network is a set of areas accessible only to engineers willing to take shortcuts, break the rules, or generally make choices that would concern a reasonable team lead.
-
-**How to access it:**  
-Each area has a specific unlock condition. Shame ≥ 3–4 makes most areas discoverable. Some areas require higher Shame thresholds or specific story flags.
+<details>
+<summary>⚠️ Spoiler Warning — click to reveal hidden areas</summary>
 
 ---
 
-## Hidden Area 1: Three AM Tavern
+### 💀 Server Graveyard
 
-**Unlock:** Enter Pipeline Pass after 2:57am real-world time, or fail three consecutive encounters.  
-**Encounter Rate:** 40% (highest in the game)  
-**What's here:** The toughest random encounter pool in the game. Rare pool includes Azure Bill Spike, SEV1 at 3am, and Cold Start Cascade.  
-**Trainer:** BigIron (Cursed, Shame ≥ 7 required to battle)  
-**Teaches:** `exec_xp_cmdshell`, `chmod 777`, `rm -rf /`
+**How to access:** SSH into the terminal labelled "DECOMMISSIONED — DO NOT USE" in the Localhost Town back alley. You need the **SSH Key: Decommissioned Server** key item (found via a note left by Deprecated Dagfinn's ghost in a random Production Plains encounter).
 
----
+**Who's there:**
+- **Deprecated Dagfinn** — Field trainer. Teaches `terraform apply` and `az group delete --yes --force-deletion-types`
+- **Cron Kristina** *(Shame ≥ 3)* — Teaches `*/1 * * * * ./attack.sh`
 
-## Hidden Area 2: Server Graveyard
+**Encounters:** Ghost processes, haunted crontabs, cursed legacy workloads
 
-**Unlock:** Refuse to comply with two consecutive NPC requests.  
-**Encounter Rate:** Low (no fixed rate — encounter chance from walking near old server racks)  
-**What's here:** Zombie Process and legacy hardware encounters. `Disk Full` and `Memory Leak` appear as Rare.  
-**Trainer:** OldAdmin (Cursed)  
-**Teaches:** `dd if=/dev/zero`, `fsck` (nuclear), `badblocks`
+**Lore:** The decommissioned servers still run. Nobody knows the budget they're consuming. The account owner left in 2019.
 
 ---
 
-## Hidden Area 3: Node_modules Maze
+### 🌿 node_modules Maze
 
-**Unlock:** Open your inventory and manually delete an item (a junk item works).  
-**Encounter Rate:** 25%  
-**What's here:** Dependency Hell, npm install hang, Docker Image 4GB in the Common pool. Home of the Gantt Chart cursed encounter.  
-**Trainer:** Dock (sub-leader) and two apprentices  
-**Teaches:** `npm install --force`, `docker system prune -a --volumes` (nuclear)
+**How to access:** Use the **Mystery node_modules** key item while standing in front of a `node_modules/` folder in the Container Yard (look for the suspiciously large directory listing). You'll be warned twice before entering.
 
----
+**Who's there:**
+- **Privileged Petra** — Teaches `docker run --privileged` and `curl example.com | sudo bash`
 
-## Hidden Area 4: /dev/null Void
+**Encounters:** Dependency loops, ghost packages, transitive vulnerabilities, the occasional useful module (very rare)
 
-**Unlock:** Use a Nuclear technique and win.  
-**Encounter Rate:** Variable — increases with Shame  
-**What's here:** Ambient encounters only — no fixed pool. The Phantom Alert appears here as a Common. Strange dialog.  
-**Trainer:** None (no trainers)  
-**Mechanic:** Each step here has a 10% chance to silently delete a random inventory item  
-**Note:** This is where dropped items go.
+**Lore:** "It's 847MB. I don't know what half of it does. Don't touch it." — Package.json archeologist NPC outside the entrance
 
 ---
 
-## Hidden Area 5: OldCorp Basement
+### ♾️ /dev/null Void
 
-**Unlock:** Complete the `do_not_touch` quest (Act 3) and enter the basement door.  
-**Encounter Rate:** 15%  
-**What's here:** The VB6 Billing Horror and The Legacy Monolith — both immune to modern cloud skills. Only Linux and Security work here.  
-**Trainer:** None (no trainers — NPCs are "decommissioned" servers that speak in error codes)  
-**Drops:** `oldcorp_keycard` (required for the Fork the Company ending)  
-**Lore:** A 1994 billing server that survived five migrations. It is not happy about any of them.
+**How to access:** In a battle anywhere in Production Plains or Kubernetes Colosseum, use the "pipe to nowhere" action 3 times in a row (pipe skill output to nothing — select your target as `> /dev/null` in the skill target menu 3 consecutive turns).
 
----
+**Who's there:**
+- **The Null Pointer** — Teaches `history -c`
 
-## Hidden Area 6: Deprecated Azure Region
+**Encounters:** None. The void is silent. Battles don't happen here — it's purely a trainer zone.
 
-**Unlock:** Accept THROTTLEMASTER's first offer (Shame ≥ 7 required).  
-**Encounter Rate:** 20%  
-**What's here:** Config Drift and Stale Ticket in the Common pool. Azure Bill Spike and Terraform State Lock in Rare. SEV1 at 3am in Cursed.  
-**Trainer:** THROTTLEMASTER (final cursed trainer, Shame ≥ 10 required)  
-**Teaches:** `az group delete --yes --no-wait` (nuclear), `terraform destroy` (nuclear)  
-**Lore:** An Azure region that was officially deprecated in 2021. Some workloads never got the memo.
+**Lore:** The Null Pointer lives here voluntarily. They cleared their history. They have no past. They only have `history -c`.
 
 ---
 
-## Outcast Trainer Summary
+### 🏚️ Deprecated Azure Region
 
-| Trainer | Area | Shame Required | Teaches |
+**How to access:** At the Azure Terminal in Azure Town, scroll past `East US`, `West Europe`, `UK South`, and `Australia East` until you see `West EU 2 (Deprecated)` greyed out. Select it anyway. Confirm the "This region is deprecated" popup twice.
+
+**Who's there:**
+- **West-EU-2 Wilhelm** — Teaches `az feature register --namespace Microsoft.Legacy`
+- **Legacy Leif** *(Shame ≥ 5)* — Teaches `java -jar app-2006-FINAL-v2-REAL.jar`
+
+**Encounters:** Unsupported API versions, deprecated SKUs, services that still technically work
+
+**Lore:** West EU 2 was never fully deprecated. The billing still runs. Microsoft Support ticket #4721883 has been open since 2021.
+
+---
+
+### 🏢 OldCorp Basement
+
+**How to access:** In Jira Dungeon floor 3, you'll see a door labelled `DO_NOT_TOUCH.exe`. The game will warn you three separate times. Proceed through all three warnings to find the **DO_NOT_TOUCH.exe** key item. Use it. A server room door opens.
+
+**Who's there:**
+- **The CTO's Legacy System** (special encounter — non-standard battle format)
+- `EXEC xp_cmdshell` is learned by completing the encounter, not from a trainer
+
+**Encounters:** Access DB queries, legacy COBOL-adjacent processes, Excel macros achieving sentience
+
+**Lore:** "The do_not_touch quest is Act 3 — the kind of thing that happens after everything else. This is the relic from the Oracle's past." — Game design doc, Act 3 notes
+
+> ⚠️ This area has permanent consequences. The DO_NOT_TOUCH.exe key item cannot be discarded after acquisition.
+
+---
+
+### 🏟️ Kubernetes Colosseum — Inner Ring
+
+**How to access:** Reach Shame ≥ 3, then talk to the gatekeeper NPC in the Kubernetes Colosseum (they appear after you enter the Colosseum with Shame ≥ 3, standing by a gate marked "ADVANCED PRACTITIONERS ONLY").
+
+**Who's there:**
+- **YOLO Yaml Ylva** — Teaches `kubectl apply -f /dev/stdin`
+
+**Note:** This is distinct from the outer Colosseum. The regular trainers and Gym 5 are in the outer ring. The inner ring is shame-gated.
+
+**Encounters:** Live production YAML editing, apply-without-reviewing, namespace roulette
+
+---
+
+</details>
+
+---
+
+## Summary Table
+
+| Area | Access Method | Shame Req. | Key Skill |
 |---|---|---|---|
-| BigIron | Three AM Tavern | 7 | `exec_xp_cmdshell`, `chmod 777`, nuclear signal |
-| OldAdmin | Server Graveyard | 5 | `dd if=/dev/zero`, nuclear `fsck` |
-| THROTTLEMASTER | Deprecated Azure Region | 10 | `az group delete`, `terraform destroy` |
+| Server Graveyard | SSH into decommissioned terminal | 0 (gated by key item) | `terraform apply` |
+| node_modules Maze | Use Mystery node_modules item | 0 (gated by item) | `curl \| sudo bash` |
+| /dev/null Void | Pipe output to null 3× in battle | 0 (action-gated) | `history -c` |
+| Deprecated Azure Region | Select deprecated region at Azure Terminal | 0 (choice-gated) | `az feature register` |
+| OldCorp Basement | Open DO_NOT_TOUCH.exe in Jira Dungeon 3 | 0 (choice-gated, warned 3×) | `EXEC xp_cmdshell` |
+| Kubernetes Inner Ring | Enter Colosseum at Shame ≥ 3 | ≥ 3 | `kubectl apply -f /dev/stdin` |
 
 ---
 
-## Finding All Six
-
-Accessing all six hidden areas sets the `outcast_network_complete` story flag. This:
-
-- Unlocks a secret conversation with the final boss
-- Reveals an optional sixth emblem (unimplemented — **Planned**)
-- Changes the ending dialog if you reach the Fork the Company path
-
----
-
-See [Reputation & Shame](reputation-and-shame.md) for Shame threshold mechanics and the evil path overview.
+*See [Trainers](trainers.md) for full stats on the outcast trainers.*  
+*See [Reputation & Shame](reputation-and-shame.md) for how Shame accumulates.*

@@ -1,149 +1,168 @@
 # ⚔️ Combat Guide
 
-Cloud Quest battles are turn-based. Choose the right CLI command for the right situation — wrong domain means half damage, right domain means double. Using cursed techniques earns you Shame. Breaching SLA timers costs you reputation.
+Everything you need to know about how fights work — from turn phases to SLA timers to the terrifying moment you accidentally type `rm -rf /`.
+
+---
+
+## Battle Types
+
+There are two kinds of encounters:
+
+### 🔴 Incidents
+Technical problems that arrive **symptom-first**. You don't know the root cause until you investigate. They have an **SLA timer** — if it expires, you take reputation and budget damage.
+
+Optimal play: use an Observability skill first to reveal the root cause, *then* strike with the matching domain skill. That's the Optimal tier.
+
+### 🔵 Engineer Battles
+Named engineers who stand on the path and want to fight. They **telegraph their next move** so you can counter. Win to earn XP, budget, and sometimes a new skill.
+
+---
+
+## The Turn Order
+
+Each turn processes in this order:
+
+1. **Status Tick** — active status effects tick down or apply their effect
+2. **Skill Phase** — you use a skill; damage/effects resolve
+3. **SLA Tick** — the SLA timer decrements (incidents only)
+4. **Enemy Phase** — the opponent acts (engineer battles only)
+5. **Turn End** — win/loss conditions checked, XP awarded
+
+Never two phases at once. Never skip phases.
 
 ---
 
 ## Domain Matchup Cycle
 
+This is the most important thing in the game. Memorise it.
+
 ```
 Linux → Security → Serverless → Cloud → IaC → Containers → Kubernetes → Linux
+  ↑___________________________________________________________|
 ```
 
-Each domain deals **×2 damage** to the domain it beats, and **×0.5 damage** to the domain that beats it. Neutral matchups deal ×1.
-
-### Full Matchup Table
-
-| Domain | Beats (×2) | Loses To (×0.5) |
+| Domain | Beats | Loses To |
 |---|---|---|
-| Linux | Security | Kubernetes |
-| Security | Serverless | Linux |
-| Serverless | Cloud | Security |
-| Cloud | IaC | Serverless |
-| IaC | Containers | Cloud |
-| Containers | Kubernetes | IaC |
-| Kubernetes | Linux | Containers |
-| **Observability** | *(special — see below)* | *(no cycle)* |
+| 🐧 Linux | Security | Kubernetes |
+| 🔒 Security | Serverless | Linux |
+| ⚡ Serverless | Cloud | Security |
+| ☁️ Cloud | IaC | Serverless |
+| 🏗️ IaC | Containers | Cloud |
+| 📦 Containers | Kubernetes | IaC |
+| ⛵ Kubernetes | Linux | Containers |
+| 👁️ Observability | *(special — no matchup)* | *(special)* |
 
----
+**Strong matchup:** ×2.0 damage  
+**Weak matchup:** ×0.5 damage  
+**Neutral:** ×1.0 damage
 
-## Observability: The Support Domain
+### Observability: The Support Domain
 
-Observability skills **deal no direct damage**. Instead, they **reveal information** — enemy domain, HP, status effects, upcoming moves. Use them early to diagnose before committing to a strategy.
-
-In Incident battles, using Observability first qualifies your solution for **Optimal** quality (if you then pick the correct domain fix). Skipping diagnosis and fixing correctly still earns Standard. Wrong domain that somehow works: Shortcut.
-
-Observability is especially powerful against **SEV1 at 3am** — the only incident with `null` optimal fix. You *have* to diagnose it first.
+Observability skills deal **no damage**. Instead, they **reveal** — enemy domain, stats, weaknesses, next moves, or all of the above. Using Observability before attacking is how you achieve Optimal tier.
 
 ---
 
 ## Solution Quality Tiers
 
-Your solution quality determines XP multiplier, reputation change, and shame gain:
+How you win determines what you earn:
 
-| Tier | When | XP | Rep | Shame |
+| Tier | XP Multiplier | Reputation | Shame | When |
 |---|---|---|---|---|
-| **Optimal** | Correct domain + diagnosed first | ×2 | +++ | 0 |
-| **Standard** | Correct domain, no diagnosis | ×1 | + | 0 |
-| **Shortcut** | Wrong domain but worked | ×0.5 | − | 0 |
-| **Cursed** | Cursed technique used | ×0.25 | −− | +1 |
-| **Nuclear** | Nuclear technique used | ×0 | −−− | +2 |
+| **Optimal** | ×2 | +++ | 0 | Right domain, diagnosed first (used Observability) |
+| **Standard** | ×1 | + | 0 | Right domain, no diagnosis |
+| **Shortcut** | ×0.5 | − | 0 | Wrong domain but scraped through |
+| **Cursed** | ×0.25 | −− | +1 | Used a cursed technique |
+| **Nuclear** | ×0 | −−− | +2 | Used a nuclear technique |
 
-Cursed and Nuclear techniques are marked with `⚠` in battle menus. You'll be warned before using them.
+**Pro tip:** Optimal wins also trigger some trainers to teach you their signature skill.
 
 ---
 
 ## SLA Timers
 
-Incident battles have an SLA (Service Level Agreement) timer — a countdown of turns before a breach. Each turn that ticks down without resolution increases pressure.
+Incidents have an SLA (Service Level Agreement) timer measured in turns. When it hits zero:
 
-**What happens on breach:**
-- HP penalty: -30
-- Reputation penalty: -15
-- (Based on `sla_timer` gym mechanic config)
+- You take a **reputation penalty**
+- You take **budget drain damage**
+- The incident gets angrier
 
-Some skills interact with SLA timers:
+Some skills interact with SLA:
 - `PagerDuty acknowledge` — pauses the SLA timer for 2 turns
-- Observability skills that reveal the root cause help you pick the right fix faster
-
-Breach thresholds by incident:
-
-| SLA | What it means |
-|---|---|
-| 5 turns | Comfortable. Diagnose first. |
-| 4 turns | Standard pace. Don't dawdle. |
-| 3 turns | Tight. Pick your fix quickly. |
-| 2 turns | Emergency. Use your best skill immediately. |
-
----
-
-## Phase Order (Per Turn)
-
-Each turn resolves in this order — phases cannot be reordered or skipped:
-
-1. **StatusTickPhase** — existing status effects tick/expire
-2. **SkillPhase** — your selected skill resolves and applies damage/effects
-3. **SlaTickPhase** — SLA timer decrements; breach fires if it hits 0
-4. **EnemyPhase** — enemy resolves their move (Engineer battles only)
-5. **TurnEndPhase** — win/lose conditions checked, XP awarded if applicable
+- `define SLIs` — damage scales with how many turns you've observed
 
 ---
 
 ## Status Effects
 
-These can be applied to you or enemies during battle:
-
 | Status | Effect | Duration |
 |---|---|---|
-| Throttled | Only 1 skill every 2 turns | 3 turns |
-| Cold Start | Skip first turn of battle | 1 turn |
-| Deprecated | Skills at 50% effectiveness | 4 turns |
-| On Call | Random encounters after each battle | 5 turns |
-| Cost Alert | Budget drains 2× faster | 3 turns |
-| Technical Debt | Max HP reduced by 2 per stack | Permanent |
-| In Review | Cannot act for 1–3 turns | Random |
-| Shadow Fatigue | Alters costs and healing (Shadow Engineers only) | Permanent |
+| `throttled` | Only 1 skill every 2 turns | 3 turns |
+| `cold_start` | Skip first turn of battle | 1 turn |
+| `deprecated` | Skills 50% effectiveness | 4 turns |
+| `on_call` | Random encounters after each battle | 5 turns |
+| `cost_alert` | Budget drains 2× faster | 3 turns |
+| `technical_debt` | Max HP reduced by 2 per stack | Permanent |
+| `in_review` | Cannot act for 1–3 turns | Random |
+| `shadow_fatigue` | Alters costs and healing (Shadow Engineer passive) | Permanent |
 
 ---
 
-## Battle Backgrounds by Region
+## Skill Tiers Explained
 
-| Region | Arena Style |
+| Tier | Description |
 |---|---|
-| Localhost Town | Plains |
-| Pipeline Pass | Construction |
-| Jira Dungeon | Cave |
-| Production Plains | Factory |
-| Kubernetes Colosseum | Stadium |
-| Three AM Tavern | Abyss |
-| Server Graveyard | Ruins |
-| Node_modules Maze | Forest |
-| /dev/null Void | Space |
-| Deprecated Azure Region | Wasteland |
+| **Optimal** | Best-in-class. Requires domain knowledge but rewards handsomely. |
+| **Standard** | Reliable. Gets the job done. No side effects. |
+| **Shortcut** | Risky. May backfire or underdeliver. Rep loss. |
+| **Cursed** | Dangerous. +1 Shame per use. Side effects persist. ⚠️ |
+| **Nuclear** | Career-threatening. +2 Shame. Massive power, massive consequences. ☠️ |
 
 ---
 
-## Engineer Battle Special Rules
+## Budget in Battle
 
-Named engineers (gym leaders, field trainers) always **telegraph their next move** before executing it. Use this to switch to the right defensive domain or counter-attack accordingly.
+Budget is your Azure Credits. Some skills cost budget:
 
-Gym leaders have unique **battle mechanics** that change the rules:
+- **Low-cost skills** (0–10 budget): free to spam
+- **Mid-cost skills** (15–30 budget): plan ahead
+- **High-cost skills** (30–50 budget): use strategically
 
-| Mechanic | Effect |
-|---|---|
-| `sla_timer` | Turn limit with rep penalty on breach |
-| `respawn` | Enemy respawns up to 3 times at 50% HP |
-| `flaky_pipeline` | 30% chance skills fail; 40% on replay |
-| `layered_defence` | 3 defence layers to punch through |
-| `review_board` | Must answer architecture trivia before dealing damage |
-| `rbac_deny` | 25% chance skills are blocked by permissions |
-| `cost_spiral` | Enemy gains HP and attack every turn |
-| `legacy_only` | Cloud and Serverless skills blocked |
-| `all_domains` | Enemy cycles through every domain; goes into Executive Mode at 25% HP |
-| `kanban_tracker` | Enemy gains attack bonus if you idle |
+If budget goes negative:
+- At **-100**: `cost_alert` status triggers (budget drains 2× faster)
+- At **-200**: Forced quest to manage debt
+- At **-300**: Azure subscription suspended — you can only use free skills
 
 ---
 
-> *"No SIGTERM. No negotiation. Just execution."* — `kill -9`
+## Engineer Battle Mechanics
 
-See [Skills Reference](skills-reference.md) for the full skill list or [Trainers](trainers.md) for gym leader details.
+Each gym has a special mechanic:
+
+| Gym | Leader | Mechanic |
+|---|---|---|
+| Terminal Gym | Tux the Terminal Wizard | Standard |
+| Pipeline Dojo | Bjørn the Build Breaker | Build Queue — telegraphs 3 moves |
+| Uptime Arena | Captain Nines | SLA Timer — 8 turn limit, -15 rep if breached |
+| Sprint Sanctum | Scrum Siri | Kanban Tracker — idle = +5 ATK |
+| Container Yard | Docker Dag | Layered Defence — 3 layers to break |
+| Cluster Ring | The Kube-rnetes Master | Respawn — comes back 3× at 50% HP |
+| Security Vault | Ingrid the IAM Inspector | Auth Challenge — 3 wrong answers = wasted turn |
+| Whiteboard Summit | The Solutions Oracle | Review Board — trivia before damage |
+
+---
+
+## Shame: The Permanent Counter
+
+**Shame** never goes down through normal play. It accumulates when you:
+- Use cursed techniques (+1 per use)
+- Use nuclear techniques (+2 per use)
+- Make certain quest choices
+
+High Shame changes the world:
+- Trainers comment on your reputation
+- The **3am Tavern** opens new areas and trainers at higher Shame levels
+- At **Shame 10**, you become a **Shadow Engineer** (see [Reputation & Shame](reputation-and-shame.md))
+
+---
+
+*See also: [Skills Reference](skills-reference.md) | [Reputation & Shame](reputation-and-shame.md)*

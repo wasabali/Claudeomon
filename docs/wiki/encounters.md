@@ -1,203 +1,84 @@
-# 👾 Encounters
+# ⚡ Encounters
 
-Random encounters come in two flavours: **Incidents** (technical problems) and **Engineers** (trainer battles). This page covers incident pools by region and stats for every incident in the game.
+Random battles in Cloud Quest come in two flavours: **Incidents** (technical problems with SLA timers) and **Engineer Battles** (PvP with trainers).
 
-> Encounter pools roll: **Common 70%** · **Rare 25%** · **Cursed 5%** (when pool is non-empty).
+See [Combat Guide](combat-guide.md) for full battle mechanics.
 
 ---
 
 ## Encounter Pools by Region
 
-### Localhost Town
-| Pool | Incidents |
-|---|---|
-| Common | 404 Not Found, Missing Semicolon, Port Conflict |
-| Rare | Failed Pipeline, npm install hang |
-| Cursed | *(none)* |
+Each region has three pools. When you step on a battle tile, the engine rolls: **common 70% · rare 25% · cursed 5%**.
 
-### Pipeline Pass (Encounter Rate: 15%)
-| Pool | Incidents |
-|---|---|
-| Common | npm install hang, 503 Service Unavailable, Failed Pipeline |
-| Rare | Merge Conflict, Port Conflict |
-| Cursed | *(none)* |
-
-### Jira Dungeon (Encounter Rate: 25%)
-| Pool | Incidents |
-|---|---|
-| Common | Stale Ticket, Missing Acceptance Criteria, Blocked by QA, Flaky CI Pipeline, Config Drift |
-| Rare | Scope Creep, Infinite Sprint |
-| Cursed | The Gantt Chart |
-
-### Production Plains (Encounter Rate: 20%)
-| Pool | Incidents |
-|---|---|
-| Common | High CPU, Disk Full, 503 Service Unavailable |
-| Rare | Production Incident, Runaway Process |
-| Cursed | SEV1 at 3am |
-
-### Kubernetes Colosseum (Encounter Rate: 30%)
-| Pool | Incidents |
-|---|---|
-| Common | CrashLoopBackOff, OOM Kill, Pending Pod |
-| Rare | Evicted Node, RBAC Denied, Leaked Secret |
-| Cursed | The YAML Labyrinth |
-
-### Three AM Tavern (Encounter Rate: 40%)
-| Pool | Incidents |
-|---|---|
-| Common | Merge Conflict, Missing Semicolon, NullPointerException |
-| Rare | Production Incident, Runaway Process, Azure Bill Spike, Cold Start Cascade |
-| Cursed | SEV1 at 3am |
-
-### Server Graveyard
-| Pool | Incidents |
-|---|---|
-| Common | Zombie Process, Disk Full, Runaway Process |
-| Rare | Evicted Node, Memory Leak |
-| Cursed | *(none)* |
-
-### Node_modules Maze
-| Pool | Incidents |
-|---|---|
-| Common | Dependency Hell, npm install hang, Docker Image 4GB |
-| Rare | Memory Leak, Cold Start Cascade |
-| Cursed | The Gantt Chart |
-
-### /dev/null Void
-| Pool | Incidents |
-|---|---|
-| Common | The Phantom Alert, NullPointerException, Zombie Process |
-| Rare | Runaway Process, Config Drift |
-| Cursed | *(none)* |
-
-### Deprecated Azure Region
-| Pool | Incidents |
-|---|---|
-| Common | Config Drift, Stale Ticket, 503 Service Unavailable |
-| Rare | Azure Bill Spike, Terraform State Lock |
-| Cursed | SEV1 at 3am |
-
-### Staging Valley
-| Pool | Incidents |
-|---|---|
-| Common | Config Drift, Terraform State Lock, Failed Pipeline |
-| Rare | Cold Start Cascade, Azure Bill Spike |
-| Cursed | *(none)* |
-
-### OldCorp Basement
-| Pool | Incidents |
-|---|---|
-| Common | Disk Full, Zombie Process |
-| Rare | The Legacy Monolith |
-| Cursed | The VB6 Billing Horror |
-
-### Shell Cavern
-| Pool | Incidents |
-|---|---|
-| Common | Zombie Process, DNS Propagation, Missing Semicolon |
-| Rare | Runaway Process, NullPointerException |
-| Cursed | *(none)* |
-
-### Helm Repository
-| Pool | Incidents |
-|---|---|
-| Common | Pending Pod, CrashLoopBackOff, OOM Kill |
-| Rare | The YAML Labyrinth, RBAC Denied |
-| Cursed | *(none)* |
-
-### Security Vault
-| Pool | Incidents |
-|---|---|
-| Common | SSL Certificate Expired, Leaked Secret, RBAC Denied |
-| Rare | The YAML Labyrinth, Evicted Node |
-| Cursed | *(none)* |
-
-### Architecture District
-| Pool | Incidents |
-|---|---|
-| Common | The Phantom Alert, Config Drift, Stale Ticket |
-| Rare | Scope Creep, Azure Bill Spike |
-| Cursed | *(none)* |
-
----
-
-## Incident Stats
-
-| Incident | Domain | HP | SLA | Difficulty | Optimal Fix |
-|---|---|---|---|---|---|
-| 404 Not Found | Cloud | 20 | 5 | 1 | `az webapp deploy` |
-| npm install hang | Containers | 25 | 4 | 1 | `kubectl rollout restart` |
-| 503 Service Unavailable | Cloud | 30 | 4 | 1 | `az webapp deploy` |
-| Missing Semicolon | IaC | 26 | 5 | 1 | `az pipelines run` |
-| Port Conflict | Linux | 28 | 4 | 2 | Force-terminate the blocking process |
-| Stale Ticket | Observability | 30 | 5 | 2 | `grep "ERROR" /var/log/*` |
-| Blocked by QA | Observability | 36 | 4 | 2 | `grep "ERROR" /var/log/*` |
-| Missing Acceptance Criteria | IaC | 34 | 5 | 2 | `terraform plan` |
-| Failed Pipeline | IaC | 35 | 4 | 2 | `az pipelines run` |
-| Merge Conflict | IaC | 32 | 4 | 2 | `git revert` |
-| High CPU | Cloud | 35 | 4 | 2 | `az scale out` |
-| Disk Full | Linux | 34 | 4 | 2 | Log cleanup or process removal |
-| NullPointerException | Linux | 30 | 4 | 2 | `grep "ERROR" /var/log/*` |
-| Flaky CI Pipeline | Cloud | 36 | 4 | 2 | `az pipelines run` |
-| SSL Certificate Expired | Security | 32 | 4 | 2 | `vault kv rotate` |
-| Cold Start Timeout | Serverless | 22 | 4 | 2 | `az functionapp deploy` |
-| Docker Image 4GB | Containers | 35 | 4 | 2 | `docker build` |
-| Infinite Redirect | Cloud | 30 | 4 | 2 | `az webapp deploy` |
-| The Phantom Alert | Observability | 25 | 5 | 2 | `grep "ERROR" /var/log/*` |
-| Zombie Process | Linux | 28 | 4 | 3 | Force-terminate |
-| DNS Propagation | Linux | 30 | 4 | 3 | `grep "ERROR" /var/log/*` |
-| Scope Creep | Cloud | 40 | 4 | 3 | `feature flag` |
-| Infinite Sprint | Serverless | 42 | 4 | 3 | `az functionapp deploy` |
-| Config Drift | IaC | 44 | 4 | 3 | `terraform apply` |
-| CrashLoopBackOff | Kubernetes | 38 | 4 | 3 | `kubectl rollout restart` |
-| OOM Kill | Containers | 40 | 4 | 3 | `kubectl scale --replicas=10` |
-| Pending Pod | Kubernetes | 37 | 4 | 3 | `kubectl scale --replicas=10` |
-| Runaway Process | Linux | 44 | 3 | 3 | Force-terminate |
-| Cold Start Cascade | Serverless | 38 | 3 | 3 | `az functionapp deploy` |
-| Leaked Secret | Security | 35 | 3 | 3 | `vault kv rotate` |
-| Memory Leak | Containers | 42 | 3 | 3 | `kubectl scale --replicas=10` |
-| Dependency Hell | Containers | 38 | 4 | 3 | `docker build` |
-| Production Incident | Cloud | 45 | 3 | 4 | `blue-green deploy` |
-| Evicted Node | Kubernetes | 48 | 3 | 4 | `kubectl drain node` |
-| RBAC Denied | Security | 46 | 3 | 4 | `chmod 644` |
-| Terraform State Lock | IaC | 45 | 3 | 4 | `terraform apply` |
-| The Gantt Chart | IaC | 50 | 3 | 4 | `terraform apply` |
-| Azure Bill Spike | Cloud | 100 | 3 | 4 | `cost optimization` |
-| The VB6 Billing Horror | Linux | 80 | 5 | 4 | `systemctl restart` |
-| The YAML Labyrinth | Kubernetes | 60 | 2 | 5 | `helm upgrade` |
-| SEV1 at 3am | Observability | 55 | 2 | 5 | *(diagnose first)* |
-| The Legacy Monolith | Security | 200 | 3 | 5 | *(linux/security only)* |
-
----
-
-## Special Incident Notes
-
-**Azure Bill Spike** (HP 100) — Boss-class. Someone left 47 GPU instances running over the weekend. Frequent budget drain attacks with a `cost_spiral_active` boss flag.
-
-**The VB6 Billing Horror** (HP 80) — Immune to Cloud, IaC, Kubernetes, and Containers. Only Linux and Security work on it. Running since 1998 and did not want to stop.
-
-**The Legacy Monolith** (HP 200) — OldCorp Basement rare encounter. Same immunities as VB6, but 200 HP. A 1994 server rack communicating via BSOD error codes. Drops `oldcorp_keycard`.
-
-**SEV1 at 3am** — No predetermined optimal fix. Use Observability to diagnose the root cause first. SLA is only 2 turns — act immediately. On-Call status applies after.
-
-**Production Incident** — On-Call battle. Reputation drain and budget spike attacks. Losing triggers a cascade.
-
----
-
-## Multi-Layer Incidents
-
-Some incidents reveal a second phase once the first HP bar is defeated. Domain and root cause shift:
-
-| Incident | Phase 2 Domain | Phase 2 HP | Phase 2 Optimal Fix |
+| Region | Common | Rare | Cursed |
 |---|---|---|---|
-| CrashLoopBackOff | Security | 28 | `vault kv rotate` |
-| OOM Kill | Kubernetes | 25 | `kubectl apply -f` |
-| Memory Leak | Kubernetes | 28 | `kubectl apply -f` |
+| Localhost Town | 503_error, npm_install_hang, env_not_set, process_zombie | port_conflict, infinite_loop | *(none)* |
+| Pipeline Pass | failed_pipeline, merge_conflict, yaml_syntax_error, dependency_hell | circular_dependency, flaky_tests | *(none)* |
+| Staging Valley | environment_mismatch, config_drift, wrong_env_var, feature_flag_forgotten | staging_is_prod, haunted_fixture | *(none)* |
+| Azure Town | quota_exceeded, subscription_limit, orphaned_resource, cost_spike | budget_alarm, region_outage | *(none)* |
+| Production Plains | high_error_rate, latency_spike, database_timeout, memory_leak, runaway_process | prod_incident, cascade_failure | sev1_at_3am |
+| Jira Dungeon | ticket_limbo, sprint_overflow, blocked_story, scope_creep | unassigned_forever, zombie_epic | burnout_cascade |
+| Container Yard | image_too_large, port_already_bound, container_oom, missing_volume | orphaned_layer, privileged_escape | supply_chain_attack |
+| Helm Repository | chart_not_found, values_override_missing, deprecated_api_version | tiller_ghost, helm_rollback_loop | *(none)* |
+| Kubernetes Colosseum | crashloopbackoff, evicted_pod, pending_forever, node_pressure | delete_all_pods, oomkilled | sev1_at_3am |
+| Security Vault | secret_exposed, permission_denied, expired_cert, overprivileged_role | supply_chain_attack, zero_day | apt_exploit |
+| Architecture District | alert_storm, dashboard_too_late, missing_runbook, slo_breached | black_box, escalation_required | silent_failure |
+| Three AM Tavern | merge_conflict, missing_semicolon | prod_incident, runaway_process | sev1_at_3am |
 
 ---
 
-> *"Context-dependent — observability required to determine root cause."*  
-> — SEV1 at 3am root cause description
+## Incident Reference
 
-See [Combat Guide](combat-guide.md) for SLA timer mechanics and [Skills Reference](skills-reference.md) for optimal fix details.
+Incidents are **anonymous enemies** — you don't know their domain until you diagnose with an Observability skill. SLA timers count down each turn; breach = bonus enemy damage.
+
+| ID | Domain | HP | SLA | Optimal Fix | Symptom Text |
+|---|---|---|---|---|---|
+| `503_error` | Cloud | 80 | 5 turns | `az webapp restart` | "Service Unavailable — upstream not responding" |
+| `npm_install_hang` | Containers | 60 | 4 turns | `docker system prune -a` | "Installing… 47%… 47%… 47%…" |
+| `env_not_set` | Linux | 70 | 5 turns | `grep "ERROR" /var/log/*` | "Key not found: DATABASE_URL" |
+| `process_zombie` | Linux | 90 | 6 turns | `kill -9` | "Process won't die. Like, philosophically." |
+| `port_conflict` | Linux | 100 | 4 turns | `kill -9` | "Address already in use: 8080" |
+| `infinite_loop` | Serverless | 120 | 3 turns | `az functionapp function invoke` | "CPU: 100%. Has been for 3 hours." |
+| `failed_pipeline` | IaC | 110 | 5 turns | `az pipelines run` | "Build failed. Again." |
+| `merge_conflict` | IaC | 100 | 4 turns | `git revert` | "CONFLICT (content): Merge conflict in everything.js" |
+| `yaml_syntax_error` | IaC | 90 | 5 turns | `terraform plan` | "did not find expected key (line 47, col 3)" |
+| `dependency_hell` | Containers | 130 | 4 turns | `docker build` | "Peer dependency mismatch: reality vs expectations" |
+| `circular_dependency` | IaC | 140 | 3 turns | `git revert` | "Module A requires B which requires A which requires B which requires…" |
+| `environment_mismatch` | Cloud | 110 | 5 turns | `az webapp deploy` | "Works in staging. Not in prod. Definitely staging's fault." |
+| `config_drift` | IaC | 120 | 4 turns | `terraform apply` | "Manual changes detected. 17 of them." |
+| `quota_exceeded` | Cloud | 100 | 4 turns | `cost optimization` | "OperationNotAllowed: Quota exceeded for resource" |
+| `cost_spike` | Cloud | 90 | 6 turns | `cost optimization` | "This month's bill: $47,000. Normal month: $3,200." |
+| `high_error_rate` | Cloud | 150 | 4 turns | `canary release` | "Error rate: 23%. SLA: 99.9%. You do the math." |
+| `latency_spike` | Observability | 130 | 4 turns | `KQL query` | "P99 latency: 47 seconds. Expected: 200ms." |
+| `database_timeout` | Cloud | 160 | 3 turns | `disaster_recovery` | "Connection pool exhausted. Every connection." |
+| `memory_leak` | Linux | 140 | 5 turns | `tail -f /var/log/syslog` | "Available memory: 47MB. Starting: 32GB." |
+| `runaway_process` | Linux | 120 | 4 turns | `kill -9` | "PID 1337 is eating your server. Has been for 6 hours." |
+| `prod_incident` | Cloud | 200 | 3 turns | `disaster_recovery` | "Severity 2. Customers calling. Boss calling. Mom calling." |
+| `cascade_failure` | Cloud | 240 | 2 turns | `blue-green deploy` | "Service A is down. Service B depends on A. Service C depends on B. You get the idea." |
+| `sev1_at_3am` | Cloud | 300 | 2 turns | `disaster_recovery` | "03:47 AM. PagerDuty. Production down. Sleep is a myth." |
+| `crashloopbackoff` | Kubernetes | 150 | 4 turns | `kubectl rollout restart` | "CrashLoopBackOff. Pod is trying. Pod is failing. Pod is trying. Pod is failing." |
+| `evicted_pod` | Kubernetes | 110 | 5 turns | `kubectl apply -f` | "Evicted: The node ran out of memory. Shocker." |
+| `pending_forever` | Kubernetes | 100 | 6 turns | `kubectl scale --replicas=10` | "Pending… Pending… Pending…" |
+| `node_pressure` | Kubernetes | 170 | 3 turns | `kubectl drain node` | "MemoryPressure: True. DiskPressure: True. Patience: False." |
+| `secret_exposed` | Security | 180 | 3 turns | `vault kv rotate` | "Your AWS credentials are trending on Twitter." |
+| `permission_denied` | Security | 130 | 5 turns | `chmod 644` | "403 Forbidden. You are not permitted to perform this action." |
+| `expired_cert` | Security | 120 | 4 turns | `certbot renew` | "Your certificate expired 47 days ago. All 47 of them." |
+
+---
+
+## SLA Breach Effects
+
+When the SLA timer reaches 0, the incident gains a damage bonus each subsequent turn:
+
+| Turns Over SLA | Bonus Damage |
+|---|---|
+| 1 | +20% |
+| 2 | +40% |
+| 3 | +60% |
+| 4+ | +80% (cap) |
+
+The `PagerDuty acknowledge` skill pauses the SLA timer for 2 turns.
+
+---
+
+*See [Combat Guide](combat-guide.md) for full turn mechanics and solution quality tiers.*
