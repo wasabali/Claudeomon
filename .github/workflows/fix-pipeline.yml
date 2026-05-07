@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Gather failure details and open fix issue
         uses: actions/github-script@v7
-        env:
-          GH_TOKEN: ${{ github.token }}
         with:
           script: |
             const run = context.payload.workflow_run;
@@ -31,7 +29,15 @@ jobs:
             const headBranch = run.head_branch;
             const actor = run.triggering_actor?.login ?? 'unknown';
 
-            // Fetch all jobs for this run
+            // Detect forks: the CI workflow fires on pull_request events which can
+            // originate from forks. workflow_run carries the head_repository, so we
+            // compare it against this repo to identify cross-repo PRs.
+            const thisRepo = `${context.repo.owner}/${context.repo.repo}`;
+            const isFork = run.head_repository?.full_name !== thisRepo;
+
+            // Fetch all jobs for this run.
+            // listJobsForWorkflowRun nests the array under response.data.jobs, so we
+            // must supply the map function; also set per_page: 100 to reduce round-trips.
             const jobs = await github.paginate(
               github.rest.actions.listJobsForWorkflowRun,
               {
@@ -39,7 +45,9 @@ jobs:
                 repo: context.repo.repo,
                 run_id: runId,
                 filter: 'latest',
-              }
+                per_page: 100,
+              },
+              (response) => response.data.jobs
             );
 
             const failedJobs = jobs.filter(j => j.conclusion === 'failure');
@@ -48,39 +56,20 @@ jobs:
               return;
             }
 
-            // Build a log section for each failed job
-            let logSections = '';
+            // Build a section per failed job using links rather than raw log content.
+            // The /actions/jobs/{id}/logs endpoint returns a binary ZIP redirect —
+            // embedding raw log text is unreliable and risks leaking masked secrets.
+            // Direct links to job.html_url give the same information safely.
+            let jobSections = '';
             for (const job of failedJobs) {
-              let logs = '';
-              try {
-                // The jobs/{job_id}/logs endpoint returns a redirect to a plain-text
-                // log file. Use fetch (Node 20, available in github-script@v7) so we
-                // can follow the redirect and read the body as text directly, avoiding
-                // loading a zip archive or large buffer into memory all at once.
-                const logsResp = await fetch(
-                  `https://api.github.com/repos/${context.repo.owner}/${context.repo.repo}/actions/jobs/${job.id}/logs`,
-                  { headers: { Authorization: `Bearer ${process.env.GH_TOKEN}` } }
-                );
-                if (!logsResp.ok) {
-                  logs = `(log fetch failed: HTTP ${logsResp.status})`;
-                } else {
-                  const fullText = await logsResp.text();
-                  // Keep only the last 200 lines to stay within GitHub issue size limits
-                  const lines = fullText.split('\n');
-                  logs = lines.length > 200 ? lines.slice(-200).join('\n') : fullText;
-                }
-              } catch (e) {
-                logs = `(could not fetch logs: ${e.message})`;
-              }
-
               const failedSteps = (job.steps ?? [])
                 .filter(s => s.conclusion === 'failure')
                 .map(s => `- **${s.name}**`)
                 .join('\n');
 
-              logSections += `\n### Job: \`${job.name}\`\n`;
-              logSections += `**Failed steps:**\n${failedSteps || '(none listed)'}\n\n`;
-              logSections += `<details><summary>Logs (last 200 lines)</summary>\n\n\`\`\`\n${logs}\n\`\`\`\n</details>\n`;
+              jobSections += `\n### Job: \`${job.name}\`\n`;
+              jobSections += `**Failed steps:**\n${failedSteps || '(none listed)'}\n\n`;
+              jobSections += `📋 [View full job logs](${job.html_url})\n`;
             }
 
             // Ensure required labels exist (create them silently if not)
@@ -110,34 +99,83 @@ jobs:
               }
             }
 
-            const title = `[CI Fix] ${workflowName} failed on \`${headBranch}\` (${headSha.slice(0, 7)})`;
+            // --- Deduplication: comment on an existing open issue for the same
+            // workflow + commit SHA instead of creating a new one every run.
+            // Note: search returns nothing if ci-failure label was just created for
+            // the first time (index lag), which is acceptable — first run always
+            // creates the issue, subsequent runs on the same SHA will find it. ---
+            const shortSha = headSha.slice(0, 7);
+            const searchQuery =
+              `repo:${thisRepo} is:issue is:open label:ci-failure "${shortSha}" in:title`;
+            const searchResult = await github.rest.search.issuesAndPullRequests({
+              q: searchQuery,
+              per_page: 5,
+            });
+            // shortSha is already in the search query; startsWith is enough to verify
+            // the title format matches this workflow (not another workflow on the same SHA).
+            const existingIssue = searchResult.data.items.find(i =>
+              i.title.startsWith(`[CI Fix] ${workflowName} failed`)
+            );
+
+            // For forks we cannot push to head_branch (it's in a different repo),
+            // so we target main instead and warn the agent.
+            const forkNotice = isFork
+              ? `\n> ⚠️ **Fork PR:** this failure came from fork \`${run.head_repository?.full_name}\`. ` +
+                `Target \`main\` (not the fork branch) when opening the fix PR.\n`
+              : '';
+            const targetBranch = isFork ? 'main' : headBranch;
+
+            const agentTask = `## Task for AI Agent
+
+@Copilot Please diagnose the pipeline failure above and open a pull request with a fix.
+${forkNotice}
+Suggested approach:
+1. Click the job log links above to read the full error output and identify the root cause.
+2. Locate the relevant source file(s) that need to change.
+3. Make the **minimal** code change that resolves the failure.
+4. Open a PR against \`${targetBranch}\` with a clear description of your fix.
+5. Ensure \`npm test\` and \`npm run build\` pass locally before opening the PR.
+
+> _This issue was opened automatically by the **Fix Failing Pipeline** workflow._`;
+
+            if (existingIssue) {
+              // Re-failure on the same commit: add a comment rather than a new issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## New failure on the same commit 🔴
+
+**Run:** [View run](${runUrl})
+
+## Failed Jobs
+${jobSections}
+
+---
+
+${agentTask}`,
+              });
+              console.log(`Commented on existing issue #${existingIssue.number}: ${existingIssue.html_url}`);
+              return;
+            }
+
+            const title = `[CI Fix] ${workflowName} failed on \`${headBranch}\` (${shortSha})`;
             const body = `## Pipeline Failure Detected 🔴
 
 **Workflow:** ${workflowName}
 **Branch:** \`${headBranch}\`
-**Commit:** [\`${headSha.slice(0, 7)}\`](https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${headSha})
+**Commit:** [\`${shortSha}\`](https://github.com/${thisRepo}/commit/${headSha})
 **Triggered by:** @${actor}
 **Run:** [View run](${runUrl})
 
 ---
 
 ## Failed Jobs
-${logSections}
+${jobSections}
 
 ---
 
-## Task for AI Agent
-
-@Copilot Please diagnose the pipeline failure above and open a pull request with a fix.
-
-Suggested approach:
-1. Read the error logs carefully to identify the root cause.
-2. Locate the relevant source file(s) that need to change.
-3. Make the **minimal** code change that resolves the failure.
-4. Open a PR against \`${headBranch}\` with a clear description of your fix.
-5. Ensure \`npm test\` and \`npm run build\` pass locally before opening the PR.
-
-> _This issue was opened automatically by the **Fix Failing Pipeline** workflow._
+${agentTask}
 `;
 
             const issue = await github.rest.issues.create({
@@ -149,3 +187,4 @@ Suggested approach:
             });
 
             console.log(`Created issue #${issue.data.number}: ${issue.data.html_url}`);
+
