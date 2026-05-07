@@ -47,7 +47,7 @@ jobs:
                 filter: 'latest',
                 per_page: 100,
               },
-              (response) => response.data.jobs
+              (response) => response.data.jobs ?? []
             );
 
             const failedJobs = jobs.filter(j => j.conclusion === 'failure');
