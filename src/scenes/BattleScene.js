@@ -14,6 +14,8 @@ import {
   turnEndPhase,
 } from '#engine/BattleEngine.js'
 import { calculateXP, computeShameFlags } from '#engine/SkillEngine.js'
+import { checkLevelUp } from '#engine/ProgressionEngine.js'
+import { calculatePostBattleBudget } from '#engine/EconomyEngine.js'
 import { Menu } from '#ui/Menu.js'
 import { DialogBox } from '#ui/DialogBox.js'
 
@@ -638,14 +640,64 @@ export class BattleScene extends BaseScene {
       const xp = calculateXP(opponent.difficulty ?? 1, this._battleState.winningTier ?? 'standard')
       GameState.player.xp = (GameState.player.xp ?? 0) + xp
 
+      // Apply budget reward + restore
+      const winMode = this._battleState.mode === BATTLE_MODES.INCIDENT ? 'incident' : 'trainer'
+      const winTier = this._battleState.winningTier ?? 'standard'
+      const maxBudget = GameState.player.maxBudget ?? GameState.player.budget ?? 100
+      GameState.player.budget = calculatePostBattleBudget(
+        GameState.player.budget ?? 0,
+        maxBudget,
+        true,
+        winMode,
+        winTier,
+      )
+
       // Apply any skill taught by an engineer opponent
       const teachEvent = this._battleState.log.slice().reverse().find(e => e.type === 'teach_skill')
       if (teachEvent?.value && !GameState.skills.learned.includes(teachEvent.value)) {
         GameState.skills.learned.push(teachEvent.value)
       }
+
+      // Mark trainer as defeated so WorldScene shows post-battle dialog
+      if (this._battleState.mode === BATTLE_MODES.ENGINEER && opponent.id) {
+        GameState.story.flags[`trainer_${opponent.id}_defeated`] = true
+      }
     } else {
+      // Budget restore on loss (partial)
+      const lossMode = this._battleState.mode === BATTLE_MODES.INCIDENT ? 'incident' : 'trainer'
+      const maxBudget = GameState.player.maxBudget ?? GameState.player.budget ?? 100
+      GameState.player.budget = calculatePostBattleBudget(
+        GameState.player.budget ?? 0,
+        maxBudget,
+        false,
+        lossMode,
+        'lose',
+      )
       GameState.stats.battlesLost++
     }
+
+    // Level-up check — apply all pending level events
+    const levelEvents = checkLevelUp(GameState.player)
+    for (const evt of levelEvents) {
+      if (evt.type === 'level_up') {
+        GameState.player.level = evt.payload.newLevel
+      } else if (evt.type === 'stat_gain') {
+        GameState.player.maxHp     = evt.payload.maxHp
+        GameState.player.maxBudget = evt.payload.budget
+        // Fully restore HP to new max on level-up
+        GameState.player.hp = evt.payload.maxHp
+      } else if (evt.type === 'slot_unlock') {
+        // Normalise active deck to new slot count
+        const existing = GameState.skills.active ?? []
+        while (existing.length < evt.payload.activeSlots) existing.push(null)
+        GameState.skills.active = existing.slice(0, evt.payload.activeSlots)
+      }
+    }
+    // Collapse to a single level-up message showing the final reached level
+    const finalLevelUp = levelEvents.filter(e => e.type === 'level_up').pop()
+    this._levelUpMessage = finalLevelUp
+      ? `Level Up! You are now level ${finalLevelUp.payload.newLevel}!`
+      : null
 
     markDirty()
     this._showLog(result === 'win' ? 'Victory!' : 'Defeated...')
@@ -656,6 +708,15 @@ export class BattleScene extends BaseScene {
         markDirty()
         const ending = this._resolveEnding()
         this.fadeToScene('CreditsScene', { ending })
+        return
+      }
+      // Show level-up dialog (if any) before returning to world
+      if (this._levelUpMessage) {
+        const msg = this._levelUpMessage
+        this._levelUpMessage = null
+        this.dialog.show([msg], () => {
+          this.fadeToScene(this._returnScene ?? 'WorldScene')
+        })
         return
       }
       this.fadeToScene(this._returnScene ?? 'WorldScene')

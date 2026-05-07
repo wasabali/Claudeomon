@@ -13,9 +13,12 @@ import {
   clampTileToInterior, findNearestWalkableTile, persistPlayerTile, syncPlayerTileFromPixels,
 } from '#engine/MovementEngine.js'
 import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
-import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
+import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
+import { roll as encounterRoll } from '#engine/EncounterEngine.js'
+import { getById as getEncounterById } from '#data/encounters.js'
+import { BATTLE_MODES } from '#engine/BattleEngine.js'
 import { Menu } from '#ui/Menu.js'
 import { HUD } from '#ui/HUD.js'
 import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
@@ -272,6 +275,7 @@ export class WorldScene extends BaseScene {
     this._lastTravelDenialToken = null
     this._facing      = 'down'
     this._stepsSinceEncounter = 0
+    this._totalSteps  = 0
 
     // Tile-step state machine
     this._moveState    = 'idle'  // 'idle' | 'stepping' | 'bumping'
@@ -382,7 +386,42 @@ export class WorldScene extends BaseScene {
       }
     }
 
+    // Viral Wave — scripted 3-encounter sequence on first Production Plains entry in Act 2
+    if (shouldTriggerViralWave(GameState.story.act, regionId, GameState.story.flags)) {
+      this._triggerViralWave()
+    }
+
+    // 3am scene — fires once after viral wave completes
+    if (shouldTriggerThreeAmScene(GameState.story.flags)) {
+      this._interacting = true
+      this.dialog.show([
+        'Your phone buzzes. Then again.',
+        "The on-call rotation doesn't care\nthat you just went to bed.",
+        'You stare at the ceiling.',
+        'The alerts keep coming.',
+        '...you get up.',
+      ], () => {
+        GameState.story.flags.three_am_scene_complete = true
+        markDirty()
+        this._interacting = false
+      })
+    }
+
     this.playBgm(regionId)
+  }
+
+  // Launches the first viral-wave scripted encounter.
+  // After viral_wave_complete is set, re-entering production_plains won't re-trigger.
+  _triggerViralWave() {
+    GameState.story.flags.viral_wave_complete = true
+    markDirty()
+    const firstEncounter = getEncounterById('high_cpu')
+    this.scene.start('BattleScene', {
+      mode:        BATTLE_MODES.SCRIPTED,
+      opponent:    firstEncounter ?? { id: 'high_cpu', name: 'High CPU', domain: 'observability', hp: 50, maxHp: 50, difficulty: 3 },
+      slaTimer:    firstEncounter?.sla ?? 8,
+      returnScene: 'WorldScene',
+    })
   }
 
   _setupMap(regionId) {
@@ -543,6 +582,7 @@ export class WorldScene extends BaseScene {
     this._keyZ     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
     this._keyX     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
     this._keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
+    this._keyI     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I)
   }
 
   _setupCamera() {
@@ -659,6 +699,11 @@ export class WorldScene extends BaseScene {
     if (Phaser.Input.Keyboard.JustDown(this._keyZ)) {
       this._tryInteract()
     }
+
+    if (Phaser.Input.Keyboard.JustDown(this._keyI)) {
+      this.scene.pause()
+      this.scene.launch('InventoryScene', { returnScene: 'WorldScene' })
+    }
   }
 
   _playBumpAnimation(dir) {
@@ -675,6 +720,7 @@ export class WorldScene extends BaseScene {
     onStepComplete()
     this._checkDoorInteraction()
     this._stepsSinceEncounter++
+    this._totalSteps++
     this._checkEncounterStep()
     this._checkTransitionTile()
     this._hud?.refresh()
@@ -867,6 +913,38 @@ export class WorldScene extends BaseScene {
     const entry   = getStoryById(`npc_${npcName}`)
     const trainer = getTrainerById(npcName)
     const lines   = this._resolveNpcDialog(entry, trainer)
+
+    // Battle-capable trainers: show intro dialog then offer the fight.
+    if (trainer?.hp && trainer?.deck?.length > 0) {
+      const alreadyDefeated = GameState.story.flags[`trainer_${npcName}_defeated`]
+      if (alreadyDefeated) {
+        // Post-battle dialog (lose/win reaction)
+        const postLines = trainer.winDialog ?? lines
+        this.dialog.show(postLines, () => { this._interacting = false })
+        return
+      }
+      const introLines = Array.isArray(trainer.introDialog) ? trainer.introDialog : lines
+      this.dialog.show(introLines, () => {
+        this.choiceMenu.open(
+          ['Fight!', 'Not now.'],
+          (idx) => {
+            if (idx === 0) {
+              this.scene.start('BattleScene', {
+                mode:            BATTLE_MODES.ENGINEER,
+                opponent:        trainer,
+                telegraphedMove: trainer.telegraphs?.[0] ?? null,
+                returnScene:     'WorldScene',
+              })
+            } else {
+              this._interacting = false
+            }
+          },
+          () => { this._interacting = false },
+        )
+      })
+      return
+    }
+
     this.dialog.show(lines, () => { this._interacting = false })
   }
 
@@ -879,7 +957,22 @@ export class WorldScene extends BaseScene {
       GameState.story.flags[setFlag] = true
       markDirty()
     }
+    this._checkActTransition()
     return pages
+  }
+
+  // Check whether the current flags satisfy an act transition and, if so,
+  // advance the act and show the title-card narration.
+  _checkActTransition() {
+    const transition = checkActTransition(GameState.story.act, GameState.story.flags)
+    if (!transition) return
+    GameState.story.act = transition.newAct
+    markDirty()
+    // Show act narration as a dialog then continue
+    const titleLine = `${transition.titleCard}: ${transition.titleSub}`
+    const pages = [titleLine, ...(transition.narration ?? [])]
+    this._interacting = true
+    this.dialog.show(pages, () => { this._interacting = false })
   }
 
   // Delegates variant/page selection to the pure StoryEngine helper.
@@ -1009,7 +1102,20 @@ export class WorldScene extends BaseScene {
   _checkEncounterStep() {
     if (shouldTriggerEncounter(this._stepsSinceEncounter, this._isRunning)) {
       this._stepsSinceEncounter = 0
-      // Wired to EncounterEngine.selectFromPool() — triggers battle scene transition
+      // Use total lifetime steps as seed so every step produces a unique roll
+      const seed = this._totalSteps
+      const encounter = encounterRoll(this._regionId, this._totalSteps, seed)
+      if (encounter) {
+        const enemyDef = getEncounterById(encounter.enemyId)
+        if (enemyDef) {
+          this.scene.start('BattleScene', {
+            mode:        BATTLE_MODES.INCIDENT,
+            opponent:    enemyDef,
+            slaTimer:    enemyDef.sla ?? 10,
+            returnScene: 'WorldScene',
+          })
+        }
+      }
     }
   }
 

@@ -14,6 +14,7 @@ import { CreditsScene }         from '#scenes/CreditsScene.js'
 import { BattleScene }          from '#scenes/BattleScene.js'
 import { PauseScene }           from '#scenes/PauseScene.js'
 import { ShopScene }            from '#scenes/ShopScene.js'
+import { InventoryScene }       from '#scenes/InventoryScene.js'
 
 const fontFace = `1em ${CONFIG.FONT}`
 
@@ -56,6 +57,7 @@ const game = new Phaser.Game({
     PauseScene,
     CreditsScene,
     ShopScene,
+    InventoryScene,
   ],
 })
 
