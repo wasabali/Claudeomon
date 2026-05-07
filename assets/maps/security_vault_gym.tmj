@@ -633,7 +633,110 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
-      "objects": [],
+      "objects": [
+        {
+          "height": 48,
+          "id": 1,
+          "name": "ingrid_iam",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "ingrid_iam"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 432,
+          "y": 144
+        },
+        {
+          "height": 48,
+          "id": 2,
+          "name": "policy_pal",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "policy_pal"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 720,
+          "y": 192
+        },
+        {
+          "height": 48,
+          "id": 3,
+          "name": "security_apprentice_a",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "security_apprentice_a"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 240,
+          "y": 144
+        },
+        {
+          "height": 48,
+          "id": 4,
+          "name": "security_apprentice_b",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "security_apprentice_b"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 720,
+          "y": 432
+        },
+        {
+          "height": 48,
+          "id": 5,
+          "name": "firewall_frida",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "firewall_frida"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 624,
+          "y": 192
+        },
+        {
+          "height": 48,
+          "id": 6,
+          "name": "env_var_erik",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "env_var_erik"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 432,
+          "y": 480
+        }
+      ],
       "opacity": 1,
       "type": "objectgroup",
       "visible": true,
@@ -1284,12 +1387,12 @@
             {
               "name": "targetSpawnX",
               "type": "int",
-              "value": 9
+              "value": 20
             },
             {
               "name": "targetSpawnY",
               "type": "int",
-              "value": 9
+              "value": 11
             }
           ],
           "type": "transition",

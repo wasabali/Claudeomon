@@ -120,7 +120,7 @@ const INTERACTIONS = {
   shell_cavern_bash_history: {
     id: 'shell_cavern_bash_history',
     type: 'flavor',
-    region: 'shell_cavern',
+    region: 'terminal_gym',
     tileX: 4,
     tileY: 11,
     dialog: ['~/.bash_history', 'rm -rf / --no-preserve-root', 'chmod 777 /etc/shadow', 'curl ... | sudo bash', "Someone's worst moments,\npreserved forever."],

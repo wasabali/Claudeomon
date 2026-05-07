@@ -12,7 +12,7 @@ const GYMS = {
     mechanic: 'legacy_only',
     mechanicConfig: { blockedActs: [3, 4], blockedDomains: ['cloud', 'serverless'] },
     emblemReward: 'tux',
-    region: 'localhost_town',
+    region: 'terminal_gym',
   },
   admin_gym: {
     id: 'admin_gym',
@@ -38,7 +38,7 @@ const GYMS = {
     mechanic: 'flaky_pipeline',
     mechanicConfig: { failChance: 0.3 },
     emblemReward: 'pipeline',
-    region: 'jira_dungeon',
+    region: 'jira_dungeon_1',
   },
   developer_gym: {
     id: 'developer_gym',
@@ -77,7 +77,7 @@ const GYMS = {
     mechanic: 'rbac_deny',
     mechanicConfig: { denyChance: 0.25 },
     emblemReward: 'vault',
-    region: 'security_vault',
+    region: 'security_vault_gym',
   },
   architecture_gym: {
     id: 'architecture_gym',

@@ -633,7 +633,76 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
-      "objects": [],
+      "objects": [
+        {
+          "height": 48,
+          "id": 1,
+          "name": "tux_wizard",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "tux_wizard"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 528,
+          "y": 480
+        },
+        {
+          "height": 48,
+          "id": 2,
+          "name": "nfs_nora",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "nfs_nora"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 432,
+          "y": 528
+        },
+        {
+          "height": 48,
+          "id": 3,
+          "name": "sudo_su_saga",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "sudo_su_saga"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 480,
+          "y": 144
+        },
+        {
+          "height": 48,
+          "id": 4,
+          "name": "shell_cavern_bash_history",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "shell_cavern_bash_history"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 192,
+          "y": 528
+        }
+      ],
       "opacity": 1,
       "type": "objectgroup",
       "visible": true,
