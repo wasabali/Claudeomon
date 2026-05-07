@@ -17,6 +17,7 @@ import { resolveNpcDialog, resolveNpcPages } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
 import { Menu } from '#ui/Menu.js'
+import { HUD } from '#ui/HUD.js'
 import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
 
 // Texture keys that are statically generated as stub rectangles — not walk-cycle sheets.
@@ -305,6 +306,8 @@ export class WorldScene extends BaseScene {
     this._onRegionEnter(resolvedRegionId)
 
     this._setupThrottlemasterGhost()
+
+    this._hud = new HUD(this)
   }
 
   // -------------------------------------------------------------------------
@@ -674,6 +677,7 @@ export class WorldScene extends BaseScene {
     this._stepsSinceEncounter++
     this._checkEncounterStep()
     this._checkTransitionTile()
+    this._hud?.refresh()
   }
 
   _handleDialogInput() {
