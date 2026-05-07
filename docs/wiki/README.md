@@ -20,6 +20,7 @@ Cloud Quest is a GameBoy Color-style RPG where you play as a junior cloud engine
 | [Emblems](emblems.md) | Certification badges and their passive bonuses |
 | [Reputation & Shame](reputation-and-shame.md) | How rep and shame work, and what happens when you cross the line |
 | [Tips & Tricks](tips-and-tricks.md) | Stuck? Start here. Strategy advice, hints, and a matchup cheatsheet |
+| [Quests](quests.md) | Every quest — NPCs, choices, reward tiers, and outcomes |
 | [Hidden Areas](hidden-areas.md) | The Outcast Network and how to find the game's secrets |
 | [Audio Reference](audio.md) | All SFX and BGM tracks — what plays and when |
 

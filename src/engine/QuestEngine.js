@@ -40,9 +40,10 @@ export function isQuestAvailable(questId, storyState) {
     return { available: false, reason: 'Quest is already complete.' }
   }
 
-  // Act check — quest requires a minimum act
-  if (quest.act != null && storyState.act < quest.act) {
-    return { available: false, reason: `Requires act ${quest.act}, currently in act ${storyState.act}.` }
+  // Act check — quest requires a minimum act (supports both `act` and `availableInAct` fields)
+  const requiredAct = quest.act ?? quest.availableInAct ?? null
+  if (requiredAct != null && storyState.act < requiredAct) {
+    return { available: false, reason: `Requires act ${requiredAct}, currently in act ${storyState.act}.` }
   }
 
   // Required flags check
