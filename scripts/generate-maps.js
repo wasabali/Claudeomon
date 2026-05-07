@@ -390,12 +390,12 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     npcObjects.push(makeNpcObject(objId++, t.id, spot.tileX, spot.tileY))
   }
 
-  // Interactions in this region
+  // Interactions in this region — mark tiles as occupied so trainers don't overlap,
+  // but do NOT place as NPC objects (resolved via interactions.js tile lookup in WorldScene).
   const regionInteractions = interactions.filter(i => i.region === regionId)
   for (const i of regionInteractions) {
     const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
     const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
-    npcObjects.push(makeNpcObject(objId++, i.id, tx, ty))
     usedSpots.add(`${tx},${ty}`)
   }
 
@@ -499,6 +499,28 @@ async function main() {
 
   // Accumulated gym_door positions from parent maps (gymId → {tileX, tileY})
   const gymDoorPositions = {}
+
+  // Pre-seed gymDoorPositions from hand-made parent maps that already exist on disk.
+  // This ensures gym exit_doors get correct spawn coords even when their parent
+  // map was not generated in this run.
+  for (const region of allRegions) {
+    if (region.type === 'gym') continue
+    const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
+    if (!fs.existsSync(mapPath)) continue
+    const existingMap = JSON.parse(fs.readFileSync(mapPath, 'utf8'))
+    const transLayer = existingMap.layers?.find(l => l.name === 'Transitions')
+    if (!transLayer) continue
+    for (const obj of transLayer.objects ?? []) {
+      if (obj.name !== 'gym_door') continue
+      const targetRegion = obj.properties?.find(p => p.name === 'targetRegion')?.value
+      if (targetRegion) {
+        gymDoorPositions[targetRegion] = {
+          tileX: Math.floor(obj.x / TILE),
+          tileY: Math.floor(obj.y / TILE),
+        }
+      }
+    }
+  }
 
   // Pass 1: Generate non-gym maps first (main, dungeon, hidden)
   // so we know where gym_doors land in parent maps

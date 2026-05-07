@@ -684,23 +684,6 @@
           "width": 48,
           "x": 480,
           "y": 144
-        },
-        {
-          "height": 48,
-          "id": 4,
-          "name": "shell_cavern_bash_history",
-          "properties": [
-            {
-              "name": "npc",
-              "type": "string",
-              "value": "shell_cavern_bash_history"
-            }
-          ],
-          "type": "npc",
-          "visible": true,
-          "width": 48,
-          "x": 192,
-          "y": 528
         }
       ],
       "opacity": 1,
@@ -1353,12 +1336,12 @@
             {
               "name": "targetSpawnX",
               "type": "int",
-              "value": 20
+              "value": 3
             },
             {
               "name": "targetSpawnY",
               "type": "int",
-              "value": 11
+              "value": 5
             }
           ],
           "type": "transition",
