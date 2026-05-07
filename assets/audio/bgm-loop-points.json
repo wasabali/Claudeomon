@@ -1,5 +1,5 @@
 {
-  "_note": "BGM loop points for seamless looping via Phaser markers (BaseScene.playBgm). Values are in seconds to 2 decimal places. When end > start, Phaser plays start..end and loops back to start — this avoids the silence gap at the physical end of the file. When both are 0, Phaser falls back to a simple file loop (may have an audible gap). Non-looping tracks (victory, game_over) always use 0/0. Measure loop points with an audio editor once the real Ninja Adventure OGG files replace the current placeholders.",
+  "_note": "BGM loop points for seamless looping via Phaser markers (BaseScene.playBgm). Values are in seconds to 2 decimal places. When end > start, Phaser plays start..end and loops back to start — this avoids the silence gap at the physical end of the file. When both are 0, Phaser falls back to a simple file loop (may have an audible gap). Non-looping tracks (victory, game_over) always use 0/0. Measure loop points with an audio editor (e.g. Audacity) once the real Kenney RPG Audio OGG files are placed in assets/audio/bgm/. Source: https://kenney.nl/assets/rpg-audio (CC0). See also: kenneyTrack field in src/data/audio.js.",
 
   "_format": {
     "start": "Intro end / loop-back point in seconds. Use 0 for tracks with no intro section.",
