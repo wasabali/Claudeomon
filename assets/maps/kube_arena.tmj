@@ -1273,7 +1273,7 @@
       "objects": [
         {
           "height": 48,
-          "id": 100,
+          "id": 300,
           "name": "exit_door",
           "properties": [
             {
@@ -1289,7 +1289,7 @@
             {
               "name": "targetSpawnY",
               "type": "int",
-              "value": 14
+              "value": 15
             }
           ],
           "type": "transition",
@@ -1307,7 +1307,7 @@
     }
   ],
   "nextlayerid": 7,
-  "nextobjectid": 101,
+  "nextobjectid": 301,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.10.0",

@@ -184,6 +184,20 @@ function makeNpcObject(objId, npcName, tileX, tileY) {
   }
 }
 
+function makeInteractionObject(objId, interactionId, interactionType, tileX, tileY) {
+  return {
+    height: TILE,
+    id: objId,
+    name: interactionId,
+    properties: [{ name: 'type', type: 'string', value: interactionType }],
+    type: 'interaction',
+    visible: true,
+    width: TILE,
+    x: tileX * TILE,
+    y: tileY * TILE,
+  }
+}
+
 function makeTransitionObject(objId, name, targetRegion, spawnX, spawnY, tileX, tileY) {
   return {
     height: TILE,
@@ -284,7 +298,7 @@ function generateObjects(w, h, regionType, openings, rng, isTech) {
       { w: 2, h: 2, tile: techGid(T.COOLING_UNIT) },
       { w: 2, h: 2, tile: techGid(T.MONITORING_DASHBOARD) },
     ]
-  } else if (isTech && regionType === 'dungeon') {
+  } else if (isTech && (regionType === 'dungeon' || regionType === 'hidden')) {
     // Server Graveyard-style: decommissioned hardware, tombstones
     buildings = [
       { w: 1, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
@@ -380,6 +394,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const overlayLayer = makeTileLayer(4, 'Overlay', w, h, 0)
 
   const npcObjects = []
+  const interactionObjects = []
   const usedSpots = new Set([...occupied])
   let objId = 1
 
@@ -390,19 +405,20 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     npcObjects.push(makeNpcObject(objId++, t.id, spot.tileX, spot.tileY))
   }
 
-  // Interactions in this region
-  const regionInteractions = interactions.filter(i => i.region === regionId)
-  for (const i of regionInteractions) {
-    const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
-    const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
-    npcObjects.push(makeNpcObject(objId++, i.id, tx, ty))
-    usedSpots.add(`${tx},${ty}`)
-  }
-
   // Azure terminal for fast-travel regions
   if (region.hasFastTravel) {
     const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
     npcObjects.push(makeNpcObject(objId++, 'azure_terminal', spot.tileX, spot.tileY))
+  }
+
+  // Interactions in this region — placed in a separate Interactions object layer
+  const regionInteractions = interactions.filter(i => i.region === regionId)
+  let interObjId = 200
+  for (const i of regionInteractions) {
+    const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
+    const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
+    interactionObjects.push(makeInteractionObject(interObjId++, i.id, i.type, tx, ty))
+    usedSpots.add(`${tx},${ty}`)
   }
 
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)
@@ -411,9 +427,13 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer]
   let nextLayerId = 6
 
+  if (interactionObjects.length > 0) {
+    layers.push(makeObjectGroup(nextLayerId++, 'Interactions', interactionObjects))
+  }
+
   // Transitions layer
   const transitionObjects = []
-  let transObjId = 100
+  let transObjId = 300
 
   // Track gym_door placements so gym exit_doors can reference them
   const placedGymDoors = {}
@@ -448,7 +468,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     layers.push(makeObjectGroup(nextLayerId++, 'Transitions', transitionObjects))
   }
 
-  const nextObjectId = Math.max(objId, transObjId)
+  const nextObjectId = Math.max(objId, interObjId, transObjId)
 
   return {
     map: {

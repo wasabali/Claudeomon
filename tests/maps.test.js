@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { REGION_CONNECTIONS, getAll as getAllRegions } from '../src/data/regions.js'
+import { getBy as getInteractionsBy } from '../src/data/interactions.js'
 
 const MAPS_DIR = path.join(process.cwd(), 'assets', 'maps')
 
@@ -275,5 +276,51 @@ describe('tech regions carry kenney_tech_office tileset', () => {
     expect(nonZero.length).toBeGreaterThan(0)
     // All non-zero GIDs should be in range 6–55 (kenney_tech_office tiles)
     expect(nonZero.every(gid => gid >= 6 && gid <= 55)).toBe(true)
+  })
+})
+
+describe('Interactions object layer', () => {
+  it('interaction objects are in Interactions layer, not NPCs layer', () => {
+    const regionsWithInteractions = [...new Set(getInteractionsBy('type', 'sign').concat(
+      getInteractionsBy('type', 'flavor'),
+      getInteractionsBy('type', 'chest'),
+      getInteractionsBy('type', 'door'),
+    ).map(i => i.region))]
+
+    for (const regionId of regionsWithInteractions) {
+      const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)
+      if (!fs.existsSync(mapPath)) continue
+
+      const map = JSON.parse(fs.readFileSync(mapPath, 'utf8'))
+      const npcLayer = map.layers.find(l => l.name === 'NPCs')
+      const interLayer = map.layers.find(l => l.name === 'Interactions')
+
+      expect(interLayer).toBeDefined()
+
+      const interactionIds = getInteractionsBy('region', regionId).map(i => i.id)
+      for (const id of interactionIds) {
+        if (npcLayer) {
+          expect(npcLayer.objects.find(o => o.name === id)).toBeUndefined()
+        }
+        expect(interLayer.objects.find(o => o.name === id)).toBeDefined()
+      }
+    }
+  })
+
+  it('each Interactions layer object has type "interaction" and a valid type property', () => {
+    const VALID_INTERACTION_TYPES = ['sign', 'flavor', 'chest', 'door']
+    for (const region of allRegions) {
+      const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
+      if (!fs.existsSync(mapPath)) continue
+      const map = JSON.parse(fs.readFileSync(mapPath, 'utf8'))
+      const interLayer = map.layers.find(l => l.name === 'Interactions')
+      if (!interLayer) continue
+      for (const obj of interLayer.objects) {
+        expect(obj.type).toBe('interaction')
+        const typeProp = obj.properties?.find(p => p.name === 'type')
+        expect(typeProp).toBeDefined()
+        expect(VALID_INTERACTION_TYPES).toContain(typeProp.value)
+      }
+    }
   })
 })

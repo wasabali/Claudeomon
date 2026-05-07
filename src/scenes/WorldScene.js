@@ -729,16 +729,16 @@ export class WorldScene extends BaseScene {
       }
     }
 
-    const TILE_OFFSETS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }
-    const playerTileX = Math.floor(this._player.x / TILE_SIZE)
-    const playerTileY = Math.floor(this._player.y / TILE_SIZE)
-    const [tdx, tdy]  = TILE_OFFSETS[this._facing]
-    const tileX = playerTileX + tdx
-    const tileY = playerTileY + tdy
-    const interaction = this._interactionLookup?.get(`${tileX},${tileY}`)
-    if (interaction && interaction.type !== 'door') {
-      this._resolveInteraction(interaction)
+    const { dx: fdx, dy: fdy } = DIR_OFFSETS[this._facing]
+    const facingTileX = this._tileX + fdx
+    const facingTileY = this._tileY + fdy
+    const facingInteraction = this._interactionLookup?.get(`${facingTileX},${facingTileY}`)
+    if (facingInteraction && facingInteraction.type !== 'door') {
+      this._resolveInteraction(facingInteraction)
+      return
     }
+
+    this._checkInteractionTile()
   }
 
   _buildInteractionLookup() {
@@ -747,6 +747,15 @@ export class WorldScene extends BaseScene {
     const regionInteractions = getInteractionsBy('region', region)
     for (const interaction of regionInteractions) {
       this._interactionLookup.set(`${interaction.tileX},${interaction.tileY}`, interaction)
+    }
+  }
+
+  _checkInteractionTile() {
+    const tileX = Math.floor(this._player.x / TILE_SIZE)
+    const tileY = Math.floor(this._player.y / TILE_SIZE)
+    const interaction = this._interactionLookup?.get(`${tileX},${tileY}`)
+    if (interaction && interaction.type !== 'door' && interaction.type !== 'npc') {
+      this._resolveInteraction(interaction)
     }
   }
 
