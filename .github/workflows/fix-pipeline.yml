@@ -1,0 +1,151 @@
+name: Fix Failing Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI", "Deploy to GitHub Pages"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  propose-fix:
+    name: Propose Fix
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+
+    steps:
+      - name: Gather failure details and open fix issue
+        uses: actions/github-script@v7
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const runId = run.id;
+            const workflowName = run.name;
+            const runUrl = run.html_url;
+            const headSha = run.head_sha;
+            const headBranch = run.head_branch;
+            const actor = run.triggering_actor?.login ?? 'unknown';
+
+            // Fetch all jobs for this run
+            const jobs = await github.paginate(
+              github.rest.actions.listJobsForWorkflowRun,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId,
+                filter: 'latest',
+              }
+            );
+
+            const failedJobs = jobs.filter(j => j.conclusion === 'failure');
+            if (failedJobs.length === 0) {
+              console.log('No failed jobs found — skipping issue creation.');
+              return;
+            }
+
+            // Build a log section for each failed job
+            let logSections = '';
+            for (const job of failedJobs) {
+              let logs = '';
+              try {
+                // The jobs/{job_id}/logs endpoint returns a redirect to a plain-text
+                // log file. Use fetch (Node 20, available in github-script@v7) so we
+                // can follow the redirect and read the body as text directly, avoiding
+                // loading a zip archive or large buffer into memory all at once.
+                const logsResp = await fetch(
+                  `https://api.github.com/repos/${context.repo.owner}/${context.repo.repo}/actions/jobs/${job.id}/logs`,
+                  { headers: { Authorization: `Bearer ${process.env.GH_TOKEN}` } }
+                );
+                if (!logsResp.ok) {
+                  logs = `(log fetch failed: HTTP ${logsResp.status})`;
+                } else {
+                  const fullText = await logsResp.text();
+                  // Keep only the last 200 lines to stay within GitHub issue size limits
+                  const lines = fullText.split('\n');
+                  logs = lines.length > 200 ? lines.slice(-200).join('\n') : fullText;
+                }
+              } catch (e) {
+                logs = `(could not fetch logs: ${e.message})`;
+              }
+
+              const failedSteps = (job.steps ?? [])
+                .filter(s => s.conclusion === 'failure')
+                .map(s => `- **${s.name}**`)
+                .join('\n');
+
+              logSections += `\n### Job: \`${job.name}\`\n`;
+              logSections += `**Failed steps:**\n${failedSteps || '(none listed)'}\n\n`;
+              logSections += `<details><summary>Logs (last 200 lines)</summary>\n\n\`\`\`\n${logs}\n\`\`\`\n</details>\n`;
+            }
+
+            // Ensure required labels exist (create them silently if not)
+            const requiredLabels = [
+              { name: 'bug',        color: 'd73a4a', description: 'Something is not working' },
+              { name: 'ci-failure', color: 'e4e669', description: 'Automated CI failure report' },
+            ];
+            for (const label of requiredLabels) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label.name,
+                });
+              } catch {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description,
+                  });
+                } catch (createErr) {
+                  console.warn(`Could not create label "${label.name}": ${createErr.message}`);
+                }
+              }
+            }
+
+            const title = `[CI Fix] ${workflowName} failed on \`${headBranch}\` (${headSha.slice(0, 7)})`;
+            const body = `## Pipeline Failure Detected 🔴
+
+**Workflow:** ${workflowName}
+**Branch:** \`${headBranch}\`
+**Commit:** [\`${headSha.slice(0, 7)}\`](https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${headSha})
+**Triggered by:** @${actor}
+**Run:** [View run](${runUrl})
+
+---
+
+## Failed Jobs
+${logSections}
+
+---
+
+## Task for AI Agent
+
+@Copilot Please diagnose the pipeline failure above and open a pull request with a fix.
+
+Suggested approach:
+1. Read the error logs carefully to identify the root cause.
+2. Locate the relevant source file(s) that need to change.
+3. Make the **minimal** code change that resolves the failure.
+4. Open a PR against \`${headBranch}\` with a clear description of your fix.
+5. Ensure \`npm test\` and \`npm run build\` pass locally before opening the PR.
+
+> _This issue was opened automatically by the **Fix Failing Pipeline** workflow._
+`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['bug', 'ci-failure'],
+            });
+
+            console.log(`Created issue #${issue.data.number}: ${issue.data.html_url}`);
