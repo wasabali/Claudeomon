@@ -5,6 +5,7 @@
 import { calculateDamage, calculateXP, assessQuality, applyShameAndReputation, applyShameGrime, shouldTeachOnAnyWin } from './SkillEngine.js'
 import { REPUTATION_MIN, REPUTATION_MAX, EXECUTIVE_MODE_THRESHOLD, EXECUTIVE_MODE_MULTIPLIER, DOMAIN_MATCHUPS, GYM_MECHANICS, GYM_SHAME_THRESHOLDS, SHADOW_ENGINEER, ECONOMY } from '../config.js'
 import { calculateBattleReward, calculateBudgetRestore, calculateCostSpiralSurcharge, calculateCostSpiralHpGain, calculateDebtPenalty } from './EconomyEngine.js'
+import { tickStatuses as statusEngineTick } from './StatusEngine.js'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -206,30 +207,15 @@ export function getPreBattleEvents(state) {
 // Expired statuses are removed and emit status_remove events.
 // ---------------------------------------------------------------------------
 export function statusTickPhase(state) {
-  const events = []
-
-  const tickStatuses = (statuses, target) => {
-    const toRemove = []
-    for (const status of statuses) {
-      if (status.duration === -1) continue // permanent
-      status.duration -= 1
-      events.push({ type: 'status_tick', target, value: status.duration, statusName: status.name })
-      if (status.duration <= 0) {
-        toRemove.push(status.name)
-        events.push({ type: 'status_remove', target, statusName: status.name })
-      }
-    }
-    // Remove expired
-    for (const name of toRemove) {
-      const idx = statuses.findIndex(s => s.name === name)
-      if (idx !== -1) statuses.splice(idx, 1)
-    }
+  // Delegate to StatusEngine which uses battleState[target].statuses with { id, remaining }
+  const adapter = {
+    player:   { statuses: state.playerStatuses   },
+    opponent: { statuses: state.opponentStatuses },
   }
-
-  tickStatuses(state.playerStatuses,   'player')
-  tickStatuses(state.opponentStatuses, 'opponent')
-
-  return events
+  return [
+    ...statusEngineTick(adapter, 'player'),
+    ...statusEngineTick(adapter, 'opponent'),
+  ]
 }
 
 // ---------------------------------------------------------------------------
@@ -343,7 +329,7 @@ export function skillPhase(state, skill) {
         dmg = calculateDamage(skill, state.opponent.domain)
       }
       // Throttle status halves outgoing damage while preserving legitimate zero-damage results
-      if (state.playerStatuses.find(s => s.name === 'throttle')) {
+      if (state.playerStatuses.find(s => s.id === 'throttle')) {
         dmg = Math.max(0, Math.floor(dmg * 0.5))
       }
       state.opponent.hp = Math.max(0, state.opponent.hp - dmg)
@@ -592,18 +578,18 @@ export function incidentAttackPhase(state) {
     }
 
     case INCIDENT_ATTACKS.SKILL_BLOCK: {
-      const alreadyBlocked = state.playerStatuses.find(s => s.name === 'skill_block')
+      const alreadyBlocked = state.playerStatuses.find(s => s.id === 'skill_block')
       if (!alreadyBlocked) {
-        state.playerStatuses.push({ name: 'skill_block', duration: SKILL_BLOCK_DURATION })
+        state.playerStatuses.push({ id: 'skill_block', remaining: SKILL_BLOCK_DURATION })
       }
       events.push({ type: 'status_apply', target: 'player', statusName: 'skill_block', duration: SKILL_BLOCK_DURATION })
       break
     }
 
     case INCIDENT_ATTACKS.CONFUSION: {
-      const alreadyConfused = state.playerStatuses.find(s => s.name === 'confusion')
+      const alreadyConfused = state.playerStatuses.find(s => s.id === 'confusion')
       if (!alreadyConfused) {
-        state.playerStatuses.push({ name: 'confusion', duration: CONFUSION_DURATION })
+        state.playerStatuses.push({ id: 'confusion', remaining: CONFUSION_DURATION })
       }
       events.push({ type: 'status_apply', target: 'player', statusName: 'confusion', duration: CONFUSION_DURATION })
       break
@@ -621,9 +607,9 @@ export function incidentAttackPhase(state) {
     }
 
     case INCIDENT_ATTACKS.THROTTLE: {
-      const alreadyThrottled = state.playerStatuses.find(s => s.name === 'throttle')
+      const alreadyThrottled = state.playerStatuses.find(s => s.id === 'throttle')
       if (!alreadyThrottled) {
-        state.playerStatuses.push({ name: 'throttle', duration: THROTTLE_DURATION })
+        state.playerStatuses.push({ id: 'throttle', remaining: THROTTLE_DURATION })
       }
       events.push({ type: 'status_apply', target: 'player', statusName: 'throttle', duration: THROTTLE_DURATION })
       break

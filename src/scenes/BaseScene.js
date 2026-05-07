@@ -155,7 +155,7 @@ export class BaseScene extends Phaser.Scene {
   // Falls back to a procedurally generated dark-navy stub when the sprite file
   // is not present (i.e. Kenney assets not yet downloaded / placed).
   // Returns a game object with origin (0, 0) — top-left positioning.
-  createPanel(x, y, width, height, { slice = 4 } = {}) {
+  createPanel(x, y, width, height, { slice = 8 } = {}) {
     const FILL   = 0x1a1a2a
     const BORDER = 0x334155
     // Use the Kenney UI Pack panel if it was loaded by BootScene; otherwise
