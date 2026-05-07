@@ -886,8 +886,8 @@ describe('regions registry', () => {
     expect(getRegionsBy('type', 'gym')).toHaveLength(8)
   })
 
-  it('defines 5 dungeon rooms', () => {
-    expect(getRegionsBy('type', 'dungeon')).toHaveLength(5)
+  it('defines 8 dungeon rooms', () => {
+    expect(getRegionsBy('type', 'dungeon')).toHaveLength(8)
   })
 
   it('defines 5 hidden regions', () => {

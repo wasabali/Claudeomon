@@ -3,7 +3,7 @@ import { BaseScene } from '#scenes/BaseScene.js'
 import { DialogBox } from '#ui/DialogBox.js'
 import { CONFIG, MOVEMENT } from '../config.js'
 import { GameState, hasItem, addItem, markDirty, grantXpOnce } from '#state/GameState.js'
-import { getById as getStoryById } from '#data/story.js'
+import { getById as getStoryById, getNpcAppearance, getViralWave } from '#data/story.js'
 import { getById as getQuestById } from '#data/quests.js'
 import { getById as getSkillById } from '#data/skills.js'
 import {
@@ -19,9 +19,16 @@ import {
   clampTileToInterior, findNearestWalkableTile, persistPlayerTile, syncPlayerTileFromPixels,
 } from '#engine/MovementEngine.js'
 import { getById as getTrainerById, PLAYER_SPRITE_KEY } from '#data/trainers.js'
-import { resolveNpcDialog, resolveNpcPages, checkActTransition } from '#engine/StoryEngine.js'
+import { getBy as getGymsBy } from '#data/gyms.js'
+import { resolveNpcDialog, resolveNpcPages, checkActTransition, shouldTriggerViralWave, shouldTriggerThreeAmScene, getKristofferLocation, getKristofferShameDialog } from '#engine/StoryEngine.js'
 import { getBy as getInteractionsBy, getById as getInteractionById } from '#data/interactions.js'
 import { getById as getRegionById, getAll as getAllRegions } from '#data/regions.js'
+import { roll as encounterRoll } from '#engine/EncounterEngine.js'
+import { getById as getEncounterById } from '#data/encounters.js'
+import { BATTLE_MODES } from '#engine/BattleEngine.js'
+import {
+  isGateResolved, getAvailableSolutions, evaluateSolution, getAll as getAllGates,
+} from '#engine/GateEngine.js'
 import { Menu } from '#ui/Menu.js'
 import { HUD } from '#ui/HUD.js'
 import { canTravel, getDiscoveredTerminals, canFastTravel, DENIAL_REASONS, shouldShowTravelDenial } from '#engine/RegionEngine.js'
@@ -278,6 +285,7 @@ export class WorldScene extends BaseScene {
     this._lastTravelDenialToken = null
     this._facing      = 'down'
     this._stepsSinceEncounter = 0
+    this._totalSteps  = 0
 
     // Tile-step state machine
     this._moveState    = 'idle'  // 'idle' | 'stepping' | 'bumping'
@@ -388,7 +396,59 @@ export class WorldScene extends BaseScene {
       }
     }
 
+    // Viral Wave — scripted 3-encounter sequence on first Production Plains entry in Act 2
+    if (shouldTriggerViralWave(GameState.story.act, regionId, GameState.story.flags)) {
+      if (this._triggerViralWave()) return  // BattleScene takes over; skip further region-enter logic
+    }
+
+    // 3am scene — fires once after viral wave completes
+    if (shouldTriggerThreeAmScene(GameState.story.flags)) {
+      this._interacting = true
+      this.dialog.show([
+        'Your phone buzzes. Then again.',
+        "The on-call rotation doesn't care\nthat you just went to bed.",
+        'You stare at the ceiling.',
+        'The alerts keep coming.',
+        '...you get up.',
+      ], () => {
+        GameState.story.flags.three_am_scene_complete = true
+        markDirty()
+        this._interacting = false
+      })
+    }
+
     this.playBgm(regionId)
+  }
+
+  // Launches the next encounter in the viral-wave scripted sequence.
+  // Returns true when a battle is started; false when the final encounter
+  // already resolved and we only needed to set viral_wave_complete.
+  // Stage is stored in GameState.story.flags.viral_wave_stage (0-based index
+  // into VIRAL_WAVE.encounters), so it survives scene restarts.
+  _triggerViralWave() {
+    const wave  = getViralWave()
+    const stage = GameState.story.flags.viral_wave_stage ?? 0
+
+    if (stage >= wave.encounters.length) {
+      // All encounters resolved — mark the sequence complete so the 3am scene can fire.
+      GameState.story.flags.viral_wave_complete = true
+      markDirty()
+      return false
+    }
+
+    GameState.story.flags.viral_wave_stage = stage + 1
+    markDirty()
+
+    const encounterId = wave.encounters[stage].id
+    const encounter   = getEncounterById(encounterId)
+    this.scene.start('BattleScene', {
+      mode:         BATTLE_MODES.SCRIPTED,
+      opponent:     encounter ?? { id: encounterId, name: encounterId, domain: 'observability', hp: 50, maxHp: 50, difficulty: 3 },
+      slaTimer:     encounter?.sla ?? 8,
+      originRegion: this._regionId,
+      returnScene:  'WorldScene',
+    })
+    return true
   }
 
   _setupMap(regionId) {
@@ -451,7 +511,21 @@ export class WorldScene extends BaseScene {
 
   _setupNpcSprites() {
     this._npcSprites = []
+
+    // Pre-compute per-act state used across the loop.
+    const act                = GameState.story?.act ?? 1
+    const kristofferRegionId = getKristofferLocation(act)
+
     for (const def of this._npcDefs) {
+      // Only suppress NPCs that have an explicit appearance entry whose
+      // appearsInAct has not been reached yet.  NPCs without an entry are
+      // default/Act-1 NPCs and are always visible.
+      const appearance = getNpcAppearance(def.name)
+      if (appearance && appearance.appearsInAct > act) continue
+
+      // Kristoffer NPC: only show in the region he's assigned to for this act
+      if (def.name === 'kristoffer' && kristofferRegionId !== this._regionId) continue
+
       const cx     = def.x + def.width / 2
       const cy     = def.y + def.height / 2
 
@@ -549,6 +623,7 @@ export class WorldScene extends BaseScene {
     this._keyZ     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
     this._keyX     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
     this._keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
+    this._keyI     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I)
   }
 
   _setupCamera() {
@@ -665,6 +740,11 @@ export class WorldScene extends BaseScene {
     if (Phaser.Input.Keyboard.JustDown(this._keyZ)) {
       this._tryInteract()
     }
+
+    if (Phaser.Input.Keyboard.JustDown(this._keyI)) {
+      this.scene.pause()
+      this.scene.launch('InventoryScene', { returnSceneKey: 'WorldScene' })
+    }
   }
 
   _playBumpAnimation(dir) {
@@ -681,6 +761,7 @@ export class WorldScene extends BaseScene {
     onStepComplete()
     this._checkDoorInteraction()
     this._stepsSinceEncounter++
+    this._totalSteps++
     this._checkEncounterStep()
     this._checkTransitionTile()
     this._hud?.refresh()
@@ -890,10 +971,119 @@ export class WorldScene extends BaseScene {
       return
     }
 
+    if (npcName === 'kristoffer') {
+      // Kristoffer's dialog reacts to player shame — use the shame-aware resolver
+      const shameLines = getKristofferShameDialog(GameState.player.shamePoints ?? 0)
+      const fallback = getStoryById('npc_kristoffer')?.pages ?? ['...']
+      const lines = shameLines.length > 0 ? shameLines : fallback
+      this.dialog.show(lines, () => { this._interacting = false })
+      return
+    }
+
     const entry   = getStoryById(`npc_${npcName}`)
     const trainer = getTrainerById(npcName)
     const lines   = this._resolveNpcDialog(entry, trainer)
+
+    // Gate-blocking NPCs: check if this NPC guards an unresolved hard gate.
+    // If so, present available skill choices first; fall through to battle/dialog otherwise.
+    const gateForNpc = getAllGates().find(g => g.npcId === npcName)
+    if (gateForNpc && !isGateResolved(gateForNpc.id, GameState.story.flags)) {
+      this._resolveGateNpc(gateForNpc, lines)
+      return
+    }
+
+    // Battle-capable trainers: show intro dialog then offer the fight.
+    if (trainer?.hp && trainer?.deck?.length > 0) {
+      const alreadyDefeated = GameState.story.flags[`trainer_${npcName}_defeated`]
+      if (alreadyDefeated) {
+        // Post-battle dialog (lose/win reaction)
+        const postLines = trainer.winDialog ?? lines
+        this.dialog.show(postLines, () => { this._interacting = false })
+        return
+      }
+
+      // Look up gym data if this trainer is a gym leader
+      const gym = getGymsBy('leader', npcName)[0] ?? null
+
+      const introLines = Array.isArray(trainer.introDialog) ? trainer.introDialog : lines
+      this.dialog.show(introLines, () => {
+        this.choiceMenu.open(
+          ['Fight!', 'Not now.'],
+          (idx) => {
+            if (idx === 0) {
+              this.scene.start('BattleScene', {
+                mode:             BATTLE_MODES.ENGINEER,
+                opponent:         trainer,
+                telegraphedMove:  trainer.telegraphs?.[0] ?? null,
+                gymId:            gym?.id ?? null,
+                gymMechanic:      gym?.mechanic ?? null,
+                gymMechanicConfig: gym?.mechanicConfig ?? null,
+                returnScene:      'WorldScene',
+              })
+            } else {
+              this._interacting = false
+            }
+          },
+          () => { this._interacting = false },
+        )
+      })
+      return
+    }
+
     this.dialog.show(lines, () => { this._interacting = false })
+  }
+
+  // Generic gate-NPC interaction. Shows the gate hint then presents the player's
+  // available solutions as a skill-choice menu. Applies repDelta, shameDelta, and
+  // the gate flag when a solution is selected.
+  _resolveGateNpc(gate, introLines) {
+    const learnedSkills  = GameState.skills.learned ?? []
+    const available = getAvailableSolutions(gate.id, learnedSkills)
+
+    if (available.length === 0) {
+      // Player doesn't have any solution commands yet — show hint and exit
+      const hintLines = introLines.length > 0 ? introLines : [gate.hintText ?? 'I need your help.']
+      this.dialog.show(hintLines, () => { this._interacting = false })
+      return
+    }
+
+    const choices = available.map(sol => sol.commandId)
+    this.dialog.show(introLines.length > 0 ? introLines : [gate.hintText ?? 'I need your help.'], () => {
+      this.choiceMenu.open(
+        choices,
+        (idx) => {
+          const sol    = available[idx]
+          const result = evaluateSolution(gate.id, sol.commandId)
+
+          // Apply rep and shame deltas
+          if (result.repDelta) {
+            GameState.player.reputation = Math.max(0, Math.min(100,
+              (GameState.player.reputation ?? 50) + result.repDelta))
+          }
+          if (result.shameDelta) {
+            GameState.player.shamePoints = (GameState.player.shamePoints ?? 0) + result.shameDelta
+          }
+
+          // Set quest flag effect
+          if (result.questFlagEffect) {
+            GameState.story.flags[result.questFlagEffect] = true
+          }
+
+          // Resolve the gate if pathEffect is 'open'
+          if (result.resolved && result.flag) {
+            GameState.story.flags[result.flag] = true
+          }
+
+          markDirty()
+
+          // Show confirmation line from story registry if available
+          const confirmLines = getStoryById(`gate_resolved_${gate.id}`)?.pages
+            ?? [`${sol.commandId} — done. You may pass.`]
+          this.dialog.show(confirmLines, () => { this._interacting = false })
+        },
+        () => { this._interacting = false },
+      )
+    })
   }
 
   // Delegates to the pure StoryEngine resolver, then applies any state mutation
@@ -905,7 +1095,22 @@ export class WorldScene extends BaseScene {
       GameState.story.flags[setFlag] = true
       markDirty()
     }
+    this._checkActTransition()
     return pages
+  }
+
+  // Check whether the current flags satisfy an act transition and, if so,
+  // advance the act and show the title-card narration.
+  _checkActTransition() {
+    const transition = checkActTransition(GameState.story.act, GameState.story.flags)
+    if (!transition) return
+    GameState.story.act = transition.newAct
+    markDirty()
+    // Show act narration as a dialog then continue
+    const titleLine = `${transition.titleCard}: ${transition.titleSub}`
+    const pages = [titleLine, ...(transition.narration ?? [])]
+    this._interacting = true
+    this.dialog.show(pages, () => { this._interacting = false })
   }
 
   // Delegates variant/page selection to the pure StoryEngine helper.
@@ -966,6 +1171,7 @@ export class WorldScene extends BaseScene {
       [DENIAL_REASONS.ACT_GATE]:       'region_under_construction',
       [DENIAL_REASONS.DUNGEON_POINTS]: 'dungeon_points_required',
       [DENIAL_REASONS.RESOURCE_LOCKS]: 'resource_locks_required',
+      [DENIAL_REASONS.HARD_GATE]:      'region_gate_blocked',
     }
     const storyId = REASON_TO_STORY[reasonId]
     const entry   = storyId ? getStoryById(storyId) : null
@@ -1035,7 +1241,21 @@ export class WorldScene extends BaseScene {
   _checkEncounterStep() {
     if (shouldTriggerEncounter(this._stepsSinceEncounter, this._isRunning)) {
       this._stepsSinceEncounter = 0
-      // Wired to EncounterEngine.selectFromPool() — triggers battle scene transition
+      // Use session step count as seed (resets each time WorldScene is created)
+      const seed = this._totalSteps
+      const encounter = encounterRoll(this._regionId, this._totalSteps, seed)
+      if (encounter) {
+        const enemyDef = getEncounterById(encounter.enemyId)
+        if (enemyDef) {
+          this.scene.start('BattleScene', {
+            mode:         BATTLE_MODES.INCIDENT,
+            opponent:     enemyDef,
+            slaTimer:     enemyDef.sla ?? 10,
+            originRegion: this._regionId,
+            returnScene:  'WorldScene',
+          })
+        }
+      }
     }
   }
 

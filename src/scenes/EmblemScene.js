@@ -603,24 +603,8 @@ export class EmblemScene extends BaseScene {
   }
 
   _addPanel(x, y, width, height) {
-    const key = '__emblem_scene_panel__'
-    if (!this.textures.exists(key)) {
-      const g = this.make.graphics({ x: 0, y: 0, add: false })
-      g.fillStyle(COLOR_PANEL_FILL, 1)
-      g.fillRect(0, 0, 24, 24)
-      g.lineStyle(2, COLOR_PANEL_BORDER, 1)
-      g.strokeRect(1, 1, 22, 22)
-      g.generateTexture(key, 24, 24)
-      g.destroy()
-    }
-
-    if (typeof this.add.nineslice === 'function') {
-      return this.add.nineslice(x, y, key, undefined, width, height, 4, 4, 4, 4)
-    }
-
-    const panel = this.add.rectangle(x, y, width, height, COLOR_PANEL_FILL)
-    panel.setStrokeStyle(1, COLOR_PANEL_BORDER)
-    return panel
+    // Delegate to BaseScene which uses the loaded 'ui_window' asset with 8px corners
+    return this.createPanel(x, y, width, height)
   }
 
   _destroyAllShineEffects() {
