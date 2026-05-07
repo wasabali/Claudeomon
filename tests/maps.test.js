@@ -280,16 +280,17 @@ describe('tech regions carry kenney_tech_office tileset', () => {
 })
 
 describe('Interactions object layer', () => {
+  const knownRegionIds = new Set(allRegions.map(r => r.id))
+
   it('interaction objects are in Interactions layer, not NPCs layer', () => {
     const regionsWithInteractions = [...new Set(
-      ['sign', 'flavor', 'chest', 'door'].flatMap(type => getInteractionsBy('type', type)).map(i => i.region)
+      ['sign', 'flavor', 'chest', 'door'].flatMap(type => getInteractionsBy('type', type))
+        .map(i => i.region)
+        .filter(id => knownRegionIds.has(id))
     )]
 
     for (const regionId of regionsWithInteractions) {
-      const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)
-      if (!fs.existsSync(mapPath)) continue
-
-      const map = JSON.parse(fs.readFileSync(mapPath, 'utf8'))
+      const map = loadMap(regionId)
       const npcLayer = map.layers.find(l => l.name === 'NPCs')
       const interLayer = map.layers.find(l => l.name === 'Interactions')
 
@@ -310,7 +311,7 @@ describe('Interactions object layer', () => {
     for (const region of allRegions) {
       const mapPath = path.join(MAPS_DIR, `${region.id}.tmj`)
       if (!fs.existsSync(mapPath)) continue
-      const map = JSON.parse(fs.readFileSync(mapPath, 'utf8'))
+      const map = loadMap(region.id)
       const interLayer = map.layers.find(l => l.name === 'Interactions')
       if (!interLayer) continue
       for (const obj of interLayer.objects) {

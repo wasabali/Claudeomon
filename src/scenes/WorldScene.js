@@ -543,6 +543,7 @@ export class WorldScene extends BaseScene {
     this._keyZ     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
     this._keyX     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X)
     this._keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
+    this._keyE     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
   }
 
   _setupCamera() {
@@ -658,6 +659,11 @@ export class WorldScene extends BaseScene {
 
     if (Phaser.Input.Keyboard.JustDown(this._keyZ)) {
       this._tryInteract()
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this._keyE)) {
+      this.scene.pause()
+      this.scene.launch('EmblemScene', { returnSceneKey: 'WorldScene' })
     }
   }
 

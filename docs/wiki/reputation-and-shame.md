@@ -100,13 +100,13 @@ Using cursed and nuclear techniques accumulates Shame. The path gradually change
 
 ## Shame Reduction
 
-Shame is permanent, but two items can slow its accumulation:
+Shame is permanent, but two items can directly reduce it:
 
 | Method | Effect |
 |---|---|
 | **Vault Emblem** | –1 to every Shame gain (minimum 0) |
-| **Post-Mortem Document** | Converts one Shame Point to Reputation (+10 rep, story event) |
-| **Coffee & Apology** | Restores some Reputation (does not affect Shame) |
+| **Coffee and an Apology** | Immediately reduces Shame by 1 |
+| **Published Post-Mortem** | Immediately reduces Shame by 1 |
 
 ---
 
