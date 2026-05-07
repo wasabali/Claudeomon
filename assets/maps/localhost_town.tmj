@@ -1797,6 +1797,74 @@
         {
           "height": 48,
           "id": 1,
+          "name": "margaret",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "margaret"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 192,
+          "y": 96
+        },
+        {
+          "height": 48,
+          "id": 2,
+          "name": "azure_terminal",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "azure_terminal"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 528,
+          "y": 288
+        },
+        {
+          "height": 48,
+          "id": 3,
+          "name": "professor_pedersen",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "professor_pedersen"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 576,
+          "y": 384
+        },
+        {
+          "height": 48,
+          "id": 4,
+          "name": "random_intern",
+          "properties": [
+            {
+              "name": "npc",
+              "type": "string",
+              "value": "random_intern"
+            }
+          ],
+          "type": "npc",
+          "visible": true,
+          "width": 48,
+          "x": 384,
+          "y": 528
+        },
+        {
+          "height": 48,
+          "id": 6,
           "name": "ola_ops",
           "properties": [
             {
@@ -1808,12 +1876,12 @@
           "type": "npc",
           "visible": true,
           "width": 48,
-          "x": 432,
-          "y": 336
+          "x": 720,
+          "y": 288
         },
         {
           "height": 48,
-          "id": 2,
+          "id": 7,
           "name": "logging_lena",
           "properties": [
             {
@@ -1825,12 +1893,12 @@
           "type": "npc",
           "visible": true,
           "width": 48,
-          "x": 336,
-          "y": 624
+          "x": 960,
+          "y": 480
         },
         {
           "height": 48,
-          "id": 3,
+          "id": 8,
           "name": "fundamentals_apprentice_a",
           "properties": [
             {
@@ -1842,12 +1910,12 @@
           "type": "npc",
           "visible": true,
           "width": 48,
-          "x": 528,
-          "y": 288
+          "x": 1200,
+          "y": 336
         },
         {
           "height": 48,
-          "id": 4,
+          "id": 9,
           "name": "fundamentals_apprentice_b",
           "properties": [
             {
@@ -1860,20 +1928,32 @@
           "visible": true,
           "width": 48,
           "x": 1440,
-          "y": 288
-        },
+          "y": 624
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
+      "name": "Interactions",
+      "objects": [
         {
           "height": 48,
-          "id": 5,
+          "id": 10,
           "name": "localhost_sign_welcome",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "localhost_sign_welcome"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 240,
@@ -1881,16 +1961,16 @@
         },
         {
           "height": 48,
-          "id": 6,
+          "id": 11,
           "name": "localhost_sign_lab",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "localhost_sign_lab"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 384,
@@ -1898,16 +1978,16 @@
         },
         {
           "height": 48,
-          "id": 7,
+          "id": 12,
           "name": "localhost_sign_bakery",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "localhost_sign_bakery"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 144,
@@ -1915,16 +1995,16 @@
         },
         {
           "height": 48,
-          "id": 8,
+          "id": 13,
           "name": "localhost_lab_server_rack",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "localhost_lab_server_rack"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 480,
@@ -1932,16 +2012,16 @@
         },
         {
           "height": 48,
-          "id": 9,
+          "id": 14,
           "name": "localhost_lab_bookshelf",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "localhost_lab_bookshelf"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 528,
@@ -1949,16 +2029,16 @@
         },
         {
           "height": 48,
-          "id": 10,
+          "id": 15,
           "name": "localhost_apartment_pc",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "localhost_apartment_pc"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 96,
@@ -1966,37 +2046,20 @@
         },
         {
           "height": 48,
-          "id": 11,
+          "id": 16,
           "name": "localhost_margaret_counter",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "localhost_margaret_counter"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 192,
           "y": 336
-        },
-        {
-          "height": 48,
-          "id": 12,
-          "name": "azure_terminal",
-          "properties": [
-            {
-              "name": "npc",
-              "type": "string",
-              "value": "azure_terminal"
-            }
-          ],
-          "type": "npc",
-          "visible": true,
-          "width": 48,
-          "x": 1488,
-          "y": 384
         }
       ],
       "opacity": 1,
@@ -3822,6 +3885,87 @@
           "width": 48,
           "x": 960,
           "y": 384
+        },
+        {
+          "height": 48,
+          "id": 17,
+          "name": "bakery_door",
+          "properties": [
+            {
+              "name": "targetRegion",
+              "type": "string",
+              "value": "bakery_interior"
+            },
+            {
+              "name": "targetSpawnX",
+              "type": "int",
+              "value": 10
+            },
+            {
+              "name": "targetSpawnY",
+              "type": "int",
+              "value": 12
+            }
+          ],
+          "type": "transition",
+          "visible": true,
+          "width": 48,
+          "x": 192,
+          "y": 384
+        },
+        {
+          "height": 48,
+          "id": 18,
+          "name": "lab_door",
+          "properties": [
+            {
+              "name": "targetRegion",
+              "type": "string",
+              "value": "lab_interior"
+            },
+            {
+              "name": "targetSpawnX",
+              "type": "int",
+              "value": 10
+            },
+            {
+              "name": "targetSpawnY",
+              "type": "int",
+              "value": 12
+            }
+          ],
+          "type": "transition",
+          "visible": true,
+          "width": 48,
+          "x": 432,
+          "y": 240
+        },
+        {
+          "height": 48,
+          "id": 19,
+          "name": "apartment_door",
+          "properties": [
+            {
+              "name": "targetRegion",
+              "type": "string",
+              "value": "apartment_interior"
+            },
+            {
+              "name": "targetSpawnX",
+              "type": "int",
+              "value": 10
+            },
+            {
+              "name": "targetSpawnY",
+              "type": "int",
+              "value": 12
+            }
+          ],
+          "type": "transition",
+          "visible": true,
+          "width": 48,
+          "x": 96,
+          "y": 480
         }
       ],
       "opacity": 1,
@@ -3831,7 +3975,7 @@
       "y": 0
     }
   ],
-  "nextlayerid": 7,
+  "nextlayerid": 8,
   "nextobjectid": 101,
   "orientation": "orthogonal",
   "renderorder": "right-down",

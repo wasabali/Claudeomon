@@ -225,6 +225,20 @@ function makeNpcObject(objId, npcName, tileX, tileY) {
   }
 }
 
+function makeInteractionObject(objId, interactionId, tileX, tileY) {
+  return {
+    height: TILE,
+    id: objId,
+    name: interactionId,
+    properties: [{ name: 'interaction', type: 'string', value: interactionId }],
+    type: 'interaction',
+    visible: true,
+    width: TILE,
+    x: tileX * TILE,
+    y: tileY * TILE,
+  }
+}
+
 function makeTransitionObject(objId, name, targetRegion, spawnX, spawnY, tileX, tileY) {
   return {
     height: TILE,
@@ -436,8 +450,18 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const overlayLayer = makeTileLayer(4, 'Overlay', w, h, 0)
 
   const npcObjects = []
+  const interactionObjects = []
   const usedSpots = new Set([...occupied])
   let objId = 1
+
+  // Reserve fixed interaction coordinates first so that randomly-placed NPCs
+  // (trainers, azure_terminal) never land on a fixed sign/flavor/chest tile.
+  const regionInteractions = interactions.filter(i => i.region === regionId)
+  for (const i of regionInteractions) {
+    const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
+    const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
+    usedSpots.add(`${tx},${ty}`)
+  }
 
   // Trainers in this region
   const regionTrainers = trainers.filter(t => t.location === regionId)
@@ -446,26 +470,25 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     npcObjects.push(makeNpcObject(objId++, t.id, spot.tileX, spot.tileY))
   }
 
-  // Interactions in this region
-  const regionInteractions = interactions.filter(i => i.region === regionId)
-  for (const i of regionInteractions) {
-    const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
-    const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
-    npcObjects.push(makeNpcObject(objId++, i.id, tx, ty))
-    usedSpots.add(`${tx},${ty}`)
-  }
-
   // Azure terminal for fast-travel regions
   if (region.hasFastTravel) {
     const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
     npcObjects.push(makeNpcObject(objId++, 'azure_terminal', spot.tileX, spot.tileY))
   }
 
+  // Interactions in this region — placed in a separate Interactions layer
+  for (const i of regionInteractions) {
+    const tx = i.tileX >= 0 && i.tileX < w ? i.tileX : Math.floor(w / 2)
+    const ty = i.tileY >= 0 && i.tileY < h ? i.tileY : Math.floor(h / 2)
+    interactionObjects.push(makeInteractionObject(objId++, i.id, tx, ty))
+  }
+
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)
+  const interactionsLayer = makeObjectGroup(6, 'Interactions', interactionObjects)
   const collisionLayer = generateCollision(w, h, connections, occupied)
 
-  const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer]
-  let nextLayerId = 6
+  const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer, interactionsLayer]
+  let nextLayerId = 7
 
   // Transitions layer
   const transitionObjects = []
