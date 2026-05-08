@@ -1098,7 +1098,9 @@ export class WorldScene extends BaseScene {
       // Look up gym data if this trainer is a gym leader
       const gym = getGymsBy('leader', npcName)[0] ?? null
 
-      const introLines = Array.isArray(trainer.introDialog) ? trainer.introDialog : lines
+      const introLines = Array.isArray(trainer.introDialog)
+        ? trainer.introDialog
+        : (typeof trainer.introDialog === 'string' ? [trainer.introDialog] : lines)
       this.dialog.show(introLines, () => {
         this.choiceMenu.open(
           ['Fight!', 'Not now.'],
