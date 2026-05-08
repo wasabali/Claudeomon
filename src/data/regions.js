@@ -13,7 +13,7 @@
 //   accessTrigger    — (hidden only) string describing unlock condition
 //   layout           — procedural map generation descriptor:
 //     type           — 'town' | 'dungeon' | 'arena' | 'gym' | 'interior' | 'wilderness'
-//     paths          — 'grid' | 'organic' | 'none'  (optional)
+//     paths          — 'grid' | 'organic' | 'bsp' | 'none'  (optional)
 //     landmarks      — array of landmark hint strings  (optional)
 
 const REGIONS = {

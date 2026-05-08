@@ -619,9 +619,14 @@ describe('localhost_town town layout', () => {
   it('Objects layer has enough tiles to represent at least 3 buildings', () => {
     const map = loadMap('localhost_town')
     const objects = map.layers.find(l => l.name === 'Objects')
-    const nonZero = objects.data.filter(gid => gid !== 0)
-    // Three Kenney building composites (7–8 tiles wide × 3 tiles tall = 21–24 tiles each)
-    expect(nonZero.length).toBeGreaterThanOrEqual(60)
+    // Kenney building composite GIDs occupy rows 0–8, cols 0–22 of the 27-col tileset.
+    // The last building block (WATER_BLOCK) ends at K(15,8) = 8*27+15+1 = 232.
+    // Trees start at K(16,8) = 233, so GIDs 1–232 are building tiles exclusively
+    // (in the Objects layer where only placeBlock, placeTree, and road code run).
+    const isBuildingGid = gid => gid > 0 && gid <= 232
+    const buildingTileCount = objects.data.filter(isBuildingGid).length
+    // Three buildings × minimum 7×3 = 21 tiles each → need at least 63 building tiles
+    expect(buildingTileCount).toBeGreaterThanOrEqual(63)
   })
 
   it('Objects layer contains road/path tiles (paved path network)', () => {

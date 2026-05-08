@@ -641,14 +641,45 @@ function generateArenaObjects(w, h, openings, rng, isTech) {
     }
   }
 
-  // Clear a 3-tile entrance lane through north spectator rows to the arena
-  const hasNorthOpening = openings.has(`${midX},0`) || openings.has(`${midX - 1},0`) || openings.has(`${midX + 1},0`)
+  // Helper: unconditionally clear a tile from the objects layer and occupied set.
+  function clearTile(x, y) {
+    if (x >= 1 && x < w - 1 && y >= 1 && y < h - 1) {
+      layer.data[y * w + x] = 0
+      occupied.delete(`${x},${y}`)
+    }
+  }
+
+  // For each edge direction that has an opening, carve a lane through any outer
+  // decoration rows AND open a gate through the arena ring wall itself so the
+  // interior is always reachable.
+  const hasNorthOpening = [-1, 0, 1].some(dx => openings.has(`${midX + dx},0`))
+  const hasSouthOpening = [-1, 0, 1].some(dx => openings.has(`${midX + dx},${h - 1}`))
+  const midY = Math.floor(h / 2)
+  const hasWestOpening  = [-1, 0, 1].some(dy => openings.has(`0,${midY + dy}`))
+  const hasEastOpening  = [-1, 0, 1].some(dy => openings.has(`${w - 1},${midY + dy}`))
+
+  // North: clear spectator rows + ring north wall (y = arenaY - 1)
   if (hasNorthOpening) {
-    for (let y = 2; y < arenaY; y++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const key = `${midX + dx},${y}`
-        if (occupied.has(key)) { layer.data[y * w + (midX + dx)] = 0; occupied.delete(key) }
-      }
+    for (let y = 1; y < arenaY; y++) {
+      for (let dx = -1; dx <= 1; dx++) clearTile(midX + dx, y)
+    }
+  }
+  // South: clear ring south wall (y = arenaY + arenaH) + rows to edge
+  if (hasSouthOpening) {
+    for (let y = arenaY + arenaH; y < h - 1; y++) {
+      for (let dx = -1; dx <= 1; dx++) clearTile(midX + dx, y)
+    }
+  }
+  // West: clear ring west wall (x = arenaX - 1) + columns to edge
+  if (hasWestOpening) {
+    for (let x = 1; x < arenaX; x++) {
+      for (let dy = -1; dy <= 1; dy++) clearTile(x, midY + dy)
+    }
+  }
+  // East: clear ring east wall (x = arenaX + arenaW) + columns to edge
+  if (hasEastOpening) {
+    for (let x = arenaX + arenaW; x < w - 1; x++) {
+      for (let dy = -1; dy <= 1; dy++) clearTile(x, midY + dy)
     }
   }
 
