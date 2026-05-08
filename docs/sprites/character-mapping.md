@@ -50,14 +50,26 @@ Maps every Cloud Quest trainer and the player character to a **Ninja Adventure A
 
 ---
 
+## Story / Quest NPCs (non-combat)
+
+These NPCs appear on the overworld for dialog and quest interactions only. They have no battle deck.
+
+| Trainer ID | Name | Location | spriteKey | Archetype | Notes |
+|------------|------|----------|-----------|-----------|-------|
+| `margaret` | Old Margaret | localhost_town | `ninja_woman_fighter` | Woman Fighter | Bakery owner, quest giver, capable senior |
+| `professor_pedersen` | Professor Pedersen | localhost_town | `ninja_king` | King | Academic authority, mentor figure |
+| `random_intern` | Random Intern | localhost_town | `ninja_adventurer` | Adventurer | Fresh recruit, no experience |
+
+---
+
 ## Gym Apprentices (generic trainers)
 
 Apprentices reuse shared character types. Each gym's apprentices get the domain-appropriate archetype.
 
 | Trainer ID | Name | Domain | spriteKey | Notes |
 |------------|------|--------|-----------|-------|
-| `fundamentals_apprentice_a` | Apprentice Engineer A | linux | `ninja_adventurer` | Beginner |
-| `fundamentals_apprentice_b` | Apprentice Engineer B | linux | `ninja_adventurer` | Beginner |
+| `fundamentals_apprentice_a` | Apprentice Engineer A | linux | `ninja_monk` | Student archetype |
+| `fundamentals_apprentice_b` | Apprentice Engineer B | linux | `ninja_magician` | Student archetype |
 | `admin_apprentice_a` | Apprentice Engineer A | cloud | `ninja_soldier` | Cloud admin |
 | `admin_apprentice_b` | Apprentice Engineer B | cloud | `ninja_soldier` | Cloud admin |
 | `devops_apprentice_a` | Apprentice Engineer A | iac | `ninja_adventurer` | DevOps student |

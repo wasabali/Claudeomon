@@ -501,6 +501,23 @@ describe('localhost_town NPC and interaction objects', () => {
     }
   })
 
+  it('every NPC object name in NPCs layer has a trainer registry entry with a spriteKey', async () => {
+    const { getById: getTrainerById } = await import('../src/data/trainers.js')
+    const map = loadMap('localhost_town')
+    const npcLayer = map.layers.find(l => l.name === 'NPCs')
+    expect(npcLayer).toBeDefined()
+    const SPRITES_DIR = path.join(process.cwd(), 'assets', 'sprites', 'characters')
+    for (const obj of npcLayer.objects) {
+      // azure_terminal is a special hardcoded stub (not a trainer), always intentional
+      if (obj.name === 'azure_terminal') continue
+      const trainer = getTrainerById(obj.name)
+      expect(trainer, `NPC "${obj.name}" has no trainer registry entry`).toBeDefined()
+      expect(trainer.spriteKey, `NPC "${obj.name}" trainer has no spriteKey`).toBeTruthy()
+      const spritePath = path.join(SPRITES_DIR, `${trainer.spriteKey}.png`)
+      expect(fs.existsSync(spritePath), `NPC "${obj.name}" spriteKey "${trainer.spriteKey}" has no sprite file at assets/sprites/characters/${trainer.spriteKey}.png`).toBe(true)
+    }
+  })
+
   it('has Interactions layer with all localhost_town interaction objects', async () => {
     const { getBy: getInteractionsBy } = await import('../src/data/interactions.js')
     const map = loadMap('localhost_town')
