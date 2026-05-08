@@ -1113,19 +1113,29 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
+      "objects": [],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 6,
+      "name": "Interactions",
       "objects": [
         {
           "height": 48,
-          "id": 1,
+          "id": 2,
           "name": "oldcorp_nameplate",
           "properties": [
             {
-              "name": "npc",
+              "name": "interaction",
               "type": "string",
               "value": "oldcorp_nameplate"
             }
           ],
-          "type": "npc",
+          "type": "interaction",
           "visible": true,
           "width": 48,
           "x": 288,
@@ -2245,8 +2255,8 @@
       "y": 0
     }
   ],
-  "nextlayerid": 6,
-  "nextobjectid": 100,
+  "nextlayerid": 7,
+  "nextobjectid": 101,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.10.0",

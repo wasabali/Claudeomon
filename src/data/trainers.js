@@ -309,6 +309,40 @@ const TRAINERS = {
     gymId: 'architecture_gym',
   },
 
+  // =========================================================================
+  // STORY / QUEST NPCs — non-combat, dialog only
+  // =========================================================================
+
+  margaret: {
+    id: 'margaret',
+    spriteKey: 'ninja_woman_fighter',
+    name: 'Old Margaret',
+    introDialog: [
+      "Welcome to Localhost Town, dear.",
+      "My bakery has a small website problem —\nmaybe you can help?",
+    ],
+    location: 'localhost_town',
+  },
+
+  professor_pedersen: {
+    id: 'professor_pedersen',
+    spriteKey: 'ninja_king',
+    name: 'Professor Pedersen',
+    introDialog: [
+      "Ah, a new student! Study hard and use\nonly the approved techniques.",
+      "There are no shortcuts worth taking\nin this profession.",
+    ],
+    location: 'localhost_town',
+  },
+
+  random_intern: {
+    id: 'random_intern',
+    spriteKey: 'ninja_adventurer',
+    name: 'Random Intern',
+    introDialog: ['...I just started here.'],
+    location: 'localhost_town',
+  },
+
   // ==================================================================
   // GYM LEADERS — new additions
   // =========================================================================
@@ -798,7 +832,7 @@ const TRAINERS = {
 
   fundamentals_apprentice_a: {
     id: 'fundamentals_apprentice_a',
-    spriteKey: 'ninja_adventurer',
+    spriteKey: 'ninja_monk',
     name: 'Apprentice Engineer A',
     domain: 'linux',
     hp: 40,
@@ -820,7 +854,7 @@ const TRAINERS = {
 
   fundamentals_apprentice_b: {
     id: 'fundamentals_apprentice_b',
-    spriteKey: 'ninja_adventurer',
+    spriteKey: 'ninja_magician',
     name: 'Apprentice Engineer B',
     domain: 'linux',
     hp: 40,
