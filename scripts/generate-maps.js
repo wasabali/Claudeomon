@@ -485,7 +485,235 @@ function generateCollision(w, h, connections, occupiedTiles, wallGid = 5) {
   return layer
 }
 
-function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWasteland, biome = null, useKenney = false) {
+// ── BSP Dungeon Layout ────────────────────────────────────────────────────────
+// Generates multiple rooms connected by L-shaped corridors using Binary Space
+// Partitioning.  Every non-carved interior tile becomes a wall.
+// Used for regions with layout.type === 'dungeon' and biome === 'dungeon'.
+function bspDungeonObjects(w, h, openings, rng, wallGid) {
+  const layer = makeTileLayer(2, 'Objects', w, h, 0)
+  const occupied = new Set()
+  const carved = new Set()
+  const roomCenters = []
+
+  function carveRect(rx, ry, rw, rh) {
+    for (let x = rx; x < rx + rw; x++) {
+      for (let y = ry; y < ry + rh; y++) {
+        if (x >= 1 && x < w - 1 && y >= 1 && y < h - 1) carved.add(`${x},${y}`)
+      }
+    }
+    const cx = rx + Math.floor(rw / 2)
+    const cy = ry + Math.floor(rh / 2)
+    roomCenters.push({ cx, cy })
+    return { cx, cy }
+  }
+
+  function carveCorridor(x1, y1, x2, y2) {
+    if (rng() < 0.5) {
+      for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
+        if (x >= 1 && x < w - 1) carved.add(`${x},${y1}`)
+      }
+      for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
+        if (y >= 1 && y < h - 1) carved.add(`${x2},${y}`)
+      }
+    } else {
+      for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
+        if (y >= 1 && y < h - 1) carved.add(`${x1},${y}`)
+      }
+      for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
+        if (x >= 1 && x < w - 1) carved.add(`${x},${y2}`)
+      }
+    }
+  }
+
+  const MIN_SPLIT = 8
+  const MIN_ROOM_W = 4
+  const MIN_ROOM_H = 3
+
+  // Carve a randomly-sized room within the partition [x, x+bw) × [y, y+bh).
+  function leafRoom(x, y, bw, bh) {
+    const maxRw = Math.max(MIN_ROOM_W, bw - 2)
+    const maxRh = Math.max(MIN_ROOM_H, bh - 2)
+    const rw = MIN_ROOM_W + Math.floor(rng() * (maxRw - MIN_ROOM_W + 1))
+    const rh = MIN_ROOM_H + Math.floor(rng() * (maxRh - MIN_ROOM_H + 1))
+    const rx = x + 1 + Math.floor(rng() * Math.max(1, bw - rw - 1))
+    const ry = y + 1 + Math.floor(rng() * Math.max(1, bh - rh - 1))
+    return carveRect(rx, ry, rw, rh)
+  }
+
+  function bsp(x, y, bw, bh, depth) {
+    if (depth === 0 || bw < MIN_SPLIT || bh < MIN_SPLIT) return leafRoom(x, y, bw, bh)
+
+    let c1, c2
+    if (bw >= bh) {
+      const maxSplit = bw - MIN_SPLIT
+      if (maxSplit < MIN_SPLIT) return leafRoom(x, y, bw, bh)
+      const splitOff = MIN_SPLIT + Math.floor(rng() * (maxSplit - MIN_SPLIT + 1))
+      c1 = bsp(x, y, splitOff, bh, depth - 1)
+      c2 = bsp(x + splitOff, y, bw - splitOff, bh, depth - 1)
+    } else {
+      const maxSplit = bh - MIN_SPLIT
+      if (maxSplit < MIN_SPLIT) return leafRoom(x, y, bw, bh)
+      const splitOff = MIN_SPLIT + Math.floor(rng() * (maxSplit - MIN_SPLIT + 1))
+      c1 = bsp(x, y, bw, splitOff, depth - 1)
+      c2 = bsp(x, y + splitOff, bw, bh - splitOff, depth - 1)
+    }
+
+    carveCorridor(c1.cx, c1.cy, c2.cx, c2.cy)
+    return { cx: Math.floor((c1.cx + c2.cx) / 2), cy: Math.floor((c1.cy + c2.cy) / 2) }
+  }
+
+  bsp(1, 1, w - 2, h - 2, 3)
+
+  // Connect each edge opening to the nearest room center via corridor
+  for (const key of openings) {
+    const [ox, oy] = key.split(',').map(Number)
+    carved.add(key)
+    if (roomCenters.length > 0) {
+      let nearest = roomCenters[0]
+      let bestDist = Infinity
+      for (const r of roomCenters) {
+        const d = Math.abs(r.cx - ox) + Math.abs(r.cy - oy)
+        if (d < bestDist) { bestDist = d; nearest = r }
+      }
+      carveCorridor(ox, oy, nearest.cx, nearest.cy)
+    }
+  }
+
+  // Fill every non-carved interior tile with the wall GID
+  for (let x = 1; x < w - 1; x++) {
+    for (let y = 1; y < h - 1; y++) {
+      if (!carved.has(`${x},${y}`)) {
+        layer.data[y * w + x] = wallGid
+        occupied.add(`${x},${y}`)
+      }
+    }
+  }
+
+  return { layer, occupied }
+}
+
+// ── Arena Layout ──────────────────────────────────────────────────────────────
+// Generates a central combat ring surrounded by spectator stands.
+// Used for regions with layout.type === 'arena' (kubernetes_colosseum).
+function generateArenaObjects(w, h, openings, rng, isTech) {
+  const layer = makeTileLayer(2, 'Objects', w, h, 0)
+  const occupied = new Set()
+
+  const wallGid  = isTech ? techGid(T.SERVER_ROOM_WALL)      : KU.WALL_DARK
+  const specGid  = isTech ? techGid(T.SERVER_RACK)           : KU.WALL_STONE
+  const propGids = isTech
+    ? [techGid(T.MONITORING_DASHBOARD), techGid(T.WARNING_SIGN), techGid(T.CABLE_BUNDLE)]
+    : [KU.ITEM_CHEST, KU.ITEM_GEM, KU.ITEM_BLUE]
+
+  const arenaW = Math.floor(w * 0.40)
+  const arenaH = Math.floor(h * 0.45)
+  const arenaX = Math.floor((w - arenaW) / 2)
+  const arenaY = Math.floor((h - arenaH) / 2)
+  const midX   = Math.floor(w / 2)
+
+  function place(x, y, gid) {
+    if (x >= 1 && x < w - 1 && y >= 1 && y < h - 1 && !openings.has(`${x},${y}`) && !occupied.has(`${x},${y}`)) {
+      layer.data[y * w + x] = gid
+      occupied.add(`${x},${y}`)
+    }
+  }
+
+  // Arena boundary — north, south, west, east edges
+  for (let x = arenaX - 1; x <= arenaX + arenaW; x++) {
+    place(x, arenaY - 1,       wallGid)
+    place(x, arenaY + arenaH,  wallGid)
+  }
+  for (let y = arenaY; y < arenaY + arenaH; y++) {
+    place(arenaX - 1,        y, wallGid)
+    place(arenaX + arenaW,   y, wallGid)
+  }
+
+  // Spectator stands — two rows north of the arena
+  for (let row = 0; row < 2; row++) {
+    for (let x = arenaX - 2; x <= arenaX + arenaW + 1; x++) {
+      place(x, arenaY - 3 - row, specGid)
+    }
+  }
+  // Spectator stands — two rows south of the arena
+  for (let row = 0; row < 2; row++) {
+    for (let x = arenaX - 2; x <= arenaX + arenaW + 1; x++) {
+      place(x, arenaY + arenaH + 2 + row, specGid)
+    }
+  }
+
+  // Helper: unconditionally clear a tile from the objects layer and occupied set.
+  function clearTile(x, y) {
+    if (x >= 1 && x < w - 1 && y >= 1 && y < h - 1) {
+      layer.data[y * w + x] = 0
+      occupied.delete(`${x},${y}`)
+    }
+  }
+
+  // For each edge direction that has an opening, carve a lane through any outer
+  // decoration rows AND open a gate through the arena ring wall itself so the
+  // interior is always reachable.
+  const hasNorthOpening = [-1, 0, 1].some(dx => openings.has(`${midX + dx},0`))
+  const hasSouthOpening = [-1, 0, 1].some(dx => openings.has(`${midX + dx},${h - 1}`))
+  const midY = Math.floor(h / 2)
+  const hasWestOpening  = [-1, 0, 1].some(dy => openings.has(`0,${midY + dy}`))
+  const hasEastOpening  = [-1, 0, 1].some(dy => openings.has(`${w - 1},${midY + dy}`))
+
+  // North: clear spectator rows + ring north wall (y = arenaY - 1)
+  if (hasNorthOpening) {
+    for (let y = 1; y < arenaY; y++) {
+      for (let dx = -1; dx <= 1; dx++) clearTile(midX + dx, y)
+    }
+  }
+  // South: clear ring south wall (y = arenaY + arenaH) + rows to edge
+  if (hasSouthOpening) {
+    for (let y = arenaY + arenaH; y < h - 1; y++) {
+      for (let dx = -1; dx <= 1; dx++) clearTile(midX + dx, y)
+    }
+  }
+  // West: clear ring west wall (x = arenaX - 1) + columns to edge
+  if (hasWestOpening) {
+    for (let x = 1; x < arenaX; x++) {
+      for (let dy = -1; dy <= 1; dy++) clearTile(x, midY + dy)
+    }
+  }
+  // East: clear ring east wall (x = arenaX + arenaW) + columns to edge
+  if (hasEastOpening) {
+    for (let x = arenaX + arenaW; x < w - 1; x++) {
+      for (let dy = -1; dy <= 1; dy++) clearTile(x, midY + dy)
+    }
+  }
+
+  // Scatter decorative props in the outer corners (not inside the arena ring)
+  const safeZone = 2
+  for (let i = 0; i < 10; i++) {
+    for (let attempt = 0; attempt < 25; attempt++) {
+      const tx = Math.floor(rng() * (w - safeZone * 2)) + safeZone
+      const ty = Math.floor(rng() * (h - safeZone * 2)) + safeZone
+      const inArenaBounds = tx > arenaX - 3 && tx < arenaX + arenaW + 2 && ty > arenaY - 5 && ty < arenaY + arenaH + 5
+      if (!inArenaBounds && !occupied.has(`${tx},${ty}`) && !openings.has(`${tx},${ty}`)) {
+        place(tx, ty, propGids[Math.floor(rng() * propGids.length)])
+        break
+      }
+    }
+  }
+
+  return { layer, occupied }
+}
+
+function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWasteland, biome = null, useKenney = false, layout = null) {
+  const layoutType = layout?.type
+
+  // ── BSP dungeon: dungeon-type regions with dungeon biome ──────────────────
+  if (layoutType === 'dungeon' && regionType === 'dungeon' && biome === 'dungeon') {
+    return bspDungeonObjects(w, h, openings, rng, BIOME_PROP_GID)
+  }
+
+  // ── Arena layout: main region with arena type ─────────────────────────────
+  if (layoutType === 'arena') {
+    return generateArenaObjects(w, h, openings, rng, isTech)
+  }
+
+  // ── All other region types: existing generation logic ─────────────────────
   const layer = makeTileLayer(2, 'Objects', w, h, 0)
   const occupied = new Set()
 
@@ -727,7 +955,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   // main/gym region types — dungeons still use legacy biome/stub GIDs
   const useKenney = KENNEY_BIOMES.includes(biome) && (type === 'main' || type === 'gym')
   const openings = getOpeningTiles(w, h, connections)
-  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland, biome, useKenney)
+  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland, biome, useKenney, region.layout)
 
   // Biome regions use their biome floor as the ground tile; tech regions use tech_floor;
   // void/wasteland use their own ground tile; Kenney village uses green grass;
