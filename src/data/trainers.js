@@ -1428,7 +1428,7 @@ const TRAINERS = {
   },
 
   // =========================================================================
-  // WORLD NPCs — non-battlable characters visible on the overworld map.
+  // WORLD NPCs — non-battleable characters visible on the overworld map.
   // These entries exist solely to provide a spriteKey for WorldScene to
   // render a human-looking character instead of the orange npc_default stub.
   // They intentionally omit hp/deck so the battle check never fires.
