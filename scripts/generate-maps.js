@@ -206,34 +206,36 @@ const TILESET_TECH = {
   tilewidth: TILE,
 }
 
-// Void tileset (GIDs 6–17) — appended for void-themed regions.
-// Image lives at assets/tiles/void_tiles.png (576×48, 12 tiles in a single row).
+// Void tileset (GIDs 6–19) — appended for void-themed regions.
+// Image lives at assets/tiles/void_tiles.png (672×48, 14 tiles in a single row).
+// Tiles 0–11 retained for compatibility; tiles 12–13 are new scatter objects.
 const TILESET_VOID = {
-  columns: 12,
+  columns: 14,
   firstgid: 6,
   image: '../tiles/void_tiles.png',
   imageheight: TILE,
-  imagewidth: TILE * 12,
+  imagewidth: TILE * 14,
   margin: 0,
   name: 'void_tiles',
   spacing: 0,
-  tilecount: 12,
+  tilecount: 14,
   tileheight: TILE,
   tilewidth: TILE,
 }
 
-// Wasteland tileset (GIDs 6–17) — appended for wasteland-themed regions.
-// Image lives at assets/tiles/wasteland_tiles.png (576×48, 12 tiles in a single row).
+// Wasteland tileset (GIDs 6–19) — appended for wasteland-themed regions.
+// Image lives at assets/tiles/wasteland_tiles.png (672×48, 14 tiles in a single row).
+// Tiles 0–11 retained for compatibility; tiles 12–13 are new scatter objects.
 const TILESET_WASTELAND = {
-  columns: 12,
+  columns: 14,
   firstgid: 6,
   image: '../tiles/wasteland_tiles.png',
   imageheight: TILE,
-  imagewidth: TILE * 12,
+  imagewidth: TILE * 14,
   margin: 0,
   name: 'wasteland_tiles',
   spacing: 0,
-  tilecount: 12,
+  tilecount: 14,
   tileheight: TILE,
   tilewidth: TILE,
 }
@@ -249,18 +251,22 @@ const VOID_GROUND_GID      = TILESET_VOID.firstgid       // 6 — tile index 0 (
 const WASTELAND_GROUND_GID = TILESET_WASTELAND.firstgid  // 6 — tile index 0 (waste_ground)
 
 // GIDs for object tiles in void tileset (0-indexed IDs + firstgid)
-const VOID_PLATFORM_GID   = TILESET_VOID.firstgid + 2   // 8  — void_platform
-const VOID_PLATFORM_L_GID = TILESET_VOID.firstgid + 3   // 9  — void_platform_edge_l
-const VOID_PLATFORM_R_GID = TILESET_VOID.firstgid + 4   // 10 — void_platform_edge_r
-const VOID_DEBRIS_GID     = TILESET_VOID.firstgid + 6   // 12 — void_debris
-const VOID_WALL_GID       = TILESET_VOID.firstgid + 11  // 17 — void_wall (impassable)
+const VOID_PLATFORM_GID      = TILESET_VOID.firstgid + 2   // 8  — void_platform
+const VOID_PLATFORM_L_GID    = TILESET_VOID.firstgid + 3   // 9  — void_platform_edge_l
+const VOID_PLATFORM_R_GID    = TILESET_VOID.firstgid + 4   // 10 — void_platform_edge_r
+const VOID_DEBRIS_GID        = TILESET_VOID.firstgid + 6   // 12 — void_debris
+const VOID_WALL_GID          = TILESET_VOID.firstgid + 11  // 17 — void_wall (impassable)
+const VOID_GLITCH_CORRUPT_GID = TILESET_VOID.firstgid + 12 // 18 — void_glitch_corrupt
+const VOID_DATA_STREAM_GID   = TILESET_VOID.firstgid + 13  // 19 — void_data_stream
 
 // GIDs for object tiles in wasteland tileset (0-indexed IDs + firstgid)
-const WASTE_RUBBLE_GID    = TILESET_WASTELAND.firstgid + 3   // 9  — waste_rubble
-const WASTE_SERVER_GID    = TILESET_WASTELAND.firstgid + 6   // 12 — waste_server_rack
-const WASTE_CAUTION_GID   = TILESET_WASTELAND.firstgid + 7   // 13 — waste_caution_tape
-const WASTE_FENCE_GID     = TILESET_WASTELAND.firstgid + 10  // 16 — waste_wire_fence
-const WASTE_WALL_GID      = TILESET_WASTELAND.firstgid + 11  // 17 — waste_wall (impassable)
+const WASTE_RUBBLE_GID       = TILESET_WASTELAND.firstgid + 3   // 9  — waste_rubble
+const WASTE_SERVER_GID       = TILESET_WASTELAND.firstgid + 6   // 12 — waste_server_rack
+const WASTE_CAUTION_GID      = TILESET_WASTELAND.firstgid + 7   // 13 — waste_caution_tape
+const WASTE_FENCE_GID        = TILESET_WASTELAND.firstgid + 10  // 16 — waste_wire_fence
+const WASTE_WALL_GID         = TILESET_WASTELAND.firstgid + 11  // 17 — waste_wall (impassable)
+const WASTE_DEAD_TREE_GID    = TILESET_WASTELAND.firstgid + 12  // 18 — waste_dead_tree
+const WASTE_BROKEN_SIGN_GID  = TILESET_WASTELAND.firstgid + 13  // 19 — waste_broken_sign
 
 // Ninja Adventure tileset definitions (village, dungeon, nature, interior).
 // Images live at assets/maps/tilesets/{name}.png (384×192, 8×4 tiles).
@@ -869,6 +875,8 @@ function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWast
         { w: 1, h: 1, tile: VOID_PLATFORM_L_GID },
         { w: 1, h: 1, tile: VOID_PLATFORM_R_GID },
         { w: 2, h: 1, tile: VOID_DEBRIS_GID },
+        { w: 1, h: 1, tile: VOID_GLITCH_CORRUPT_GID },
+        { w: 1, h: 1, tile: VOID_DATA_STREAM_GID },
       ]
     } else if (isWasteland) {
       buildings = [
@@ -876,6 +884,8 @@ function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWast
         { w: 2, h: 1, tile: WASTE_RUBBLE_GID },
         { w: 3, h: 1, tile: WASTE_FENCE_GID },
         { w: 1, h: 1, tile: WASTE_CAUTION_GID },
+        { w: 1, h: 1, tile: WASTE_DEAD_TREE_GID },
+        { w: 1, h: 1, tile: WASTE_BROKEN_SIGN_GID },
       ]
     } else if (regionType === 'main') {
       buildings = [

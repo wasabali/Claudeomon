@@ -1,12 +1,12 @@
 {
-  "columns": 12,
+  "columns": 14,
   "image": "void_tiles.png",
   "imageheight": 48,
-  "imagewidth": 576,
+  "imagewidth": 672,
   "margin": 0,
   "name": "void_tiles",
   "spacing": 0,
-  "tilecount": 12,
+  "tilecount": 14,
   "tiledversion": "1.10.0",
   "tileheight": 48,
   "tilewidth": 48,
@@ -322,6 +322,58 @@
         }
       ],
       "type": "wall"
+    },
+    {
+      "id": 12,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_glitch_corrupt"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Corrupt pixel cluster — magenta checkerboard glitch artefact"
+        }
+      ],
+      "type": "prop"
+    },
+    {
+      "id": 13,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "void_data_stream"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Data stream — vertical cascade of cyan-green digital rain"
+        }
+      ],
+      "type": "prop"
     }
   ],
   "type": "tileset",

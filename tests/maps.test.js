@@ -363,8 +363,8 @@ describe('void regions carry void_tiles tileset', () => {
     expect(voidTs.image).toBe('../tiles/void_tiles.png')
     expect(voidTs.tilewidth).toBe(48)
     expect(voidTs.tileheight).toBe(48)
-    expect(voidTs.columns).toBe(12)
-    expect(voidTs.tilecount).toBe(12)
+    expect(voidTs.columns).toBe(14)
+    expect(voidTs.tilecount).toBe(14)
     expect(voidTs.firstgid).toBe(6)
     expect(map.tilesets[0].name).toBe('stub_tiles')
     expect(map.tilesets[1].name).toBe('void_tiles')
@@ -383,7 +383,7 @@ describe('void regions carry void_tiles tileset', () => {
     expect(objects).toBeDefined()
     const nonZero = objects.data.filter(gid => gid !== 0)
     expect(nonZero.length).toBeGreaterThan(0)
-    expect(nonZero.every(gid => gid >= 6 && gid <= 17)).toBe(true)
+    expect(nonZero.every(gid => gid >= 6 && gid <= 19)).toBe(true)
   })
 
   it.each(VOID_REGION_IDS)('%s collision layer uses void_wall GID 17, not stub GID 5', (regionId) => {
@@ -404,8 +404,8 @@ describe('wasteland regions carry wasteland_tiles tileset', () => {
     expect(wasteTs.image).toBe('../tiles/wasteland_tiles.png')
     expect(wasteTs.tilewidth).toBe(48)
     expect(wasteTs.tileheight).toBe(48)
-    expect(wasteTs.columns).toBe(12)
-    expect(wasteTs.tilecount).toBe(12)
+    expect(wasteTs.columns).toBe(14)
+    expect(wasteTs.tilecount).toBe(14)
     expect(wasteTs.firstgid).toBe(6)
     expect(map.tilesets[0].name).toBe('stub_tiles')
     expect(map.tilesets[1].name).toBe('wasteland_tiles')
@@ -424,7 +424,7 @@ describe('wasteland regions carry wasteland_tiles tileset', () => {
     expect(objects).toBeDefined()
     const nonZero = objects.data.filter(gid => gid !== 0)
     expect(nonZero.length).toBeGreaterThan(0)
-    expect(nonZero.every(gid => gid >= 6 && gid <= 17)).toBe(true)
+    expect(nonZero.every(gid => gid >= 6 && gid <= 19)).toBe(true)
   })
 
   it.each(WASTELAND_REGION_IDS)('%s collision layer uses waste_wall GID 17, not stub GID 5', (regionId) => {
