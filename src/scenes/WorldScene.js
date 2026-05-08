@@ -666,7 +666,7 @@ export class WorldScene extends BaseScene {
   }
 
   // Idle frame index for each facing direction (middle column of each row).
-  static _IDLE_FRAME = { down: 1, left: 4, right: 7, up: 10 }
+  static IDLE_FRAME = { down: 1, left: 4, right: 7, up: 10 }
 
   // Update the player sprite animation to match the current movement state.
   _updatePlayerAnim() {
@@ -679,11 +679,11 @@ export class WorldScene extends BaseScene {
     } else {
       // idle or bumping — freeze on the standing frame for the current direction
       this._player.anims.stop()
-      this._player.setFrame(WorldScene._IDLE_FRAME[this._facing] ?? 1)
+      this._player.setFrame(WorldScene.IDLE_FRAME[this._facing] ?? 1)
     }
   }
 
-
+  _syncTileFromPlayerPosition() {
     const persisted = syncPlayerTileFromPixels(
       this._player.x,
       this._player.y,
