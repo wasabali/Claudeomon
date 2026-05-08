@@ -279,28 +279,29 @@ function getOpeningTiles(w, h, connections) {
   return tiles
 }
 
-function generateCollision(w, h, connections, occupiedTiles) {
+function generateCollision(w, h, connections, occupiedTiles, biome = null) {
   const layer = makeTileLayer(5, 'Collision', w, h, 0, { opacity: 0, visible: false })
   const openings = getOpeningTiles(w, h, connections)
+  const wallGid = biome ? (6 + 8) : 5  // biome: use first solid biome tile; stub: GID 5
 
   for (let x = 0; x < w; x++) {
     for (let y = 0; y < h; y++) {
       const isEdge = x === 0 || y === 0 || x === w - 1 || y === h - 1
       if (isEdge && !openings.has(`${x},${y}`)) {
-        layer.data[y * w + x] = 5
+        layer.data[y * w + x] = wallGid
       }
     }
   }
 
   for (const key of occupiedTiles) {
     const [bx, by] = key.split(',').map(Number)
-    layer.data[by * w + bx] = 5
+    layer.data[by * w + bx] = wallGid
   }
 
   return layer
 }
 
-function generateObjects(w, h, regionType, openings, rng, isTech) {
+function generateObjects(w, h, regionType, openings, rng, isTech, biome = null) {
   const layer = makeTileLayer(2, 'Objects', w, h, 0)
   const occupied = new Set()
 
@@ -362,10 +363,12 @@ function generateObjects(w, h, regionType, openings, rng, isTech) {
       { w: 3, h: 3, tile: 3 },
     ]
   } else {
+    // Dungeon / hidden regions — use biome solid tiles when available, else stub tile 4
+    const propTile = biome ? (6 + 8) : 4  // biome: local tile 8 = first solid prop; stub: GID 4
     buildings = [
-      { w: 2, h: 2, tile: 4 },
-      { w: 2, h: 2, tile: 4 },
-      { w: 3, h: 2, tile: 4 },
+      { w: 2, h: 2, tile: propTile },
+      { w: 2, h: 2, tile: propTile + 1 },
+      { w: 3, h: 2, tile: propTile },
     ]
   }
 
@@ -424,7 +427,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const isWasteland = !!region.hasWastelandTileset
   const biome = (!isTech && !isVoid && !isWasteland) ? (region.biome || null) : null
   const openings = getOpeningTiles(w, h, connections)
-  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech)
+  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, biome)
 
   // Biome regions use their biome floor as the ground tile; tech regions use tech_floor;
   // void/wasteland use their own ground tile; all others fall back to stub tile 1.
@@ -487,7 +490,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
 
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)
   const interactionsLayer = makeObjectGroup(6, 'Interactions', interactionObjects)
-  const collisionLayer = generateCollision(w, h, connections, occupied)
+  const collisionLayer = generateCollision(w, h, connections, occupied, biome)
 
   const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer, interactionsLayer]
   let nextLayerId = 7
@@ -529,7 +532,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     layers.push(makeObjectGroup(nextLayerId++, 'Transitions', transitionObjects))
   }
 
-  const nextObjectId = Math.max(objId, interObjId, transObjId)
+  const nextObjectId = Math.max(objId, transObjId)
 
   return {
     map: {

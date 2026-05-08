@@ -245,6 +245,17 @@ describe('transition spawn coordinates are in-bounds for target maps', () => {
 // Derived from region data — single source of truth for which regions carry the tech tileset
 const TECH_REGION_IDS = getAllRegions().filter(r => r.hasTechTileset).map(r => r.id)
 
+// Biome regions derived from region data
+const BIOME_REGION_IDS_BY_BIOME = {}
+for (const region of getAllRegions()) {
+  if (region.biome) {
+    if (!BIOME_REGION_IDS_BY_BIOME[region.biome]) BIOME_REGION_IDS_BY_BIOME[region.biome] = []
+    BIOME_REGION_IDS_BY_BIOME[region.biome].push(region.id)
+  }
+}
+const DUNGEON_BIOME_REGION_IDS  = BIOME_REGION_IDS_BY_BIOME['dungeon']  || []
+const INTERIOR_BIOME_REGION_IDS = BIOME_REGION_IDS_BY_BIOME['interior'] || []
+
 describe('tech regions carry kenney_tech_office tileset', () => {
   it.each(TECH_REGION_IDS)('%s includes kenney_tech_office as second tileset', (regionId) => {
     const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)
@@ -276,6 +287,73 @@ describe('tech regions carry kenney_tech_office tileset', () => {
     expect(nonZero.length).toBeGreaterThan(0)
     // All non-zero GIDs should be in range 6–55 (kenney_tech_office tiles)
     expect(nonZero.every(gid => gid >= 6 && gid <= 55)).toBe(true)
+  })
+})
+
+describe('dungeon biome regions carry dungeon tileset', () => {
+  it.each(DUNGEON_BIOME_REGION_IDS)('%s includes dungeon as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const ts = map.tilesets.find(t => t.name === 'dungeon')
+    expect(ts).toBeDefined()
+    expect(ts.image).toBe('tilesets/dungeon.png')
+    expect(ts.tilewidth).toBe(48)
+    expect(ts.tileheight).toBe(48)
+    expect(ts.columns).toBe(8)
+    expect(ts.tilecount).toBe(32)
+    expect(ts.firstgid).toBe(6)
+  })
+
+  it.each(DUNGEON_BIOME_REGION_IDS)('%s ground layer uses dungeon tile GIDs', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.some(gid => gid >= 6 && gid <= 37)).toBe(true)
+  })
+})
+
+// Only generated (non-hand-made) maps are guaranteed to have no stub building GIDs.
+// Hand-made maps with biome may still carry legacy stub tiles and are out of scope.
+const GENERATED_DUNGEON_IDS  = ['jira_dungeon_1', 'jira_dungeon_2', 'jira_dungeon_3']
+const GENERATED_INTERIOR_IDS = ['bakery_interior', 'lab_interior', 'apartment_interior']
+
+describe('generated dungeon maps have no stub building GIDs', () => {
+  it.each(GENERATED_DUNGEON_IDS)('%s has no stub building GIDs (2–5) in tile layers', (regionId) => {
+    const map = loadMap(regionId)
+    const tileLayers = map.layers.filter(l => l.type === 'tilelayer')
+    for (const layer of tileLayers) {
+      expect(layer.data.filter(gid => gid >= 2 && gid <= 5).length).toBe(0)
+    }
+  })
+})
+
+describe('interior biome regions carry interior tileset', () => {
+  it.each(INTERIOR_BIOME_REGION_IDS)('%s includes interior as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const ts = map.tilesets.find(t => t.name === 'interior')
+    expect(ts).toBeDefined()
+    expect(ts.image).toBe('tilesets/interior.png')
+    expect(ts.tilewidth).toBe(48)
+    expect(ts.tileheight).toBe(48)
+    expect(ts.columns).toBe(8)
+    expect(ts.tilecount).toBe(32)
+    expect(ts.firstgid).toBe(6)
+  })
+
+  it.each(INTERIOR_BIOME_REGION_IDS)('%s ground layer uses interior tile GIDs', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.some(gid => gid >= 6 && gid <= 37)).toBe(true)
+  })
+})
+
+describe('generated interior maps have no stub building GIDs', () => {
+  it.each(GENERATED_INTERIOR_IDS)('%s has no stub building GIDs (2–5) in tile layers', (regionId) => {
+    const map = loadMap(regionId)
+    const tileLayers = map.layers.filter(l => l.type === 'tilelayer')
+    for (const layer of tileLayers) {
+      expect(layer.data.filter(gid => gid >= 2 && gid <= 5).length).toBe(0)
+    }
   })
 })
 
