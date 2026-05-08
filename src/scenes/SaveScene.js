@@ -33,6 +33,7 @@ export class SaveScene extends BaseScene {
     })
 
     this.input.keyboard.on('keydown', this.onKeyDown, this)
+    this.setupPauseKey()
     this.time.addEvent({
       delay: 500,
       loop: true,
