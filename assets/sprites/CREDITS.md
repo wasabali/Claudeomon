@@ -1,73 +1,85 @@
 # Sprite Asset Credits
 
-All sprite assets are CC0 (public domain). Attribution is not legally required; we credit sources here as good practice.
+All sprite assets are CC0 or CC-BY-SA (see per-source details below). Attribution is included as good practice.
 
 ---
 
-## Ninja Adventure Asset Pack (CC0)
+## LPC (Liberated Pixel Cup) Spritesheet Generator — CC-BY-SA 3.0
 
 Character sprites used for Cloud Quest trainers, the player character, and NPCs are
-sourced from the **Ninja Adventure Asset Pack** by Robert and Pixel-Boy.
+generated from the **Universal LPC Spritesheet Character Generator**.
 
-- **Source:** https://pixel-boy.itch.io/ninja-adventure-asset-pack  
-- **License:** CC0 (Public Domain)
-- **Modifications:** 3× nearest-neighbor upscale from 16×16px to 48×48px
+- **Source:** https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/
+- **License:** CC-BY-SA 3.0 (Creative Commons Attribution-ShareAlike 3.0)
+- **Style:** Pokémon DS-era overworld — solid outline, ~16-colour palette, no anti-aliasing
+- **Format:** 4-row × 3-column walk-cycle sheet, 48×48 px per frame (total 144×192 px)
 
 ### What's included
 
 Each character sprite sheet is a **4-row × 3-column** walk-cycle sheet at 48×48 px per frame.
 
 **Important:** BootScene loads all player/trainer sprites by `spriteKey` from `assets/sprites/characters/<spriteKey>.png`.
-`PLAYER_SPRITE_KEY` is `'ninja_hero'`; each trainer entry in `src/data/trainers.js` sets its own `spriteKey`.
+`PLAYER_SPRITE_KEY` is `'player_default'`; each trainer entry in `src/data/trainers.js` sets its own `spriteKey`.
 
-Sprite sheets live in `assets/sprites/characters/` and are named by archetype:
+Sprite sheets live in `assets/sprites/characters/` and are named by role:
 
-| File | Archetype |
-|------|-----------|
-| `ninja_hero.png` | Versatile young hero (**player default**) |
-| `ninja_old_samurai.png` | Grizzled veteran warrior |
-| `ninja_mage.png` | Robed wizard/spell-caster |
-| `ninja_sorceress.png` | Female magic user |
-| `ninja_archwizard.png` | Elder all-knowing spell-caster |
-| `ninja_warlock.png` | Dark/mysterious magic user |
-| `ninja_samurai.png` | Disciplined sword-wielder |
-| `ninja_knight.png` | Armoured, principled fighter |
-| `ninja_heavy_bandit.png` | Large, bulky brawler |
-| `ninja_captain.png` | Naval/fleet commander |
-| `ninja_soldier.png` | Rank-and-file armoured fighter |
-| `ninja_warrior.png` | Sturdy battle-hardened fighter |
-| `ninja_archer.png` | Precise ranged fighter |
-| `ninja_monk.png` | Meditative martial artist |
-| `ninja_ninja.png` | Stealthy operative |
-| `ninja_assassin.png` | Fast, event-driven rogue |
-| `ninja_robot.png` | Automated mechanical fighter |
-| `ninja_adventurer.png` | Young, inexperienced traveller |
-| `ninja_woman_fighter.png` | Female armoured fighter |
-| `ninja_pirate.png` | Swashbuckling sales type |
-| `ninja_burglar.png` | Quick, opportunistic thief |
-| `ninja_demon.png` | Sinister corrupted figure |
-| `ninja_skeleton.png` | Deprecated/ancient undead |
-| `ninja_ogre.png` | Massive destructive brute |
-| `ninja_goblin.png` | Small but chaotic primitive |
-| `ninja_slime.png` | Formless null entity |
-| `ninja_sheriff.png` | Law-enforcement type |
-| `ninja_clown.png` | Chaotic unpredictable joker |
-| `ninja_magician.png` | Stage-magician trickster |
-| `ninja_king.png` | Final-boss authority figure |
+| File | Role / archetype |
+|------|-----------------|
+| `player_default.png` | Young cloud engineer — player character |
+| `senior_ops_npc.png` | Grizzled veteran ops engineer |
+| `devops_npc.png` | DevOps / Linux wizard |
+| `security_engineer_npc.png` | Security specialist |
+| `principal_engineer_npc.png` | Elder all-knowing principal engineer |
+| `cursed_trainer_npc.png` | Dark/mysterious cursed technique user |
+| `data_engineer_npc.png` | Disciplined data engineer |
+| `senior_engineer_npc.png` | Armoured, principled senior engineer |
+| `infra_engineer_npc.png` | Large, bulky infrastructure engineer |
+| `staff_engineer_npc.png` | Staff / fleet commander |
+| `junior_engineer_npc.png` | Rank-and-file junior engineer |
+| `sre_npc.png` | Sturdy battle-hardened SRE |
+| `frontend_engineer_npc.png` | Precise frontend engineer |
+| `platform_engineer_npc.png` | Meditative platform engineer |
+| `devrel_npc.png` | Stealthy DevRel operative |
+| `hacker_npc.png` | Fast, event-driven hacker |
+| `sysadmin_npc.png` | Automated sysadmin |
+| `intern_npc.png` | Young, inexperienced intern |
+| `cloud_engineer_npc.png` | Cloud infrastructure engineer |
+| `open_source_pirate_npc.png` | Swashbuckling open-source advocate |
+| `chaos_engineer_npc.png` | Quick, opportunistic chaos engineer |
+| `demon_trainer_npc.png` | Sinister cursed trainer |
+| `zombie_process_npc.png` | Deprecated/ancient zombie process |
+| `legacy_engineer_npc.png` | Massive legacy system engineer |
+| `goblin_engineer_npc.png` | Small but chaotic goblin engineer |
+| `jira_slime_npc.png` | Formless JIRA slime entity |
+| `compliance_officer_npc.png` | Compliance officer |
+| `scrum_master_npc.png` | Chaotic unpredictable scrum master |
+| `backend_engineer_npc.png` | Backend engineer trickster |
+| `cto_npc.png` | Final-boss CTO authority figure |
+| `rival_engineer_npc.png` | Rival cloud engineer |
+
+### How to obtain real assets
+
+1. Visit **https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/**
+2. Customise the character appearance for each role (hoodie, laptop bag for player, etc.)
+3. Export as PNG — the generator outputs a walk-cycle sheet at native pixel size
+4. Scale to 48×48 px per frame (144×192 px total) using nearest-neighbor interpolation
+5. Save as `assets/sprites/characters/<spriteKey>.png`
+
+---
+
+## Kenney Tiny Town (CC0)
+
+Portrait sprites used in DialogBox conversations are sourced from **Kenney Tiny Town**.
+
+- **Source:** https://kenney.nl/assets/tiny-town
+- **License:** CC0 1.0 Universal (Public Domain Dedication)
+- **Format:** ~80×80 px talking-head portrait, restricted palette
 
 ### Folder Mapping
 
-| Ninja Adventure folder | Cloud Quest folder |
-|------------------------|--------------------|
-| `Actor/Characters/` | `assets/sprites/characters/` |
-| `Actor/Monsters/` | `assets/sprites/monsters/` |
-| `FX/` | `assets/sprites/vfx/` |
-
-### Obtaining the files
-
-1. Download **Ninja Adventure Asset Pack** from https://pixel-boy.itch.io/ninja-adventure-asset-pack
-2. Run the upscale script (3×): `node scripts/upscale-assets.js --input /tmp/NinjaAdventure --output /tmp/ninja-upscaled`
-3. Copy character sheets matching the table above into `assets/sprites/characters/`
+| Source | Cloud Quest folder |
+|--------|--------------------|
+| Kenney Tiny Town | `assets/sprites/portraits/` |
 
 ---
 

@@ -178,9 +178,8 @@ All sprites are scaled 3× from their source resolution for consistent clarity a
 
 | Source | Native size | In-game size | Scale |
 |---|---|---|---|
-| Ninja Adventure tiles | 16×16px | 48×48px | 3× |
-| Ninja Adventure characters | 16×16px | 48×48px | 3× |
-| Kenney Micro Roguelike portraits | 16×16px | 48×48px | 3× |
+| LPC character sheets | 48×48px | 48×48px | 1× (no upscale) |
+| Kenney Tiny Town portraits | varies | 48×48px | scaled |
 | Kenney UI Pack panels | varies | 48×48px+ | scaled |
 | Kenney Space Kit tiles | 16×16px | 48×48px | 3× |
 | Kenney RPG Urban Pack tiles | 16×16px | 48×48px | 3× |
@@ -425,8 +424,8 @@ HP bar colours are rendered programmatically: green (`#00cc44`) > 50%, yellow (`
 
 | Asset | Source | Licence |
 |---|---|---|
-| Tiles, characters, facesets | [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) — Pixel-Boy & AAA | CC0 (public domain) |
-| Battle portraits | [Kenney Micro Roguelike](https://kenney.nl/assets/micro-roguelike) — Kenney | CC0 (public domain) |
+| Player + trainer characters | [LPC Spritesheet Generator](https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/) — CC-BY-SA 3.0 | CC-BY-SA 3.0 |
+| Battle portraits | [Kenney Tiny Town](https://kenney.nl/assets/tiny-town) — Kenney | CC0 (public domain) |
 | UI chrome (panels, dialog frames) | [Kenney UI Pack](https://kenney.nl/assets/ui-pack) — Kenney | CC0 (public domain) |
 | Battle backgrounds | [PokeRogue](https://github.com/pagefaultgames/pokerogue) — pagefaultgames | CC-BY-NC-SA-4.0 |
 | Font | [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) — CodeMan38 | OFL-1.1 |
@@ -444,12 +443,12 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 | Source | Role | License |
 |--------|------|---------|
-| **Kenney Micro Roguelike** | Character sprite archetypes, incident sprites, battle portraits | CC0 1.0 (Public Domain) |
+| **LPC Spritesheet Generator** | Player sprite, trainer/NPC walk-cycle sheets | CC-BY-SA 3.0 |
+| **Kenney Tiny Town** | Battle portraits (talking-head box portraits) | CC0 1.0 (Public Domain) |
 | **Kenney RPG Audio** | BGM tracks and SFX | CC0 1.0 (Public Domain) |
 | **Kenney Game Icons** | Item icons | CC0 1.0 (Public Domain) |
 | **Kenney UI Pack** | UI chrome — dialog panels, menus, HUD window frames | CC0 1.0 (Public Domain) |
 | **Kenney RPG Urban** | Supplemental tech/urban tiles | CC0 1.0 (Public Domain) |
-| **Ninja Adventure** | Supplemental character archetypes, tiles, VFX | CC0 1.0 (Public Domain) |
 | **PokeRogue** | Battle backgrounds | CC-BY-NC-SA-4.0 |
 
 ---
@@ -488,7 +487,7 @@ We attribute anyway because it's the right thing to do.
 
 All Ninja Adventure source sprites are **16×16px**. Cloud Quest uses a **3× nearest-neighbor upscale** to reach the 48×48px tile size. See [Asset Pipeline](#asset-pipeline) below for the upscale script.
 
-**Player sprite:** BootScene loads `PLAYER_SPRITE_KEY` (`'ninja_hero'`) from `assets/sprites/characters/ninja_hero.png`.  
+**Player sprite:** BootScene loads `PLAYER_SPRITE_KEY` (`'player_default'`) from `assets/sprites/characters/player_default.png`.  
 **Trainer sprites:** Each trainer in `src/data/trainers.js` has a `spriteKey` field. BootScene loads it from `assets/sprites/characters/<spriteKey>.png`.
 
 ---
@@ -598,7 +597,7 @@ node scripts/upscale-assets.js \
 
 After upscaling, copy and rename sprites to match the game's loading convention:
 
-- **Player sprite** → `assets/sprites/characters/ninja_hero.png`  
+- **Player sprite** → `assets/sprites/characters/player_default.png`  
   (or update `PLAYER_SPRITE_KEY` in `src/data/trainers.js` and copy to the matching key path)
 - **Trainer sprites** → `assets/sprites/characters/<spriteKey>.png`  
   (one file per trainer; the filename must match the `spriteKey` field in `src/data/trainers.js`)
