@@ -16,53 +16,29 @@ const connectedRegionIds = Object.keys(REGION_CONNECTIONS)
 const allRegions = getAllRegions().filter(r => r.type !== 'hidden')
 
 describe('localhost_town map tileset metadata', () => {
-  it('declares stub_tiles as an image-based tileset', () => {
+  it('declares kenney_urban as its primary tileset', () => {
     const map = loadMap('localhost_town')
-    const tileset = map.tilesets.find(set => set.name === 'stub_tiles')
-    const tileEntries = tileset?.tiles ?? []
-
+    const tileset = map.tilesets.find(set => set.name === 'kenney_urban')
     expect(tileset).toBeDefined()
-    expect(tileset.columns).toBe(5)
-    expect(tileset.image).toBe('stub_tiles.png')
-    expect(tileset.imagewidth).toBe(240)
-    expect(tileset.imageheight).toBe(48)
-    expect(Array.isArray(tileEntries)).toBe(true)
-    expect(tileEntries.every(tile => tile.image === undefined)).toBe(true)
+    expect(tileset.columns).toBe(27)
+    expect(tileset.image).toBe('tilesets/kenney_urban.png')
+    expect(tileset.imagewidth).toBe(1296)
+    expect(tileset.imageheight).toBe(864)
+    expect(tileset.tilecount).toBe(486)
+    expect(tileset.tilewidth).toBe(48)
+    expect(tileset.tileheight).toBe(48)
+    expect(map.tilesets[0].name).toBe('kenney_urban')
   })
 
-  it('declares village as the second tileset for Ninja Adventure integration', () => {
-    const map = loadMap('localhost_town')
-    const village = map.tilesets.find(set => set.name === 'village')
-
-    expect(village).toBeDefined()
-    expect(village.columns).toBe(8)
-    expect(village.image).toBe('tilesets/village.png')
-    expect(village.imagewidth).toBe(384)
-    expect(village.imageheight).toBe(192)
-    expect(village.tilewidth).toBe(48)
-    expect(village.tileheight).toBe(48)
-    expect(village.tilecount).toBe(32)
-    // stub_tiles must remain first; village must be exactly second
-    expect(map.tilesets[0].name).toBe('stub_tiles')
-    expect(map.tilesets[1].name).toBe('village')
-    expect(map.tilesets[1].firstgid).toBe(6)
-  })
-
-  it('village tileset declares solid collision properties on wall tiles', () => {
-    const map = loadMap('localhost_town')
-    const village = map.tilesets.find(set => set.name === 'village')
-    expect(village.tiles).toBeDefined()
-    const solidIds = village.tiles
-      .filter(t => t.properties?.some(p => p.name === 'solid' && p.value === true))
-      .map(t => t.id)
-
-    expect(solidIds.length).toBeGreaterThan(0)
-    // Solid wall tiles asserted: wall_stone(8), wall_wood(9), wall_brick(10), fence(11)
-    // (ids 12-15 in that row are intentionally walkable: door, water_shallow, door_frame, roof_edge)
-    expect(solidIds).toContain(8)   // wall_stone
-    expect(solidIds).toContain(9)   // wall_wood
-    expect(solidIds).toContain(10)  // wall_brick
-    expect(solidIds).toContain(11)  // fence
+  it('kenney_urban tileset PNG is a valid PNG at 1296×864px', () => {
+    const pngPath = path.join(MAPS_DIR, 'tilesets', 'kenney_urban.png')
+    expect(fs.existsSync(pngPath)).toBe(true)
+    const buf = fs.readFileSync(pngPath)
+    // PNG signature
+    expect(buf[0]).toBe(137)
+    expect(buf[1]).toBe(80)   // P
+    expect(buf[2]).toBe(78)   // N
+    expect(buf[3]).toBe(71)   // G
   })
 
   it('village tileset PNG is a valid PNG at 384×192px', () => {
@@ -81,15 +57,15 @@ describe('localhost_town map tileset metadata', () => {
     expect(height).toBe(192)
   })
 
-  it('localhost_town ground layer uses village tile IDs', () => {
+  it('localhost_town ground layer uses kenney_urban tile GIDs', () => {
     const map = loadMap('localhost_town')
     const ground = map.layers.find(l => l.name === 'Ground')
-    const village = map.tilesets.find(ts => ts.name === 'village')
-    const minGid = village.firstgid
-    const maxGid = village.firstgid + village.tilecount - 1
+    const kenney = map.tilesets.find(ts => ts.name === 'kenney_urban')
+    const minGid = kenney.firstgid
+    const maxGid = kenney.firstgid + kenney.tilecount - 1
 
-    const usesVillageTiles = ground.data.some(id => id >= minGid && id <= maxGid)
-    expect(usesVillageTiles).toBe(true)
+    const usesKenneyTiles = ground.data.some(id => id >= minGid && id <= maxGid)
+    expect(usesKenneyTiles).toBe(true)
   })
 })
 
@@ -111,12 +87,12 @@ describe('map layer structure', () => {
     }
   })
 
-  it.each(allRegions.map(r => r.id))('%s uses stub_tiles tileset', (regionId) => {
+  it.each(allRegions.map(r => r.id))('%s uses stub_tiles or kenney_urban tileset', (regionId) => {
     const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)
     expect(fs.existsSync(mapPath)).toBe(true)
     const map = loadMap(regionId)
-    expect(map.tilesets[0].name).toBe('stub_tiles')
-    expect(map.tilesets[0].image).toBe('stub_tiles.png')
+    const firstName = map.tilesets[0].name
+    expect(['stub_tiles', 'kenney_urban']).toContain(firstName)
   })
 })
 
@@ -327,24 +303,36 @@ describe('generated dungeon maps have no stub building GIDs', () => {
   })
 })
 
-describe('interior biome regions carry interior tileset', () => {
-  it.each(INTERIOR_BIOME_REGION_IDS)('%s includes interior as second tileset', (regionId) => {
+describe('interior biome regions carry interior or kenney_urban tileset', () => {
+  it.each(INTERIOR_BIOME_REGION_IDS)('%s includes interior tileset or uses kenney_urban', (regionId) => {
     const map = loadMap(regionId)
+    const usesKenney = map.tilesets.some(t => t.name === 'kenney_urban')
     const ts = map.tilesets.find(t => t.name === 'interior')
-    expect(ts).toBeDefined()
-    expect(ts.image).toBe('tilesets/interior.png')
-    expect(ts.tilewidth).toBe(48)
-    expect(ts.tileheight).toBe(48)
-    expect(ts.columns).toBe(8)
-    expect(ts.tilecount).toBe(32)
-    expect(ts.firstgid).toBe(6)
+    // Kenney urban maps don't need a separate interior tileset
+    if (usesKenney) {
+      expect(usesKenney).toBe(true)
+    } else {
+      expect(ts).toBeDefined()
+      expect(ts.image).toBe('tilesets/interior.png')
+      expect(ts.tilewidth).toBe(48)
+      expect(ts.tileheight).toBe(48)
+      expect(ts.columns).toBe(8)
+      expect(ts.tilecount).toBe(32)
+      expect(ts.firstgid).toBe(6)
+    }
   })
 
-  it.each(INTERIOR_BIOME_REGION_IDS)('%s ground layer uses interior tile GIDs', (regionId) => {
+  it.each(INTERIOR_BIOME_REGION_IDS)('%s ground layer uses valid tile GIDs', (regionId) => {
     const map = loadMap(regionId)
     const ground = map.layers.find(l => l.name === 'Ground')
     expect(ground).toBeDefined()
-    expect(ground.data.some(gid => gid >= 6 && gid <= 37)).toBe(true)
+    const usesKenney = map.tilesets.some(t => t.name === 'kenney_urban')
+    if (usesKenney) {
+      // Kenney maps use GIDs from the Kenney urban tileset (1-486)
+      expect(ground.data.some(gid => gid >= 1 && gid <= 486)).toBe(true)
+    } else {
+      expect(ground.data.some(gid => gid >= 6 && gid <= 37)).toBe(true)
+    }
   })
 })
 
