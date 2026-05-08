@@ -279,6 +279,92 @@ describe('tech regions carry kenney_tech_office tileset', () => {
   })
 })
 
+// Derived from region data — single source of truth for which regions carry the void/wasteland tilesets
+const VOID_REGION_IDS = getAllRegions().filter(r => r.hasVoidTileset).map(r => r.id)
+const WASTELAND_REGION_IDS = getAllRegions().filter(r => r.hasWastelandTileset).map(r => r.id)
+
+describe('void regions carry void_tiles tileset', () => {
+  it.each(VOID_REGION_IDS)('%s declares void_tiles as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const voidTs = map.tilesets.find(ts => ts.name === 'void_tiles')
+    expect(voidTs).toBeDefined()
+    expect(voidTs.image).toBe('../tiles/void_tiles.png')
+    expect(voidTs.tilewidth).toBe(48)
+    expect(voidTs.tileheight).toBe(48)
+    expect(voidTs.columns).toBe(12)
+    expect(voidTs.tilecount).toBe(12)
+    expect(voidTs.firstgid).toBe(6)
+    expect(map.tilesets[0].name).toBe('stub_tiles')
+    expect(map.tilesets[1].name).toBe('void_tiles')
+  })
+
+  it.each(VOID_REGION_IDS)('%s ground layer uses void_ground GID 6', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.every(gid => gid === 6)).toBe(true)
+  })
+
+  it.each(VOID_REGION_IDS)('%s objects layer uses void tile GIDs (6–17), not stub GIDs 2–5', (regionId) => {
+    const map = loadMap(regionId)
+    const objects = map.layers.find(l => l.name === 'Objects')
+    expect(objects).toBeDefined()
+    const nonZero = objects.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid >= 6 && gid <= 17)).toBe(true)
+  })
+
+  it.each(VOID_REGION_IDS)('%s collision layer uses void_wall GID 17, not stub GID 5', (regionId) => {
+    const map = loadMap(regionId)
+    const collision = map.layers.find(l => l.name === 'Collision')
+    expect(collision).toBeDefined()
+    const nonZero = collision.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid === 17)).toBe(true)
+  })
+})
+
+describe('wasteland regions carry wasteland_tiles tileset', () => {
+  it.each(WASTELAND_REGION_IDS)('%s declares wasteland_tiles as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const wasteTs = map.tilesets.find(ts => ts.name === 'wasteland_tiles')
+    expect(wasteTs).toBeDefined()
+    expect(wasteTs.image).toBe('../tiles/wasteland_tiles.png')
+    expect(wasteTs.tilewidth).toBe(48)
+    expect(wasteTs.tileheight).toBe(48)
+    expect(wasteTs.columns).toBe(12)
+    expect(wasteTs.tilecount).toBe(12)
+    expect(wasteTs.firstgid).toBe(6)
+    expect(map.tilesets[0].name).toBe('stub_tiles')
+    expect(map.tilesets[1].name).toBe('wasteland_tiles')
+  })
+
+  it.each(WASTELAND_REGION_IDS)('%s ground layer uses waste_ground GID 6', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.every(gid => gid === 6)).toBe(true)
+  })
+
+  it.each(WASTELAND_REGION_IDS)('%s objects layer uses wasteland tile GIDs (6–17), not stub GIDs 2–5', (regionId) => {
+    const map = loadMap(regionId)
+    const objects = map.layers.find(l => l.name === 'Objects')
+    expect(objects).toBeDefined()
+    const nonZero = objects.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid >= 6 && gid <= 17)).toBe(true)
+  })
+
+  it.each(WASTELAND_REGION_IDS)('%s collision layer uses waste_wall GID 17, not stub GID 5', (regionId) => {
+    const map = loadMap(regionId)
+    const collision = map.layers.find(l => l.name === 'Collision')
+    expect(collision).toBeDefined()
+    const nonZero = collision.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid === 17)).toBe(true)
+  })
+})
+
 describe('Interactions object layer', () => {
   const knownRegionIds = new Set(allRegions.map(r => r.id))
 
