@@ -81,9 +81,9 @@ export class InventoryScene extends BaseScene {
     this.descriptionText = this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + LIST_H + 8, '', {
       fontFamily: CONFIG.FONT,
       fontSize:   '8px',
-      color:      '#aaaaaa',
+      color:      '#cccccc',
       wordWrap:   { width: PANEL_W - 16 },
-      lineSpacing: 4,
+      lineSpacing: 6,
     })
 
     this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + LIST_H + DESC_H + 6,
