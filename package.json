@@ -11,7 +11,8 @@
     "test:watch": "vitest --exclude tests/stress/**",
     "gen:maps": "node scripts/generate-maps.js",
     "gen:tilesets": "node scripts/generate-tilesets.js",
-    "gen:sprites": "node scripts/generate-placeholder-sprites.js"
+    "gen:sprites": "node scripts/generate-placeholder-sprites.js",
+    "gen:tech-sprites": "node scripts/generate-tech-sprites.js"
   },
   "dependencies": {
     "phaser": "3.90.0"
