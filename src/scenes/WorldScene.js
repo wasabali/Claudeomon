@@ -44,6 +44,7 @@ const TILESET_KEY           = 'stub_tiles'
 const TECH_TILESET_KEY      = 'kenney_tech_office'
 const VOID_TILESET_KEY      = 'void_tiles'
 const WASTELAND_TILESET_KEY = 'wasteland_tiles'
+const KENNEY_URBAN_KEY      = 'kenney_urban'
 const NINJA_TILESETS        = ['village', 'dungeon', 'nature', 'interior']
 
 // Derived from src/data/regions.js flags — single source of truth
@@ -86,6 +87,11 @@ export class WorldScene extends BaseScene {
 
     if (!this.cache.tilemap.exists(regionId)) {
       this.load.tilemapTiledJSON(regionId, `assets/maps/${regionId}.tmj`)
+    }
+
+    // Preload Kenney Urban tileset (3× upscaled from tilemap_packed.png)
+    if (!this.textures.exists(KENNEY_URBAN_KEY)) {
+      this.load.image(KENNEY_URBAN_KEY, 'assets/maps/tilesets/kenney_urban.png')
     }
 
     // Preload Ninja Adventure tileset images so _setupMap can register them
@@ -456,11 +462,28 @@ export class WorldScene extends BaseScene {
     this._regionId = mapKey
 
     this._map = this.make.tilemap({ key: mapKey })
-    const stubTileset = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+    const tilesets = []
 
+    // Register the Kenney Urban tileset if this map uses it
+    if (this._map.tilesets.some(ts => ts.name === 'kenney_urban') && this.textures.exists(KENNEY_URBAN_KEY)) {
+      const kenneyTs = this._map.addTilesetImage('kenney_urban', KENNEY_URBAN_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (kenneyTs) tilesets.push(kenneyTs)
+    }
+
+    // Fallback: register stub_tiles if this map uses it (non-Kenney maps)
+    if (this._map.tilesets.some(ts => ts.name === 'stub_tiles')) {
+      const stubTileset = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (stubTileset) tilesets.push(stubTileset)
+    }
+
+    // Safety fallback: if no tilesets registered (e.g. kenney_urban failed to load),
+    // fall back to stub_tiles so createLayer() doesn't break
+    if (tilesets.length === 0) {
+      const fallbackTs = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (fallbackTs) tilesets.push(fallbackTs)
+    }
     // Tech regions carry a second tileset for server rooms, offices, and data centres
     const isTech = TECH_TILESET_REGIONS.has(mapKey)
-    const tilesets = [stubTileset]
     if (isTech) {
       const techTileset = this._map.addTilesetImage('kenney_tech_office', TECH_TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
       if (techTileset) tilesets.push(techTileset)

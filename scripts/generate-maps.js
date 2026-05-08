@@ -8,7 +8,7 @@ const MAPS_DIR = path.join(ROOT, 'assets', 'maps')
 
 const TILE = 48
 
-// Base stub tileset (GIDs 1–5) — used by all regions
+// Base stub tileset (GIDs 1–5) — used by non-village regions as fallback
 const TILESET_STUB = {
   columns: 5,
   firstgid: 1,
@@ -22,6 +22,171 @@ const TILESET_STUB = {
   tileheight: TILE,
   tilewidth: TILE,
 }
+
+// ---------------------------------------------------------------------------
+// Kenney RPG Urban Pack tileset — 27 cols × 18 rows = 486 tiles at 48×48px.
+// Source: tilemap_packed.png upscaled 3× via nearest-neighbor.
+// ---------------------------------------------------------------------------
+const KU_COLS = 27
+const KU_ROWS = 18
+const KU_TILE_COUNT = KU_COLS * KU_ROWS  // 486
+
+const TILESET_KENNEY_URBAN = {
+  columns: KU_COLS,
+  firstgid: 1,
+  image: 'tilesets/kenney_urban.png',
+  imageheight: KU_ROWS * TILE,
+  imagewidth: KU_COLS * TILE,
+  margin: 0,
+  name: 'kenney_urban',
+  spacing: 0,
+  tilecount: KU_TILE_COUNT,
+  tileheight: TILE,
+  tilewidth: TILE,
+}
+
+// GID helper: convert (col, row) in the Kenney urban tilemap to a 1-based GID.
+const K = (col, row) => row * KU_COLS + col + 1
+
+// ---------------------------------------------------------------------------
+// Kenney Urban tile constants — named references to specific tiles.
+// Derived from visual analysis of tilemap_packed.png (27×18 grid of 16px tiles).
+// ---------------------------------------------------------------------------
+
+const KU = {
+  // ── Ground / walkable ───────────────────────────────────────────────────
+  // Beige sidewalk tiles (rows 3-5, cols 0-7)
+  SIDEWALK:      K(1, 4),   // 110 — plain beige center
+  SIDEWALK_ALT:  K(5, 3),   // 87  — slightly warmer beige variant
+  SIDEWALK_TL:   K(0, 3),   // 82  — top-left corner
+  SIDEWALK_T:    K(1, 3),   // 83  — top edge
+  SIDEWALK_TR:   K(2, 3),   // 84  — top-right corner
+  SIDEWALK_L:    K(0, 4),   // 109 — left edge
+  SIDEWALK_R:    K(2, 4),   // 111 — right edge
+  SIDEWALK_BL:   K(0, 5),   // 136 — bottom-left corner
+  SIDEWALK_B:    K(1, 5),   // 137 — bottom edge
+  SIDEWALK_BR:   K(2, 5),   // 138 — bottom-right corner
+
+  // Green grass (teal pool tiles repurposed)
+  GRASS:         K(5, 0),   // 6   — solid teal green fill
+  GRASS_ALT:     K(6, 0),   // 7   — teal green variant
+  GRASS_EDGE_T:  K(1, 0),   // 2   — grass with top edge detail
+  GRASS_EDGE_B:  K(1, 2),   // 56  — grass with bottom edge detail
+  GRASS_EDGE_L:  K(0, 1),   // 28  — grass with left edge
+  GRASS_EDGE_R:  K(7, 1),   // 35  — grass with right edge
+
+  // Gray room floor tiles (rows 0-2, cols 8-15)
+  GRAY_FLOOR:    K(9, 1),   // 37  — solid gray
+  GRAY_FLOOR_V:  K(9, 0),   // 10  — gray floor variant
+
+  // ── Building composites ─────────────────────────────────────────────────
+  // Pool / Park building (rows 0-2, cols 0-7) — 8×3 block
+  // These form a complete pool/fountain structure
+  POOL_BLOCK: { w: 8, h: 3, startCol: 0, startRow: 0 },
+
+  // Gray room (rows 0-2, cols 8-15) — 8×3 block
+  GRAY_ROOM_BLOCK: { w: 8, h: 3, startCol: 8, startRow: 0 },
+
+  // Red roof building (rows 0-2, cols 16-22) — 7×3 block
+  RED_ROOF_BLOCK: { w: 7, h: 3, startCol: 16, startRow: 0 },
+
+  // Beige room/building (rows 3-5, cols 0-7) — 8×3 block
+  BEIGE_ROOM_BLOCK: { w: 8, h: 3, startCol: 0, startRow: 3 },
+
+  // Gray interior (rows 3-5, cols 8-15) — 8×3 block
+  GRAY_INT_BLOCK: { w: 8, h: 3, startCol: 8, startRow: 3 },
+
+  // Orange/brown building front (rows 3-5, cols 16-22) — 7×3 block
+  ORANGE_FRONT_BLOCK: { w: 7, h: 3, startCol: 16, startRow: 3 },
+
+  // Water area (rows 6-8, cols 8-15) — 8×3 block
+  WATER_BLOCK: { w: 8, h: 3, startCol: 8, startRow: 6 },
+
+  // ── Road tiles (rows 15-17, cols 0-10) ──────────────────────────────────
+  ROAD_SIDEWALK_V: K(0, 15), // 406 — road sidewalk (vertical edge)
+  ROAD_EDGE_V:     K(1, 15), // 407 — road vertical edge
+  ROAD_PLAIN:      K(2, 15), // 408 — road surface variant
+  ROAD_H_DARK:     K(3, 15), // 409 — horizontal road dark
+  ROAD_H_MARKS:    K(4, 15), // 410 — horizontal road with markings
+  ROAD_V_A:        K(0, 16), // 433 — vertical road A
+  ROAD_V_B:        K(1, 16), // 434 — vertical road B
+  ROAD_CENTER:     K(2, 16), // 435 — road center/cross
+  ROAD_CROSS_A:    K(3, 16), // 436 — road crossing A (with markings)
+  ROAD_CROSS_B:    K(4, 16), // 437 — road crossing B (with markings)
+  ROAD_H_A:        K(5, 16), // 438 — horizontal road A
+  ROAD_H_B:        K(6, 16), // 439 — horizontal road B
+  ROAD_V_C:        K(7, 16), // 440 — vertical road C
+  ROAD_V_D:        K(8, 16), // 441 — vertical road D
+  ROAD_V2:         K(0, 17), // 460 — vertical road 2
+  ROAD_V2_B:       K(1, 17), // 461 — vertical road 2B
+
+  // ── Trees (rows 8-10, cols 16-22) ───────────────────────────────────────
+  // Trees are 1×2 (top+bottom) composite sprites
+  TREE_A_TOP:    K(16, 8),   // 233 — bright green tree top
+  TREE_A_BOT:    K(16, 9),   // 260 — bright green tree bottom
+  TREE_B_TOP:    K(19, 8),   // 236 — green tree top variant
+  TREE_B_BOT:    K(19, 9),   // 263 — green tree bottom variant
+  TREE_C_TOP:    K(21, 8),   // 238 — dark green tree top
+  TREE_C_BOT:    K(21, 9),   // 265 — dark green tree bottom
+  TREE_D_TOP:    K(22, 8),   // 239 — small green tree top
+  TREE_D_BOT:    K(22, 9),   // 266 — small green tree bottom
+
+  // ── Orange trees / autumn (rows 11-12, cols 16-22) ──────────────────────
+  TREE_ORANGE_TOP: K(16, 11),// 298 — orange tree top
+  TREE_ORANGE_BOT: K(16, 12),// 325 — orange tree bottom
+  TREE_RED_TOP:    K(19, 11),// 301 — red tree top
+  TREE_RED_BOT:    K(19, 12),// 328 — red tree bottom
+
+  // ── Vehicles (rows 15-17, cols 15-20) ───────────────────────────────────
+  CAR_YELLOW_T:  K(15, 15),  // 421 — yellow car top
+  CAR_YELLOW_B:  K(15, 16),  // 448 — yellow car bottom
+  CAR_RED_T:     K(15, 17),  // 475 — red car top
+  CAR_RED_B:     K(16, 17),  // 476 — red car bottom
+  TRUCK_T:       K(17, 15),  // 423 — truck top
+  TRUCK_B:       K(17, 16),  // 450 — truck bottom
+
+  // ── Small items (row 6, cols 0-7) ───────────────────────────────────────
+  ITEM_PURPLE:   K(0, 6),    // 163 — purple gem/item
+  ITEM_SWORD:    K(1, 6),    // 164 — dark item
+  ITEM_EMPTY:    K(2, 6),    // 165 — dark tile (impassable)
+  ITEM_CHEST:    K(3, 6),    // 166 — chest/container
+  ITEM_HEART:    K(4, 6),    // 167 — heart/potion
+  ITEM_BLUE:     K(5, 6),    // 168 — blue item
+  ITEM_GEM:      K(6, 6),    // 169 — blue gem
+
+  // ── Walls / boundaries ──────────────────────────────────────────────────
+  WALL_DARK:     K(2, 6),    // 165 — very dark tile (good for walls)
+  WALL_STONE:    K(11, 14),  // 392 — dark stone
+  WALL_V:        K(2, 14),   // 381 — vertical wall
+}
+
+// Biomes that use the Kenney Urban tileset instead of stub + biome tilesets.
+const KENNEY_BIOMES = ['village', 'nature', 'interior']
+
+// Resolve a block template to an array of GIDs.
+// Returns a 2D array [row][col] of GIDs.
+function resolveBlock(block) {
+  const rows = []
+  for (let dy = 0; dy < block.h; dy++) {
+    const row = []
+    for (let dx = 0; dx < block.w; dx++) {
+      row.push(K(block.startCol + dx, block.startRow + dy))
+    }
+    rows.push(row)
+  }
+  return rows
+}
+
+// Available building templates for village maps (in order of size/interest)
+const VILLAGE_BUILDINGS = [
+  { name: 'pool',         block: KU.POOL_BLOCK,         w: 8, h: 3, solid: true },
+  { name: 'gray_room',    block: KU.GRAY_ROOM_BLOCK,    w: 8, h: 3, solid: true },
+  { name: 'red_roof',     block: KU.RED_ROOF_BLOCK,     w: 7, h: 3, solid: true },
+  { name: 'beige_room',   block: KU.BEIGE_ROOM_BLOCK,   w: 8, h: 3, solid: true },
+  { name: 'gray_int',     block: KU.GRAY_INT_BLOCK,     w: 8, h: 3, solid: true },
+  { name: 'orange_front', block: KU.ORANGE_FRONT_BLOCK, w: 7, h: 3, solid: true },
+  { name: 'water',        block: KU.WATER_BLOCK,        w: 8, h: 3, solid: true },
+]
 
 // Tech / office tileset (GIDs 6–55) — appended for tech-themed regions.
 // Image lives at assets/tiles/kenney_tech_office.png (240×480, 50 tiles).
@@ -320,7 +485,7 @@ function generateCollision(w, h, connections, occupiedTiles, wallGid = 5) {
   return layer
 }
 
-function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWasteland, biome = null) {
+function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWasteland, biome = null, useKenney = false) {
   const layer = makeTileLayer(2, 'Objects', w, h, 0)
   const occupied = new Set()
 
@@ -349,71 +514,168 @@ function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWast
     }
   }
 
-  let buildings
-  if (isTech && regionType === 'main') {
-    // Tech regions: server racks, desks, cooling units instead of generic blocks
-    buildings = [
-      { w: 2, h: 3, tile: techGid(T.SERVER_RACK) },
-      { w: 2, h: 3, tile: techGid(T.SERVER_RACK_LEDS) },
-      { w: 3, h: 2, tile: techGid(T.DESK) },
-      { w: 2, h: 2, tile: techGid(T.COOLING_UNIT) },
-      { w: 2, h: 2, tile: techGid(T.MONITORING_DASHBOARD) },
-    ]
-  } else if (isTech && (regionType === 'dungeon' || regionType === 'hidden')) {
-    // Server Graveyard-style: decommissioned hardware, tombstones
-    buildings = [
-      { w: 1, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
-      { w: 1, h: 2, tile: techGid(T.DUSTY_RACK) },
-      { w: 1, h: 2, tile: techGid(T.SERVER_TOMBSTONE) },
-      { w: 2, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
-    ]
-  } else if (isTech && regionType === 'gym') {
-    buildings = [
-      { w: 2, h: 2, tile: techGid(T.SERVER_RACK_INTERACT) },
-    ]
-  } else if (isVoid) {
-    // Void region: floating platforms and debris instead of generic blocks
-    buildings = [
-      { w: 3, h: 1, tile: VOID_PLATFORM_GID },
-      { w: 1, h: 1, tile: VOID_PLATFORM_L_GID },
-      { w: 1, h: 1, tile: VOID_PLATFORM_R_GID },
-      { w: 2, h: 1, tile: VOID_DEBRIS_GID },
-    ]
-  } else if (isWasteland) {
-    // Wasteland region: derelict infrastructure props
-    buildings = [
-      { w: 1, h: 2, tile: WASTE_SERVER_GID },
-      { w: 2, h: 1, tile: WASTE_RUBBLE_GID },
-      { w: 3, h: 1, tile: WASTE_FENCE_GID },
-      { w: 1, h: 1, tile: WASTE_CAUTION_GID },
-    ]
-  } else if (regionType === 'main') {
-    buildings = [
-      { w: 4, h: 4, tile: 2 },
-      { w: 4, h: 4, tile: 3 },
-      { w: 4, h: 4, tile: 4 },
-    ]
-  } else if (regionType === 'gym') {
-    buildings = [
-      { w: 3, h: 3, tile: 3 },
-    ]
-  } else {
-    // Dungeon / hidden regions — use biome solid tiles when available, else stub tile 4
-    const propTile = biome ? BIOME_PROP_GID : 4
-    buildings = [
-      { w: 2, h: 2, tile: propTile },
-      { w: 2, h: 2, tile: propTile + 1 },
-      { w: 3, h: 2, tile: propTile },
-    ]
+  // Place a composite block from the Kenney tilemap — each tile gets its own GID.
+  function placeBlock(bx, by, block) {
+    const gids = resolveBlock(block)
+    for (let dy = 0; dy < block.h; dy++) {
+      for (let dx = 0; dx < block.w; dx++) {
+        const tx = bx + dx
+        const ty = by + dy
+        layer.data[ty * w + tx] = gids[dy][dx]
+        occupied.add(`${tx},${ty}`)
+      }
+    }
   }
 
-  for (const b of buildings) {
-    for (let attempt = 0; attempt < 50; attempt++) {
-      const bx = Math.floor(rng() * (w - b.w - safeZone * 2)) + safeZone
-      const by = Math.floor(rng() * (h - b.h - safeZone * 2)) + safeZone
-      if (canPlace(bx, by, b.w, b.h)) {
-        placeBuilding(bx, by, b.w, b.h, b.tile)
-        break
+  // Place a 1×2 tree (top + bottom)
+  function placeTree(tx, ty, topGid, botGid) {
+    if (ty < 1) return
+    layer.data[(ty - 1) * w + tx] = topGid
+    layer.data[ty * w + tx] = botGid
+    occupied.add(`${tx},${ty - 1}`)
+    occupied.add(`${tx},${ty}`)
+  }
+
+  if (useKenney && (regionType === 'main' || regionType === 'gym')) {
+    // ── Kenney Urban village layout ──
+    // Place composite building blocks from the Kenney tilemap.
+    // Shuffle the building list and try to place 3-4 buildings.
+    const availableBuildings = [...VILLAGE_BUILDINGS]
+    // Shuffle
+    for (let i = availableBuildings.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [availableBuildings[i], availableBuildings[j]] = [availableBuildings[j], availableBuildings[i]]
+    }
+
+    const numBuildings = regionType === 'gym' ? 2 : Math.min(4, availableBuildings.length)
+    for (let bi = 0; bi < numBuildings; bi++) {
+      const bdef = availableBuildings[bi]
+      for (let attempt = 0; attempt < 80; attempt++) {
+        const bx = Math.floor(rng() * (w - bdef.w - safeZone * 2)) + safeZone
+        const by = Math.floor(rng() * (h - bdef.h - safeZone * 2)) + safeZone
+        if (canPlace(bx, by, bdef.w, bdef.h)) {
+          placeBlock(bx, by, bdef.block)
+          break
+        }
+      }
+    }
+
+    // Scatter trees in open spaces
+    const treeTypes = [
+      [KU.TREE_A_TOP, KU.TREE_A_BOT],
+      [KU.TREE_B_TOP, KU.TREE_B_BOT],
+      [KU.TREE_C_TOP, KU.TREE_C_BOT],
+      [KU.TREE_D_TOP, KU.TREE_D_BOT],
+      [KU.TREE_ORANGE_TOP, KU.TREE_ORANGE_BOT],
+      [KU.TREE_RED_TOP, KU.TREE_RED_BOT],
+    ]
+    const numTrees = regionType === 'gym' ? 2 : Math.floor(rng() * 6) + 4
+    for (let ti = 0; ti < numTrees; ti++) {
+      for (let attempt = 0; attempt < 30; attempt++) {
+        const tx = Math.floor(rng() * (w - safeZone * 2)) + safeZone
+        const ty = Math.floor(rng() * (h - safeZone * 2 - 1)) + safeZone + 1
+        if (canPlace(tx, ty - 1, 1, 2)) {
+          const [top, bot] = treeTypes[Math.floor(rng() * treeTypes.length)]
+          placeTree(tx, ty, top, bot)
+          break
+        }
+      }
+    }
+
+    // Place a road through the middle (horizontal or vertical based on aspect ratio)
+    if (regionType === 'main') {
+      const midY = Math.floor(h / 2)
+      const roadTiles = [KU.ROAD_V_A, KU.ROAD_V_B, KU.ROAD_H_A, KU.ROAD_H_B]
+      // Horizontal road across the map
+      for (let x = 1; x < w - 1; x++) {
+        const key = `${x},${midY}`
+        if (!occupied.has(key) && !openings.has(key)) {
+          layer.data[midY * w + x] = roadTiles[x % 2]
+          // Don't mark road as occupied — NPCs can walk on roads
+        }
+        const key2 = `${x},${midY + 1}`
+        if (!occupied.has(key2) && !openings.has(key2)) {
+          layer.data[(midY + 1) * w + x] = roadTiles[(x % 2) + 2]
+        }
+      }
+
+      // Vertical road crossing
+      const midX = Math.floor(w / 2)
+      for (let y = 1; y < h - 1; y++) {
+        const key = `${midX},${y}`
+        if (!occupied.has(key) && !openings.has(key)) {
+          layer.data[y * w + midX] = KU.ROAD_V_C
+        }
+        const key2 = `${midX + 1},${y}`
+        if (!occupied.has(key2) && !openings.has(key2)) {
+          layer.data[y * w + (midX + 1)] = KU.ROAD_V_D
+        }
+      }
+    }
+
+  } else {
+    // ── Legacy object generation (non-Kenney regions) ──
+    let buildings
+    if (isTech && regionType === 'main') {
+      buildings = [
+        { w: 2, h: 3, tile: techGid(T.SERVER_RACK) },
+        { w: 2, h: 3, tile: techGid(T.SERVER_RACK_LEDS) },
+        { w: 3, h: 2, tile: techGid(T.DESK) },
+        { w: 2, h: 2, tile: techGid(T.COOLING_UNIT) },
+        { w: 2, h: 2, tile: techGid(T.MONITORING_DASHBOARD) },
+      ]
+    } else if (isTech && (regionType === 'dungeon' || regionType === 'hidden')) {
+      buildings = [
+        { w: 1, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
+        { w: 1, h: 2, tile: techGid(T.DUSTY_RACK) },
+        { w: 1, h: 2, tile: techGid(T.SERVER_TOMBSTONE) },
+        { w: 2, h: 2, tile: techGid(T.DECOMMISSIONED_SERVER) },
+      ]
+    } else if (isTech && regionType === 'gym') {
+      buildings = [
+        { w: 2, h: 2, tile: techGid(T.SERVER_RACK_INTERACT) },
+      ]
+    } else if (isVoid) {
+      buildings = [
+        { w: 3, h: 1, tile: VOID_PLATFORM_GID },
+        { w: 1, h: 1, tile: VOID_PLATFORM_L_GID },
+        { w: 1, h: 1, tile: VOID_PLATFORM_R_GID },
+        { w: 2, h: 1, tile: VOID_DEBRIS_GID },
+      ]
+    } else if (isWasteland) {
+      buildings = [
+        { w: 1, h: 2, tile: WASTE_SERVER_GID },
+        { w: 2, h: 1, tile: WASTE_RUBBLE_GID },
+        { w: 3, h: 1, tile: WASTE_FENCE_GID },
+        { w: 1, h: 1, tile: WASTE_CAUTION_GID },
+      ]
+    } else if (regionType === 'main') {
+      buildings = [
+        { w: 4, h: 4, tile: 2 },
+        { w: 4, h: 4, tile: 3 },
+        { w: 4, h: 4, tile: 4 },
+      ]
+    } else if (regionType === 'gym') {
+      buildings = [
+        { w: 3, h: 3, tile: 3 },
+      ]
+    } else {
+      const propTile = biome ? BIOME_PROP_GID : 4
+      buildings = [
+        { w: 2, h: 2, tile: propTile },
+        { w: 2, h: 2, tile: propTile + 1 },
+        { w: 3, h: 2, tile: propTile },
+      ]
+    }
+
+    for (const b of buildings) {
+      for (let attempt = 0; attempt < 50; attempt++) {
+        const bx = Math.floor(rng() * (w - b.w - safeZone * 2)) + safeZone
+        const by = Math.floor(rng() * (h - b.h - safeZone * 2)) + safeZone
+        if (canPlace(bx, by, b.w, b.h)) {
+          placeBuilding(bx, by, b.w, b.h, b.tile)
+          break
+        }
       }
     }
   }
@@ -452,7 +714,7 @@ function findNpcSpot(w, h, occupied, usedSpots, openings, rng) {
   return { tileX: Math.floor(w / 2), tileY: Math.floor(h / 2) }
 }
 
-function generateMap(regionId, region, connections, allRegions, trainers, interactions, childGyms, gymDoorPositions) {
+function generateMap(regionId, region, connections, allRegions, trainers, interactions, childGyms, gymDoorPositions, childDungeons = []) {
   const type = region.type
   const { w, h } = SIZE[type] || SIZE.main
   const rng = seededRng(hashSeed(regionId))
@@ -461,22 +723,31 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const isVoid = !!region.hasVoidTileset
   const isWasteland = !!region.hasWastelandTileset
   const biome = (!isTech && !isVoid && !isWasteland) ? (region.biome || null) : null
+  // Use Kenney Urban tileset for village/nature/interior biomes, but only for
+  // main/gym region types — dungeons still use legacy biome/stub GIDs
+  const useKenney = KENNEY_BIOMES.includes(biome) && (type === 'main' || type === 'gym')
   const openings = getOpeningTiles(w, h, connections)
-  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland, biome)
+  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland, biome, useKenney)
 
   // Biome regions use their biome floor as the ground tile; tech regions use tech_floor;
-  // void/wasteland use their own ground tile; all others fall back to stub tile 1.
+  // void/wasteland use their own ground tile; Kenney village uses green grass;
+  // all others fall back to stub tile 1.
   const biomeFirstGid = BIOME_FIRST_GID
-  const groundGid = isTech     ? techGid(T.TECH_FLOOR)
-                  : isVoid     ? VOID_GROUND_GID
-                  : isWasteland ? WASTELAND_GROUND_GID
-                  : biome      ? biomeFirstGid
+  const groundGid = useKenney     ? KU.GRASS
+                  : isTech        ? techGid(T.TECH_FLOOR)
+                  : isVoid        ? VOID_GROUND_GID
+                  : isWasteland   ? WASTELAND_GROUND_GID
+                  : biome         ? biomeFirstGid
                   : 1
 
-  // Scatter alt-ground tile (GID+1) using seeded RNG for visual variety in biome regions.
-  // ~25% of tiles use the alt variant so the ground looks textured rather than uniform.
+  // Scatter alt-ground tile using seeded RNG for visual variety.
   const groundData = new Array(w * h)
-  if (biome) {
+  if (useKenney) {
+    // Kenney village: alternate between two teal-green grass tiles
+    for (let i = 0; i < w * h; i++) {
+      groundData[i] = rng() < 0.3 ? KU.GRASS_ALT : groundGid
+    }
+  } else if (biome) {
     const altGid = biomeFirstGid + 1
     for (let i = 0; i < w * h; i++) {
       groundData[i] = rng() < 0.25 ? altGid : groundGid
@@ -525,7 +796,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
 
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)
   const interactionsLayer = makeObjectGroup(6, 'Interactions', interactionObjects)
-  const wallGid = isVoid ? VOID_WALL_GID : isWasteland ? WASTE_WALL_GID : biome ? BIOME_PROP_GID : 5
+  const wallGid = isVoid ? VOID_WALL_GID : isWasteland ? WASTE_WALL_GID : useKenney ? KU.WALL_DARK : biome ? BIOME_PROP_GID : 5
   const collisionLayer = generateCollision(w, h, connections, occupied, wallGid)
 
   const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer, interactionsLayer]
@@ -564,6 +835,20 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
     }
   }
 
+  // Dungeon child transitions (bakery_door, lab_door, etc.)
+  if (type === 'main' && childDungeons.length > 0) {
+    for (const dg of childDungeons) {
+      const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
+      const dgSize = SIZE.dungeon || SIZE.main
+      const dgSpawnX = Math.floor(dgSize.w / 2)
+      const dgSpawnY = dgSize.h - 3
+      const doorName = dg.id.replace(/_interior$/, '_door').replace(/_(\d+)$/, '_door_$1')
+      transitionObjects.push(
+        makeTransitionObject(transObjId++, doorName, dg.id, dgSpawnX, dgSpawnY, spot.tileX, spot.tileY)
+      )
+    }
+  }
+
   if (transitionObjects.length > 0) {
     layers.push(makeObjectGroup(nextLayerId++, 'Transitions', transitionObjects))
   }
@@ -582,7 +867,8 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
       renderorder: 'right-down',
       tiledversion: '1.10.0',
       tileheight: TILE,
-      tilesets: isTech       ? [TILESET_STUB, TILESET_TECH]
+      tilesets: useKenney    ? [TILESET_KENNEY_URBAN]
+               : isTech       ? [TILESET_STUB, TILESET_TECH]
                : isVoid      ? [TILESET_STUB, TILESET_VOID]
                : isWasteland ? [TILESET_STUB, TILESET_WASTELAND]
                : biome       ? [TILESET_STUB, makeBiomeTileset(biome)]
@@ -612,6 +898,15 @@ async function main() {
     if (r.type === 'gym' && r.parentRegion) {
       if (!gymsByParent[r.parentRegion]) gymsByParent[r.parentRegion] = []
       gymsByParent[r.parentRegion].push(r)
+    }
+  }
+
+  // Index dungeon children by parent region
+  const dungeonsByParent = {}
+  for (const r of allRegions) {
+    if (r.type === 'dungeon' && r.parentRegion) {
+      if (!dungeonsByParent[r.parentRegion]) dungeonsByParent[r.parentRegion] = []
+      dungeonsByParent[r.parentRegion].push(r)
     }
   }
 
@@ -657,7 +952,8 @@ async function main() {
 
     const conn = connections[region.id] || {}
     const childGyms = gymsByParent[region.id] || []
-    const { map, placedGymDoors } = generateMap(region.id, region, conn, allRegions, allTrainers, allInteractions, childGyms, gymDoorPositions)
+    const childDungeons = dungeonsByParent[region.id] || []
+    const { map, placedGymDoors } = generateMap(region.id, region, conn, allRegions, allTrainers, allInteractions, childGyms, gymDoorPositions, childDungeons)
 
     Object.assign(gymDoorPositions, placedGymDoors)
 
