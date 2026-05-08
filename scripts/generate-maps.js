@@ -104,6 +104,12 @@ const BIOME_COLS = 8
 const BIOME_ROWS = 4
 const BIOME_TILE_COUNT = BIOME_COLS * BIOME_ROWS  // 32
 
+// GIDs for Ninja Adventure biome tilesets — derived from stub_tiles count so they
+// stay correct if stub tile count ever changes.
+const BIOME_FIRST_GID = TILESET_STUB.tilecount + 1  // 6 — biome tileset always starts here
+const BIOME_PROP_LOCAL = 8                           // local tile index of first solid prop row
+const BIOME_PROP_GID   = BIOME_FIRST_GID + BIOME_PROP_LOCAL  // 14 — wall/prop GID for Objects + Collision
+
 // Solid tile IDs (0-indexed within each biome tileset) — kept in sync with
 // generate-tilesets.js SOLID_TILES so collision properties match the PNG layout.
 const BIOME_SOLID_TILES = {
@@ -124,7 +130,7 @@ function biomeTiles(name) {
 function makeBiomeTileset(name) {
   return {
     columns:     BIOME_COLS,
-    firstgid:    6,
+    firstgid:    BIOME_FIRST_GID,
     image:       `tilesets/${name}.png`,
     imageheight: BIOME_ROWS * TILE,
     imagewidth:  BIOME_COLS * TILE,
@@ -314,7 +320,7 @@ function generateCollision(w, h, connections, occupiedTiles, wallGid = 5) {
   return layer
 }
 
-function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWasteland) {
+function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWasteland, biome = null) {
   const layer = makeTileLayer(2, 'Objects', w, h, 0)
   const occupied = new Set()
 
@@ -392,10 +398,12 @@ function generateObjects(w, h, regionType, openings, rng, isTech, isVoid, isWast
       { w: 3, h: 3, tile: 3 },
     ]
   } else {
+    // Dungeon / hidden regions — use biome solid tiles when available, else stub tile 4
+    const propTile = biome ? BIOME_PROP_GID : 4
     buildings = [
-      { w: 2, h: 2, tile: 4 },
-      { w: 2, h: 2, tile: 4 },
-      { w: 3, h: 2, tile: 4 },
+      { w: 2, h: 2, tile: propTile },
+      { w: 2, h: 2, tile: propTile + 1 },
+      { w: 3, h: 2, tile: propTile },
     ]
   }
 
@@ -454,11 +462,11 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const isWasteland = !!region.hasWastelandTileset
   const biome = (!isTech && !isVoid && !isWasteland) ? (region.biome || null) : null
   const openings = getOpeningTiles(w, h, connections)
-  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland)
+  const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland, biome)
 
   // Biome regions use their biome floor as the ground tile; tech regions use tech_floor;
   // void/wasteland use their own ground tile; all others fall back to stub tile 1.
-  const biomeFirstGid = 6  // biome tileset always starts at GID 6 (after stub_tiles GIDs 1–5)
+  const biomeFirstGid = BIOME_FIRST_GID
   const groundGid = isTech     ? techGid(T.TECH_FLOOR)
                   : isVoid     ? VOID_GROUND_GID
                   : isWasteland ? WASTELAND_GROUND_GID
@@ -517,7 +525,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
 
   const npcLayer = makeObjectGroup(3, 'NPCs', npcObjects)
   const interactionsLayer = makeObjectGroup(6, 'Interactions', interactionObjects)
-  const wallGid = isVoid ? VOID_WALL_GID : isWasteland ? WASTE_WALL_GID : 5
+  const wallGid = isVoid ? VOID_WALL_GID : isWasteland ? WASTE_WALL_GID : biome ? BIOME_PROP_GID : 5
   const collisionLayer = generateCollision(w, h, connections, occupied, wallGid)
 
   const layers = [groundLayer, objectsLayer, npcLayer, overlayLayer, collisionLayer, interactionsLayer]
