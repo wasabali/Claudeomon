@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { REGION_CONNECTIONS, getAll as getAllRegions } from '../src/data/regions.js'
 import { getBy as getInteractionsBy } from '../src/data/interactions.js'
+import { getById as getTrainerById } from '../src/data/trainers.js'
 
 const MAPS_DIR = path.join(process.cwd(), 'assets', 'maps')
 
@@ -393,6 +394,32 @@ describe('localhost_town NPC and interaction objects', () => {
       expect(spawnX, `${obj.name} targetSpawnX out of bounds`).toBeLessThan(targetMap.width)
       expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeGreaterThanOrEqual(0)
       expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeLessThan(targetMap.height)
+    }
+  })
+})
+
+describe('NPC sprite coverage', () => {
+  // azure_terminal is the only intentional non-trainer NPC stub (it is a machine, not a person).
+  const INTENTIONAL_STUBS = new Set(['azure_terminal'])
+
+  it('every NPC in every map NPCs layer has a trainer registry entry', () => {
+    const maps = fs.readdirSync(MAPS_DIR).filter(f => f.endsWith('.tmj'))
+    for (const mapFile of maps) {
+      const map = JSON.parse(fs.readFileSync(path.join(MAPS_DIR, mapFile), 'utf-8'))
+      const npcLayer = map.layers?.find(l => l.name === 'NPCs')
+      if (!npcLayer) continue
+      for (const npc of npcLayer.objects) {
+        if (INTENTIONAL_STUBS.has(npc.name)) continue
+        const trainer = getTrainerById(npc.name)
+        expect(
+          trainer,
+          `NPC "${npc.name}" in ${mapFile} has no trainer registry entry — it will render as an orange rectangle`,
+        ).toBeDefined()
+        expect(
+          trainer?.spriteKey,
+          `NPC "${npc.name}" in ${mapFile} has a trainer entry but no spriteKey — it will render as an orange rectangle`,
+        ).toBeTruthy()
+      }
     }
   })
 })
