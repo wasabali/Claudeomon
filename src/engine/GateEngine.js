@@ -11,6 +11,8 @@
 
 import { getById as getGateById, getAll as getAllGates } from '#data/gates.js'
 
+export { getAllGates as getAll }
+
 // ---------------------------------------------------------------------------
 // Gate type constants
 // ---------------------------------------------------------------------------
