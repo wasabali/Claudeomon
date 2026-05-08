@@ -58,8 +58,8 @@ export const WORLD_SCENE = {
 }
 
 export const MOVEMENT = {
-  STEP_DURATION_MS:         500,
-  RUN_STEP_DURATION_MS:     250,
+  STEP_DURATION_MS:         250,
+  RUN_STEP_DURATION_MS:     150,
   INPUT_BUFFER_WINDOW_MS:   150,
   BUMP_DURATION_MS:         100,
   BUMP_DISTANCE_PX:         2,

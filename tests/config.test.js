@@ -140,12 +140,12 @@ describe('XP_TABLE', () => {
 })
 
 describe('MOVEMENT', () => {
-  it('defines walk step duration of 500ms', () => {
-    expect(MOVEMENT.STEP_DURATION_MS).toBe(500)
+  it('defines walk step duration of 250ms', () => {
+    expect(MOVEMENT.STEP_DURATION_MS).toBe(250)
   })
 
-  it('defines run step duration of 250ms (2x walk speed)', () => {
-    expect(MOVEMENT.RUN_STEP_DURATION_MS).toBe(250)
+  it('defines run step duration of 150ms (faster than walk)', () => {
+    expect(MOVEMENT.RUN_STEP_DURATION_MS).toBe(150)
   })
 
   it('defines input buffer window of 150ms', () => {
