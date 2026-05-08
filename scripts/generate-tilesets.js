@@ -382,7 +382,7 @@ const STUB_TILES = [
   tile( 25, 22, 35,'stone'),  // 5 — wall / impassable (dark solid)
 ]
 
-// void_tiles — 12-tile strip for dev_null_void and shadow_registry.
+// void_tiles — 12-tile strip for dev_null_void (and future void-biome regions).
 // Palette from assets/maps/TILE_SPECS.md §1.
 const VOID_TILES = [
   tile( 10, 10, 26,'flat'),   //  1 — void_ground
