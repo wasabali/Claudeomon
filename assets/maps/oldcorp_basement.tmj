@@ -1113,25 +1113,7 @@
       "draworder": "topdown",
       "id": 3,
       "name": "NPCs",
-      "objects": [
-        {
-          "height": 48,
-          "id": 1,
-          "name": "oldcorp_nameplate",
-          "properties": [
-            {
-              "name": "npc",
-              "type": "string",
-              "value": "oldcorp_nameplate"
-            }
-          ],
-          "type": "npc",
-          "visible": true,
-          "width": 48,
-          "x": 288,
-          "y": 96
-        }
-      ],
+      "objects": [],
       "opacity": 1,
       "type": "objectgroup",
       "visible": true,
