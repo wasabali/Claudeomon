@@ -1,101 +1,22 @@
 # Visual Assets
 
-This document covers the art pipeline for Cloud Quest — how raw source art is
-acquired, processed, and organised under `assets/`.
-
----
-
-## Source Art: Ninja Adventure Asset Pack
-
-Cloud Quest uses the free [Ninja Adventure Asset Pack](https://pixel-boy.itch.io/ninja-adventure-asset-pack)
-by Pixel-Boy and AAA, released under CC0 (public domain).
-
-Raw assets ship at **16×16 px** per tile/frame. Cloud Quest renders at
-`CONFIG.TILE_SIZE = 48 px`, so every source image must be upscaled by **3×**
-before use.
-
----
-
-## Upscale Pipeline
-
-The script `scripts/upscale_assets.py` performs a lossless 3× nearest-neighbor
-upscale of the entire asset pack in one pass.
-
-### Requirements
-
-- Python 3.9+
-- [Pillow](https://pypi.org/project/Pillow/) — `pip install Pillow`
-
-### Usage
-
-```bash
-python scripts/upscale_assets.py \
-    --input  ./ninja-adventure-raw/ \
-    --output ./assets/ \
-    --scale  3
-```
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--input DIR` | *(required)* | Root directory of the raw Ninja Adventure download |
-| `--output DIR` | *(required)* | Root output directory (`assets/` subfolders are created automatically) |
-| `--scale N` | `3` | Integer scale factor — `3` maps 16 px → 48 px |
-
-### What the script does
-
-1. Walks `--input` recursively and collects every `.png` file.
-2. Converts each image to **RGBA** (preserves full transparency).
-3. Strips any embedded ICC profile from the source file.
-4. Upscales with **`Image.NEAREST`** (nearest-neighbor) — no anti-aliasing,
-   no bilinear smoothing, no compression artifacts.
-5. Saves lossless PNG to a mirrored path under `--output`.
-6. Prints a manifest of processed files, grouped by asset category.
-
-### Interpolation requirement
-
-Only nearest-neighbor scaling is permitted. Using any other algorithm
-(bilinear, bicubic, Lanczos) will introduce sub-pixel blurring that destroys
-the pixel-art look at 48 px.
-
-The Pillow constant for nearest-neighbor is `Image.Resampling.NEAREST`, with
-`Image.NEAREST` retained as a legacy alias and the integer constant `0` used
-in older Pillow versions. The equivalent ImageMagick flag is `-filter point`.
-
-### Example manifest output
-
-```
-── Manifest ──────────────────────────────
-  characters        42 file(s)
-  effects           18 file(s)
-  items             35 file(s)
-  monsters          60 file(s)
-  other              3 file(s)
-  tiles            120 file(s)
-  ui                24 file(s)
-  TOTAL            302 file(s)
-──────────────────────────────────────────
-
-Done — 302 PNG(s) upscaled 3× → written to /path/to/assets
-```
+This document describes every external asset source used in Cloud Quest, how each is licensed, and how assets are mapped into the project's folder structure.
 
 ---
 
 ## Asset Directory Structure
 
-After running the pipeline the `assets/` tree mirrors the Ninja Adventure pack
-layout:
-
 ```
 assets/
-├── arenas/          # Battle background art (panoramic, already 1920×1080)
-├── audio/           # BGM and SFX (not processed by this script)
+├── arenas/          # Battle background art (panoramic, 1920×1080)
+├── audio/           # BGM and SFX
 ├── maps/            # Tiled .tmj exports
 ├── sprites/
-│   ├── characters/  # Player and NPC sprite sheets
+│   ├── characters/  # Player and NPC walk-cycle sheets (LPC format)
 │   ├── effects/     # Spell, particle, and UI effects
 │   ├── items/       # Item icons
 │   ├── monsters/    # Enemy sprite sheets
-│   ├── tiles/       # World tiles and tilesets
+│   ├── portraits/   # DialogBox talking-head portraits
 │   └── ui/          # HUD panels, cursors, button frames
 └── ui/              # Full-screen UI backgrounds
 ```
@@ -104,69 +25,14 @@ assets/
 
 ## Spritesheets
 
-The upscale pipeline scales the **entire sheet image** without any knowledge of
-the frame grid. Because `16 × 3 = 48` is an exact integer multiple, every
-frame boundary aligns perfectly after upscaling — no sub-pixel drift, no torn
-frames.
+Phaser is configured to load character sheets with `frameWidth: 48, frameHeight: 48`.
+LPC-generated sheets export at 64×64 px per frame by default — scale down to 48×48 using
+nearest-neighbor interpolation before placing files in `assets/sprites/characters/`.
 
-Phaser is configured to load sheets with `frameWidth: 48, frameHeight: 48`
-(or multiples thereof for larger frames). Never hardcode 16 px frame sizes in
-scene or engine code.
+Never hardcode 16 px or 64 px frame sizes in scene or engine code.
 
 ---
 
-## Alternative: Node.js upscale script (recommended)
-
-For a full recursive batch upscale with directory-tree mirroring:
-
-```bash
-node scripts/upscale-assets.js \
-  --input /path/to/NinjaAdventure \
-  --output assets/ninja-adventure-upscaled
-# Add --force to reprocess existing files
-```
-
-Requires **ImageMagick** (`sudo apt install imagemagick` / `brew install imagemagick`).  
-Uses `-filter Point` (nearest-neighbor) and `+profile '*'` (strips ICC profiles).
-
-## Alternative: ImageMagick one-liner
-
-For a quick ad-hoc conversion of a single directory:
-
-```bash
-for f in *.png; do
-  convert "$f" -filter point -resize 300% "out/$f"
-done
-```
-
-The `-filter point` flag selects nearest-neighbor. This is equivalent to the
-Python script for single-directory runs but does not handle subdirectories,
-category manifests, or automatic ICC profile stripping.
-
----
-
-## ICC Profiles
-
-Some Ninja Adventure PNGs ship with embedded sRGB ICC profiles. Pillow emits
-a warning for these and some renderers apply unintended colour correction.
-The upscale script strips ICC profiles automatically — output PNGs are
-profile-free.
-
-If you process files with ImageMagick and want to strip profiles:
-
-```bash
-convert input.png -strip output.png
-```
-
----
-
-## Re-running the Pipeline
-
-The script is idempotent — re-running it overwrites existing output files with
-freshly upscaled copies. Output files are never merged or appended.
-
-If the Ninja Adventure pack is updated, delete the relevant subdirectories
-under `assets/sprites/` and re-run the script.
 # Visual Assets Specification
 
 Cloud Quest uses a pixel-art style drawing on the [Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) asset pack for world sprites and audio, and the [Kenney UI Pack](https://kenney.nl/assets/ui-pack) for all UI chrome.
@@ -453,42 +319,46 @@ Cloud Quest uses a **multi-source asset strategy**:
 
 ---
 
-## Ninja Adventure Asset Pack
+## LPC Spritesheet Generator
 
 ### Overview
 
-[Ninja Adventure](https://pixel-boy.itch.io/ninja-adventure-asset-pack) by **pixel-boy (AAA)** provides the **character sprite archetypes** used by Cloud Quest's player and trainer sprites. It is released under the **CC0 1.0 Universal** license.
+Player and trainer walk-cycle sheets are generated with the **Universal LPC Spritesheet Character Generator** by Sander Frenken. Each export is a standard LPC walk-cycle sheet, customisable per character role.
 
 ```
-## Ninja Adventure Asset Pack
-- Author:        pixel-boy (AAA)
-- Source:        https://pixel-boy.itch.io/ninja-adventure-asset-pack
-- License:       CC0 1.0 Universal (Public Domain Dedication)
-- Usage:         Character/trainer sprite sheets (loaded by spriteKey), world tiles, VFX
-- Modifications: 3× nearest-neighbor upscale from 16×16 to 48×48px
+LPC Spritesheet Generator
+- Tool:    https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/
+- License: CC-BY-SA 3.0 (Creative Commons Attribution-ShareAlike 3.0)
+- Usage:   Player sprite (player_default) + all trainer/NPC character sheets
+- Format:  4-row × 3-col walk-cycle, 64×64 px per frame (scale down to 48×48 for Cloud Quest)
 ```
 
 ### What's Included
 
-| Category | Ninja Adventure folder | Cloud Quest folder |
-|----------|------------------------|-------------------|
-| Character sprite sheets (player + trainers, by `spriteKey`) | `Actor/Characters/` | `assets/sprites/characters/` |
-| Monster sprites | `Actor/Monsters/` | `assets/sprites/monsters/` |
-| World / overworld tiles | `TileSet/` | `assets/maps/tilesets/` |
-| VFX (magic, explosions) | `FX/` | `assets/sprites/vfx/` |
-
-### License
-
-CC0 1.0 Universal — these assets are dedicated to the public domain. No attribution is legally required.
-
-We attribute anyway because it's the right thing to do.
+| Category | Cloud Quest folder |
+|----------|-------------------|
+| Player sprite (`player_default.png`) | `assets/sprites/characters/` |
+| Trainer/NPC sprite sheets (by `spriteKey`) | `assets/sprites/characters/` |
 
 ### Integration Notes
 
-All Ninja Adventure source sprites are **16×16px**. Cloud Quest uses a **3× nearest-neighbor upscale** to reach the 48×48px tile size. See [Asset Pipeline](#asset-pipeline) below for the upscale script.
+The LPC generator exports at **64×64 px per frame** by default. Cloud Quest uses **48×48 px per frame**, so each exported sheet must be scaled down before use.
+
+1. Visit https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/
+2. Customise the character for the role (e.g. hoodie + laptop bag for the player)
+3. Export as PNG — the generator outputs a walk-cycle spritesheet at 64×64 px per frame
+4. Scale down to 48×48 px per frame (total sheet: 144×192 px) using nearest-neighbor interpolation:
+   ```bash
+   convert lpc_export.png -filter point -resize 144x192 assets/sprites/characters/player_default.png
+   ```
+5. Verify frame boundaries with `frameWidth: 48, frameHeight: 48` in Phaser
 
 **Player sprite:** BootScene loads `PLAYER_SPRITE_KEY` (`'player_default'`) from `assets/sprites/characters/player_default.png`.  
 **Trainer sprites:** Each trainer in `src/data/trainers.js` has a `spriteKey` field. BootScene loads it from `assets/sprites/characters/<spriteKey>.png`.
+
+### License
+
+CC-BY-SA 3.0 — attribution and share-alike required. Cloud Quest must credit the LPC contributors and any derived character assets must carry the same CC-BY-SA 3.0 license.
 
 ---
 

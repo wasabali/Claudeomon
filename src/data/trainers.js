@@ -310,20 +310,25 @@ const TRAINERS = {
   },
 
   // =========================================================================
-  // STORY / QUEST NPCs — non-combat, dialog only
+  // WORLD NPCs — non-battleable characters visible on the overworld map.
+  // These entries exist solely to provide a spriteKey for WorldScene to
+  // render a human-looking character instead of the orange npc_default stub.
+  // They intentionally omit hp/deck so the battle check never fires.
   // =========================================================================
 
   margaret: {
     id: 'margaret',
     spriteKey: 'cloud_engineer_npc',
     name: 'Old Margaret',
+    isCursed: false,
     location: 'localhost_town',
   },
 
   professor_pedersen: {
     id: 'professor_pedersen',
-    spriteKey: 'cto_npc',
+    spriteKey: 'principal_engineer_npc',
     name: 'Professor Pedersen',
+    isCursed: false,
     location: 'localhost_town',
   },
 
@@ -331,6 +336,7 @@ const TRAINERS = {
     id: 'random_intern',
     spriteKey: 'intern_npc',
     name: 'Random Intern',
+    isCursed: false,
     location: 'localhost_town',
   },
 
@@ -1453,37 +1459,6 @@ const TRAINERS = {
   },
 
   // =========================================================================
-  // WORLD NPCs — non-battleable characters visible on the overworld map.
-  // These entries exist solely to provide a spriteKey for WorldScene to
-  // render a human-looking character instead of the orange npc_default stub.
-  // They intentionally omit hp/deck so the battle check never fires.
-  // =========================================================================
-
-  margaret: {
-    id: 'margaret',
-    spriteKey: 'cloud_engineer_npc',
-    name: 'Margaret',
-    isCursed: false,
-    location: 'localhost_town',
-  },
-
-  professor_pedersen: {
-    id: 'professor_pedersen',
-    spriteKey: 'principal_engineer_npc',
-    name: 'Professor Pedersen',
-    isCursed: false,
-    location: 'localhost_town',
-  },
-
-  random_intern: {
-    id: 'random_intern',
-    spriteKey: 'intern_npc',
-    name: 'Random Intern',
-    isCursed: false,
-    location: 'localhost_town',
-  },
-
-  // =========================================================================
   // CURSED TRAINERS — hidden areas, require shame to access
   // =========================================================================
 
@@ -2356,7 +2331,7 @@ export const getAllSpriteKeys = () => _allSpriteKeys
 
 // Portrait keys — one per trainer + one for the player.
 // Convention: portrait_{id} → assets/sprites/portraits/{id}.png
-// Source: Kenney Micro Roguelike (CC0), 16×16px upscaled 3× to 48×48px.
+// Source: Kenney Tiny Town (CC0). Place portrait PNGs in assets/sprites/portraits/.
 const _allPortraitKeys = (() => {
   const keys = new Set(['portrait_player'])
   for (const trainer of Object.values(TRAINERS)) {

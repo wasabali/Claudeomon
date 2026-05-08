@@ -61,8 +61,11 @@ Sprite sheets live in `assets/sprites/characters/` and are named by role:
 
 1. Visit **https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/**
 2. Customise the character appearance for each role (hoodie, laptop bag for player, etc.)
-3. Export as PNG — the generator outputs a walk-cycle sheet at native pixel size
-4. Scale to 48×48 px per frame (144×192 px total) using nearest-neighbor interpolation
+3. Export as PNG — the generator outputs a walk-cycle sheet at **64×64 px per frame** by default
+4. Scale down to **48×48 px per frame** (total sheet 144×192 px) using nearest-neighbor interpolation:
+   ```bash
+   convert lpc_export.png -filter point -resize 144x192 <spriteKey>.png
+   ```
 5. Save as `assets/sprites/characters/<spriteKey>.png`
 
 ---

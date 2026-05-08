@@ -2,7 +2,7 @@
  * scripts/generate-placeholder-sprites.js
  *
  * Generates placeholder PNG sprites for all game assets that require external
- * downloads (LPC character sheets, Kenney Tiny Town tiles, PokeRogue arenas).
+ * downloads (LPC character sheets, Kenney Tiny Town portraits, PokeRogue arenas).
  *
  * These are coloured stubs — sufficient to boot and test the game without
  * missing-texture errors.  Replace them with the real assets when available
