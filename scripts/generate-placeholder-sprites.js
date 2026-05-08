@@ -102,6 +102,24 @@ function encodePngRgb(width, height, pixels) {
   return Buffer.concat([PNG_SIG, pngChunk('IHDR', ihdr), pngChunk('IDAT', idat), pngChunk('IEND', Buffer.alloc(0))])
 }
 
+/** Encode a raw RGBA pixel buffer into a PNG (with alpha channel). */
+function encodePngRgba(width, height, pixels) {
+  const ihdr = Buffer.alloc(13)
+  ihdr.writeUInt32BE(width, 0)
+  ihdr.writeUInt32BE(height, 4)
+  ihdr[8] = 8; ihdr[9] = 6  // 8-bit depth, RGBA colour type
+
+  const rowBytes = width * 4
+  const raw      = Buffer.alloc(height * (rowBytes + 1))
+  for (let y = 0; y < height; y++) {
+    raw[y * (rowBytes + 1)] = 0  // filter: None
+    pixels.copy(raw, y * (rowBytes + 1) + 1, y * rowBytes, (y + 1) * rowBytes)
+  }
+  const idat = zlib.deflateSync(raw, { level: 9 })
+
+  return Buffer.concat([PNG_SIG, pngChunk('IHDR', ihdr), pngChunk('IDAT', idat), pngChunk('IEND', Buffer.alloc(0))])
+}
+
 // ---------------------------------------------------------------------------
 // Write helper — respects --force flag, never clobbers non-empty real assets
 // ---------------------------------------------------------------------------
@@ -122,39 +140,8 @@ function writePng(destPath, png) {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers — paint solid-colour sprites with a thin frame-cell border grid
+// Helpers — paint solid-colour sprites and humanoid character walk-cycles
 // ---------------------------------------------------------------------------
-
-/**
- * Paint a grid of COLS×ROWS solid-colour cells (each CELL×CELL px),
- * separated by a 1px darker border to show individual frame boundaries.
- */
-function paintGrid(cols, rows, cell, r, g, b) {
-  const w  = cols * cell
-  const h  = rows * cell
-  const br = Math.max(0, r - 60)
-  const bg = Math.max(0, g - 60)
-  const bb = Math.max(0, b - 60)
-
-  const pixels = Buffer.alloc(w * h * 3)
-
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const off = (y * w + x) * 3
-      // Draw 1px border at every cell edge
-      const localX = x % cell
-      const localY = y % cell
-      const onBorder = localX === 0 || localY === 0 || localX === cell - 1 || localY === cell - 1
-      if (onBorder) {
-        pixels[off] = br; pixels[off + 1] = bg; pixels[off + 2] = bb
-      } else {
-        pixels[off] = r;  pixels[off + 1] = g;  pixels[off + 2] = b
-      }
-    }
-  }
-
-  return pixels
-}
 
 /** Paint a solid-colour RGB square with a 1px darker border. */
 function paintSolid(size, r, g, b) {
@@ -182,6 +169,157 @@ function paintArena(w, h, r, g, b) {
   for (let i = 0; i < pixels.length; i += 3) {
     pixels[i] = r; pixels[i + 1] = g; pixels[i + 2] = b
   }
+  return pixels
+}
+
+// Skin and eye colours shared by all humanoid placeholders.
+const SKIN_R = 0xe0; const SKIN_G = 0xc0; const SKIN_B = 0x90
+const EYE_R  = 0x22; const EYE_G  = 0x11; const EYE_B  = 0x00
+
+/**
+ * Paint a 3-col × 4-row walk-cycle character sheet (144×192 px, RGBA).
+ *
+ * Each 48×48 frame contains a simple pixel-art humanoid in one of four
+ * directions (rows 0-3 = down / left / right / up) and one of three walk
+ * phases (cols 0-2 = left-step / neutral / right-step).
+ *
+ * Background is fully transparent (alpha = 0), so the character floats
+ * correctly over the tile layer in Phaser without a coloured box border.
+ * Hair uses the caller-supplied key colour; clothing uses a slightly
+ * lighter tint; shoes use a slightly darker accent.
+ */
+function paintCharacter(r, g, b) {
+  const W = CHAR_W  // 144
+  const H = CHAR_H  // 192
+  const pixels = Buffer.alloc(W * H * 4)  // RGBA, initialised to 0 (transparent)
+
+  function set(x, y, pr, pg, pb, pa = 255) {
+    if (x < 0 || x >= W || y < 0 || y >= H) return
+    const off = (y * W + x) * 4
+    pixels[off] = pr; pixels[off + 1] = pg; pixels[off + 2] = pb; pixels[off + 3] = pa
+  }
+  function fill(x0, y0, fw, fh, pr, pg, pb, pa = 255) {
+    for (let dy = 0; dy < fh; dy++)
+      for (let dx = 0; dx < fw; dx++)
+        set(x0 + dx, y0 + dy, pr, pg, pb, pa)
+  }
+
+  // Hair = key colour darkened slightly; clothing detail = key colour darkened more.
+  const hr = Math.max(0, r - 40); const hg = Math.max(0, g - 40); const hb = Math.max(0, b - 40)
+  const dr = Math.max(0, r - 30); const dg = Math.max(0, g - 30); const db = Math.max(0, b - 30)
+
+  // col 0 → left step (left leg raised 3px), col 1 → neutral, col 2 → right step
+  const walkOffsets = [[3, 0], [0, 0], [0, 3]]
+
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 3; col++) {
+      const ox = col * FRAME_SIZE  // x origin of this frame in the sheet
+      const oy = row * FRAME_SIZE  // y origin
+      const [leftDy, rightDy] = walkOffsets[col]
+
+      // --- down (row 0) — full front view ---
+      if (row === 0) {
+        fill(ox + 18, oy + 3,  12, 5,  hr, hg, hb)          // hair
+        fill(ox + 18, oy + 8,  12, 10, SKIN_R, SKIN_G, SKIN_B) // face
+        fill(ox + 20, oy + 11, 2,  2,  EYE_R, EYE_G, EYE_B)   // left eye
+        fill(ox + 26, oy + 11, 2,  2,  EYE_R, EYE_G, EYE_B)   // right eye
+        fill(ox + 18, oy + 18, 12, 13, r, g, b)              // body
+        fill(ox + 18, oy + 24, 12, 2,  dr, dg, db)           // belt
+        fill(ox + 13, oy + 18, 5,  10, r, g, b)              // left arm
+        fill(ox + 30, oy + 18, 5,  10, r, g, b)              // right arm
+        fill(ox + 18, oy + 31 + leftDy,  5, 14 - leftDy,  r, g, b) // left leg
+        fill(ox + 25, oy + 31 + rightDy, 5, 14 - rightDy, r, g, b) // right leg
+        fill(ox + 17, oy + 43, 7,  3,  dr, dg, db)           // left shoe
+        fill(ox + 24, oy + 43, 7,  3,  dr, dg, db)           // right shoe
+      }
+
+      // --- up (row 3) — back view ---
+      if (row === 3) {
+        fill(ox + 18, oy + 3,  12, 15, hr, hg, hb)           // full-hair back
+        fill(ox + 21, oy + 16, 6,  3,  SKIN_R, SKIN_G, SKIN_B) // neck
+        fill(ox + 18, oy + 18, 12, 13, r, g, b)
+        fill(ox + 18, oy + 24, 12, 2,  dr, dg, db)
+        fill(ox + 13, oy + 18, 5,  10, r, g, b)
+        fill(ox + 30, oy + 18, 5,  10, r, g, b)
+        fill(ox + 18, oy + 31 + leftDy,  5, 14 - leftDy,  r, g, b)
+        fill(ox + 25, oy + 31 + rightDy, 5, 14 - rightDy, r, g, b)
+        fill(ox + 17, oy + 43, 7,  3,  dr, dg, db)
+        fill(ox + 24, oy + 43, 7,  3,  dr, dg, db)
+      }
+
+      // --- left (row 1) — side profile ---
+      if (row === 1) {
+        fill(ox + 19, oy + 3,  10, 5,  hr, hg, hb)           // hair
+        fill(ox + 20, oy + 8,  10, 10, SKIN_R, SKIN_G, SKIN_B)
+        fill(ox + 19, oy + 8,  3,  10, hr, hg, hb)           // hair on left edge
+        fill(ox + 24, oy + 11, 2,  2,  EYE_R, EYE_G, EYE_B)  // one eye
+        fill(ox + 20, oy + 18, 9,  13, r, g, b)
+        fill(ox + 20, oy + 24, 9,  2,  dr, dg, db)
+        fill(ox + 15, oy + 18, 5,  10, r, g, b)              // front arm
+        // Legs stacked — rear leg slightly darker
+        fill(ox + 19, oy + 31 + leftDy,  9, 14 - leftDy, r, g, b)
+        if (leftDy !== rightDy)
+          fill(ox + 20, oy + 31 + rightDy, 7, 12 - rightDy, dr, dg, db)
+        fill(ox + 18, oy + 43, 9,  3,  dr, dg, db)
+      }
+
+      // --- right (row 2) — side profile, mirrored ---
+      if (row === 2) {
+        fill(ox + 19, oy + 3,  10, 5,  hr, hg, hb)
+        fill(ox + 18, oy + 8,  10, 10, SKIN_R, SKIN_G, SKIN_B)
+        fill(ox + 26, oy + 8,  3,  10, hr, hg, hb)           // hair on right edge
+        fill(ox + 22, oy + 11, 2,  2,  EYE_R, EYE_G, EYE_B)
+        fill(ox + 19, oy + 18, 9,  13, r, g, b)
+        fill(ox + 19, oy + 24, 9,  2,  dr, dg, db)
+        fill(ox + 28, oy + 18, 5,  10, r, g, b)              // front arm
+        fill(ox + 20, oy + 31 + rightDy, 9, 14 - rightDy, r, g, b)
+        if (leftDy !== rightDy)
+          fill(ox + 21, oy + 31 + leftDy, 7, 12 - leftDy, dr, dg, db)
+        fill(ox + 21, oy + 43, 9,  3,  dr, dg, db)
+      }
+    }
+  }
+
+  return pixels
+}
+
+// ---------------------------------------------------------------------------
+// Portrait painter — simple face tile (48×48 RGBA)
+// ---------------------------------------------------------------------------
+
+function paintPortrait(r, g, b) {
+  const SIZE = PORTRAIT_SIZE
+  const pixels = Buffer.alloc(SIZE * SIZE * 4)
+
+  function fill(x0, y0, fw, fh, pr, pg, pb, pa = 255) {
+    for (let dy = 0; dy < fh; dy++)
+      for (let dx = 0; dx < fw; dx++) {
+        const xx = x0 + dx; const yy = y0 + dy
+        if (xx < 0 || xx >= SIZE || yy < 0 || yy >= SIZE) continue
+        const off = (yy * SIZE + xx) * 4
+        pixels[off] = pr; pixels[off + 1] = pg; pixels[off + 2] = pb; pixels[off + 3] = pa
+      }
+  }
+
+  const hr = Math.max(0, r - 40); const hg = Math.max(0, g - 40); const hb = Math.max(0, b - 40)
+  const dr = Math.max(0, r - 20); const dg = Math.max(0, g - 20); const db = Math.max(0, b - 20)
+
+  // Background panel (key colour)
+  fill(0, 0, SIZE, SIZE, dr, dg, db)
+  // Hair
+  fill(12, 3, 24, 10, hr, hg, hb)
+  // Face
+  fill(12, 10, 24, 22, SKIN_R, SKIN_G, SKIN_B)
+  // Eyes
+  fill(15, 16, 4, 4, EYE_R, EYE_G, EYE_B)
+  fill(29, 16, 4, 4, EYE_R, EYE_G, EYE_B)
+  // Nose
+  fill(23, 22, 2, 3, Math.max(0, SKIN_R - 30), Math.max(0, SKIN_G - 30), Math.max(0, SKIN_B - 30))
+  // Mouth
+  fill(18, 27, 12, 2, Math.max(0, SKIN_R - 50), Math.max(0, SKIN_G - 60), Math.max(0, SKIN_B - 60))
+  // Shoulders/collar
+  fill(8, 32, 32, 12, r, g, b)
+
   return pixels
 }
 
@@ -242,23 +380,22 @@ function keyToRgb(key) {
 
 const CHARS_DIR = path.join(ROOT, 'assets', 'sprites', 'characters')
 
-console.log('\n── Character sprites (144×192px, 3×4 walk-cycle frames) ────────')
+console.log('\n── Character sprites (144×192px, 3×4 walk-cycle humanoid figures) ─')
 for (const key of getAllSpriteKeys()) {
   const [r, g, b] = keyToRgb(key)
-  const pixels = paintGrid(CHAR_COLS, CHAR_ROWS, FRAME_SIZE, r, g, b)
-  writePng(path.join(CHARS_DIR, `${key}.png`), encodePngRgb(CHAR_W, CHAR_H, pixels))
+  const pixels = paintCharacter(r, g, b)
+  writePng(path.join(CHARS_DIR, `${key}.png`), encodePngRgba(CHAR_W, CHAR_H, pixels))
 }
 
 // ---------------------------------------------------------------------------
-// Portrait sprites — 48×48px solid-colour tiles
+// Portrait sprites — 48×48px face tiles
 //
 // Convention (from BootScene.js):
 //   portrait_player  → assets/sprites/portraits/player.png
 //   portrait_<id>    → assets/sprites/portraits/<id>.png
 //
 // Colour is derived from the trainer's spriteKey using the same hash function
-// used for character sheets, dimmed to 70% brightness so portraits look
-// visually related but distinct from the full-size character sprites.
+// used for character sheets so portraits look visually related.
 // getAllPortraitKeys() / getAll() are imported live from src/data/trainers.js.
 // ---------------------------------------------------------------------------
 
@@ -280,18 +417,13 @@ for (const portKey of getAllPortraitKeys()) {
       [r, g, b] = keyToRgb(spriteKey)
     }
   }
-  portraitEntries.push({
-    file: filename,
-    r: Math.floor(r * 0.7),
-    g: Math.floor(g * 0.7),
-    b: Math.floor(b * 0.7),
-  })
+  portraitEntries.push({ file: filename, r, g, b })
 }
 
-console.log('\n── Portrait sprites (48×48px) ──────────────────────────────────')
+console.log('\n── Portrait sprites (48×48px face tiles) ───────────────────────')
 for (const { file, r, g, b } of portraitEntries) {
-  const pixels = paintSolid(PORTRAIT_SIZE, r, g, b)
-  writePng(path.join(PORTRAITS_DIR, `${file}.png`), encodePngRgb(PORTRAIT_SIZE, PORTRAIT_SIZE, pixels))
+  const pixels = paintPortrait(r, g, b)
+  writePng(path.join(PORTRAITS_DIR, `${file}.png`), encodePngRgba(PORTRAIT_SIZE, PORTRAIT_SIZE, pixels))
 }
 
 // ---------------------------------------------------------------------------

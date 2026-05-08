@@ -777,8 +777,10 @@ export class WorldScene extends BaseScene {
       this._player.y = result.y
 
       if (result.remaining <= MOVEMENT.INPUT_BUFFER_WINDOW_MS) {
-        const dir = this._getInputDirection()
-        if (dir) this._bufferedDir = dir
+        // Always overwrite — clears the buffer when no key is held, preventing
+        // an extra step from a quick tap that was buffered but released before
+        // the step finished (the two-tiles-at-once bug).
+        this._bufferedDir = this._getInputDirection()
       }
 
       if (result.complete) {
