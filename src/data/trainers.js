@@ -317,10 +317,6 @@ const TRAINERS = {
     id: 'margaret',
     spriteKey: 'ninja_woman_fighter',
     name: 'Old Margaret',
-    introDialog: [
-      "Welcome to Localhost Town, dear.",
-      "My bakery has a small website problem —\nmaybe you can help?",
-    ],
     location: 'localhost_town',
   },
 
@@ -328,10 +324,6 @@ const TRAINERS = {
     id: 'professor_pedersen',
     spriteKey: 'ninja_king',
     name: 'Professor Pedersen',
-    introDialog: [
-      "Ah, a new student! Study hard and use\nonly the approved techniques.",
-      "There are no shortcuts worth taking\nin this profession.",
-    ],
     location: 'localhost_town',
   },
 
@@ -339,7 +331,6 @@ const TRAINERS = {
     id: 'random_intern',
     spriteKey: 'ninja_adventurer',
     name: 'Random Intern',
-    introDialog: ['...I just started here.'],
     location: 'localhost_town',
   },
 
