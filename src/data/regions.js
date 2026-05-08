@@ -11,6 +11,10 @@
 //   hasTechTileset   — true if region uses kenney_tech_office as a supplemental tileset
 //   mvp              — true if in MVP scope (Act 1 core path)
 //   accessTrigger    — (hidden only) string describing unlock condition
+//   layout           — procedural map generation descriptor:
+//     type           — 'town' | 'dungeon' | 'arena' | 'gym' | 'interior' | 'wilderness'
+//     paths          — 'grid' | 'organic' | 'none'  (optional)
+//     landmarks      — array of landmark hint strings  (optional)
 
 const REGIONS = {
 
@@ -28,6 +32,7 @@ const REGIONS = {
     parentRegion:  null,
     hasFastTravel: true,
     mvp:           true,
+    layout:        { type: 'town', paths: 'grid', landmarks: ['tree', 'fountain', 'bench'] },
   },
   pipeline_pass: {
     id:            'pipeline_pass',
@@ -39,6 +44,7 @@ const REGIONS = {
     parentRegion:  null,
     hasFastTravel: true,
     mvp:           true,
+    layout:        { type: 'wilderness', paths: 'organic', landmarks: ['tree', 'rock'] },
   },
   azure_town: {
     id:              'azure_town',
@@ -50,6 +56,7 @@ const REGIONS = {
     hasFastTravel:   true,
     hasTechTileset:  true,
     mvp:             false,
+    layout:          { type: 'interior' },
   },
   production_plains: {
     id:              'production_plains',
@@ -61,6 +68,7 @@ const REGIONS = {
     hasFastTravel:   true,
     hasTechTileset:  true,
     mvp:             false,
+    layout:          { type: 'interior' },
   },
   kubernetes_colosseum: {
     id:              'kubernetes_colosseum',
@@ -72,6 +80,7 @@ const REGIONS = {
     hasFastTravel:   true,
     hasTechTileset:  true,
     mvp:             false,
+    layout:          { type: 'arena' },
   },
   three_am_tavern: {
     id:            'three_am_tavern',
@@ -83,6 +92,7 @@ const REGIONS = {
     parentRegion:  null,
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'interior' },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -99,6 +109,7 @@ const REGIONS = {
     parentRegion:  'localhost_town',
     hasFastTravel: false,
     mvp:           true,
+    layout:        { type: 'gym' },
   },
   pipeline_gym: {
     id:            'pipeline_gym',
@@ -110,6 +121,7 @@ const REGIONS = {
     parentRegion:  'pipeline_pass',
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'gym' },
   },
   security_vault_gym: {
     id:            'security_vault_gym',
@@ -121,6 +133,7 @@ const REGIONS = {
     parentRegion:  'azure_town',
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'gym' },
   },
   cloud_console_gym: {
     id:              'cloud_console_gym',
@@ -132,6 +145,7 @@ const REGIONS = {
     hasFastTravel:   false,
     hasTechTileset:  true,
     mvp:             false,
+    layout:          { type: 'gym' },
   },
   container_harbor: {
     id:            'container_harbor',
@@ -143,6 +157,7 @@ const REGIONS = {
     parentRegion:  'kubernetes_colosseum',
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'gym' },
   },
   kube_arena: {
     id:            'kube_arena',
@@ -154,6 +169,7 @@ const REGIONS = {
     parentRegion:  'kubernetes_colosseum',
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'gym' },
   },
   serverless_shrine: {
     id:            'serverless_shrine',
@@ -165,6 +181,7 @@ const REGIONS = {
     parentRegion:  'production_plains',
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'gym' },
   },
   sre_command_center: {
     id:              'sre_command_center',
@@ -176,6 +193,7 @@ const REGIONS = {
     hasFastTravel:   false,
     hasTechTileset:  true,
     mvp:             false,
+    layout:          { type: 'gym' },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -192,6 +210,7 @@ const REGIONS = {
     parentRegion:  'pipeline_pass',
     hasFastTravel: false,
     mvp:           true,
+    layout:        { type: 'dungeon', paths: 'bsp' },
   },
   jira_dungeon_2: {
     id:            'jira_dungeon_2',
@@ -203,6 +222,7 @@ const REGIONS = {
     parentRegion:  'pipeline_pass',
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'dungeon', paths: 'bsp' },
   },
   jira_dungeon_3: {
     id:            'jira_dungeon_3',
@@ -214,6 +234,7 @@ const REGIONS = {
     parentRegion:  'pipeline_pass',
     hasFastTravel: false,
     mvp:           false,
+    layout:        { type: 'dungeon', paths: 'bsp' },
   },
   cloud_console_1: {
     id:              'cloud_console_1',
@@ -225,6 +246,7 @@ const REGIONS = {
     hasFastTravel:   false,
     hasTechTileset:  true,
     mvp:             false,
+    layout:          { type: 'interior' },
   },
   cloud_console_2: {
     id:              'cloud_console_2',
@@ -236,6 +258,7 @@ const REGIONS = {
     hasFastTravel:   false,
     hasTechTileset:  true,
     mvp:             false,
+    layout:          { type: 'interior' },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -253,6 +276,7 @@ const REGIONS = {
     hasTechTileset:  true,
     mvp:             false,
     accessTrigger:   'SSH to decommissioned terminal',
+    layout:          { type: 'interior' },
   },
   node_modules_maze: {
     id:            'node_modules_maze',
@@ -265,6 +289,7 @@ const REGIONS = {
     hasFastTravel: false,
     mvp:           false,
     accessTrigger: 'Use mystery_node_modules junk item',
+    layout:        { type: 'wilderness', paths: 'organic', landmarks: ['tree', 'rock'] },
   },
   dev_null_void: {
     id:               'dev_null_void',
@@ -277,6 +302,7 @@ const REGIONS = {
     hasVoidTileset:   true,
     mvp:              false,
     accessTrigger:    'Pipe output 3 times in battle',
+    layout:           { type: 'interior' },
   },
   deprecated_azure_region: {
     id:                    'deprecated_azure_region',
@@ -289,6 +315,7 @@ const REGIONS = {
     hasWastelandTileset:   true,
     mvp:                   false,
     accessTrigger:         'Select greyed-out region at Azure Terminal',
+    layout:                { type: 'interior' },
   },
   oldcorp_basement: {
     id:              'oldcorp_basement',
@@ -301,6 +328,7 @@ const REGIONS = {
     hasTechTileset:  true,
     mvp:             false,
     accessTrigger:   'Open despite 3 warnings in Jira Dungeon',
+    layout:          { type: 'interior' },
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -317,6 +345,7 @@ const REGIONS = {
     parentRegion:  'localhost_town',
     hasFastTravel: false,
     mvp:           true,
+    layout:        { type: 'interior' },
   },
   lab_interior: {
     id:            'lab_interior',
@@ -328,6 +357,7 @@ const REGIONS = {
     parentRegion:  'localhost_town',
     hasFastTravel: false,
     mvp:           true,
+    layout:        { type: 'interior' },
   },
   apartment_interior: {
     id:            'apartment_interior',
@@ -339,6 +369,7 @@ const REGIONS = {
     parentRegion:  'localhost_town',
     hasFastTravel: false,
     mvp:           true,
+    layout:        { type: 'interior' },
   },
 }
 

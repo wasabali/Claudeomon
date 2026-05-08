@@ -597,3 +597,95 @@ describe('NPC sprite coverage', () => {
     }
   })
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Acceptance criteria for layout-aware procedural map generator
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('all regions carry a layout descriptor', () => {
+  it('every region in regions.js has a layout field with a valid type', () => {
+    const VALID_LAYOUT_TYPES = new Set(['town', 'dungeon', 'arena', 'gym', 'interior', 'wilderness'])
+    for (const region of getAllRegions()) {
+      expect(region.layout, `${region.id} is missing a layout descriptor`).toBeDefined()
+      expect(
+        VALID_LAYOUT_TYPES.has(region.layout.type),
+        `${region.id} has unknown layout type "${region.layout?.type}"`,
+      ).toBe(true)
+    }
+  })
+})
+
+describe('localhost_town town layout', () => {
+  it('Objects layer has enough tiles to represent at least 3 buildings', () => {
+    const map = loadMap('localhost_town')
+    const objects = map.layers.find(l => l.name === 'Objects')
+    const nonZero = objects.data.filter(gid => gid !== 0)
+    // Three Kenney building composites (7–8 tiles wide × 3 tiles tall = 21–24 tiles each)
+    expect(nonZero.length).toBeGreaterThanOrEqual(60)
+  })
+
+  it('Objects layer contains road/path tiles (paved path network)', () => {
+    const map = loadMap('localhost_town')
+    const objects = map.layers.find(l => l.name === 'Objects')
+    // Kenney road GIDs occupy rows 15–17, cols 0–10 of the 27-col tileset.
+    // GID = row * 27 + col + 1  →  min: 15*27+0+1=406, max: 17*27+10+1=470
+    const isRoadGid = gid => gid >= 406 && gid <= 470
+    expect(objects.data.some(isRoadGid)).toBe(true)
+  })
+
+  it('Objects layer contains at least 2 tree tiles (decorative landmarks)', () => {
+    const map = loadMap('localhost_town')
+    const objects = map.layers.find(l => l.name === 'Objects')
+    // Kenney tree GIDs: rows 8–12, cols 16–22 of the 27-col tileset.
+    // Green tree tops/bottoms: rows 8–9  → GID 233–266
+    // Orange/red tree tops/bottoms: rows 11–12 → GID 298–328
+    const isTreeGid = gid => (gid >= 233 && gid <= 266) || (gid >= 298 && gid <= 328)
+    const treeCount = objects.data.filter(isTreeGid).length
+    expect(treeCount).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('jira_dungeon BSP layout', () => {
+  it.each(['jira_dungeon_1', 'jira_dungeon_2', 'jira_dungeon_3'])('%s Objects layer has BSP wall tiles forming multiple rooms', (regionId) => {
+    const map = loadMap(regionId)
+    const objects = map.layers.find(l => l.name === 'Objects')
+    const nonZero = objects.data.filter(gid => gid !== 0)
+    // With BSP depth 3, interior walls should account for at least 100 tiles
+    expect(nonZero.length).toBeGreaterThan(100)
+  })
+
+  it.each(['jira_dungeon_1', 'jira_dungeon_2', 'jira_dungeon_3'])('%s has substantial walkable area inside (rooms + corridors)', (regionId) => {
+    const map = loadMap(regionId)
+    const collision = map.layers.find(l => l.name === 'Collision')
+    const walkable = collision.data.filter(gid => gid === 0).length
+    // At least 25% of all tiles should be walkable
+    expect(walkable).toBeGreaterThan(map.width * map.height * 0.25)
+  })
+})
+
+describe('kubernetes_colosseum arena layout', () => {
+  it('Objects layer contains arena walls and spectator tiles', () => {
+    const map = loadMap('kubernetes_colosseum')
+    const objects = map.layers.find(l => l.name === 'Objects')
+    const nonZero = objects.data.filter(gid => gid !== 0)
+    // Arena walls + spectator stands should produce many obstacle tiles
+    expect(nonZero.length).toBeGreaterThan(50)
+  })
+
+  it('center of map is walkable (open arena floor)', () => {
+    const map = loadMap('kubernetes_colosseum')
+    const collision = map.layers.find(l => l.name === 'Collision')
+    const cx = Math.floor(map.width / 2)
+    const cy = Math.floor(map.height / 2)
+    expect(collision.data[cy * map.width + cx]).toBe(0)
+  })
+
+  it('has gym_door transitions for child gyms', () => {
+    const map = loadMap('kubernetes_colosseum')
+    const trans = map.layers.find(l => l.name === 'Transitions')
+    expect(trans).toBeDefined()
+    const gymDoors = trans.objects.filter(o => o.name === 'gym_door')
+    expect(gymDoors.length).toBeGreaterThanOrEqual(1)
+  })
+})
+
