@@ -2,11 +2,11 @@
  * scripts/generate-placeholder-sprites.js
  *
  * Generates placeholder PNG sprites for all game assets that require external
- * downloads (Ninja Adventure pack, Kenney Micro Roguelike, PokeRogue arenas).
+ * downloads (LPC character sheets, Kenney Tiny Town portraits, PokeRogue arenas).
  *
  * These are coloured stubs — sufficient to boot and test the game without
- * missing-texture errors.  Replace them with the real upscaled assets when
- * available (see docs/VISUAL_ASSETS.md for the full pipeline).
+ * missing-texture errors.  Replace them with the real assets when available
+ * (see docs/VISUAL_ASSETS.md for the full pipeline).
  *
  * Usage:
  *   node scripts/generate-placeholder-sprites.js [--force]
@@ -14,10 +14,11 @@
  *   --force   Overwrite existing files (default: skip non-empty files that
  *             already exist so real assets are never clobbered accidentally)
  *
- * Asset sources — download and run the upscale pipeline when ready:
- *   Characters/trainers: https://pixel-boy.itch.io/ninja-adventure-asset-pack  (CC0)
- *   Portraits:           https://kenney.nl/assets/micro-roguelike               (CC0)
- *   Arena backgrounds:   https://github.com/pagefaultgames/pokerogue-assets      (CC-BY-NC-SA-4.0)
+ * Asset sources — download and place files when ready:
+ *   Player character:    https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/  (CC-BY-SA 3.0)
+ *   Trainer/NPC sheets:  https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/  (CC-BY-SA 3.0)
+ *   Portraits:           https://kenney.nl/assets/tiny-town  (CC0)
+ *   Arena backgrounds:   https://github.com/pagefaultgames/pokerogue-assets  (CC-BY-NC-SA-4.0)
  *
  * PNG encoding uses Node's built-in zlib — no external dependencies.
  * Mirrors the encoder in scripts/generate-ui-stubs.js.
@@ -333,8 +334,10 @@ function paintPortrait(r, g, b) {
 //   Row 3 — walk north (away from camera)
 //   Columns 0–2 — step-left, neutral, step-right
 //
-// This matches the comment in BootScene.js ("4-row × 3-col walk-cycle") and
-// the Ninja Adventure spritesheet layout used after the 3× upscale pipeline.
+// This matches the LPC (Liberated Pixel Cup) walk-cycle sheet format:
+//   https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/
+// Target style: Pokémon DS-era overworld trainer — solid outline, ~16-colour
+// palette, no anti-aliasing. Each frame: 48×48px at 1× (no upscale needed).
 //
 // Colour is derived deterministically from the sprite key string (djb2 hash
 // → hue angle) so every key referenced by getAllSpriteKeys() gets a unique
@@ -478,7 +481,8 @@ if (!FORCE && skipped > 0) {
 }
 console.log()
 console.log('Replace placeholder files with real assets:')
-console.log('  Characters/trainers: https://pixel-boy.itch.io/ninja-adventure-asset-pack  (CC0)')
-console.log('  Portraits:           https://kenney.nl/assets/micro-roguelike               (CC0)')
-console.log('  Arena backgrounds:   https://github.com/pagefaultgames/pokerogue-assets      (CC-BY-NC-SA-4.0)')
-console.log('  Then run: node scripts/upscale-assets.js --input <raw-dir> --output <out-dir>')
+console.log('  Player character:   https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/  (CC-BY-SA 3.0)')
+console.log('  Trainer/NPC sheets: https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/  (CC-BY-SA 3.0)')
+console.log('  Portraits:          https://kenney.nl/assets/tiny-town  (CC0)')
+console.log('  Arena backgrounds:  https://github.com/pagefaultgames/pokerogue-assets  (CC-BY-NC-SA-4.0)')
+console.log('  See docs/VISUAL_ASSETS.md for the full pipeline.')
