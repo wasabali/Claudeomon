@@ -639,14 +639,14 @@ export class WorldScene extends BaseScene {
   }
 
   // Register a walk-cycle animation for each direction using the 4-row × 3-col
-  // ninja spritesheet layout:  Row 0 = down, 1 = left, 2 = right, 3 = up.
+  // ninja spritesheet layout:  Row 0 = down, 1 = right, 2 = left, 3 = up.
   // Animations are shared across scene restarts (Phaser deduplicates by key).
   _setupPlayerAnimations(textureKey) {
     if (!this._playerUseSheet) return
     const DIRS = [
       { dir: 'down',  startFrame: 0 },
-      { dir: 'left',  startFrame: 3 },
-      { dir: 'right', startFrame: 6 },
+      { dir: 'right', startFrame: 3 },
+      { dir: 'left',  startFrame: 6 },
       { dir: 'up',    startFrame: 9 },
     ]
     for (const { dir, startFrame } of DIRS) {
@@ -666,7 +666,7 @@ export class WorldScene extends BaseScene {
   }
 
   // Idle frame index for each facing direction (middle column of each row).
-  static IDLE_FRAME = { down: 1, left: 4, right: 7, up: 10 }
+  static IDLE_FRAME = { down: 1, right: 4, left: 7, up: 10 }
 
   // Update the player sprite animation to match the current movement state.
   _updatePlayerAnim() {
@@ -819,7 +819,7 @@ export class WorldScene extends BaseScene {
       return
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this._keyZ)) {
+    if (Phaser.Input.Keyboard.JustDown(this._keyZ) || Phaser.Input.Keyboard.JustDown(this._keyEnter)) {
       this._tryInteract()
     }
 
