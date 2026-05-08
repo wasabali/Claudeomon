@@ -156,6 +156,14 @@ export class Menu {
     if (this._onCancel) this._onCancel()
   }
 
+  /**
+   * Positional-arg wrapper used by WorldScene choice menus.
+   * Equivalent to show(items, { onSelect, onCancel }).
+   */
+  open(items, onSelect, onCancel) {
+    this.show(items, { onSelect, onCancel })
+  }
+
   /** Clean up Phaser objects — call when scene shuts down. */
   destroy() {
     this._active = false
