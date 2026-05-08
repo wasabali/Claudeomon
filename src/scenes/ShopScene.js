@@ -28,6 +28,7 @@ export class ShopScene extends BaseScene {
 
     this.createChrome()
     this.registerInputs()
+    this.setupPauseKey()
     this.refresh()
   }
 

@@ -113,6 +113,7 @@ export class ServiceCatalogScene extends BaseScene {
 
     this._bindInput()
     this._render()
+    this.setupPauseKey()
   }
 
   update() {

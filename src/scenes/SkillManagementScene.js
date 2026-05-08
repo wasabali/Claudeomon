@@ -34,6 +34,7 @@ export class SkillManagementScene extends BaseScene {
     this.ensureWindowTexture()
     this.renderChrome()
     this.bindKeys()
+    this.setupPauseKey()
     this.refresh()
   }
 

@@ -64,6 +64,7 @@ export class StackOverflowScene extends BaseScene {
     this._bindInput()
     this._buildRows()
     this._render()
+    this.setupPauseKey()
   }
 
   _bindInput() {

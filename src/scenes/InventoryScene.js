@@ -19,9 +19,16 @@ const TABS = [
 ]
 
 const MAX_VISIBLE_ITEMS = 4
-const TOP_PANEL_HEIGHT = 20
-const LIST_PANEL_HEIGHT = 92
-const DESCRIPTION_PANEL_Y = TOP_PANEL_HEIGHT + LIST_PANEL_HEIGHT
+
+// Centered compact panel dimensions (canvas is 1920×1080)
+const PANEL_W  = 760
+const TAB_H    = 24
+const LIST_H   = 100
+const DESC_H   = 120
+const HINT_H   = 20
+const PANEL_H  = TAB_H + LIST_H + DESC_H + HINT_H          // 264
+const PANEL_X  = Math.floor((CONFIG.WIDTH  - PANEL_W) / 2) // 580
+const PANEL_Y  = Math.floor((CONFIG.HEIGHT - PANEL_H) / 2) // 408
 
 export class InventoryScene extends BaseScene {
   constructor() {
@@ -42,33 +49,49 @@ export class InventoryScene extends BaseScene {
 
     this.createChrome()
     this.registerInputs()
+    this.setupPauseKey()
     this.refresh()
   }
 
   createChrome() {
-    this.createPanel(0, 0, CONFIG.WIDTH, TOP_PANEL_HEIGHT)
-    this.createPanel(0, TOP_PANEL_HEIGHT, CONFIG.WIDTH, LIST_PANEL_HEIGHT)
-    this.createPanel(0, DESCRIPTION_PANEL_Y, CONFIG.WIDTH, CONFIG.HEIGHT - DESCRIPTION_PANEL_Y)
+    // Dim the underlying scene
+    this.add.rectangle(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT, 0x000000)
+      .setOrigin(0, 0)
+      .setAlpha(0.65)
 
-    this.tabText = this.add.text(4, 6, '', {
+    // Compact centered panels: tab bar | item list | description | hint strip
+    this.createPanel(PANEL_X, PANEL_Y,                         PANEL_W, TAB_H)
+    this.createPanel(PANEL_X, PANEL_Y + TAB_H,                 PANEL_W, LIST_H)
+    this.createPanel(PANEL_X, PANEL_Y + TAB_H + LIST_H,        PANEL_W, DESC_H)
+    this.createPanel(PANEL_X, PANEL_Y + TAB_H + LIST_H + DESC_H, PANEL_W, HINT_H)
+
+    this.tabText = this.add.text(PANEL_X + 8, PANEL_Y + 8, '', {
       fontFamily: CONFIG.FONT,
       fontSize:   '8px',
       color:      '#ffffff',
     })
 
-    this.itemText = this.add.text(4, 26, '', {
+    this.itemText = this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + 8, '', {
       fontFamily: CONFIG.FONT,
       fontSize:   '8px',
       color:      '#ffffff',
+      lineSpacing: 6,
+    })
+
+    this.descriptionText = this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + LIST_H + 8, '', {
+      fontFamily: CONFIG.FONT,
+      fontSize:   '8px',
+      color:      '#aaaaaa',
+      wordWrap:   { width: PANEL_W - 16 },
       lineSpacing: 4,
     })
 
-    this.descriptionText = this.add.text(4, DESCRIPTION_PANEL_Y + 6, '', {
-      fontFamily: CONFIG.FONT,
-      fontSize:   '8px',
-      color:      '#ffffff',
-      wordWrap:   { width: CONFIG.WIDTH - 8 },
-    })
+    this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + LIST_H + DESC_H + 6,
+      'I/X: CLOSE   ESC: PAUSE', {
+        fontFamily: CONFIG.FONT,
+        fontSize:   '6px',
+        color:      '#555577',
+      })
   }
 
   createPanel(x, y, width, height) {
@@ -84,6 +107,7 @@ export class InventoryScene extends BaseScene {
       down:  Phaser.Input.Keyboard.KeyCodes.DOWN,
       z:     Phaser.Input.Keyboard.KeyCodes.Z,
       x:     Phaser.Input.Keyboard.KeyCodes.X,
+      i:     Phaser.Input.Keyboard.KeyCodes.I,
     })
   }
 
@@ -94,6 +118,7 @@ export class InventoryScene extends BaseScene {
     if (Phaser.Input.Keyboard.JustDown(this.keys.down)) this.moveCursor(1)
     if (Phaser.Input.Keyboard.JustDown(this.keys.z)) this.confirm()
     if (Phaser.Input.Keyboard.JustDown(this.keys.x)) this.close()
+    if (Phaser.Input.Keyboard.JustDown(this.keys.i)) this.close()
   }
 
   changeTab(step) {
