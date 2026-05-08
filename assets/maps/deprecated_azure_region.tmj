@@ -733,7 +733,7 @@
         0,
         0,
         0,
-        0,
+        19,
         0,
         0,
         0,
@@ -973,7 +973,7 @@
         0,
         0,
         0,
-        0,
+        18,
         0,
         0,
         0,
@@ -1128,8 +1128,8 @@
           "type": "npc",
           "visible": true,
           "width": 48,
-          "x": 1200,
-          "y": 624
+          "x": 1056,
+          "y": 288
         },
         {
           "height": 48,
@@ -1145,8 +1145,8 @@
           "type": "npc",
           "visible": true,
           "width": 48,
-          "x": 1200,
-          "y": 288
+          "x": 624,
+          "y": 384
         }
       ],
       "opacity": 1,
@@ -1885,7 +1885,7 @@
         0,
         0,
         0,
-        0,
+        17,
         0,
         0,
         0,
@@ -2125,7 +2125,7 @@
         0,
         0,
         0,
-        0,
+        17,
         0,
         0,
         0,
@@ -2294,15 +2294,15 @@
       "tilewidth": 48
     },
     {
-      "columns": 12,
+      "columns": 14,
       "firstgid": 6,
       "image": "../tiles/wasteland_tiles.png",
       "imageheight": 48,
-      "imagewidth": 576,
+      "imagewidth": 672,
       "margin": 0,
       "name": "wasteland_tiles",
       "spacing": 0,
-      "tilecount": 12,
+      "tilecount": 14,
       "tileheight": 48,
       "tilewidth": 48
     }

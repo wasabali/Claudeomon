@@ -1,12 +1,12 @@
 {
-  "columns": 12,
+  "columns": 14,
   "image": "wasteland_tiles.png",
   "imageheight": 48,
-  "imagewidth": 576,
+  "imagewidth": 672,
   "margin": 0,
   "name": "wasteland_tiles",
   "spacing": 0,
-  "tilecount": 12,
+  "tilecount": 14,
   "tiledversion": "1.10.0",
   "tileheight": 48,
   "tilewidth": 48,
@@ -322,6 +322,58 @@
         }
       ],
       "type": "wall"
+    },
+    {
+      "id": 12,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_dead_tree"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Dead tree skeleton — bare dark-brown trunk with jagged bare branches"
+        }
+      ],
+      "type": "prop"
+    },
+    {
+      "id": 13,
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "value": "waste_broken_sign"
+        },
+        {
+          "name": "tileType",
+          "type": "string",
+          "value": "prop"
+        },
+        {
+          "name": "collision",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "value": "Broken signpost — faded orange warning sign on a cracked post"
+        }
+      ],
+      "type": "prop"
     }
   ],
   "type": "tileset",

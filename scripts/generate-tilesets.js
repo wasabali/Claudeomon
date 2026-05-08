@@ -383,8 +383,9 @@ const STUB_TILES = [
   tile( 25, 22, 35,'stone'),  // 5 — wall / impassable (dark solid)
 ]
 
-// void_tiles — 12-tile strip for dev_null_void (and future void-biome regions).
+// void_tiles — 14-tile strip for dev_null_void (and future void-biome regions).
 // Palette from assets/maps/TILE_SPECS.md §1.
+// Tiles 12–13 (void_glitch_corrupt, void_data_stream) added to meet biome tile quota.
 const VOID_TILES = [
   tile( 10, 10, 26,'flat'),   //  1 — void_ground
   tile( 26, 26, 46,'cross'),  //  2 — void_ground_corrupted
@@ -398,10 +399,13 @@ const VOID_TILES = [
   tile( 10, 10, 26,'grass'),  // 10 — void_dissolution (fade)
   tile(102,  0,204,'water'),  // 11 — void_portal_glow
   tile(  5,  5, 16,'flat'),   // 12 — void_wall (collision)
+  tile(204,  0,255,'cross'),  // 13 — void_glitch_corrupt (magenta checkerboard corruption)
+  tile(  0,204,102,'cross'),  // 14 — void_data_stream (cyan-green data rain)
 ]
 
-// wasteland_tiles — 12-tile strip for deprecated_azure_region.
+// wasteland_tiles — 14-tile strip for deprecated_azure_region.
 // Palette from assets/maps/TILE_SPECS.md §2.
+// Tiles 12–13 (waste_dead_tree, waste_broken_sign) added to meet biome tile quota.
 const WASTELAND_TILES = [
   tile(160,120, 32,'stone'),  //  1 — waste_ground (cracked earth)
   tile(139,105, 20,'stone'),  //  2 — waste_ground_heavy
@@ -415,6 +419,8 @@ const WASTELAND_TILES = [
   tile( 32, 96,160,'flat'),   // 10 — waste_azure_logo
   tile(106,106, 90,'cross'),  // 11 — waste_wire_fence
   tile( 26, 26, 26,'flat'),   // 12 — waste_wall (collision)
+  tile( 52, 38, 22,'stone'),  // 13 — waste_dead_tree (bare dark-brown tree skeleton)
+  tile(180,120, 40,'cross'),  // 14 — waste_broken_sign (faded orange signpost)
 ]
 
 // kenney_tech_office — 50-tile grid (5 cols × 10 rows) for tech/office regions.
