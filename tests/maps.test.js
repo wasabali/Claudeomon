@@ -39,6 +39,11 @@ describe('localhost_town map tileset metadata', () => {
     expect(buf[1]).toBe(80)   // P
     expect(buf[2]).toBe(78)   // N
     expect(buf[3]).toBe(71)   // G
+    // IHDR width and height are big-endian uint32 at bytes 16-23
+    const width  = buf.readUInt32BE(16)
+    const height = buf.readUInt32BE(20)
+    expect(width).toBe(1296)
+    expect(height).toBe(864)
   })
 
   it('village tileset PNG is a valid PNG at 384×192px', () => {

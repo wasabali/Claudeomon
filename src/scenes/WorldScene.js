@@ -475,6 +475,13 @@ export class WorldScene extends BaseScene {
       const stubTileset = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
       if (stubTileset) tilesets.push(stubTileset)
     }
+
+    // Safety fallback: if no tilesets registered (e.g. kenney_urban failed to load),
+    // fall back to stub_tiles so createLayer() doesn't break
+    if (tilesets.length === 0) {
+      const fallbackTs = this._map.addTilesetImage('stub_tiles', TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)
+      if (fallbackTs) tilesets.push(fallbackTs)
+    }
     // Tech regions carry a second tileset for server rooms, offices, and data centres
     const isTech = TECH_TILESET_REGIONS.has(mapKey)
     if (isTech) {

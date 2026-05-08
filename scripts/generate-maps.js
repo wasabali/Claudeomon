@@ -723,8 +723,9 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const isVoid = !!region.hasVoidTileset
   const isWasteland = !!region.hasWastelandTileset
   const biome = (!isTech && !isVoid && !isWasteland) ? (region.biome || null) : null
-  // Use Kenney Urban tileset for village biome (and nature biome for overworld maps)
-  const useKenney = KENNEY_BIOMES.includes(biome)
+  // Use Kenney Urban tileset for village/nature/interior biomes, but only for
+  // main/gym region types — dungeons still use legacy biome/stub GIDs
+  const useKenney = KENNEY_BIOMES.includes(biome) && (type === 'main' || type === 'gym')
   const openings = getOpeningTiles(w, h, connections)
   const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland, biome, useKenney)
 
