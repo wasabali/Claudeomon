@@ -534,6 +534,8 @@ export class WorldScene extends BaseScene {
 
   _setupNpcSprites() {
     this._npcSprites = []
+    // Tiles occupied by NPC sprites — player cannot walk into them.
+    this._blockedNpcTiles = new Set()
 
     // Pre-compute per-act state used across the loop.
     const act                = GameState.story?.act ?? 1
@@ -569,6 +571,11 @@ export class WorldScene extends BaseScene {
       const sprite  = isSheet
         ? this.add.sprite(cx, cy, key, 1).setDepth(CHAR_DEPTH)  // frame 1 = idle-down
         : this.add.image(cx, cy, key).setDepth(CHAR_DEPTH)
+
+      // Block the tile this NPC occupies so the player can't walk through it.
+      const npcTileX = Math.floor(cx / TILE_SIZE)
+      const npcTileY = Math.floor(cy / TILE_SIZE)
+      this._blockedNpcTiles.add(`${npcTileX},${npcTileY}`)
 
       this.add.text(cx, cy - def.height / 2 - 8, def.name, {
         fontFamily: CONFIG.FONT,
@@ -614,8 +621,8 @@ export class WorldScene extends BaseScene {
     const playerTextureKey = this.textures.exists(PLAYER_SPRITE_KEY)
       ? PLAYER_SPRITE_KEY
       : 'player'
-    const playerUseSheet = playerTextureKey !== 'player'
-    this._player = playerUseSheet
+    this._playerUseSheet = playerTextureKey !== 'player'
+    this._player = this._playerUseSheet
       ? this.physics.add.sprite(startX, startY, playerTextureKey, 1)
       : this.physics.add.sprite(startX, startY, playerTextureKey)
     this._player.setDepth(CHAR_DEPTH)
@@ -627,9 +634,56 @@ export class WorldScene extends BaseScene {
       this.physics.add.collider(this._player, this._collisionLayer)
     }
     this.physics.world.setBounds(0, 0, this._map.widthInPixels, this._map.heightInPixels)
+
+    this._setupPlayerAnimations(playerTextureKey)
   }
 
-  _syncTileFromPlayerPosition() {
+  // Register a walk-cycle animation for each direction using the 4-row × 3-col
+  // ninja spritesheet layout:  Row 0 = down, 1 = left, 2 = right, 3 = up.
+  // Animations are shared across scene restarts (Phaser deduplicates by key).
+  _setupPlayerAnimations(textureKey) {
+    if (!this._playerUseSheet) return
+    const DIRS = [
+      { dir: 'down',  startFrame: 0 },
+      { dir: 'left',  startFrame: 3 },
+      { dir: 'right', startFrame: 6 },
+      { dir: 'up',    startFrame: 9 },
+    ]
+    for (const { dir, startFrame } of DIRS) {
+      const key = `player_walk_${dir}`
+      if (!this.anims.exists(key)) {
+        this.anims.create({
+          key,
+          frames: this.anims.generateFrameNumbers(textureKey, {
+            start: startFrame,
+            end:   startFrame + 2,
+          }),
+          frameRate: 8,
+          repeat: -1,
+        })
+      }
+    }
+  }
+
+  // Idle frame index for each facing direction (middle column of each row).
+  static _IDLE_FRAME = { down: 1, left: 4, right: 7, up: 10 }
+
+  // Update the player sprite animation to match the current movement state.
+  _updatePlayerAnim() {
+    if (!this._playerUseSheet || !this._player) return
+    if (this._moveState === 'stepping') {
+      const animKey = `player_walk_${this._facing}`
+      if (this._player.anims.currentAnim?.key !== animKey) {
+        this._player.play(animKey, true)
+      }
+    } else {
+      // idle or bumping — freeze on the standing frame for the current direction
+      this._player.anims.stop()
+      this._player.setFrame(WorldScene._IDLE_FRAME[this._facing] ?? 1)
+    }
+  }
+
+
     const persisted = syncPlayerTileFromPixels(
       this._player.x,
       this._player.y,
@@ -668,6 +722,7 @@ export class WorldScene extends BaseScene {
       return
     }
     this._updateMovement(delta)
+    this._updatePlayerAnim()
     this._updateThrottlemasterGhost()
     this._checkEdgeTransition()
   }
@@ -686,6 +741,7 @@ export class WorldScene extends BaseScene {
   }
 
   _isTileWalkable(tileX, tileY) {
+    if (this._blockedNpcTiles?.has(`${tileX},${tileY}`)) return false
     return isTileWalkable(tileX, tileY, this._map.width, this._map.height,
       (tx, ty) => this._collisionLayer ? this._collisionLayer.getTileAt(tx, ty) : null)
   }
