@@ -1453,6 +1453,37 @@ const TRAINERS = {
   },
 
   // =========================================================================
+  // WORLD NPCs — non-battleable characters visible on the overworld map.
+  // These entries exist solely to provide a spriteKey for WorldScene to
+  // render a human-looking character instead of the orange npc_default stub.
+  // They intentionally omit hp/deck so the battle check never fires.
+  // =========================================================================
+
+  margaret: {
+    id: 'margaret',
+    spriteKey: 'ninja_woman_fighter',
+    name: 'Margaret',
+    isCursed: false,
+    location: 'localhost_town',
+  },
+
+  professor_pedersen: {
+    id: 'professor_pedersen',
+    spriteKey: 'ninja_archwizard',
+    name: 'Professor Pedersen',
+    isCursed: false,
+    location: 'localhost_town',
+  },
+
+  random_intern: {
+    id: 'random_intern',
+    spriteKey: 'ninja_adventurer',
+    name: 'Random Intern',
+    isCursed: false,
+    location: 'localhost_town',
+  },
+
+  // =========================================================================
   // CURSED TRAINERS — hidden areas, require shame to access
   // =========================================================================
 

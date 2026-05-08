@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { REGION_CONNECTIONS, getAll as getAllRegions } from '../src/data/regions.js'
 import { getBy as getInteractionsBy } from '../src/data/interactions.js'
+import { getById as getTrainerById } from '../src/data/trainers.js'
 
 const MAPS_DIR = path.join(process.cwd(), 'assets', 'maps')
 
@@ -245,6 +246,17 @@ describe('transition spawn coordinates are in-bounds for target maps', () => {
 // Derived from region data — single source of truth for which regions carry the tech tileset
 const TECH_REGION_IDS = getAllRegions().filter(r => r.hasTechTileset).map(r => r.id)
 
+// Biome regions derived from region data
+const BIOME_REGION_IDS_BY_BIOME = {}
+for (const region of getAllRegions()) {
+  if (region.biome) {
+    if (!BIOME_REGION_IDS_BY_BIOME[region.biome]) BIOME_REGION_IDS_BY_BIOME[region.biome] = []
+    BIOME_REGION_IDS_BY_BIOME[region.biome].push(region.id)
+  }
+}
+const DUNGEON_BIOME_REGION_IDS  = BIOME_REGION_IDS_BY_BIOME['dungeon']  || []
+const INTERIOR_BIOME_REGION_IDS = BIOME_REGION_IDS_BY_BIOME['interior'] || []
+
 describe('tech regions carry kenney_tech_office tileset', () => {
   it.each(TECH_REGION_IDS)('%s includes kenney_tech_office as second tileset', (regionId) => {
     const mapPath = path.join(MAPS_DIR, `${regionId}.tmj`)
@@ -276,6 +288,159 @@ describe('tech regions carry kenney_tech_office tileset', () => {
     expect(nonZero.length).toBeGreaterThan(0)
     // All non-zero GIDs should be in range 6–55 (kenney_tech_office tiles)
     expect(nonZero.every(gid => gid >= 6 && gid <= 55)).toBe(true)
+  })
+})
+
+describe('dungeon biome regions carry dungeon tileset', () => {
+  it.each(DUNGEON_BIOME_REGION_IDS)('%s includes dungeon as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const ts = map.tilesets.find(t => t.name === 'dungeon')
+    expect(ts).toBeDefined()
+    expect(ts.image).toBe('tilesets/dungeon.png')
+    expect(ts.tilewidth).toBe(48)
+    expect(ts.tileheight).toBe(48)
+    expect(ts.columns).toBe(8)
+    expect(ts.tilecount).toBe(32)
+    expect(ts.firstgid).toBe(6)
+  })
+
+  it.each(DUNGEON_BIOME_REGION_IDS)('%s ground layer uses dungeon tile GIDs', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.some(gid => gid >= 6 && gid <= 37)).toBe(true)
+  })
+})
+
+// Only generated (non-hand-made) maps are guaranteed to have no stub building GIDs.
+// Hand-made maps with biome may still carry legacy stub tiles and are out of scope.
+const GENERATED_DUNGEON_IDS  = ['jira_dungeon_1', 'jira_dungeon_2', 'jira_dungeon_3']
+const GENERATED_INTERIOR_IDS = ['bakery_interior', 'lab_interior', 'apartment_interior']
+
+describe('generated dungeon maps have no stub building GIDs', () => {
+  it.each(GENERATED_DUNGEON_IDS)('%s has no stub building GIDs (2–5) in tile layers', (regionId) => {
+    const map = loadMap(regionId)
+    const tileLayers = map.layers.filter(l => l.type === 'tilelayer')
+    for (const layer of tileLayers) {
+      expect(layer.data.filter(gid => gid >= 2 && gid <= 5).length).toBe(0)
+    }
+  })
+})
+
+describe('interior biome regions carry interior tileset', () => {
+  it.each(INTERIOR_BIOME_REGION_IDS)('%s includes interior as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const ts = map.tilesets.find(t => t.name === 'interior')
+    expect(ts).toBeDefined()
+    expect(ts.image).toBe('tilesets/interior.png')
+    expect(ts.tilewidth).toBe(48)
+    expect(ts.tileheight).toBe(48)
+    expect(ts.columns).toBe(8)
+    expect(ts.tilecount).toBe(32)
+    expect(ts.firstgid).toBe(6)
+  })
+
+  it.each(INTERIOR_BIOME_REGION_IDS)('%s ground layer uses interior tile GIDs', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.some(gid => gid >= 6 && gid <= 37)).toBe(true)
+  })
+})
+
+describe('generated interior maps have no stub building GIDs', () => {
+  it.each(GENERATED_INTERIOR_IDS)('%s has no stub building GIDs (2–5) in tile layers', (regionId) => {
+    const map = loadMap(regionId)
+    const tileLayers = map.layers.filter(l => l.type === 'tilelayer')
+    for (const layer of tileLayers) {
+      expect(layer.data.filter(gid => gid >= 2 && gid <= 5).length).toBe(0)
+    }
+  })
+})
+
+// Derived from region data — single source of truth for which regions carry the void/wasteland tilesets
+const VOID_REGION_IDS = getAllRegions().filter(r => r.hasVoidTileset).map(r => r.id)
+const WASTELAND_REGION_IDS = getAllRegions().filter(r => r.hasWastelandTileset).map(r => r.id)
+
+describe('void regions carry void_tiles tileset', () => {
+  it.each(VOID_REGION_IDS)('%s declares void_tiles as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const voidTs = map.tilesets.find(ts => ts.name === 'void_tiles')
+    expect(voidTs).toBeDefined()
+    expect(voidTs.image).toBe('../tiles/void_tiles.png')
+    expect(voidTs.tilewidth).toBe(48)
+    expect(voidTs.tileheight).toBe(48)
+    expect(voidTs.columns).toBe(12)
+    expect(voidTs.tilecount).toBe(12)
+    expect(voidTs.firstgid).toBe(6)
+    expect(map.tilesets[0].name).toBe('stub_tiles')
+    expect(map.tilesets[1].name).toBe('void_tiles')
+  })
+
+  it.each(VOID_REGION_IDS)('%s ground layer uses void_ground GID 6', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.every(gid => gid === 6)).toBe(true)
+  })
+
+  it.each(VOID_REGION_IDS)('%s objects layer uses void tile GIDs (6–17), not stub GIDs 2–5', (regionId) => {
+    const map = loadMap(regionId)
+    const objects = map.layers.find(l => l.name === 'Objects')
+    expect(objects).toBeDefined()
+    const nonZero = objects.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid >= 6 && gid <= 17)).toBe(true)
+  })
+
+  it.each(VOID_REGION_IDS)('%s collision layer uses void_wall GID 17, not stub GID 5', (regionId) => {
+    const map = loadMap(regionId)
+    const collision = map.layers.find(l => l.name === 'Collision')
+    expect(collision).toBeDefined()
+    const nonZero = collision.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid === 17)).toBe(true)
+  })
+})
+
+describe('wasteland regions carry wasteland_tiles tileset', () => {
+  it.each(WASTELAND_REGION_IDS)('%s declares wasteland_tiles as second tileset', (regionId) => {
+    const map = loadMap(regionId)
+    const wasteTs = map.tilesets.find(ts => ts.name === 'wasteland_tiles')
+    expect(wasteTs).toBeDefined()
+    expect(wasteTs.image).toBe('../tiles/wasteland_tiles.png')
+    expect(wasteTs.tilewidth).toBe(48)
+    expect(wasteTs.tileheight).toBe(48)
+    expect(wasteTs.columns).toBe(12)
+    expect(wasteTs.tilecount).toBe(12)
+    expect(wasteTs.firstgid).toBe(6)
+    expect(map.tilesets[0].name).toBe('stub_tiles')
+    expect(map.tilesets[1].name).toBe('wasteland_tiles')
+  })
+
+  it.each(WASTELAND_REGION_IDS)('%s ground layer uses waste_ground GID 6', (regionId) => {
+    const map = loadMap(regionId)
+    const ground = map.layers.find(l => l.name === 'Ground')
+    expect(ground).toBeDefined()
+    expect(ground.data.every(gid => gid === 6)).toBe(true)
+  })
+
+  it.each(WASTELAND_REGION_IDS)('%s objects layer uses wasteland tile GIDs (6–17), not stub GIDs 2–5', (regionId) => {
+    const map = loadMap(regionId)
+    const objects = map.layers.find(l => l.name === 'Objects')
+    expect(objects).toBeDefined()
+    const nonZero = objects.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid >= 6 && gid <= 17)).toBe(true)
+  })
+
+  it.each(WASTELAND_REGION_IDS)('%s collision layer uses waste_wall GID 17, not stub GID 5', (regionId) => {
+    const map = loadMap(regionId)
+    const collision = map.layers.find(l => l.name === 'Collision')
+    expect(collision).toBeDefined()
+    const nonZero = collision.data.filter(gid => gid !== 0)
+    expect(nonZero.length).toBeGreaterThan(0)
+    expect(nonZero.every(gid => gid === 17)).toBe(true)
   })
 })
 
@@ -410,6 +575,32 @@ describe('localhost_town NPC and interaction objects', () => {
       expect(spawnX, `${obj.name} targetSpawnX out of bounds`).toBeLessThan(targetMap.width)
       expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeGreaterThanOrEqual(0)
       expect(spawnY, `${obj.name} targetSpawnY out of bounds`).toBeLessThan(targetMap.height)
+    }
+  })
+})
+
+describe('NPC sprite coverage', () => {
+  // azure_terminal is the only intentional non-trainer NPC stub (it is a machine, not a person).
+  const INTENTIONAL_STUBS = new Set(['azure_terminal'])
+
+  it('every NPC in every map NPCs layer has a trainer registry entry', () => {
+    const maps = fs.readdirSync(MAPS_DIR).filter(f => f.endsWith('.tmj'))
+    for (const mapFile of maps) {
+      const map = JSON.parse(fs.readFileSync(path.join(MAPS_DIR, mapFile), 'utf-8'))
+      const npcLayer = map.layers?.find(l => l.name === 'NPCs')
+      if (!npcLayer) continue
+      for (const npc of npcLayer.objects) {
+        if (INTENTIONAL_STUBS.has(npc.name)) continue
+        const trainer = getTrainerById(npc.name)
+        expect(
+          trainer,
+          `NPC "${npc.name}" in ${mapFile} has no trainer registry entry — it will render as an orange rectangle`,
+        ).toBeDefined()
+        expect(
+          trainer?.spriteKey,
+          `NPC "${npc.name}" in ${mapFile} has a trainer entry but no spriteKey — it will render as an orange rectangle`,
+        ).toBeTruthy()
+      }
     }
   })
 })
