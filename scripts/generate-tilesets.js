@@ -418,69 +418,10 @@ const WASTELAND_TILES = [
 ]
 
 // kenney_tech_office — 50-tile grid (5 cols × 10 rows) for tech/office regions.
-// Palette inspired by Kenney RPG Urban Pack colours.
-const TECH_OFFICE_TILES = [
-  // Row 0 (IDs 1-5): floors
-  tile( 40, 40, 44,'stone'),  //  1 — tech_floor (dark grey)
-  tile( 52, 73, 94,'stone'),  //  2 — server_room_floor
-  tile(190,192,198,'stone'),  //  3 — office_floor (light, from Kenney)
-  tile( 28, 40, 82,'stone'),  //  4 — raised_floor
-  tile( 95, 98,108,'stone'),  //  5 — corridor
-  // Row 1 (IDs 6-10): walls / structural
-  tile( 22, 22, 25,'flat'),   //  6 — server_room_wall
-  tile(218,212,192,'wood'),   //  7 — office_wall (beige, from Kenney)
-  tile( 45, 45, 58,'stone'),  //  8 — datacenter_wall
-  tile(172,210,235,'flat'),   //  9 — glass_wall (from Kenney)
-  tile( 60, 65, 72,'stone'),  // 10 — tech_building_exterior
-  // Row 2 (IDs 11-15): equipment
-  tile( 30, 30, 40,'flat'),   // 11 — server_rack (dark)
-  tile( 30, 30, 40,'cross'),  // 12 — server_rack_leds (blinking)
-  tile( 80, 60, 20,'wood'),   // 13 — cable_bundle
-  tile( 60, 60, 80,'cross'),  // 14 — patch_panel
-  tile( 40, 50, 70,'cross'),  // 15 — network_switch
-  // Row 3 (IDs 16-20): office furniture (from Kenney)
-  tile(120, 90, 50,'wood'),   // 16 — desk
-  tile( 50, 60, 80,'flat'),   // 17 — monitor
-  tile( 70, 70, 80,'flat'),   // 18 — keyboard
-  tile(200,200,210,'flat'),   // 19 — whiteboard
-  tile( 80, 50, 30,'wood'),   // 20 — office_chair
-  // Row 4 (IDs 21-25): mechanical / signage
-  tile(180,180,190,'stone'),  // 21 — cooling_unit
-  tile( 40, 60, 40,'flat'),   // 22 — ups_battery
-  tile(255,204,  0,'flat'),   // 23 — warning_sign (from Kenney)
-  tile(200, 50, 50,'flat'),   // 24 — emergency_light
-  tile( 60, 60, 60,'cross'),  // 25 — cable_tray
-  // Row 5 (IDs 26-30): screens / terminals
-  tile( 50, 70, 50,'flat'),   // 26 — crt_monitor
-  tile( 10, 20, 10,'flat'),   // 27 — command_prompt (dark green)
-  tile(200, 40, 40,'flat'),   // 28 — error_screen (red)
-  tile( 30, 80,120,'flat'),   // 29 — monitoring_dashboard
-  tile( 40, 40, 50,'cross'),  // 30 — terminal_server
-  // Row 6 (IDs 31-35): exteriors (from Kenney)
-  tile(100,110,130,'stone'),  // 31 — cloud_office_exterior
-  tile( 90, 80, 60,'wood'),   // 32 — startup_garage
-  tile( 80, 90,110,'stone'),  // 33 — noc_building
-  tile(120,130,150,'stone'),  // 34 — datacenter_entrance
-  tile(150,140,120,'stone'),  // 35 — tech_park_path (from Kenney)
-  // Row 7 (IDs 36-40): small items (from Kenney where noted)
-  tile(240,220,100,'flat'),   // 36 — sticky_notes
-  tile(140,100, 60,'flat'),   // 37 — coffee_cup
-  tile( 50, 50, 60,'flat'),   // 38 — decommissioned_server
-  tile( 70, 60, 50,'stone'),  // 39 — dusty_rack
-  tile( 20,200, 20,'flat'),   // 40 — blinking_led (green)
-  // Row 8 (IDs 41-45): interactive objects
-  tile( 30, 30, 40,'cross'),  // 41 — server_rack_interact
-  tile( 40, 60, 40,'flat'),   // 42 — terminal_interact
-  tile( 50, 50, 70,'cross'),  // 43 — control_panel
-  tile( 60, 55, 50,'stone'),  // 44 — server_tombstone
-  tile( 40, 40, 44,'flat'),   // 45 — reserved
-  // Row 9 (IDs 46-50): reserved custom slots
-  tile( 40, 40, 44,'flat'),   // 46 — custom_slot_1
-  tile( 40, 40, 44,'flat'),   // 47 — custom_slot_2
-  tile( 40, 40, 44,'flat'),   // 48 — custom_slot_3
-  tile( 40, 40, 44,'flat'),   // 49 — custom_slot_4
-  tile( 40, 40, 44,'flat'),   // 50 — custom_slot_5
-]
+// Tile definitions and pixel art are owned by scripts/generate-tech-sprites.js.
+// The constant that previously lived here (TECH_OFFICE_TILES) was removed when
+// generation was delegated to that script; see generate-tech-sprites.js for the
+// full tile registry with per-slot painter functions.
 
 // ---------------------------------------------------------------------------
 // Strip-tileset generator — single-row tilesets (n cols × 1 row)
