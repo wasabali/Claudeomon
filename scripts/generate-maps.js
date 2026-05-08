@@ -955,7 +955,12 @@ function findNpcSpot(w, h, occupied, usedSpots, openings, rng) {
 function generateMap(regionId, region, connections, allRegions, trainers, interactions, childGyms, gymDoorPositions, childDungeons = []) {
   const type = region.type
   const { w, h } = SIZE[type] || SIZE.main
-  const rng = seededRng(hashSeed(regionId))
+  // Two independent RNG streams derived from the regionId seed:
+  //   rngObjects — drives tile scatter and object placement (generateObjects + ground)
+  //   rngNpcs    — drives NPC/transition spot selection (unaffected by scatter changes)
+  const baseSeed = hashSeed(regionId)
+  const rng      = seededRng(baseSeed)
+  const rngNpcs  = seededRng(baseSeed ^ 0x5a5a5a5a)
 
   const isTech = !!region.hasTechTileset
   const isVoid = !!region.hasVoidTileset
@@ -1013,14 +1018,14 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   // Trainers in this region
   const regionTrainers = trainers.filter(t => t.location === regionId)
   for (const t of regionTrainers) {
-    const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
+    const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rngNpcs)
     npcObjects.push(makeNpcObject(objId++, t.id, spot.tileX, spot.tileY))
   }
 
 
   // Azure terminal for fast-travel regions
   if (region.hasFastTravel) {
-    const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
+    const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rngNpcs)
     npcObjects.push(makeNpcObject(objId++, 'azure_terminal', spot.tileX, spot.tileY))
   }
 
@@ -1061,7 +1066,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
 
   if (type === 'main' && childGyms.length > 0) {
     for (const gym of childGyms) {
-      const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
+      const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rngNpcs)
       const gymSize = SIZE.gym
       // Spawn player one tile above the exit_door inside the gym
       const gymSpawnX = Math.floor(gymSize.w / 2)
@@ -1076,7 +1081,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   // Dungeon child transitions (bakery_door, lab_door, etc.)
   if (type === 'main' && childDungeons.length > 0) {
     for (const dg of childDungeons) {
-      const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rng)
+      const spot = findNpcSpot(w, h, occupied, usedSpots, openings, rngNpcs)
       const dgSize = SIZE.dungeon || SIZE.main
       const dgSpawnX = Math.floor(dgSize.w / 2)
       const dgSpawnY = dgSize.h - 3

@@ -377,7 +377,7 @@ describe('void regions carry void_tiles tileset', () => {
     expect(ground.data.every(gid => gid === 6)).toBe(true)
   })
 
-  it.each(VOID_REGION_IDS)('%s objects layer uses void tile GIDs (6–17), not stub GIDs 2–5', (regionId) => {
+  it.each(VOID_REGION_IDS)('%s objects layer uses void tile GIDs (6–19), not stub GIDs 2–5', (regionId) => {
     const map = loadMap(regionId)
     const objects = map.layers.find(l => l.name === 'Objects')
     expect(objects).toBeDefined()
@@ -418,7 +418,7 @@ describe('wasteland regions carry wasteland_tiles tileset', () => {
     expect(ground.data.every(gid => gid === 6)).toBe(true)
   })
 
-  it.each(WASTELAND_REGION_IDS)('%s objects layer uses wasteland tile GIDs (6–17), not stub GIDs 2–5', (regionId) => {
+  it.each(WASTELAND_REGION_IDS)('%s objects layer uses wasteland tile GIDs (6–19), not stub GIDs 2–5', (regionId) => {
     const map = loadMap(regionId)
     const objects = map.layers.find(l => l.name === 'Objects')
     expect(objects).toBeDefined()

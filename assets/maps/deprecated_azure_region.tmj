@@ -1128,8 +1128,8 @@
           "type": "npc",
           "visible": true,
           "width": 48,
-          "x": 432,
-          "y": 192
+          "x": 1056,
+          "y": 288
         },
         {
           "height": 48,
@@ -1145,8 +1145,8 @@
           "type": "npc",
           "visible": true,
           "width": 48,
-          "x": 1200,
-          "y": 480
+          "x": 624,
+          "y": 384
         }
       ],
       "opacity": 1,

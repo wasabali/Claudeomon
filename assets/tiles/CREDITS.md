@@ -2,16 +2,17 @@
 
 ## Kenney RPG Urban Pack (CC0)
 
-Village, nature, and interior biome maps are rendered with tiles sourced from the
+Village, nature, and interior biome **main** and **gym** maps are rendered with tiles sourced from the
 [Kenney RPG Urban Pack](https://kenney.nl/assets/rpg-urban-pack)
-by [Kenney](https://kenney.nl).
+by [Kenney](https://kenney.nl). Dungeon-type children of those biomes use the custom generated biome
+tilesets instead (see *Custom Pixel Art Tilesets — Biome Tilesets* below).
 
 - **License:** [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)
   (no attribution required, but we credit them anyway)
 - **Source:** https://kenney.nl/assets/rpg-urban-pack
 - **File used:** `tilemap_packed.png` (27×18 tile grid, 16×16 px source)
 - **Upscale applied:** 3× nearest-neighbour → 48×48 px → stored as `assets/maps/tilesets/kenney_urban.png` (1296×864 px)
-- **Used by biomes:** `village` (localhost_town, azure_town), `nature` (production_plains, pipeline_pass), `interior` (three_am_tavern, bakery_interior, lab_interior, apartment_interior)
+- **Used by biomes (main/gym maps only):** `village` (localhost_town, azure_town), `nature` (production_plains, pipeline_pass), `interior` (three_am_tavern, bakery_interior, lab_interior, apartment_interior)
 
 ### Key tiles used from Kenney RPG Urban
 
