@@ -1,10 +1,15 @@
 name: Fix Failing Pipeline
 
-# Triggers on EVERY completed check suite (universal — catches all repo workflows
-# and GitHub's own pages-build-deployment runner).
+# workflow_run fires when any listed workflow completes — this is the correct way
+# to react to Actions-created check suites within the same repository.
+# check_suite events are only fired by third-party GitHub Apps, not GitHub Actions.
 # Also exposes workflow_dispatch so it can be run manually against a specific run.
 on:
-  check_suite:
+  workflow_run:
+    workflows:
+      - CI
+      - Deploy to GitHub Pages
+      - Sync Wiki
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -22,11 +27,11 @@ jobs:
   propose-fix:
     name: Propose Fix
     runs-on: ubuntu-latest
-    # For check_suite: only fire on failures.
+    # For workflow_run: only fire on failures.
     # For workflow_dispatch: always proceed (run_id supplied by the user).
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      github.event.check_suite.conclusion == 'failure'
+      github.event.workflow_run.conclusion == 'failure'
 
     steps:
       - name: Gather failure details and open fix issue
@@ -59,35 +64,10 @@ jobs:
               actor            = manualRun.triggering_actor?.login ?? 'unknown';
               headRepoFullName = manualRun.head_repository?.full_name;
             } else {
-              // ── check_suite event ──────────────────────────────────────────
-              const suite = context.payload.check_suite;
-
-              // Find the workflow run that belongs to this check suite.
-              // The REST API supports filtering by check_suite_id.
-              const { data: runsData } = await github.request(
-                'GET /repos/{owner}/{repo}/actions/runs',
-                {
-                  owner:           context.repo.owner,
-                  repo:            context.repo.repo,
-                  check_suite_id:  suite.id,
-                  per_page:        1,
-                }
-              );
-              const runs = runsData.workflow_runs ?? [];
-              if (runs.length === 0) {
-                // pages-build-deployment and other system workflows may not surface
-                // as Actions workflow runs — nothing to process.
-                console.log('No Actions workflow run found for this check suite — skipping.');
-                return;
-              }
-
-              const run = runs[0];
-
-              // Guard: never create an issue for this workflow itself.
-              if (run.name === 'Fix Failing Pipeline') {
-                console.log('Skipping: this is the Fix Failing Pipeline workflow itself.');
-                return;
-              }
+              // ── workflow_run event ─────────────────────────────────────────
+              // The failing run is available directly in the event payload —
+              // no extra API call needed (unlike the old check_suite approach).
+              const run = context.payload.workflow_run;
 
               runId            = run.id;
               workflowName     = run.name;
