@@ -160,6 +160,9 @@ const KU = {
   WALL_V:        K(2, 14),   // 381 — vertical wall
 }
 
+// Biomes that use the Kenney Urban tileset instead of stub + biome tilesets.
+const KENNEY_BIOMES = ['village', 'nature', 'interior']
+
 // Resolve a block template to an array of GIDs.
 // Returns a 2D array [row][col] of GIDs.
 function resolveBlock(block) {
@@ -721,7 +724,7 @@ function generateMap(regionId, region, connections, allRegions, trainers, intera
   const isWasteland = !!region.hasWastelandTileset
   const biome = (!isTech && !isVoid && !isWasteland) ? (region.biome || null) : null
   // Use Kenney Urban tileset for village biome (and nature biome for overworld maps)
-  const useKenney = biome === 'village' || biome === 'nature' || biome === 'interior'
+  const useKenney = KENNEY_BIOMES.includes(biome)
   const openings = getOpeningTiles(w, h, connections)
   const { layer: objectsLayer, occupied } = generateObjects(w, h, type, openings, rng, isTech, isVoid, isWasteland, biome, useKenney)
 
