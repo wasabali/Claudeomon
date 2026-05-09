@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { CONFIG } from '../config.js'
-import { GameState } from '#state/GameState.js'
+import { GameState, markDirty } from '#state/GameState.js'
 
 const SLIDER_STEPS = 10
 const STEP_SIZE    = 1 / SLIDER_STEPS  // 0.1 per step
@@ -11,7 +11,7 @@ const SLIDERS = [
   { key: 'sfxVolume',    label: 'SFX' },
 ]
 
-const MENU_ITEMS = [...SLIDERS.map(s => s.label), 'MUTE', 'RESUME']
+const MENU_ITEMS_BASE = [...SLIDERS.map(s => s.label), 'MUTE', 'RESUME']
 
 const LABEL_X      = Math.floor(CONFIG.WIDTH * 0.1)
 const VALUE_X      = Math.floor(CONFIG.WIDTH * 0.45)
@@ -31,6 +31,12 @@ export class PauseScene extends Phaser.Scene {
     this._returnScene = data.returnScene ?? null
     this._selectedIndex = 0
 
+    // Build menu items — add FORFEIT before RESUME when paused inside a battle
+    const inBattle = this._returnScene === 'BattleScene'
+    this._menuItems = inBattle
+      ? [...SLIDERS.map(s => s.label), 'MUTE', 'FORFEIT', 'RESUME']
+      : MENU_ITEMS_BASE
+
     this.cameras.main.setBackgroundColor('rgba(0, 0, 0, 0.85)')
 
     this.add.text(CONFIG.WIDTH / 2, TITLE_Y, 'PAUSED', {
@@ -44,16 +50,16 @@ export class PauseScene extends Phaser.Scene {
     this._menuTexts = []
     this._valueTexts = []
 
-    for (let i = 0; i < MENU_ITEMS.length; i++) {
+    for (let i = 0; i < this._menuItems.length; i++) {
       const y = START_Y + i * LINE_HEIGHT
 
-      const label = this.add.text(LABEL_X, y, MENU_ITEMS[i], textStyle)
+      const label = this.add.text(LABEL_X, y, this._menuItems[i], textStyle)
       this._menuTexts.push(label)
 
       if (i < SLIDERS.length) {
         const valueText = this.add.text(VALUE_X, y, '', textStyle)
         this._valueTexts.push(valueText)
-      } else if (MENU_ITEMS[i] === 'MUTE') {
+      } else if (this._menuItems[i] === 'MUTE') {
         const valueText = this.add.text(VALUE_X, y, '', textStyle)
         this._valueTexts.push(valueText)
       }
@@ -68,12 +74,12 @@ export class PauseScene extends Phaser.Scene {
     this._refreshDisplay()
 
     this.input.keyboard.on('keydown-UP', () => {
-      this._selectedIndex = (this._selectedIndex - 1 + MENU_ITEMS.length) % MENU_ITEMS.length
+      this._selectedIndex = (this._selectedIndex - 1 + this._menuItems.length) % this._menuItems.length
       this._refreshDisplay()
     })
 
     this.input.keyboard.on('keydown-DOWN', () => {
-      this._selectedIndex = (this._selectedIndex + 1) % MENU_ITEMS.length
+      this._selectedIndex = (this._selectedIndex + 1) % this._menuItems.length
       this._refreshDisplay()
     })
 
@@ -95,14 +101,15 @@ export class PauseScene extends Phaser.Scene {
       GameState._session[slider.key] = next
       this._applyVolumeToActiveScene()
       this._refreshDisplay()
-    } else if (MENU_ITEMS[idx] === 'MUTE') {
+    } else if (this._menuItems[idx] === 'MUTE') {
       this._toggleMute()
     }
   }
 
   _confirm() {
-    const item = MENU_ITEMS[this._selectedIndex]
+    const item = this._menuItems[this._selectedIndex]
     if (item === 'MUTE') this._toggleMute()
+    else if (item === 'FORFEIT') this._forfeit()
     else if (item === 'RESUME') this._resume()
   }
 
@@ -119,6 +126,14 @@ export class PauseScene extends Phaser.Scene {
       this.scene.resume(this._returnScene)
     }
     this.scene.stop('PauseScene')
+  }
+
+  _forfeit() {
+    GameState.stats.battlesLost = (GameState.stats.battlesLost ?? 0) + 1
+    markDirty()
+    if (this._returnScene) this.scene.stop(this._returnScene)
+    this.scene.stop('PauseScene')
+    this.scene.start('WorldScene')
   }
 
   _applyVolumeToActiveScene() {

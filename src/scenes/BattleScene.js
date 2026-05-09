@@ -12,6 +12,7 @@ import {
   incidentAttackPhase,
   enemyPhase,
   turnEndPhase,
+  getPreBattleEvents,
 } from '#engine/BattleEngine.js'
 import { calculateXP, computeShameFlags } from '#engine/SkillEngine.js'
 import { checkLevelUp } from '#engine/ProgressionEngine.js'
@@ -121,6 +122,13 @@ export class BattleScene extends BaseScene {
       } else {
         this.playBgm('battle_engineer')
       }
+    }
+
+    // Show pre-battle intro dialog (ENGINEER mode — trainer/gym leader lines)
+    const preBattleEvents = getPreBattleEvents(this._battleState)
+    if (preBattleEvents.length > 0) {
+      this._skillMenu.hide()
+      this._animateEvents(preBattleEvents)
     }
   }
 
@@ -256,7 +264,11 @@ export class BattleScene extends BaseScene {
 
   _refreshSkillMenu() {
     if (!this._skillMenu) return
-    this._skillMenu.setItems(this._buildMenuItems())
+    // Use show() directly so the menu is always re-displayed regardless of its current
+    // _active state. setItems() only calls show() when _active is already true, but
+    // Menu.confirm() sets _active=false (via hide()) before invoking the onSelect callback,
+    // so setItems() would silently skip re-showing after every action.
+    this._skillMenu.show(this._buildMenuItems())
   }
 
   _onMenuSelect(item) {
@@ -317,7 +329,15 @@ export class BattleScene extends BaseScene {
   }
 
   _onFlee() {
-    if (this._battleState.mode === BATTLE_MODES.ENGINEER) return
+    if (this._battleState.mode === BATTLE_MODES.ENGINEER) {
+      this._animating = true
+      this._showLog("Can't flee a trainer battle!")
+      this.time.delayedCall(800, () => {
+        this._animating = false
+        this._refreshSkillMenu()
+      })
+      return
+    }
 
     this._battleState.player.shamePoints += 1
     const events = [
