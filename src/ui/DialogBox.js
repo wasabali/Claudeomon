@@ -39,6 +39,7 @@ export class DialogBox {
     this._charIdx = 0
     this._typing  = false
     this._speaker = null  // { name, portraitKey } or null
+    this._portrait = null // Phaser Image — created lazily when a portrait is first shown
 
     this._ensureTexture()
     this._buildChrome()
@@ -274,16 +275,9 @@ export class DialogBox {
       },
     })
 
-    // Speaker portrait — shown on the left of the box when a speaker is set
-    // and the portrait texture has been loaded.
-    this._portrait = this.scene.add.image(
-      BOX_PADDING_X,
-      PORTRAIT_Y,
-      '__DEFAULT',
-    ).setOrigin(0, 0)
-      .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
-      .setVisible(false)
-    this._container.add(this._portrait)
+    // Speaker portrait — created lazily in _refreshSpeaker when a valid portrait
+    // texture is available. Null until first setSpeaker call with a loaded portrait.
+    this._portrait = null
 
     // Speaker name label — shown above dialog text when a speaker is set.
     this._nameLabel = this.scene.add.text(
@@ -308,9 +302,20 @@ export class DialogBox {
       this._nameLabel.setVisible(true)
 
       if (hasPortrait) {
-        this._portrait.setTexture(s.portraitKey)
+        // Create portrait image lazily (only when a valid texture is confirmed).
+        if (!this._portrait) {
+          this._portrait = this.scene.add.image(
+            BOX_PADDING_X,
+            PORTRAIT_Y,
+            s.portraitKey,
+          ).setOrigin(0, 0)
+            .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
+          this._container.add(this._portrait)
+        } else {
+          this._portrait.setTexture(s.portraitKey)
+        }
         this._portrait.setVisible(true)
-      } else {
+      } else if (this._portrait) {
         this._portrait.setVisible(false)
       }
 
@@ -321,7 +326,7 @@ export class DialogBox {
       this._text.setWordWrapWidth(CONFIG.WIDTH - textX - BOX_PADDING_X)
     } else {
       this._nameLabel.setVisible(false)
-      this._portrait.setVisible(false)
+      if (this._portrait) this._portrait.setVisible(false)
 
       // Reset text to default position.
       this._text.setX(BOX_PADDING_X)

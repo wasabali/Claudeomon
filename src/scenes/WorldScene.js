@@ -975,12 +975,12 @@ export class WorldScene extends BaseScene {
 
     // Set the dialog box speaker — name + portrait drawn from trainer data when
     // available. Terminals show no speaker (clearSpeaker resets to plain text layout).
-    const _speakerTrainer = getTrainerById(npcName)
-    const _isTerminal = npcName === 'azure_terminal' || npcName === 'hosting_terminal'
-    if (_isTerminal) {
+    const speakerTrainer = getTrainerById(npcName)
+    const isTerminal = npcName === 'azure_terminal' || npcName === 'hosting_terminal'
+    if (isTerminal) {
       this.dialog.clearSpeaker()
     } else {
-      const speakerName = _speakerTrainer?.name ?? this._formatNpcName(npcName)
+      const speakerName = speakerTrainer?.name ?? this._formatNpcName(npcName)
       this.dialog.setSpeaker(speakerName, `portrait_${npcName}`)
     }
 
@@ -1285,8 +1285,8 @@ export class WorldScene extends BaseScene {
 
   // Converts an NPC ID to a title-cased display name for the dialog speaker label.
   // Example: 'intern_ivan' → 'Intern Ivan', 'dagny_dba' → 'Dagny Dba'
-  _formatNpcName(id) {
-    return id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  _formatNpcName(npcId) {
+    return npcId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   }
 
   // 4-frame stepped fade (0% → 34% → 67% → 100% black), not smooth
