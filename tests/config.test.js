@@ -30,8 +30,8 @@ describe('CONFIG', () => {
     expect(CONFIG.MAX_ACTIVE_SKILLS).toBe(6)
   })
 
-  it('has 48px portrait size', () => {
-    expect(CONFIG.PORTRAIT_SIZE).toBe(48)
+  it('has 80px portrait size', () => {
+    expect(CONFIG.PORTRAIT_SIZE).toBe(80)
   })
 })
 

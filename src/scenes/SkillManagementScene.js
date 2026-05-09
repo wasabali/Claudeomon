@@ -15,6 +15,25 @@ import { GameState, markDirty } from '#state/GameState.js'
 
 const VISIBLE_KNOWN_COUNT = 6
 
+const DIM_OVERLAY_ALPHA = 0.70
+
+// Layout constants — all derived from CONFIG.WIDTH / CONFIG.HEIGHT (1920×1080)
+const COL_W         = 700   // width of each column panel
+const COL_H         = 740   // height of each column panel
+const COL_LEFT_X    = 160   // left column x
+const COL_RIGHT_X   = 1060  // right column x
+const COL_Y         = 140   // top of both columns
+const DETAIL_X      = 160   // bottom detail panel x
+const DETAIL_Y      = 900   // bottom detail panel y (COL_Y + COL_H + 20)
+const DETAIL_W      = 1600  // bottom detail panel width
+const DETAIL_H      = 120   // bottom detail panel height
+const FONT_TITLE    = '22px'
+const FONT_ITEM     = '18px'
+const FONT_DETAIL   = '16px'
+const FONT_HEADER   = '14px'
+const ITEM_LINE_H   = 46    // vertical spacing between skill rows
+const ITEMS_START_Y = 72    // offset inside column panel before first item
+
 export class SkillManagementScene extends BaseScene {
   constructor() {
     super({ key: 'SkillManagementScene' })
@@ -66,32 +85,74 @@ export class SkillManagementScene extends BaseScene {
   }
 
   renderChrome() {
-    this.createPanel(80, 72, 156, 140)
-    this.createPanel(47, 66, 76, 88)
-    this.createPanel(114, 66, 74, 88)
-    this.createPanel(80, 130, 156, 20)
+    // Dim background so underlying world isn't a distraction
+    this.add.rectangle(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT, 0x000000)
+      .setOrigin(0, 0)
+      .setAlpha(DIM_OVERLAY_ALPHA)
 
-    this.add.text(8, 8, this.replaceSkillId ? 'REPLACE A SKILL?' : 'AZURE TERMINAL', {
+    // Title bar
+    this.add.text(CONFIG.WIDTH / 2, 60, this.replaceSkillId ? 'REPLACE A SKILL?' : 'AZURE TERMINAL', {
       fontFamily: CONFIG.FONT,
-      fontSize: '6px',
-      color: '#0f380f',
-    })
-    this.add.text(10, 22, 'ACTIVE DECK', { fontFamily: CONFIG.FONT, fontSize: '5px', color: '#0f380f' })
-    this.add.text(82, 22, this.replaceSkillId ? 'NEW SKILL' : 'KNOWN', {
+      fontSize:   FONT_TITLE,
+      color:      '#9bc5ff',
+    }).setOrigin(0.5, 0.5)
+
+    // Left column — active deck
+    this.createPanel(COL_LEFT_X, COL_Y, COL_W, COL_H)
+    this.add.text(COL_LEFT_X + 20, COL_Y + 20, 'ACTIVE DECK', {
       fontFamily: CONFIG.FONT,
-      fontSize: '5px',
-      color: '#0f380f',
+      fontSize:   FONT_HEADER,
+      color:      '#9bc5ff',
     })
+
+    // Right column — known / replacement skill
+    this.createPanel(COL_RIGHT_X, COL_Y, COL_W, COL_H)
+    this.add.text(COL_RIGHT_X + 20, COL_Y + 20, this.replaceSkillId ? 'NEW SKILL' : 'KNOWN SKILLS', {
+      fontFamily: CONFIG.FONT,
+      fontSize:   FONT_HEADER,
+      color:      '#9bc5ff',
+    })
+
+    // Bottom detail panel — skill info + confirm prompt
+    this.createPanel(DETAIL_X, DETAIL_Y, DETAIL_W, DETAIL_H)
+
+    // Hint line
+    this.add.text(CONFIG.WIDTH / 2, DETAIL_Y + DETAIL_H + 20,
+      'Z: SELECT   X: CANCEL   ESC: PAUSE', {
+        fontFamily: CONFIG.FONT,
+        fontSize:   FONT_DETAIL,
+        color:      '#556677',
+      }).setOrigin(0.5, 0)
 
     this.leftTexts = []
     this.rightTexts = []
-    for (let i = 0; i < 6; i++) {
-      this.leftTexts.push(this.add.text(10, 34 + i * 11, '', { fontFamily: CONFIG.FONT, fontSize: '5px', color: '#0f380f' }))
-      this.rightTexts.push(this.add.text(82, 34 + i * 11, '', { fontFamily: CONFIG.FONT, fontSize: '5px', color: '#0f380f' }))
+    for (let i = 0; i < VISIBLE_KNOWN_COUNT; i++) {
+      this.leftTexts.push(
+        this.add.text(COL_LEFT_X + 24, COL_Y + ITEMS_START_Y + i * ITEM_LINE_H, '', {
+          fontFamily: CONFIG.FONT,
+          fontSize:   FONT_ITEM,
+          color:      '#f8f8f8',
+        }),
+      )
+      this.rightTexts.push(
+        this.add.text(COL_RIGHT_X + 24, COL_Y + ITEMS_START_Y + i * ITEM_LINE_H, '', {
+          fontFamily: CONFIG.FONT,
+          fontSize:   FONT_ITEM,
+          color:      '#f8f8f8',
+        }),
+      )
     }
 
-    this.bottomText = this.add.text(8, 126, '', { fontFamily: CONFIG.FONT, fontSize: '5px', color: '#0f380f' })
-    this.confirmText = this.add.text(18, 60, '', { fontFamily: CONFIG.FONT, fontSize: '5px', color: '#0f380f' }).setVisible(false)
+    this.bottomText = this.add.text(DETAIL_X + 24, DETAIL_Y + 20, '', {
+      fontFamily: CONFIG.FONT,
+      fontSize:   FONT_DETAIL,
+      color:      '#cccccc',
+    })
+    this.confirmText = this.add.text(DETAIL_X + 24, DETAIL_Y + 56, '', {
+      fontFamily: CONFIG.FONT,
+      fontSize:   FONT_ITEM,
+      color:      '#ffe066',
+    }).setVisible(false)
   }
 
   getSlotCount() {

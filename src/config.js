@@ -2,7 +2,7 @@ export const CONFIG = {
   WIDTH:             1920,
   HEIGHT:            1080,
   TILE_SIZE:         48,
-  PORTRAIT_SIZE:     48,   // battle portrait px — Kenney Micro Roguelike 16px × 3 upscale
+  PORTRAIT_SIZE:     80,   // battle portrait px
   FONT:              '"Press Start 2P"',
   MAX_ACTIVE_SKILLS: 6,
 }
