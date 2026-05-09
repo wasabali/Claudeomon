@@ -1,5 +1,4 @@
 import { BaseScene } from '#scenes/BaseScene.js'
-import { SaveManager } from '#state/SaveManager.js'
 import { COLORS, CONFIG, TITLE_SCREEN } from '../config.js'
 
 export class TitleScene extends BaseScene {
@@ -86,15 +85,6 @@ export class TitleScene extends BaseScene {
     const selectedItem = TITLE_SCREEN.MENU_ITEMS[this.selectedIndex]
     this.playSfx('sfx_confirm')
     if (selectedItem === 'NEW GAME')   this.fadeToScene('NewGameScene')
-    if (selectedItem === 'LOAD SAVE')  this._handleLoadSave()
-  }
-
-  async _handleLoadSave() {
-    try {
-      await SaveManager.import()
-      this.fadeToScene('WorldScene')
-    } catch (_) {
-      // user cancelled file picker or save was invalid — stay on title screen
-    }
+    if (selectedItem === 'LOAD SAVE')  this.fadeToScene('SaveSlotScene', { mode: 'load' })
   }
 }
