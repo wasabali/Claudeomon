@@ -26,29 +26,28 @@ import { DialogBox } from '#ui/DialogBox.js'
 // Layout constants — positions derived from CONFIG.WIDTH/HEIGHT (1920×1080)
 // ---------------------------------------------------------------------------
 const ENEMY_HP_BAR_X   = Math.floor(CONFIG.WIDTH / 2)
-const ENEMY_HP_BAR_Y   = 10
-const PLAYER_HP_BAR_X  = 4
-const PLAYER_HP_BAR_Y  = CONFIG.HEIGHT - 44
-const BUDGET_METER_X   = 4
-const BUDGET_METER_Y   = CONFIG.HEIGHT - 32
-const SLA_TIMER_X      = CONFIG.WIDTH - 40
-const SLA_TIMER_Y      = 6
+const ENEMY_HP_BAR_Y   = 16
+const PLAYER_HP_BAR_X  = 16
+const PLAYER_HP_BAR_Y  = CONFIG.HEIGHT - 200
+const BUDGET_METER_X   = 16
+const BUDGET_METER_Y   = CONFIG.HEIGHT - 160
+const SLA_TIMER_X      = CONFIG.WIDTH - 20
+const SLA_TIMER_Y      = 16
 const SKILL_MENU_X     = 4
 const SKILL_MENU_Y     = CONFIG.HEIGHT - 62
-const HP_BAR_W         = Math.floor(CONFIG.WIDTH * 0.475)
-const HP_BAR_H         = 4
-const BUDGET_BAR_W     = Math.floor(CONFIG.WIDTH * 0.375)
-const BUDGET_BAR_H     = 4
-const LOG_X            = 4
-const LOG_Y            = CONFIG.HEIGHT - 76
-// Portrait layout — 48×48px static images next to HP bars.
-// Player portrait sits above the battle log (bottom-left), anchored to LOG_Y so it
-// never overlaps the log text or skill menu below it.
-// Opponent portrait sits to the left of the enemy name (top-center).
-const PORTRAIT_SIZE         = CONFIG.PORTRAIT_SIZE
+const HP_BAR_W         = Math.floor(CONFIG.WIDTH * 0.45)
+const HP_BAR_H         = 16
+const BUDGET_BAR_W     = Math.floor(CONFIG.WIDTH * 0.35)
+const BUDGET_BAR_H     = 16
+const LOG_X            = 16
+const LOG_Y            = CONFIG.HEIGHT - 240
+// Portrait layout — 80×80px images next to HP bars.
+// Player portrait sits to the left of the player HP bar (bottom-left).
+// Opponent portrait sits to the left of the enemy name bar (top-center).
+const PORTRAIT_SIZE         = 80
 const PLAYER_PORTRAIT_X     = PLAYER_HP_BAR_X
-const PLAYER_PORTRAIT_Y     = LOG_Y - PORTRAIT_SIZE - 2
-const OPPONENT_PORTRAIT_X   = ENEMY_HP_BAR_X - PORTRAIT_SIZE - 4
+const PLAYER_PORTRAIT_Y     = PLAYER_HP_BAR_Y - PORTRAIT_SIZE - 8
+const OPPONENT_PORTRAIT_X   = ENEMY_HP_BAR_X - PORTRAIT_SIZE - 8
 const OPPONENT_PORTRAIT_Y   = ENEMY_HP_BAR_Y
 
 // ---------------------------------------------------------------------------
@@ -137,16 +136,16 @@ export class BattleScene extends BaseScene {
   // HUD — player HP, enemy HP, budget meter, SLA timer
   // -------------------------------------------------------------------------
   _buildHUD(mode, opponent) {
-    const textStyle = { fontFamily: CONFIG.FONT, fontSize: '6px', color: '#ffffff' }
+    const textStyle = { fontFamily: CONFIG.FONT, fontSize: '18px', color: '#ffffff' }
 
     // Enemy name + HP
     this._enemyNameText = this.add.text(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y - 2, opponent.name ?? '???', textStyle)
-    this._enemyHpBarBg  = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 6, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0)
-    this._enemyHpBar    = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 6, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0)
+    this._enemyHpBarBg  = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 24, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0)
+    this._enemyHpBar    = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 24, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0)
 
     // In ENGINEER mode, show domain; in INCIDENT mode show '???'
     const domainLabel = mode === BATTLE_MODES.ENGINEER ? opponent.domain : '???'
-    this._enemyDomainText = this.add.text(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 12, `[${domainLabel}]`, {
+    this._enemyDomainText = this.add.text(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 46, `[${domainLabel}]`, {
       ...textStyle, color: '#9bc5ff',
     })
 
@@ -155,7 +154,7 @@ export class BattleScene extends BaseScene {
       const telegraphLabel = this._battleState.telegraphedMove
         ? `Preparing: ${this._battleState.telegraphedMove}`
         : ''
-      this._telegraphText = this.add.text(4, 22, telegraphLabel, {
+      this._telegraphText = this.add.text(16, 72, telegraphLabel, {
         ...textStyle, color: '#ffe066',
       })
     } else {
@@ -163,24 +162,24 @@ export class BattleScene extends BaseScene {
     }
 
     // Player HP
-    this.add.text(PLAYER_HP_BAR_X, PLAYER_HP_BAR_Y - 2, 'HP', textStyle)
-    this._playerHpBarBg = this.add.rectangle(PLAYER_HP_BAR_X + 12, PLAYER_HP_BAR_Y + 2, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0)
-    this._playerHpBar   = this.add.rectangle(PLAYER_HP_BAR_X + 12, PLAYER_HP_BAR_Y + 2, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0)
-    this._playerHpText  = this.add.text(PLAYER_HP_BAR_X + HP_BAR_W + 14, PLAYER_HP_BAR_Y - 2, this._hpLabel(), textStyle)
+    this.add.text(PLAYER_HP_BAR_X, PLAYER_HP_BAR_Y - 24, 'HP', textStyle)
+    this._playerHpBarBg = this.add.rectangle(PLAYER_HP_BAR_X + 36, PLAYER_HP_BAR_Y, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0)
+    this._playerHpBar   = this.add.rectangle(PLAYER_HP_BAR_X + 36, PLAYER_HP_BAR_Y, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0)
+    this._playerHpText  = this.add.text(PLAYER_HP_BAR_X + HP_BAR_W + 48, PLAYER_HP_BAR_Y - 6, this._hpLabel(), textStyle)
 
     // Budget meter
-    this.add.text(BUDGET_METER_X, BUDGET_METER_Y - 2, '$', textStyle)
-    this._budgetBarBg = this.add.rectangle(BUDGET_METER_X + 8, BUDGET_METER_Y + 2, BUDGET_BAR_W, BUDGET_BAR_H, 0x333300).setOrigin(0, 0)
-    this._budgetBar   = this.add.rectangle(BUDGET_METER_X + 8, BUDGET_METER_Y + 2, BUDGET_BAR_W, BUDGET_BAR_H, 0xffe066).setOrigin(0, 0)
+    this.add.text(BUDGET_METER_X, BUDGET_METER_Y - 24, '$', textStyle)
+    this._budgetBarBg = this.add.rectangle(BUDGET_METER_X + 30, BUDGET_METER_Y, BUDGET_BAR_W, BUDGET_BAR_H, 0x333300).setOrigin(0, 0)
+    this._budgetBar   = this.add.rectangle(BUDGET_METER_X + 30, BUDGET_METER_Y, BUDGET_BAR_W, BUDGET_BAR_H, 0xffe066).setOrigin(0, 0)
 
     // SLA timer (INCIDENT and SCRIPTED modes)
     if (mode === BATTLE_MODES.INCIDENT || mode === BATTLE_MODES.SCRIPTED) {
       this._slaText = this.add.text(SLA_TIMER_X, SLA_TIMER_Y, this._slaLabel(), {
-        ...textStyle, color: '#ff6666',
-      })
+        ...textStyle, fontSize: '22px', color: '#ff6666',
+      }).setOrigin(1, 0)
     }
 
-    // Battle portraits — 48×48px static images (Kenney Micro Roguelike, CC0).
+    // Battle portraits — 80×80px static images (Kenney Micro Roguelike, CC0).
     // Rendered only when the portrait texture has been loaded; silently skipped otherwise.
     const playerPortraitKey   = 'portrait_player'
     const opponentPortraitKey = `portrait_${opponent.id}`
@@ -355,9 +354,9 @@ export class BattleScene extends BaseScene {
   _buildLogBox() {
     this._logText = this.add.text(LOG_X, LOG_Y, '', {
       fontFamily:  CONFIG.FONT,
-      fontSize:    '6px',
+      fontSize:    '18px',
       color:       '#f8f8f8',
-      wordWrap:    { width: CONFIG.WIDTH - 8 },
+      wordWrap:    { width: CONFIG.WIDTH - 32 },
     })
   }
 

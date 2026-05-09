@@ -18,17 +18,17 @@ const TABS = [
   { key: 'junk',        label: 'JUNK',  allowInBattle: false },
 ]
 
-const MAX_VISIBLE_ITEMS = 4
+const MAX_VISIBLE_ITEMS = 6
 
-// Centered compact panel dimensions (canvas is 1920×1080)
-const PANEL_W  = 760
-const TAB_H    = 24
-const LIST_H   = 100
-const DESC_H   = 120
-const HINT_H   = 20
-const PANEL_H  = TAB_H + LIST_H + DESC_H + HINT_H          // 264
-const PANEL_X  = Math.floor((CONFIG.WIDTH  - PANEL_W) / 2) // 580
-const PANEL_Y  = Math.floor((CONFIG.HEIGHT - PANEL_H) / 2) // 408
+// Centered panel dimensions (canvas is 1920×1080)
+const PANEL_W  = 1200
+const TAB_H    = 64
+const LIST_H   = 340
+const DESC_H   = 240
+const HINT_H   = 56
+const PANEL_H  = TAB_H + LIST_H + DESC_H + HINT_H          // 700
+const PANEL_X  = Math.floor((CONFIG.WIDTH  - PANEL_W) / 2) // 360
+const PANEL_Y  = Math.floor((CONFIG.HEIGHT - PANEL_H) / 2) // 190
 
 export class InventoryScene extends BaseScene {
   constructor() {
@@ -65,31 +65,31 @@ export class InventoryScene extends BaseScene {
     this.createPanel(PANEL_X, PANEL_Y + TAB_H + LIST_H,        PANEL_W, DESC_H)
     this.createPanel(PANEL_X, PANEL_Y + TAB_H + LIST_H + DESC_H, PANEL_W, HINT_H)
 
-    this.tabText = this.add.text(PANEL_X + 8, PANEL_Y + 8, '', {
+    this.tabText = this.add.text(PANEL_X + 16, PANEL_Y + 20, '', {
       fontFamily: CONFIG.FONT,
-      fontSize:   '8px',
+      fontSize:   '20px',
       color:      '#ffffff',
     })
 
-    this.itemText = this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + 8, '', {
+    this.itemText = this.add.text(PANEL_X + 16, PANEL_Y + TAB_H + 16, '', {
       fontFamily: CONFIG.FONT,
-      fontSize:   '8px',
+      fontSize:   '18px',
       color:      '#ffffff',
-      lineSpacing: 6,
+      lineSpacing: 14,
     })
 
-    this.descriptionText = this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + LIST_H + 8, '', {
+    this.descriptionText = this.add.text(PANEL_X + 16, PANEL_Y + TAB_H + LIST_H + 16, '', {
       fontFamily: CONFIG.FONT,
-      fontSize:   '8px',
+      fontSize:   '18px',
       color:      '#cccccc',
-      wordWrap:   { width: PANEL_W - 16 },
-      lineSpacing: 6,
+      wordWrap:   { width: PANEL_W - 32 },
+      lineSpacing: 14,
     })
 
-    this.add.text(PANEL_X + 8, PANEL_Y + TAB_H + LIST_H + DESC_H + 6,
+    this.add.text(PANEL_X + 16, PANEL_Y + TAB_H + LIST_H + DESC_H + 18,
       'I/X: CLOSE   ESC: PAUSE', {
         fontFamily: CONFIG.FONT,
-        fontSize:   '6px',
+        fontSize:   '16px',
         color:      '#555577',
       })
   }
