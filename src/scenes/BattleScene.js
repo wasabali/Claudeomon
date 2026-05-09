@@ -42,11 +42,11 @@ const BUDGET_BAR_H     = 16
 const LOG_X            = 16
 const LOG_Y            = CONFIG.HEIGHT - 240
 // Portrait layout — 80×80px images next to HP bars.
-// Player portrait sits to the left of the player HP bar (bottom-left).
+// Player portrait sits above the battle log (bottom-left), anchored to LOG_Y.
 // Opponent portrait sits to the left of the enemy name bar (top-center).
 const PORTRAIT_SIZE         = CONFIG.PORTRAIT_SIZE
 const PLAYER_PORTRAIT_X     = PLAYER_HP_BAR_X
-const PLAYER_PORTRAIT_Y     = PLAYER_HP_BAR_Y - PORTRAIT_SIZE - 8
+const PLAYER_PORTRAIT_Y     = LOG_Y - PORTRAIT_SIZE - 8
 const OPPONENT_PORTRAIT_X   = ENEMY_HP_BAR_X - PORTRAIT_SIZE - 8
 const OPPONENT_PORTRAIT_Y   = ENEMY_HP_BAR_Y
 

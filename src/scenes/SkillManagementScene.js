@@ -126,7 +126,7 @@ export class SkillManagementScene extends BaseScene {
 
     this.leftTexts = []
     this.rightTexts = []
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < VISIBLE_KNOWN_COUNT; i++) {
       this.leftTexts.push(
         this.add.text(COL_LEFT_X + 24, COL_Y + ITEMS_START_Y + i * ITEM_LINE_H, '', {
           fontFamily: CONFIG.FONT,
