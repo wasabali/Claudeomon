@@ -6,8 +6,15 @@ const SAVE_EXTENSION = '.cloudquest'
 const SAVE_VERSION = '1.0'
 const CHECKSUM_WARNING = "Save file checksum mismatch. Someone's been poking around the config. Load anyway? [Y/N]"
 const LEGACY_SAVE_VERSION = 1
-const SLOT_COUNT = 3
-const slotKey = (slotIndex) => `cloudquest_save_${slotIndex}`
+export const SLOT_COUNT = 3
+const slotKey     = (slotIndex) => `cloudquest_save_${slotIndex}`
+const slotMetaKey = (slotIndex) => `cloudquest_save_${slotIndex}_meta`
+
+const assertValidSlotIndex = (slotIndex) => {
+  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= SLOT_COUNT) {
+    throw new RangeError(`slotIndex must be an integer in [0, ${SLOT_COUNT - 1}]; got ${slotIndex}`)
+  }
+}
 
 const deepCopy = value => {
   if (typeof structuredClone === 'function') return structuredClone(value)
@@ -88,17 +95,19 @@ export const SaveManager = {
   },
 
   async saveToSlot(slotIndex, gameState, commitMessage = '') {
+    assertValidSlotIndex(slotIndex)
     const persisted = this.stripSession(gameState)
+    const meta = {
+      playerName: gameState.player.name,
+      level:      gameState.player.level,
+      location:   gameState.player.location,
+      playtime:   gameState.player.playtime,
+    }
     const payloadWithoutChecksum = {
       version: SAVE_VERSION,
       savedAt: new Date().toISOString(),
       commitMessage: String(commitMessage).slice(0, 72),
-      slotMeta: {
-        playerName: gameState.player.name,
-        level:      gameState.player.level,
-        location:   gameState.player.location,
-        playtime:   gameState.player.playtime,
-      },
+      slotMeta: meta,
       ...persisted,
     }
 
@@ -106,6 +115,16 @@ export const SaveManager = {
     const payload = { ...payloadWithoutChecksum, checksum }
 
     globalThis.localStorage.setItem(slotKey(slotIndex), JSON.stringify(payload))
+    // Write a lightweight meta-only entry so getSlotMeta avoids parsing the full payload.
+    globalThis.localStorage.setItem(slotMetaKey(slotIndex), JSON.stringify({
+      slotIndex,
+      playerName:    meta.playerName,
+      level:         meta.level,
+      location:      meta.location,
+      playtime:      meta.playtime,
+      savedAt:       payloadWithoutChecksum.savedAt,
+      commitMessage: payloadWithoutChecksum.commitMessage,
+    }))
 
     if (gameState?._session) {
       gameState._session.isDirty = false
@@ -115,7 +134,8 @@ export const SaveManager = {
     return payload
   },
 
-  loadFromSlot(slotIndex) {
+  async loadFromSlot(slotIndex) {
+    assertValidSlotIndex(slotIndex)
     const raw = globalThis.localStorage.getItem(slotKey(slotIndex))
     if (!raw) return null
 
@@ -124,6 +144,16 @@ export const SaveManager = {
 
     if (!checksum || payloadWithoutChecksum.version === null || payloadWithoutChecksum.version === undefined) {
       throw new Error('Malformed slot save: missing required fields.')
+    }
+    if (payloadWithoutChecksum.version !== SAVE_VERSION && payloadWithoutChecksum.version !== LEGACY_SAVE_VERSION) {
+      throw new Error(`Unsupported save version: ${payloadWithoutChecksum.version}`)
+    }
+
+    const computedChecksum = await this.computeChecksum(JSON.stringify(payloadWithoutChecksum))
+    if (computedChecksum !== checksum) {
+      const confirmFn = globalThis.confirm
+      const shouldLoad = typeof confirmFn === 'function' ? confirmFn(CHECKSUM_WARNING) : false
+      if (!shouldLoad) return null
     }
 
     const restoredState = deepCopy(payloadWithoutChecksum)
@@ -142,23 +172,17 @@ export const SaveManager = {
   },
 
   deleteSlot(slotIndex) {
+    assertValidSlotIndex(slotIndex)
     globalThis.localStorage.removeItem(slotKey(slotIndex))
+    globalThis.localStorage.removeItem(slotMetaKey(slotIndex))
   },
 
   getSlotMeta(slotIndex) {
-    const raw = globalThis.localStorage.getItem(slotKey(slotIndex))
+    assertValidSlotIndex(slotIndex)
+    const raw = globalThis.localStorage.getItem(slotMetaKey(slotIndex))
     if (!raw) return null
     try {
-      const parsed = JSON.parse(raw)
-      return {
-        slotIndex,
-        playerName:    parsed.slotMeta?.playerName ?? '',
-        level:         parsed.slotMeta?.level ?? 1,
-        location:      parsed.slotMeta?.location ?? '',
-        playtime:      parsed.slotMeta?.playtime ?? 0,
-        savedAt:       parsed.savedAt ?? null,
-        commitMessage: parsed.commitMessage ?? '',
-      }
+      return JSON.parse(raw)
     } catch {
       return null
     }

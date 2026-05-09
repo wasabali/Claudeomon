@@ -1,9 +1,7 @@
 import { BaseScene } from '#scenes/BaseScene.js'
-import { SaveManager } from '#state/SaveManager.js'
+import { SaveManager, SLOT_COUNT } from '#state/SaveManager.js'
 import { GameState } from '#state/GameState.js'
 import { CONFIG, COLORS } from '../config.js'
-
-const SLOT_COUNT = 3
 
 const PANEL_X       = 360
 const PANEL_W       = CONFIG.WIDTH - PANEL_X * 2
@@ -31,6 +29,7 @@ const formatPlaytime = (seconds) => {
 const formatDate = (isoString) => {
   if (!isoString) return ''
   const d = new Date(isoString)
+  if (isNaN(d.getTime())) return ''
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
@@ -209,14 +208,19 @@ export class SaveSlotScene extends BaseScene {
     this._statusText.setText(`Slot ${i + 1} saved.`).setColor(COLOR_OK)
   }
 
-  _loadFromSelected() {
+  async _loadFromSelected() {
     const meta = this._slots[this._selectedIndex]
     if (!meta) {
       this._statusText.setText('Empty slot — nothing to load.').setColor(COLOR_CONFIRM)
       return
     }
-    SaveManager.loadFromSlot(this._selectedIndex)
-    this.fadeToScene('WorldScene')
+    try {
+      const result = await SaveManager.loadFromSlot(this._selectedIndex)
+      if (!result) return  // user declined checksum mismatch prompt
+      this.fadeToScene('WorldScene')
+    } catch {
+      this._statusText.setText('Failed to load — slot may be corrupted.').setColor(COLOR_CONFIRM)
+    }
   }
 
   _requestDelete() {
