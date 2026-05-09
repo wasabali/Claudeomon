@@ -229,7 +229,7 @@ export class BattleScene extends BaseScene {
       x: SKILL_MENU_X,
       y: SKILL_MENU_Y,
       width: CONFIG.WIDTH - SKILL_MENU_X * 2,
-      onSelect: (item) => this._onMenuSelect(item),
+      onSelect: (_idx, item) => this._onMenuSelect(item),
       onCancel: () => {},
     })
     this._skillMenu.show()
@@ -286,7 +286,7 @@ export class BattleScene extends BaseScene {
           x: Math.floor(CONFIG.WIDTH * 0.35),
           y: Math.floor(CONFIG.HEIGHT * 0.45),
           width: Math.floor(CONFIG.WIDTH * 0.3),
-          onSelect: (choice) => {
+          onSelect: (_idx, choice) => {
             this._cursedConfirmMenu.destroy()
             this._cursedConfirmMenu = null
             if (choice.value === 'yes') {
