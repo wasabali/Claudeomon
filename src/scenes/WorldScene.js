@@ -414,6 +414,7 @@ export class WorldScene extends BaseScene {
     // 3am scene — fires once after viral wave completes
     if (shouldTriggerThreeAmScene(GameState.story.flags)) {
       this._interacting = true
+      this.dialog.clearSpeaker()
       this.dialog.show([
         'Your phone buzzes. Then again.',
         "The on-call rotation doesn't care\nthat you just went to bed.",
@@ -934,6 +935,7 @@ export class WorldScene extends BaseScene {
 
     if (type === 'sign' || type === 'flavor') {
       this._interacting = true
+      this.dialog.clearSpeaker()
       this.dialog.show(interaction.dialog, () => { this._interacting = false })
       return
     }
@@ -943,6 +945,7 @@ export class WorldScene extends BaseScene {
       this._interacting = true
       GameState.story.flags[interaction.flagKey] = true
       addItem(interaction.item.tab, interaction.item.id, interaction.item.qty)
+      this.dialog.clearSpeaker()
       this.dialog.show(interaction.dialog, () => { this._interacting = false })
       return
     }
@@ -951,6 +954,7 @@ export class WorldScene extends BaseScene {
       const { requiresItem, flagKey, lockedDialog, unlockedDialog } = interaction
       if (GameState.story.flags[flagKey]) return
       this._interacting = true
+      this.dialog.clearSpeaker()
       if (hasItem(requiresItem.tab, requiresItem.id)) {
         GameState.story.flags[flagKey] = true
         markDirty()
@@ -1215,6 +1219,7 @@ export class WorldScene extends BaseScene {
     const titleLine = `${transition.titleCard}: ${transition.titleSub}`
     const pages = [titleLine, ...(transition.narration ?? [])]
     this._interacting = true
+    this.dialog.clearSpeaker()
     this.dialog.show(pages, () => { this._interacting = false })
   }
 
@@ -1254,6 +1259,7 @@ export class WorldScene extends BaseScene {
       this._player.setVelocity(0, 0)
       this._interacting = true
       const denialText = this._resolveDenialText(result.reasonId, result.reasonParams)
+      this.dialog.clearSpeaker()
       this.dialog.show([denialText], () => { this._interacting = false })
       // Push player back from edge so they don't re-trigger
       const pushback = TILE_SIZE

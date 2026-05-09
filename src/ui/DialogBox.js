@@ -24,7 +24,7 @@ const PORTRAIT_SIZE        = 80   // dialog portrait pixel size
 const PORTRAIT_Y           = BOX_Y + 10
 const SPEAKER_NAME_FONT    = '14px'
 const SPEAKER_TEXT_OFFSET_X = BOX_PADDING_X + PORTRAIT_SIZE + 12
-const SPEAKER_TEXT_OFFSET_Y = BOX_PADDING_Y + 22  // extra Y below name label
+const SPEAKER_TEXT_OFFSET_Y = 22  // extra Y below name label, relative to BOX_Y + BOX_PADDING_Y
 
 export class DialogBox {
   /**
@@ -122,7 +122,8 @@ export class DialogBox {
 
     this._text.setText(prompt)
 
-    const startY = BOX_Y + BOX_PADDING_Y + CHOICE_OFFSET_Y
+    const startY = this._text.y + CHOICE_OFFSET_Y
+    const wrapWidth = CONFIG.WIDTH - this._text.x - BOX_PADDING_X
     this._choiceTexts = choices.map((label, i) => {
       const prefix = i === 0 ? '► ' : '  '
       return this.scene.add.text(
@@ -133,7 +134,7 @@ export class DialogBox {
           fontFamily:  CONFIG.FONT,
           fontSize:    '18px',
           color:       '#f8f8f8',
-          wordWrap:    { width: CONFIG.WIDTH - BOX_PADDING_X * 2 },
+          wordWrap:    { width: wrapWidth },
         },
       )
     })
