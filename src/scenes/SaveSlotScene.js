@@ -48,6 +48,7 @@ export class SaveSlotScene extends BaseScene {
 
   create(data = {}) {
     this._mode = data.mode === 'save' ? 'save' : 'load'
+    this._returnScene = data.returnScene ?? null
     this._selectedIndex = 0
     this._confirmDeleteIndex = -1
     this._slots = SaveManager.getAllSlotMeta()
@@ -246,6 +247,15 @@ export class SaveSlotScene extends BaseScene {
     if (this._confirmDeleteIndex >= 0) {
       this._confirmDeleteIndex = -1
       this._statusText.setText('').setColor(COLOR_OK)
+      return
+    }
+    if (this._returnScene) {
+      if (this.scene.isPaused(this._returnScene)) {
+        this.scene.stop('SaveSlotScene')
+        this.scene.resume(this._returnScene)
+        return
+      }
+      this.fadeToScene(this._returnScene)
       return
     }
     if (this._mode === 'save') {

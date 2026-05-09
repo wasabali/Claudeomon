@@ -1027,19 +1027,10 @@ export class WorldScene extends BaseScene {
       const terminals = getDiscoveredTerminals(GameState.story.flags)
       const hasOtherTerminals = terminals.filter(id => id !== this._regionId).length > 0
 
-      if (hasOtherTerminals) {
-        const pages = getStoryById('npc_azure_terminal')?.pages ?? ['> AZURE TERMINAL v2.0']
-        this.dialog.show(pages, () => {
-          this._openFastTravelMenu()
-        })
-      } else {
-        const pages = getStoryById('npc_azure_terminal')?.pages ?? ['> AZURE TERMINAL v2.0']
-        this.dialog.show(pages, () => {
-          this._interacting = false
-          this.scene.pause()
-          this.scene.launch('SkillManagementScene', { returnScene: 'WorldScene' })
-        })
-      }
+      const pages = getStoryById('npc_azure_terminal')?.pages ?? ['> AZURE TERMINAL v2.0']
+      this.dialog.show(pages, () => {
+        this._openTerminalMenu(hasOtherTerminals)
+      })
       return
     }
 
@@ -1321,6 +1312,40 @@ export class WorldScene extends BaseScene {
           markDirty()
           this.scene.restart({ entryDirection })
         }
+      },
+    })
+  }
+
+  _openTerminalMenu(hasOtherTerminals) {
+    const items = []
+    const actions = []
+
+    if (hasOtherTerminals) {
+      items.push('Fast Travel')
+      actions.push(() => this._openFastTravelMenu())
+    }
+
+    items.push('Manage Skills')
+    actions.push(() => {
+      this._interacting = false
+      this.scene.pause()
+      this.scene.launch('SkillManagementScene', { returnScene: 'WorldScene' })
+    })
+
+    items.push('Save Game')
+    actions.push(() => {
+      this._interacting = false
+      this.scene.pause()
+      this.scene.launch('SaveSlotScene', { mode: 'save', returnScene: 'WorldScene' })
+    })
+
+    this._menu.show(items, {
+      title: '> AZURE TERMINAL — OPTIONS',
+      onSelect: (index) => {
+        actions[index]()
+      },
+      onCancel: () => {
+        this._interacting = false
       },
     })
   }
