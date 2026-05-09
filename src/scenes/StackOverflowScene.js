@@ -19,8 +19,16 @@ const SO_DARK         = '#0f380f'
 const SO_MID          = '#306230'
 const SO_LIGHT        = '#8bac0f'
 const SO_RED          = '#ff4d4d'
-const VISIBLE_ROWS    = 12  // max rows shown in list view
-const DETAIL_LINES_PER_PAGE = 12
+const FONT_SIZE             = '16px'
+const PANEL_INSET           = 4    // gap from screen edge to all panels
+const HEADER_H              = 56   // actual panel height of the header bar
+const FOOTER_H              = 52   // actual panel height of the footer bar
+const CONTENT_X             = 24   // left padding for content
+const CONTENT_Y_PAD         = 16   // gap between header panel bottom and first content row
+const CONTENT_Y_START       = PANEL_INSET + HEADER_H + CONTENT_Y_PAD  // first content row y
+const ROW_H                 = 40   // vertical spacing between rows
+const VISIBLE_ROWS          = 23   // max rows shown in list view
+const DETAIL_LINES_PER_PAGE = 23
 
 export class StackOverflowScene extends BaseScene {
   constructor() {
@@ -45,19 +53,22 @@ export class StackOverflowScene extends BaseScene {
   create() {
     this._ensurePanelTexture()
 
-    this._bgPanel = this._addPanel(CONFIG.WIDTH / 2, CONFIG.HEIGHT / 2, CONFIG.WIDTH - 4, CONFIG.HEIGHT - 4)
-    this._headerPanel = this._addPanel(CONFIG.WIDTH / 2, 8, CONFIG.WIDTH - 8, 12)
-    this._footerPanel = this._addPanel(CONFIG.WIDTH / 2, CONFIG.HEIGHT - 8, CONFIG.WIDTH - 8, 12)
+    // Background panel covering the full canvas
+    this._bgPanel = this._addPanel(PANEL_INSET, PANEL_INSET, CONFIG.WIDTH - PANEL_INSET * 2, CONFIG.HEIGHT - PANEL_INSET * 2)
+    // Header bar at the top
+    this._headerPanel = this._addPanel(PANEL_INSET, PANEL_INSET, CONFIG.WIDTH - PANEL_INSET * 2, HEADER_H)
+    // Footer bar at the bottom
+    this._footerPanel = this._addPanel(PANEL_INSET, CONFIG.HEIGHT - PANEL_INSET - FOOTER_H, CONFIG.WIDTH - PANEL_INSET * 2, FOOTER_H)
 
-    this._headerText = this.add.text(6, 4, 'STACKOVERFLOW', {
+    this._headerText = this.add.text(CONTENT_X, PANEL_INSET + CONTENT_Y_PAD, 'STACKOVERFLOW', {
       fontFamily: CONFIG.FONT,
-      fontSize: '6px',
+      fontSize: FONT_SIZE,
       color: SO_DARK,
     })
 
-    this._footerText = this.add.text(6, CONFIG.HEIGHT - 12, '', {
+    this._footerText = this.add.text(CONTENT_X, CONFIG.HEIGHT - PANEL_INSET - FOOTER_H + CONTENT_Y_PAD, '', {
       fontFamily: CONFIG.FONT,
-      fontSize: '6px',
+      fontSize: FONT_SIZE,
       color: SO_MID,
     })
 
@@ -185,7 +196,7 @@ export class StackOverflowScene extends BaseScene {
       return result
     }
 
-    const MAX_CHARS = 25
+    const MAX_CHARS = 80
 
     // Question header
     lines.push({ text: `Q: ${thread.questionTitle}`, color: SO_DARK })
@@ -238,11 +249,11 @@ export class StackOverflowScene extends BaseScene {
 
   _renderList() {
     if (this._rows.length === 0) {
-      this.contentObjects.push(this.add.text(6, 18, 'No commands discovered yet.\nBeat trainers to learn skills.', {
+      this.contentObjects.push(this.add.text(CONTENT_X, CONTENT_Y_START, 'No commands discovered yet.\nBeat trainers to learn skills.', {
         fontFamily: CONFIG.FONT,
-        fontSize: '6px',
+        fontSize: FONT_SIZE,
         color: SO_MID,
-        lineSpacing: 2,
+        lineSpacing: 6,
       }))
       this._footerText.setText('X: back')
       return
@@ -260,9 +271,9 @@ export class StackOverflowScene extends BaseScene {
       const color = !row.unlocked ? SO_LIGHT
         : (row.isCursed ? SO_RED : (isSelected ? SO_DARK : SO_MID))
 
-      this.contentObjects.push(this.add.text(4, 16 + i * 10, label, {
+      this.contentObjects.push(this.add.text(CONTENT_X, CONTENT_Y_START + i * ROW_H, label, {
         fontFamily: CONFIG.FONT,
-        fontSize: '6px',
+        fontSize: FONT_SIZE,
         color,
       }))
     })
@@ -283,11 +294,11 @@ export class StackOverflowScene extends BaseScene {
 
     const visible = this._detailLines.slice(this.detailScroll, this.detailScroll + DETAIL_LINES_PER_PAGE)
     visible.forEach((line, i) => {
-      const obj = this.add.text(4, 16 + i * 10, line.text, {
+      const obj = this.add.text(CONTENT_X, CONTENT_Y_START + i * ROW_H, line.text, {
         fontFamily: CONFIG.FONT,
-        fontSize: '6px',
+        fontSize: FONT_SIZE,
         color: line.color,
-        wordWrap: { width: CONFIG.WIDTH - 8 },
+        wordWrap: { width: CONFIG.WIDTH - CONTENT_X * 2 },
       })
       this.contentObjects.push(obj)
     })
