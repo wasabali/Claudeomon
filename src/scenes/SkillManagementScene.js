@@ -15,6 +15,8 @@ import { GameState, markDirty } from '#state/GameState.js'
 
 const VISIBLE_KNOWN_COUNT = 6
 
+const DIM_OVERLAY_ALPHA = 0.70
+
 // Layout constants — all derived from CONFIG.WIDTH / CONFIG.HEIGHT (1920×1080)
 const COL_W         = 700   // width of each column panel
 const COL_H         = 740   // height of each column panel
@@ -86,7 +88,7 @@ export class SkillManagementScene extends BaseScene {
     // Dim background so underlying world isn't a distraction
     this.add.rectangle(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT, 0x000000)
       .setOrigin(0, 0)
-      .setAlpha(0.70)
+      .setAlpha(DIM_OVERLAY_ALPHA)
 
     // Title bar
     this.add.text(CONFIG.WIDTH / 2, 60, this.replaceSkillId ? 'REPLACE A SKILL?' : 'AZURE TERMINAL', {
