@@ -5,6 +5,7 @@ import { BootScene } from '#scenes/BootScene.js'
 import { TitleScene } from '#scenes/TitleScene.js'
 import { WorldScene } from '#scenes/WorldScene.js'
 import { SaveScene } from '#scenes/SaveScene.js'
+import { SaveSlotScene } from '#scenes/SaveSlotScene.js'
 import { NewGameScene } from '#scenes/NewGameScene.js'
 import { ServiceCatalogScene } from '#scenes/ServiceCatalogScene.js'
 import { SkillManagementScene } from '#scenes/SkillManagementScene.js'
@@ -49,6 +50,7 @@ const game = new Phaser.Game({
     NewGameScene,
     WorldScene,
     SaveScene,
+    SaveSlotScene,
     ServiceCatalogScene,
     SkillManagementScene,
     EmblemScene,
