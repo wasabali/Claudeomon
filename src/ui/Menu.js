@@ -29,6 +29,7 @@ const ARROW_OFFSET  = 24
 const COLOR_NORMAL   = '#f8f8f8'
 const COLOR_SELECTED = '#ffe066'
 const COLOR_DISABLED = '#555555'
+const COLOR_HINT     = '#556677'
 const PANEL_KEY     = 'menu_panel_9slice'
 
 // Maximum visible items before the list would clip the panel.
@@ -192,6 +193,7 @@ export class Menu {
   _buildChrome() {
     this._container = this.scene.add.container(0, 0)
     this._container.setDepth(101) // above DialogBox (100)
+    this._container.setScrollFactor(0) // keep in screen space regardless of camera position
 
     // Background panel — prefer the Kenney UI Pack window when loaded.
     const panelKey = this.scene.textures.exists('ui_window') ? 'ui_window' : PANEL_KEY
@@ -236,6 +238,15 @@ export class Menu {
       { fontFamily: CONFIG.FONT, fontSize: FONT_SIZE, color: COLORS.MENU_ARROW },
     )
     this._container.add(this._arrow)
+
+    // Cancel hint — always visible so the player knows how to exit.
+    this._cancelHint = this.scene.add.text(
+      CONFIG.WIDTH - PADDING_X,
+      CONFIG.HEIGHT - PADDING_Y,
+      '[X] BACK',
+      { fontFamily: CONFIG.FONT, fontSize: FONT_SIZE, color: COLOR_HINT },
+    ).setOrigin(1, 1)
+    this._container.add(this._cancelHint)
   }
 
   _renderItems() {
