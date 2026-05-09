@@ -67,12 +67,15 @@ export class TitleScene extends BaseScene {
     this.input.keyboard.on('keydown-DOWN', () => this.changeSelection(TITLE_SCREEN.MENU_DOWN_DELTA))
     this.input.keyboard.on('keydown-Z', () => this.confirmSelection())
     this.input.keyboard.on('keydown-ENTER', () => this.confirmSelection())
+
+    this.playBgm('title')
   }
 
   changeSelection(direction) {
     const menuSize = TITLE_SCREEN.MENU_ITEMS.length
     this.selectedIndex = (this.selectedIndex + direction + menuSize) % menuSize
     this.menuArrow.setY(this.getMenuY(this.selectedIndex))
+    this.playSfx('sfx_cursor_move')
   }
 
   getMenuY(index) {
@@ -81,6 +84,7 @@ export class TitleScene extends BaseScene {
 
   confirmSelection() {
     const selectedItem = TITLE_SCREEN.MENU_ITEMS[this.selectedIndex]
+    this.playSfx('sfx_confirm')
     if (selectedItem === 'NEW GAME')   this.fadeToScene('NewGameScene')
     if (selectedItem === 'LOAD SAVE')  this._handleLoadSave()
   }

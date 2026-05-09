@@ -962,6 +962,7 @@ export class WorldScene extends BaseScene {
         markDirty()
         this.dialog.show(unlockedDialog, () => { this._interacting = false })
       } else {
+        this.playSfx('sfx_door_locked')
         this.dialog.show(lockedDialog, () => { this._interacting = false })
       }
     }
