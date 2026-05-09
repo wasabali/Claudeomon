@@ -147,10 +147,11 @@ export class Menu {
   confirm() {
     if (!this._active || this._items.length === 0) return
     const idx   = this._selected
-    const label = this._items[idx]
+    const item  = this._items[idx]
+    if (item?.disabled) return
     this.hide()
     this.scene.playSfx?.('sfx_confirm')
-    if (this._onSelect) this._onSelect(idx, label)
+    if (this._onSelect) this._onSelect(idx, item)
   }
 
   /** Cancel / dismiss the menu. */
