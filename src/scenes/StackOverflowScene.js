@@ -19,14 +19,15 @@ const SO_DARK         = '#0f380f'
 const SO_MID          = '#306230'
 const SO_LIGHT        = '#8bac0f'
 const SO_RED          = '#ff4d4d'
-const FONT_SIZE            = '16px'
-const HEADER_H             = 64    // height of header bar in px
-const FOOTER_H             = 60    // height of footer bar in px
-const CONTENT_X            = 24    // left padding for content
-const CONTENT_Y_PAD        = 16    // gap between header bar and first content row
-const CONTENT_Y_START      = HEADER_H + CONTENT_Y_PAD  // = 80, first content row y
-const ROW_H                = 40    // vertical spacing between rows
-const VISIBLE_ROWS         = 23    // max rows shown in list view
+const FONT_SIZE             = '16px'
+const PANEL_INSET           = 4    // gap from screen edge to all panels
+const HEADER_H              = 56   // actual panel height of the header bar
+const FOOTER_H              = 52   // actual panel height of the footer bar
+const CONTENT_X             = 24   // left padding for content
+const CONTENT_Y_PAD         = 16   // gap between header panel bottom and first content row
+const CONTENT_Y_START       = PANEL_INSET + HEADER_H + CONTENT_Y_PAD  // first content row y
+const ROW_H                 = 40   // vertical spacing between rows
+const VISIBLE_ROWS          = 23   // max rows shown in list view
 const DETAIL_LINES_PER_PAGE = 23
 
 export class StackOverflowScene extends BaseScene {
@@ -53,19 +54,19 @@ export class StackOverflowScene extends BaseScene {
     this._ensurePanelTexture()
 
     // Background panel covering the full canvas
-    this._bgPanel = this._addPanel(4, 4, CONFIG.WIDTH - 8, CONFIG.HEIGHT - 8)
+    this._bgPanel = this._addPanel(PANEL_INSET, PANEL_INSET, CONFIG.WIDTH - PANEL_INSET * 2, CONFIG.HEIGHT - PANEL_INSET * 2)
     // Header bar at the top
-    this._headerPanel = this._addPanel(4, 4, CONFIG.WIDTH - 8, HEADER_H - 8)
+    this._headerPanel = this._addPanel(PANEL_INSET, PANEL_INSET, CONFIG.WIDTH - PANEL_INSET * 2, HEADER_H)
     // Footer bar at the bottom
-    this._footerPanel = this._addPanel(4, CONFIG.HEIGHT - FOOTER_H + 4, CONFIG.WIDTH - 8, FOOTER_H - 8)
+    this._footerPanel = this._addPanel(PANEL_INSET, CONFIG.HEIGHT - PANEL_INSET - FOOTER_H, CONFIG.WIDTH - PANEL_INSET * 2, FOOTER_H)
 
-    this._headerText = this.add.text(CONTENT_X, 20, 'STACKOVERFLOW', {
+    this._headerText = this.add.text(CONTENT_X, PANEL_INSET + CONTENT_Y_PAD, 'STACKOVERFLOW', {
       fontFamily: CONFIG.FONT,
       fontSize: FONT_SIZE,
       color: SO_DARK,
     })
 
-    this._footerText = this.add.text(CONTENT_X, CONFIG.HEIGHT - FOOTER_H + 20, '', {
+    this._footerText = this.add.text(CONTENT_X, CONFIG.HEIGHT - PANEL_INSET - FOOTER_H + CONTENT_Y_PAD, '', {
       fontFamily: CONFIG.FONT,
       fontSize: FONT_SIZE,
       color: SO_MID,
