@@ -414,6 +414,7 @@ export class WorldScene extends BaseScene {
     // 3am scene — fires once after viral wave completes
     if (shouldTriggerThreeAmScene(GameState.story.flags)) {
       this._interacting = true
+      this.dialog.clearSpeaker()
       this.dialog.show([
         'Your phone buzzes. Then again.',
         "The on-call rotation doesn't care\nthat you just went to bed.",
@@ -581,11 +582,6 @@ export class WorldScene extends BaseScene {
       const npcTileY = Math.floor(cy / TILE_SIZE)
       this._blockedNpcTiles.add(`${npcTileX},${npcTileY}`)
 
-      this.add.text(cx, cy - def.height / 2 - 8, def.name, {
-        fontFamily: CONFIG.FONT,
-        fontSize:   '10px',
-        color:      '#ffe066',
-      }).setOrigin(0.5, 1).setDepth(6)
       this._npcSprites.push({ def, sprite })
     }
   }
@@ -939,6 +935,7 @@ export class WorldScene extends BaseScene {
 
     if (type === 'sign' || type === 'flavor') {
       this._interacting = true
+      this.dialog.clearSpeaker()
       this.dialog.show(interaction.dialog, () => { this._interacting = false })
       return
     }
@@ -948,6 +945,7 @@ export class WorldScene extends BaseScene {
       this._interacting = true
       GameState.story.flags[interaction.flagKey] = true
       addItem(interaction.item.tab, interaction.item.id, interaction.item.qty)
+      this.dialog.clearSpeaker()
       this.dialog.show(interaction.dialog, () => { this._interacting = false })
       return
     }
@@ -956,6 +954,7 @@ export class WorldScene extends BaseScene {
       const { requiresItem, flagKey, lockedDialog, unlockedDialog } = interaction
       if (GameState.story.flags[flagKey]) return
       this._interacting = true
+      this.dialog.clearSpeaker()
       if (hasItem(requiresItem.tab, requiresItem.id)) {
         GameState.story.flags[flagKey] = true
         markDirty()
@@ -977,6 +976,17 @@ export class WorldScene extends BaseScene {
 
   _interactWithNpc(npcName) {
     this._interacting = true
+
+    // Set the dialog box speaker — name + portrait drawn from trainer data when
+    // available. Terminals show no speaker (clearSpeaker resets to plain text layout).
+    const speakerTrainer = getTrainerById(npcName)
+    const isTerminal = npcName === 'azure_terminal' || npcName === 'hosting_terminal'
+    if (isTerminal) {
+      this.dialog.clearSpeaker()
+    } else {
+      const speakerName = speakerTrainer?.name ?? this._formatNpcName(npcName)
+      this.dialog.setSpeaker(speakerName, `portrait_${npcName}`)
+    }
 
     if (npcName === 'margaret') {
       this._interactMargaret()
@@ -1209,6 +1219,7 @@ export class WorldScene extends BaseScene {
     const titleLine = `${transition.titleCard}: ${transition.titleSub}`
     const pages = [titleLine, ...(transition.narration ?? [])]
     this._interacting = true
+    this.dialog.clearSpeaker()
     this.dialog.show(pages, () => { this._interacting = false })
   }
 
@@ -1248,6 +1259,7 @@ export class WorldScene extends BaseScene {
       this._player.setVelocity(0, 0)
       this._interacting = true
       const denialText = this._resolveDenialText(result.reasonId, result.reasonParams)
+      this.dialog.clearSpeaker()
       this.dialog.show([denialText], () => { this._interacting = false })
       // Push player back from edge so they don't re-trigger
       const pushback = TILE_SIZE
@@ -1275,6 +1287,12 @@ export class WorldScene extends BaseScene {
     const storyId = REASON_TO_STORY[reasonId]
     const entry   = storyId ? getStoryById(storyId) : null
     return entry?.pages?.[0] ?? 'You cannot go this way.'
+  }
+
+  // Converts an NPC ID to a title-cased display name for the dialog speaker label.
+  // Example: 'intern_ivan' → 'Intern Ivan', 'dagny_dba' → 'Dagny Dba'
+  _formatNpcName(npcId) {
+    return npcId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   }
 
   // 4-frame stepped fade (0% → 34% → 67% → 100% black), not smooth
