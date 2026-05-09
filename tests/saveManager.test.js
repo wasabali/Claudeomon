@@ -10,6 +10,17 @@ vi.mock('#utils/fileIO.js', () => ({
 
 const clone = value => JSON.parse(JSON.stringify(value))
 
+// Minimal localStorage mock
+const makeLocalStorage = () => {
+  const store = {}
+  return {
+    getItem:    (k) => store[k] ?? null,
+    setItem:    (k, v) => { store[k] = String(v) },
+    removeItem: (k) => { delete store[k] },
+    clear:      () => { for (const k of Object.keys(store)) delete store[k] },
+  }
+}
+
 describe('SaveManager', () => {
   let initialState
 
@@ -17,6 +28,7 @@ describe('SaveManager', () => {
     initialState = clone(GameState)
     vi.clearAllMocks()
     globalThis.confirm = vi.fn()
+    globalThis.localStorage = makeLocalStorage()
   })
 
   const restoreState = () => {
@@ -95,5 +107,176 @@ describe('SaveManager', () => {
 
     await SaveManager.import()
     expect(openFilePicker).toHaveBeenCalled()
+  })
+
+  describe('saveToSlot / loadFromSlot / deleteSlot', () => {
+    beforeEach(restoreState)
+
+    it('saveToSlot writes JSON to localStorage under the correct key and a separate meta key', async () => {
+      GameState.player.name = 'Alice'
+      GameState.player.level = 4
+      GameState.player.location = 'localhost_town'
+      GameState.player.playtime = 3720
+
+      await SaveManager.saveToSlot(0, GameState, 'reached localhost_town')
+
+      const raw = globalThis.localStorage.getItem('cloudquest_save_0')
+      expect(raw).not.toBeNull()
+      const parsed = JSON.parse(raw)
+      expect(parsed.checksum).toMatch(/^sha256:/)
+      expect(parsed.commitMessage).toBe('reached localhost_town')
+      expect(parsed.slotMeta.playerName).toBe('Alice')
+      expect(parsed.slotMeta.level).toBe(4)
+      expect(parsed.slotMeta.location).toBe('localhost_town')
+      expect(parsed.slotMeta.playtime).toBe(3720)
+
+      // Verify lightweight meta key written separately
+      const metaRaw = globalThis.localStorage.getItem('cloudquest_save_0_meta')
+      expect(metaRaw).not.toBeNull()
+      const meta = JSON.parse(metaRaw)
+      expect(meta.playerName).toBe('Alice')
+      expect(meta.level).toBe(4)
+    })
+
+    it('saveToSlot does not write _session to localStorage', async () => {
+      await SaveManager.saveToSlot(1, GameState, 'no session')
+      const parsed = JSON.parse(globalThis.localStorage.getItem('cloudquest_save_1'))
+      expect(parsed).not.toHaveProperty('_session')
+    })
+
+    it('saveToSlot clears isDirty and sets lastSavedAt on the session', async () => {
+      GameState._session.isDirty = true
+      await SaveManager.saveToSlot(2, GameState, 'dirty')
+      expect(GameState._session.isDirty).toBe(false)
+      expect(GameState._session.lastSavedAt).not.toBeNull()
+    })
+
+    it('saveToSlot uses separate keys per slot', async () => {
+      GameState.player.name = 'Slot0'
+      await SaveManager.saveToSlot(0, GameState)
+      GameState.player.name = 'Slot2'
+      await SaveManager.saveToSlot(2, GameState)
+
+      const meta0 = SaveManager.getSlotMeta(0)
+      const meta2 = SaveManager.getSlotMeta(2)
+      expect(meta0.playerName).toBe('Slot0')
+      expect(meta2.playerName).toBe('Slot2')
+    })
+
+    it('loadFromSlot restores GameState from the saved slot', async () => {
+      GameState.player.name = 'Bob'
+      GameState.player.level = 7
+      await SaveManager.saveToSlot(0, GameState, 'bob save')
+
+      // Mutate state after saving
+      GameState.player.name = 'Tampered'
+      GameState.player.level = 1
+
+      const loaded = await SaveManager.loadFromSlot(0)
+      expect(loaded.player.name).toBe('Bob')
+      expect(loaded.player.level).toBe(7)
+      expect(GameState.player.name).toBe('Bob')
+      expect(GameState._session.isDirty).toBe(false)
+    })
+
+    it('loadFromSlot returns null when slot is empty', async () => {
+      const result = await SaveManager.loadFromSlot(1)
+      expect(result).toBeNull()
+    })
+
+    it('loadFromSlot does not put _session or slotMeta into GameState', async () => {
+      await SaveManager.saveToSlot(0, GameState)
+      await SaveManager.loadFromSlot(0)
+      expect(GameState).not.toHaveProperty('slotMeta')
+      expect(GameState._session).toBeDefined()
+      expect(GameState._session.isDirty).toBe(false)
+    })
+
+    it('loadFromSlot validates the checksum and prompts on mismatch', async () => {
+      await SaveManager.saveToSlot(0, GameState, 'checksum test')
+      // Tamper the full payload directly
+      const raw = JSON.parse(globalThis.localStorage.getItem('cloudquest_save_0'))
+      raw.player.budget = 9999
+      globalThis.localStorage.setItem('cloudquest_save_0', JSON.stringify(raw))
+
+      globalThis.confirm = vi.fn(() => false)
+      const result = await SaveManager.loadFromSlot(0)
+      expect(globalThis.confirm).toHaveBeenCalled()
+      expect(result).toBeNull()
+    })
+
+    it('loadFromSlot rejects unsupported save versions', async () => {
+      await SaveManager.saveToSlot(0, GameState)
+      const raw = JSON.parse(globalThis.localStorage.getItem('cloudquest_save_0'))
+      raw.version = '99.0'
+      raw.checksum = 'sha256:fake'
+      globalThis.localStorage.setItem('cloudquest_save_0', JSON.stringify(raw))
+
+      await expect(SaveManager.loadFromSlot(0)).rejects.toThrow('Unsupported save version')
+    })
+
+    it('saveToSlot throws for an out-of-range slotIndex', async () => {
+      await expect(SaveManager.saveToSlot(3, GameState)).rejects.toThrow(RangeError)
+      await expect(SaveManager.saveToSlot(-1, GameState)).rejects.toThrow(RangeError)
+      await expect(SaveManager.saveToSlot(1.5, GameState)).rejects.toThrow(RangeError)
+    })
+
+    it('loadFromSlot throws for an out-of-range slotIndex', async () => {
+      await expect(SaveManager.loadFromSlot(3)).rejects.toThrow(RangeError)
+    })
+
+    it('deleteSlot throws for an out-of-range slotIndex', () => {
+      expect(() => SaveManager.deleteSlot(3)).toThrow(RangeError)
+    })
+
+    it('getSlotMeta throws for an out-of-range slotIndex', () => {
+      expect(() => SaveManager.getSlotMeta(3)).toThrow(RangeError)
+    })
+
+    it('deleteSlot removes both the full save and the meta key from localStorage', async () => {
+      await SaveManager.saveToSlot(0, GameState, 'to delete')
+      expect(globalThis.localStorage.getItem('cloudquest_save_0')).not.toBeNull()
+      expect(globalThis.localStorage.getItem('cloudquest_save_0_meta')).not.toBeNull()
+
+      SaveManager.deleteSlot(0)
+      expect(globalThis.localStorage.getItem('cloudquest_save_0')).toBeNull()
+      expect(globalThis.localStorage.getItem('cloudquest_save_0_meta')).toBeNull()
+    })
+
+    it('deleteSlot is a no-op on an empty slot', () => {
+      expect(() => SaveManager.deleteSlot(1)).not.toThrow()
+    })
+
+    it('getSlotMeta returns null for an empty slot', () => {
+      expect(SaveManager.getSlotMeta(0)).toBeNull()
+    })
+
+    it('getSlotMeta returns summary fields without full state parse', async () => {
+      GameState.player.name = 'Carol'
+      GameState.player.level = 3
+      GameState.player.location = 'three_am_tavern'
+      GameState.player.playtime = 600
+      await SaveManager.saveToSlot(0, GameState, 'summary test')
+
+      const meta = SaveManager.getSlotMeta(0)
+      expect(meta.slotIndex).toBe(0)
+      expect(meta.playerName).toBe('Carol')
+      expect(meta.level).toBe(3)
+      expect(meta.location).toBe('three_am_tavern')
+      expect(meta.playtime).toBe(600)
+      expect(meta.savedAt).not.toBeNull()
+      expect(meta.commitMessage).toBe('summary test')
+    })
+
+    it('getAllSlotMeta returns array of length 3 with nulls for empty slots', async () => {
+      GameState.player.name = 'Dan'
+      await SaveManager.saveToSlot(1, GameState)
+
+      const all = SaveManager.getAllSlotMeta()
+      expect(all).toHaveLength(3)
+      expect(all[0]).toBeNull()
+      expect(all[1].playerName).toBe('Dan')
+      expect(all[2]).toBeNull()
+    })
   })
 })

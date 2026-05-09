@@ -702,6 +702,7 @@ export class WorldScene extends BaseScene {
     this._keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
     this._keyE     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     this._keyI     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I)
+    this._keyEsc   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
   }
 
   _setupCamera() {
@@ -884,7 +885,8 @@ export class WorldScene extends BaseScene {
     else if (Phaser.Input.Keyboard.JustDown(this._cursors.down)) this._menu.moveDown()
     else if (Phaser.Input.Keyboard.JustDown(this._keyZ)
           || Phaser.Input.Keyboard.JustDown(this._keyEnter))     this._menu.confirm()
-    else if (Phaser.Input.Keyboard.JustDown(this._keyX))         this._menu.cancel()
+    else if (Phaser.Input.Keyboard.JustDown(this._keyX)
+          || Phaser.Input.Keyboard.JustDown(this._keyEsc))       this._menu.cancel()
   }
 
   _tryInteract() {
@@ -960,6 +962,7 @@ export class WorldScene extends BaseScene {
         markDirty()
         this.dialog.show(unlockedDialog, () => { this._interacting = false })
       } else {
+        this.playSfx('sfx_door_locked')
         this.dialog.show(lockedDialog, () => { this._interacting = false })
       }
     }

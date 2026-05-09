@@ -123,6 +123,7 @@ export class BattleScene extends BaseScene {
         this.playBgm('battle_engineer')
       }
     }
+    this.playSfx('sfx_encounter_start')
 
     // Show pre-battle intro dialog (ENGINEER mode — trainer/gym leader lines)
     const preBattleEvents = getPreBattleEvents(this._battleState)
@@ -447,6 +448,7 @@ export class BattleScene extends BaseScene {
   _renderEvent(event, callback) {
     switch (event.type) {
       case 'skill_used':
+        this.playSfx('sfx_confirm')
         this._showLog(`Used: ${event.skillId}`)
         this.time.delayedCall(300, callback)
         break
@@ -492,6 +494,7 @@ export class BattleScene extends BaseScene {
 
       case 'status_tick':
       case 'status_remove':
+        this.playSfx('sfx_status_expire')
         callback()
         break
 
@@ -712,6 +715,7 @@ export class BattleScene extends BaseScene {
                 earned: true,
                 shine:  GameState.emblems[gym.emblemReward]?.shine ?? false,
               }
+              this.playSfx('sfx_emblem_earn')
             }
           }
         }
@@ -754,6 +758,7 @@ export class BattleScene extends BaseScene {
     this._levelUpMessage = finalLevelUp
       ? `Level Up! You are now level ${finalLevelUp.payload.newLevel}!`
       : null
+    if (finalLevelUp) this.playSfx('sfx_level_up')
 
     markDirty()
     this._showLog(result === 'win' ? 'Victory!' : 'Defeated...')

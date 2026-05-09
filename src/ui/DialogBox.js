@@ -225,6 +225,7 @@ export class DialogBox {
   _buildChrome() {
     this._container = this.scene.add.container(0, 0)
     this._container.setDepth(100)
+    this._container.setScrollFactor(0) // keep in screen space regardless of camera position
 
     // Background panel — prefer the Kenney UI Pack window when loaded.
     const panelKey = this.scene.textures.exists('ui_window') ? 'ui_window' : PANEL_KEY
