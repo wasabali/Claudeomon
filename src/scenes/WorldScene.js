@@ -581,11 +581,6 @@ export class WorldScene extends BaseScene {
       const npcTileY = Math.floor(cy / TILE_SIZE)
       this._blockedNpcTiles.add(`${npcTileX},${npcTileY}`)
 
-      this.add.text(cx, cy - def.height / 2 - 8, def.name, {
-        fontFamily: CONFIG.FONT,
-        fontSize:   '10px',
-        color:      '#ffe066',
-      }).setOrigin(0.5, 1).setDepth(6)
       this._npcSprites.push({ def, sprite })
     }
   }
@@ -978,6 +973,17 @@ export class WorldScene extends BaseScene {
   _interactWithNpc(npcName) {
     this._interacting = true
 
+    // Set the dialog box speaker — name + portrait drawn from trainer data when
+    // available. Terminals show no speaker (clearSpeaker resets to plain text layout).
+    const _speakerTrainer = getTrainerById(npcName)
+    const _isTerminal = npcName === 'azure_terminal' || npcName === 'hosting_terminal'
+    if (_isTerminal) {
+      this.dialog.clearSpeaker()
+    } else {
+      const speakerName = _speakerTrainer?.name ?? this._formatNpcName(npcName)
+      this.dialog.setSpeaker(speakerName, `portrait_${npcName}`)
+    }
+
     if (npcName === 'margaret') {
       this._interactMargaret()
       return
@@ -1275,6 +1281,12 @@ export class WorldScene extends BaseScene {
     const storyId = REASON_TO_STORY[reasonId]
     const entry   = storyId ? getStoryById(storyId) : null
     return entry?.pages?.[0] ?? 'You cannot go this way.'
+  }
+
+  // Converts an NPC ID to a title-cased display name for the dialog speaker label.
+  // Example: 'intern_ivan' → 'Intern Ivan', 'dagny_dba' → 'Dagny Dba'
+  _formatNpcName(id) {
+    return id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   }
 
   // 4-frame stepped fade (0% → 34% → 67% → 100% black), not smooth

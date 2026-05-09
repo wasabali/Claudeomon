@@ -19,6 +19,13 @@ const PANEL_KEY       = 'dialog_window_9slice'
 const CHOICE_OFFSET_Y   = 36
 const CHOICE_LINE_HEIGHT = 32
 
+// Speaker portrait layout constants.
+const PORTRAIT_SIZE        = 80   // dialog portrait pixel size
+const PORTRAIT_Y           = BOX_Y + 10
+const SPEAKER_NAME_FONT    = '14px'
+const SPEAKER_TEXT_OFFSET_X = BOX_PADDING_X + PORTRAIT_SIZE + 12
+const SPEAKER_TEXT_OFFSET_Y = BOX_PADDING_Y + 22  // extra Y below name label
+
 export class DialogBox {
   /**
    * @param {Phaser.Scene} scene - The scene that owns this dialog box.
@@ -31,6 +38,7 @@ export class DialogBox {
     this._onDone  = null
     this._charIdx = 0
     this._typing  = false
+    this._speaker = null  // { name, portraitKey } or null
 
     this._ensureTexture()
     this._buildChrome()
@@ -117,7 +125,7 @@ export class DialogBox {
     this._choiceTexts = choices.map((label, i) => {
       const prefix = i === 0 ? '► ' : '  '
       return this.scene.add.text(
-        BOX_PADDING_X,
+        this._text.x,
         startY + i * CHOICE_LINE_HEIGHT,
         prefix + label,
         {
@@ -150,6 +158,22 @@ export class DialogBox {
       this._onChoiceSelect = null
       cb(idx)
     }
+  }
+
+  /**
+   * Set the current speaker displayed in the dialog box.
+   * @param {string}      name       - Display name shown above the dialog text.
+   * @param {string|null} portraitKey - Phaser texture key for the portrait (optional).
+   */
+  setSpeaker(name, portraitKey = null) {
+    this._speaker = { name, portraitKey }
+    this._refreshSpeaker()
+  }
+
+  /** Remove the current speaker (name + portrait hidden, text returns to normal position). */
+  clearSpeaker() {
+    this._speaker = null
+    this._refreshSpeaker()
   }
 
   /** True while the dialog box is visible. */
@@ -249,6 +273,61 @@ export class DialogBox {
         this._prompt.setVisible(!this._prompt.visible)
       },
     })
+
+    // Speaker portrait — shown on the left of the box when a speaker is set
+    // and the portrait texture has been loaded.
+    this._portrait = this.scene.add.image(
+      BOX_PADDING_X,
+      PORTRAIT_Y,
+      '__DEFAULT',
+    ).setOrigin(0, 0)
+      .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
+      .setVisible(false)
+    this._container.add(this._portrait)
+
+    // Speaker name label — shown above dialog text when a speaker is set.
+    this._nameLabel = this.scene.add.text(
+      SPEAKER_TEXT_OFFSET_X,
+      PORTRAIT_Y,
+      '',
+      {
+        fontFamily: CONFIG.FONT,
+        fontSize:   SPEAKER_NAME_FONT,
+        color:      '#ffe066',
+      },
+    ).setVisible(false)
+    this._container.add(this._nameLabel)
+  }
+
+  _refreshSpeaker() {
+    const s = this._speaker
+    const hasPortrait = s?.portraitKey && this.scene.textures.exists(s.portraitKey)
+
+    if (s?.name) {
+      this._nameLabel.setText(s.name)
+      this._nameLabel.setVisible(true)
+
+      if (hasPortrait) {
+        this._portrait.setTexture(s.portraitKey)
+        this._portrait.setVisible(true)
+      } else {
+        this._portrait.setVisible(false)
+      }
+
+      // Shift text right to make room for the portrait column.
+      const textX = SPEAKER_TEXT_OFFSET_X
+      this._text.setX(textX)
+      this._text.setY(BOX_Y + BOX_PADDING_Y + SPEAKER_TEXT_OFFSET_Y)
+      this._text.setWordWrapWidth(CONFIG.WIDTH - textX - BOX_PADDING_X)
+    } else {
+      this._nameLabel.setVisible(false)
+      this._portrait.setVisible(false)
+
+      // Reset text to default position.
+      this._text.setX(BOX_PADDING_X)
+      this._text.setY(BOX_Y + BOX_PADDING_Y)
+      this._text.setWordWrapWidth(CONFIG.WIDTH - BOX_PADDING_X * 2)
+    }
   }
 
   _startPage(index) {
