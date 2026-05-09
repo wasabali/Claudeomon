@@ -131,6 +131,7 @@ export class Menu {
     if (!this._active || this._items.length === 0) return
     this._selected = (this._selected - 1 + this._items.length) % this._items.length
     this._updateArrow()
+    this.scene.playSfx?.('sfx_cursor_move')
   }
 
   /** Move selection down by one (wraps). */
@@ -138,6 +139,7 @@ export class Menu {
     if (!this._active || this._items.length === 0) return
     this._selected = (this._selected + 1) % this._items.length
     this._updateArrow()
+    this.scene.playSfx?.('sfx_cursor_move')
   }
 
   /** Confirm the current selection. */
@@ -146,6 +148,7 @@ export class Menu {
     const idx   = this._selected
     const label = this._items[idx]
     this.hide()
+    this.scene.playSfx?.('sfx_confirm')
     if (this._onSelect) this._onSelect(idx, label)
   }
 
@@ -153,6 +156,7 @@ export class Menu {
   cancel() {
     if (!this._active) return
     this.hide()
+    this.scene.playSfx?.('sfx_cancel')
     if (this._onCancel) this._onCancel()
   }
 
