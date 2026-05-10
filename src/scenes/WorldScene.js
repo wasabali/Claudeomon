@@ -89,7 +89,7 @@ export class WorldScene extends BaseScene {
       this.load.tilemapTiledJSON(regionId, `assets/maps/${regionId}.tmj`)
     }
 
-    // Preload Kenney Urban tileset (3× upscaled from tilemap_packed.png)
+    // Preload Kenney Urban tileset (3× upscaled from assets/tiles/kenney-urban/tilemap_packed.png)
     if (!this.textures.exists(KENNEY_URBAN_KEY)) {
       this.load.image(KENNEY_URBAN_KEY, 'assets/maps/tilesets/kenney_urban.png')
     }
