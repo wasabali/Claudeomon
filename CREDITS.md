@@ -188,14 +188,14 @@ CC0 — no attribution required; credited here as good practice.
 
 ## Kenney RPG Urban Pack (CC0)
 
-**Supplemental tiles** for tech/office/server-room regions and the `Deprecated Azure Region` (`deprecated_azure_region`) wasteland biome.
+**Primary world tileset** for village, nature, interior, and dungeon regions, plus supplemental tiles for tech/office/server-room regions and the `Deprecated Azure Region` (`deprecated_azure_region`) wasteland biome.
 
 | Field | Value |
 |---|---|
 | Author | Kenney (kenney.nl) |
 | Source | https://kenney.nl/assets/rpg-urban-pack |
 | License | [CC0 1.0 Universal — Public Domain](https://creativecommons.org/publicdomain/zero/1.0/) |
-| Modifications | Upscaled to match 48×48px tile grid (if sourced from a 16px base); wasteland tiles recoloured to rust/decay palette |
+| Modifications | Upscaled to match 48×48px tile grid (3× nearest-neighbor from 16px source); wasteland tiles recoloured to rust/decay palette |
 
 CC0 — no attribution required; credited here as good practice.
 
@@ -203,8 +203,11 @@ CC0 — no attribution required; credited here as good practice.
 
 | Category | Cloud Quest location |
 |---|---|
+| World tileset — village / nature / interior / dungeon maps (486 tiles, 27×18 grid) | `assets/maps/tilesets/kenney_urban.png` |
 | Tech / office tileset (50 tiles) | `assets/tiles/kenney_tech_office.png` |
 | Wasteland / ruins biome tileset (12 tiles) | `assets/tiles/wasteland_tiles.png` |
+| Source tilemap (packed, 16px tiles) | `assets/tiles/kenney-urban/tilemap_packed.png` |
+| Source tilemap (with 1px spacing) | `assets/tiles/kenney-urban/tilemap.png` |
 
 ---
 

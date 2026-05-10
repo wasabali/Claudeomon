@@ -25,7 +25,7 @@ const TILESET_STUB = {
 
 // ---------------------------------------------------------------------------
 // Kenney RPG Urban Pack tileset — 27 cols × 18 rows = 486 tiles at 48×48px.
-// Source: tilemap_packed.png upscaled 3× via nearest-neighbor.
+// Source: assets/tiles/kenney-urban/tilemap_packed.png upscaled 3× via nearest-neighbor.
 // ---------------------------------------------------------------------------
 const KU_COLS = 27
 const KU_ROWS = 18
