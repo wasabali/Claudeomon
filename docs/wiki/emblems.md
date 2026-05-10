@@ -1,119 +1,156 @@
 # 🏅 Emblems
 
-Emblems are permanent upgrades earned by beating gym leaders. Each emblem has a **passive bonus** that's always active and a **grime description** — flavour text revealing what the badge has been through.
+Emblems are the shiny proof that you beat a gym leader and lived to tell the tale. Each emblem grants a **permanent passive bonus** that's always active in battle — no equipping required. They're basically certifications, except these ones actually do something useful.
 
-You can view and polish your emblems in the Emblem Case (`E` key). Polish them with the mouse-drag minigame. Fully polished emblems have a shine effect.
+You can view and polish your emblems in the **Emblem Case** scene. Polish them with the mouse-drag minigame to remove grime and unlock a shine effect. Because even in a satirical RPG, we believe in emblem hygiene.
 
 ---
 
 ## All Emblems
 
-### 🐧 Tux Emblem — Linux Domain
+There are 9 emblems in Cloud Quest. Eight are earned by beating gym leaders; the Container Emblem is earned outside the gym system.
 
-- **Gym:** Terminal Gym (Tutorial)
-- **Gym Leader:** Tux the Terminal Wizard
+---
+
+### 🐧 Tux Emblem — Linux
+
+- **Gym:** The Legacy Terminal (Gym 1)
+- **Leader:** Tux the Terminal Wizard
+- **Required Badges:** 0
 - **Passive Bonus:** Linux skills +5% effectiveness
-- **Grime Description:** *Terminal scrollback residue*
+- **Grime:** *Terminal scrollback residue*
+
+Your first emblem. Earned by surviving a fight where Cloud and Serverless skills deal 0 damage (non-damage effects still work) and late-act skills are blocked. Hope you like `grep`.
 
 ---
 
-### 🔧 Pipeline Emblem — IaC Domain
+### ☁️ Cloud Emblem — Cloud
 
-- **Gym:** Pipeline Dojo (Gym 1)
-- **Gym Leader:** Bjørn the Build Breaker
-- **Passive Bonus:** IaC skill fail chance -5%
-- **Grime Description:** *Failed build red ink splatter*
-
----
-
-### ☁️ Cloud Emblem — Cloud Domain
-
-- **Gym:** Uptime Arena (Gym 2)
-- **Gym Leader:** Captain Nines
+- **Gym:** 3am Incident Response (Gym 2)
+- **Leader:** Captain Nines
+- **Required Badges:** 1
 - **Passive Bonus:** Budget drain -10%
-- **Grime Description:** *Azure portal spinner smudges*
+- **Grime:** *Azure portal spinner smudges*
+
+Earned under a brutal 6-turn SLA timer. If you breached the SLA, you still get the emblem — but you'll remember the reputation hit.
 
 ---
 
-### 📊 SRE Emblem — Observability Domain
+### 🔧 Pipeline Emblem — IaC
 
-- **Gym:** Sprint Sanctum (Gym 3)
-- **Gym Leader:** Scrum Siri
-- **Passive Bonus:** Max HP +10
-- **Grime Description:** *3am coffee ring stains*
+- **Gym:** The Broken Pipeline (Gym 3)
+- **Leader:** Bjørn the Build Breaker
+- **Required Badges:** 2
+- **Passive Bonus:** IaC skill fail chance -5%
+- **Grime:** *Failed build red ink splatter*
 
----
-
-### 📦 Container Emblem — Containers Domain
-
-- **Gym:** Container Yard (Gym 4)
-- **Gym Leader:** Docker Dag
-- **Passive Bonus:** Container skills +5% effectiveness
-- **Grime Description:** *node_modules dust*
+Earned in the gym where 30% of your skills just... don't work. The Pipeline Emblem's -5% fail chance bonus is sweet revenge.
 
 ---
 
-### ⛵ Helm Emblem — Kubernetes Domain
+### ⚡ Serverless Emblem — Serverless
 
-- **Gym:** Cluster Ring (Gym 5)
-- **Gym Leader:** The Kube-rnetes Master
-- **Passive Bonus:** Kubernetes skills +5% effectiveness
-- **Grime Description:** *CrashLoopBackOff soot*
-
----
-
-### 🔒 Vault Emblem — Security Domain
-
-- **Gym:** Security Vault (Gym 6)
-- **Gym Leader:** Ingrid the IAM Inspector
-- **Passive Bonus:** Shame Point gain -1 (minimum 0)
-- **Grime Description:** *Leaked secret stains*
-
----
-
-### 💰 FinOps Emblem — Cloud Domain (Advanced)
-
-- **Gym:** Whiteboard Summit (Gym 7)
-- **Gym Leader:** The Solutions Oracle
-- **Passive Bonus:** Budget restored +10% after each battle
-- **Grime Description:** *Billing alert residue*
-
----
-
-### ⚡ Serverless Emblem — Serverless Domain
-
-- **Gym:** *(Unlocked via The Solutions Oracle quest chain, not a standard gym)*
-- **How to Earn:** Complete the "Event-Driven Architecture 101" + "API Gateway Gauntlet" quest chain in full without using any non-serverless skills.
+- **Gym:** Cold Start Gauntlet (Gym 4)
+- **Leader:** Fatima the Function Witch
+- **Required Badges:** 3
 - **Passive Bonus:** Serverless skills +5% effectiveness
-- **Grime Description:** *Cold start frost residue*
+- **Grime:** *Cold start frost residue*
+
+Your first non-Observability skill in this gym is blocked by cold start (Observability clears the flag without being blocked — open with a reveal!). The frost on this emblem is a permanent reminder of that helpless feeling.
 
 ---
 
-## Emblem Polishing
+### ⛵ Helm Emblem — Kubernetes
 
-In the Emblem Case, you can polish any earned emblem:
-1. Hover over the emblem
-2. Click and drag the polishing cloth across the surface
-3. After 3–4 passes, the emblem gains a **shine effect** in battle
+- **Gym:** Pod Crasher (Gym 5)
+- **Leader:** The Kube-rnetes Master
+- **Required Badges:** 4
+- **Passive Bonus:** Kubernetes skills +5% effectiveness
+- **Grime:** *CrashLoopBackOff soot*
 
-Fully polished emblems glow during the gym leader's pre-battle dialogue and add a sparkle to the battle HUD.
+The Kube-rnetes Master respawns 3 times at 50% HP. You basically have to beat the same fight four times. The soot on this emblem is well-earned.
+
+---
+
+### 🔒 Vault Emblem — Security
+
+- **Gym:** Entra Misconfiguration (Gym 6)
+- **Leader:** Ingrid the IAM Inspector
+- **Required Badges:** 5
+- **Passive Bonus:** Shame Point gain -1 (minimum 0)
+- **Grime:** *Leaked secret stains*
+
+The most defensively valuable emblem in the game. With the Vault Emblem equipped, cursed techniques only add +0 Shame instead of +1 (minimum 0). If you're flirting with the evil path, this is your safety net.
+
+---
+
+### 📊 SRE Emblem — Observability
+
+- **Gym:** Azure Bill Spiral (Gym 7)
+- **Leader:** Oracle Alice
+- **Required Badges:** 6
+- **Passive Bonus:** Max HP +10
+- **Grime:** *3am coffee ring stains*
+
+Earned in the gym where Oracle Alice's HP and attack grow every single turn. The cost spiral hits hard after turn 8. The coffee ring stains are from the all-nighter you pulled to beat her.
+
+---
+
+### 💰 FinOps Emblem — Cloud
+
+- **Gym:** The CTO Office (Gym 8)
+- **Leader:** The CTO
+- **Required Badges:** 7
+- **Passive Bonus:** Budget restored +10% after each battle
+- **Grime:** *Billing alert residue*
+
+The final gym emblem. The CTO switches domains every 2 turns and enters Executive Mode (×1.5 damage) at 25% HP. Beating the CTO is the hardest standard fight in the game. The budget bonus is your reward for surviving corporate.
 
 ---
 
 ## Emblem Summary Table
 
-| Emblem | Domain | Gym | Passive Bonus |
-|---|---|---|---|
-| Tux | Linux | Tutorial | Linux skills +5% effectiveness |
-| Pipeline | IaC | Gym 1 | IaC skill fail chance -5% |
-| Cloud | Cloud | Gym 2 | Budget drain -10% |
-| SRE | Observability | Gym 3 | Max HP +10 |
-| Container | Containers | Gym 4 | Container skills +5% effectiveness |
-| Helm | Kubernetes | Gym 5 | Kubernetes skills +5% effectiveness |
-| Vault | Security | Gym 6 | Shame Point gain -1 (minimum 0) |
-| FinOps | Cloud | Gym 7 | Budget restored +10% after each battle |
-| Serverless | Serverless | Quest chain | Serverless skills +5% effectiveness |
+| Emblem | Domain | Gym | Leader | Passive Bonus |
+|---|---|---|---|---|
+| Tux | Linux | The Legacy Terminal | Tux the Terminal Wizard | Linux skills +5% effectiveness |
+| Cloud | Cloud | 3am Incident Response | Captain Nines | Budget drain -10% |
+| Pipeline | IaC | The Broken Pipeline | Bjørn the Build Breaker | IaC skill fail chance -5% |
+| Serverless | Serverless | Cold Start Gauntlet | Fatima the Function Witch | Serverless skills +5% effectiveness |
+| Helm | Kubernetes | Pod Crasher | The Kube-rnetes Master | Kubernetes skills +5% effectiveness |
+| Vault | Security | Entra Misconfiguration | Ingrid the IAM Inspector | Shame Point gain -1 (minimum 0) |
+| SRE | Observability | Azure Bill Spiral | Oracle Alice | Max HP +10 |
+| FinOps | Cloud | The CTO Office | The CTO | Budget restored +10% after each battle |
+| Container | Containers | *(see below)* | *(see below)* | Container skills +5% effectiveness |
+
+### 📦 Container Emblem — Containers
+
+The Container Emblem is the only emblem **not directly tied to a numbered gym** in the current data. Its passive bonus is Container skills +5% effectiveness, and its grime description is *node_modules dust* — because of course it is. *Planned: The Container Emblem's acquisition method will be confirmed in a future update.*
 
 ---
 
-*Polished emblems are purely cosmetic. No gameplay advantage — just vibes.*
+## Emblem Grime & Polishing
+
+### How Grime Works
+
+Shame dirties your emblems. Every Shame Point you accumulate adds **0.05 grime** to all earned emblems. At Shame ≥ 10 (Shadow Engineer), the rate doubles to **0.10 grime per Shame Point**.
+
+Grimy emblems still provide their passive bonus — they just look terrible. Like a LinkedIn certification badge with coffee stains on it.
+
+| Shame Level | Grime Per Shame Point |
+|---|---|
+| 0–9 | 0.05 |
+| 10+ (Shadow Engineer) | 0.10 |
+
+### Polishing
+
+In the Emblem Case scene:
+
+1. Hover over any earned emblem
+2. Click and drag the polishing cloth across the surface
+3. After several passes, the emblem regains its shine
+
+Fully polished emblems glow during gym leader pre-battle dialogue and display a sparkle effect on the battle HUD. It's purely cosmetic — but it *feels* good.
+
+---
+
+*See also: [Combat Guide](combat-guide.md) · [Reputation & Shame](reputation-and-shame.md)*

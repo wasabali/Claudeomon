@@ -1,19 +1,29 @@
 # 🗺️ World Map
 
-Cloud Quest is divided into regions you unlock as you progress through the story. Each region has a dominant domain, its own encounter pool, and trainers to battle.
+Welcome to the Cloud Quest world — a sprawling network of regions, gyms, dungeons, and suspiciously named taverns. Navigate from your Localhost apartment all the way to the Architecture District, battling engineers, solving incidents, and discovering that production is always on fire somewhere.
 
 ---
 
 ## Progression Overview
 
 ```
-[Localhost Town] → [Pipeline Pass] → [Azure Town] → [Production Plains]
-                         ↓                                    ↓
-                  [Staging Valley]              [Kubernetes Colosseum]
-                         ↓
-              [Jira Dungeon 1 → 2 → 3]
-                         ↓
-                [Architecture District]
+                        ┌──────────────┐
+                        │ Jira Dungeon │
+                        │  (3 floors)  │
+                        └──────┬───────┘
+                               │ north
+[Your Apartment]          ┌────┴────────┐         ┌──────────────────┐
+      ↓                   │             │  east   │                  │
+┌─────────────┐   east    │  Pipeline   │────────→│ Production       │
+│  Localhost   │─────────→│  Pass       │         │ Plains           │
+│  Town       │           │             │         │                  │
+└──────┬──────┘           └─────────────┘         └────────┬─────────┘
+       │ south                                             │ south
+       ↓                                                   ↓
+┌──────────────┐          east           ┌─────────────────────────┐
+│  Azure Town  │────────────────────────→│ Kubernetes Colosseum    │
+│              │                         │                         │
+└──────────────┘                         └─────────────────────────┘
 ```
 
 Hidden areas branch off from specific trigger points. See [Hidden Areas](hidden-areas.md).
@@ -22,138 +32,115 @@ Hidden areas branch off from specific trigger points. See [Hidden Areas](hidden-
 
 ## Main Regions
 
-### 🏠 Localhost Town
-- **Act:** 1 (starting area)
-- **Domain:** Linux
-- **Trainers:** Ola the Ops Guy, Tux the Terminal Wizard (Tutorial Gym)
-- **Encounters:** `404_not_found`, `missing_semicolon`, `port_conflict` (common) · `failed_pipeline`, `npm_install_hang` (rare)
-- **Notes:** Safe starting zone. No cursed encounters. Margaret's bakery quest starts here.
+| Region | Domain | Act | Fast Travel | Description |
+|---|---|---|---|---|
+| 🏠 Localhost Town | — | 1 | ✅ | Starting town and tutorial area. Margaret's bakery, Professor Pedersen's lab, your apartment. Safe zone — no cursed encounters. |
+| 🏗️ Pipeline Pass | IaC | 1 | ✅ | The route between Localhost Town and the wider world. Multiple field trainers and the Cold Start Gauntlet gym. Connects north to Jira Dungeon (which houses Bjørn's gym). |
+| ☁️ Azure Town | Cloud | 1 | ✅ | Azure-themed hub city. Marketplace, budget tutorials, and Captain Nines' gym. Gateway south from Localhost Town. |
+| 🏭 Production Plains | Cloud | 2 | ✅ | Where things get real. SLA pressure ramps up. Multiple gym leaders and field trainers patrol this area. East of Pipeline Pass. |
+| ⛵ Kubernetes Colosseum | Kubernetes | 2 | ✅ | The arena district. K8s battles, Helm Repository access, and the fearsome Kube-rnetes Master. South of Production Plains, east of Azure Town. |
+| 🌙 3am Tavern | — | 2 | ❌ | *A door appears in Localhost Town when Shame ≥ 1.* Cursed trainers only. No fast travel — you walk here in shame. |
 
 ---
 
-### 🏗️ Pipeline Pass
-- **Act:** 1
-- **Domain:** IaC / Serverless
-- **Trainers:** Bjørn the Build Breaker (Gym 1), Fatima the Function Witch, DevOps Dave
-- **Encounters:** `failed_pipeline`, `merge_conflict`, `yaml_syntax_error`, `dependency_hell`, `circular_dependency`
-- **Notes:** First gym. Flaky test quest from DevOps Dave. Connects to Staging Valley.
+## 🏆 Gyms
+
+Eight gyms, eight domains, eight gym leaders who will make you regret not reading the docs.
+
+| Gym | Domain | Region | Gym Name | Leader |
+|---|---|---|---|---|
+| Terminal Gym | Linux | Localhost Town | The Legacy Terminal | Tux the Terminal Wizard |
+| Jira Dungeon 1 | IaC | Pipeline Pass | The Broken Pipeline | Bjørn the Build Breaker |
+| Production Plains | Cloud | Production Plains | 3am Incident Response | Captain Nines |
+| Pipeline Pass | Serverless | Pipeline Pass | Cold Start Gauntlet | Fatima the Function Witch |
+| Kubernetes Colosseum | Kubernetes | Kubernetes Colosseum | Pod Crasher | The Kube-rnetes Master |
+| Security Vault Gym | Security | Azure Town | Entra Misconfiguration | Ingrid the IAM Inspector |
+| Architecture District | Observability | Architecture District | Azure Bill Spiral | The Solutions Oracle |
+| Production Plains | Cloud | Production Plains | The CTO Office | The CTO |
+
+> Each gym has sub-leaders guarding inner rooms. Beat them before you face the leader. See [Trainers](trainers.md) for the full roster.
 
 ---
 
-### 🌙 Staging Valley
-- **Act:** 1
-- **Domain:** Cloud
-- **Trainers:** Scale Set Sven, Startup Steve
-- **Encounters:** `environment_mismatch`, `config_drift`, `wrong_env_var`, `feature_flag_forgotten`
-- **Notes:** "Works in staging" trauma zone. Steve's storage quest starts here.
+## 🏰 Dungeon Rooms
+
+### Jira Dungeon (3 floors) — accessed from Pipeline Pass
+
+| Floor | Name | Domain | Act |
+|---|---|---|---|
+| 1 | Backlog Cavern | Observability | 1 |
+| 2 | Sprint Corridor | IaC | 1 |
+| 3 | The Board Room | IaC | 1 |
+
+> 💀 Ignore three warnings on floor 3 to discover the OldCorp Basement entrance. See [Hidden Areas](hidden-areas.md).
+
+### Cloud Console (2 floors) — accessed from Azure Town
+
+| Floor | Name | Domain | Act |
+|---|---|---|---|
+| 1 | Portal Lobby | Cloud | 2 |
+| 2 | Resource Group Chamber | Cloud | 2 |
 
 ---
 
-### ☁️ Azure Town
-- **Act:** 1–2
-- **Domain:** Cloud
-- **Trainers:** Captain Nines (Gym 2), Cloud Costas, Grafana Gerd
-- **Encounters:** `quota_exceeded`, `subscription_limit`, `orphaned_resource`, `cost_spike`
-- **Notes:** Resource marketplace open. Budget management tutorial.
+## 🏠 Building Interiors (Localhost Town)
+
+| Building | Notes |
+|---|---|
+| Margaret's Bakery | Tutorial quest starts here. Old Margaret teaches `az webapp restart`. |
+| Professor Pedersen's Lab | Starter Deck selection. Lore dump. |
+| Your Apartment | Save point. Where it all begins (and where you'll retreat to). |
 
 ---
 
-### 🏭 Production Plains
-- **Act:** 2
-- **Domain:** Cloud / Observability
-- **Trainers:** Metrics Maja, Alert Anders, Nervous Nancy
-- **Encounters:** `high_error_rate`, `latency_spike`, `database_timeout`, `memory_leak`, `runaway_process`, `prod_incident` (rare)
-- **Notes:** Nancy's security breach quest. SLA pressure ramps up here.
+## 🔗 Region Connections
+
+The world is connected by routes. Some require story progression (Act gates) to unlock.
+
+| From | Direction | To | Gate |
+|---|---|---|---|
+| Localhost Town | → east | Pipeline Pass | — |
+| Localhost Town | ↓ south | Azure Town | — |
+| Pipeline Pass | ← west | Localhost Town | — |
+| Pipeline Pass | → east | Production Plains | Act 2 |
+| Pipeline Pass | ↑ north | Jira Dungeon 1 | — |
+| Azure Town | ↑ north | Localhost Town | — |
+| Azure Town | → east | Kubernetes Colosseum | Act 2 |
+| Production Plains | ← west | Pipeline Pass | — |
+| Production Plains | ↓ south | Kubernetes Colosseum | — |
+| Kubernetes Colosseum | ↑ north | Production Plains | — |
+| Kubernetes Colosseum | ← west | Azure Town | — |
 
 ---
 
-### 📋 Jira Dungeon (3 floors)
-- **Act:** 2
-- **Domain:** IaC / Containers
-- **Trainers:** Story Point Søren, Layer Lars, Pipeline Per, Trigger Trude, Manifest Magnus
-- **Encounters:** `ticket_limbo`, `sprint_overflow`, `blocked_story`, `scope_creep`, `unassigned_forever`
-- **Notes:** Three-floor dungeon. OldCorp Basement hidden entrance on floor 3 (ignore 3 warnings).
+## 🔒 Hidden Areas
+
+Five secret zones await the bold, the reckless, and the over-shamed. Each is accessed through special triggers — not normal routes.
+
+| Area | How to Access |
+|---|---|
+| Server Graveyard | SSH to decommissioned terminal |
+| node_modules Maze | Use Mystery node_modules junk item |
+| /dev/null Void | Pipe output 3 times in battle |
+| Deprecated Azure Region | Select greyed-out region at Azure Terminal |
+| OldCorp Basement | Open despite 3 warnings in Jira Dungeon |
+
+For full details on hidden area trainers, encounters, and loot, see [Hidden Areas](hidden-areas.md).
 
 ---
 
-### 🚢 Container Yard
-- **Act:** 2
-- **Domain:** Containers
-- **Trainers:** Docker Dag (Gym 4), Docker Diana
-- **Encounters:** `image_too_large`, `port_already_bound`, `container_oom`, `missing_volume`, `orphaned_layer` (rare)
-- **Notes:** Supply Chain Security quest available.
+## 🛒 Shops
+
+| Shop | Location | Price Mod | Notable Stock |
+|---|---|---|---|
+| Azure Marketplace | Azure Town | ×1.0 | Red Bull, Rollback Potion, Azure Credit Voucher, Skip Tests Scroll |
+| CI/CD Vending Machine | Pipeline Pass | ×1.15 | Red Bull, Rollback Potion, Cold Coffee |
+| Suspicious Vending Machine | 3am Tavern | ×0.80 | Scorched Server, Cold Coffee, Skip Tests Scroll (Shame ≥ 3 required) |
+
+> 📉 Your [Reputation](reputation-and-shame.md) affects shop prices. Higher rep = better deals.
 
 ---
 
-### 🌐 Helm Repository
-- **Act:** 2
-- **Domain:** Kubernetes / Containers
-- **Trainers:** Helm Hansen, Replica Set Ragnhild
-- **Encounters:** `chart_not_found`, `values_override_missing`, `deprecated_api_version`, `tiller_ghost` (rare)
-- **Notes:** Optional detour. Helm skills taught here.
-
----
-
-### ⛵ Kubernetes Colosseum
-- **Act:** 3
-- **Domain:** Kubernetes
-- **Trainers:** The Kube-rnetes Master (Gym 5), Kubectl Karen (sub-leader in outer ring; also appears at Three AM Tavern as Shame ≥ 2), YOLO Yaml Ylva (inner ring, Shame ≥ 3)
-- **Encounters:** `crashloopbackoff`, `evicted_pod`, `pending_forever`, `node_pressure`, `delete_all_pods` (rare), `sev1_at_3am` (cursed)
-- **Notes:** Inner ring is a hidden area. See [Hidden Areas](hidden-areas.md).
-
----
-
-### 🔒 Security Vault
-- **Act:** 3
-- **Domain:** Security
-- **Trainers:** Ingrid the IAM Inspector (Gym 6), Firewall Frida, .env Erik (hidden, Shame ≥ 3)
-- **Encounters:** `secret_exposed`, `permission_denied`, `expired_cert`, `overprivileged_role`, `supply_chain_attack` (rare)
-- **Notes:** Certificate Authority Island puzzle unlocks vault skills.
-
----
-
-### 🏛️ Architecture District
-- **Act:** 3
-- **Domain:** Observability
-- **Trainers:** Scrum Siri (Gym 3 — retrospective format), The Solutions Oracle (Gym 7), Architect Aleksander, Logging Lena
-- **Encounters:** `alert_storm`, `dashboard_too_late`, `missing_runbook`, `slo_breached`, `black_box` (rare)
-- **Notes:** Final act hub. Oracle teaches Grafana Dashboard (Optimal). Whiteboard Summit Gym 7 unlocks credits.
-
----
-
-## Gyms
-
-| # | Gym | Location | Gym Leader | Domain | Reward |
-|---|---|---|---|---|---|
-| Tutorial | Terminal Gym | Localhost Town | Tux the Terminal Wizard | Linux | Starter emblem |
-| 1 | Pipeline Dojo | Pipeline Pass | Bjørn the Build Breaker | IaC | Pipeline Emblem |
-| 2 | Uptime Arena | Azure Town | Captain Nines | Cloud | Cloud Emblem |
-| 3 | Sprint Sanctum | Architecture District | Scrum Siri | Observability | SRE Emblem |
-| 4 | Container Yard | Container Yard | Docker Dag | Containers | Container Emblem |
-| 5 | Cluster Ring | Kubernetes Colosseum | The Kube-rnetes Master | Kubernetes | Helm Emblem |
-| 6 | Security Vault | Security Vault | Ingrid the IAM Inspector | Security | Vault Emblem |
-| 7 | Whiteboard Summit | Architecture District | The Solutions Oracle | Observability | FinOps Emblem |
-
----
-
-## 🔴 Three AM Tavern
-
-- **Unlock:** Shame ≥ 1 (a door appears in Localhost Town)
-- **Domain:** Mixed (cursed techniques)
-- **Trainers:** The Force Pusher, Hotfix Håkon, Merge Magda, The Root Whisperer, kubectl Karen, Skip-Tests Sigrid, Hardcode Henrik, The Rebase Reverend, rm-rf Rune, The Downtime Dealer
-- **Notes:** Not a standard gym. High shame = more trainers available. Cursed skills only.
-
----
-
-## Special Locations
-
-| Location | Access | Purpose |
-|---|---|---|
-| Certificate Authority Island | Security Vault puzzle | Unlocks `certbot renew`, `nmap -sV` |
-| DNS Swamp | Hidden, Production Plains | Fork bomb + advanced Linux |
-| The Standby Zone | Serverless area edge | Infinite loop cold start techniques |
-| npm Registry Market | Helm Repository | Shops, `docker prune` skill |
-
----
-
-*See [Hidden Areas](hidden-areas.md) for the 6 secret zones.*
+*See [Trainers](trainers.md) for who you'll fight in each region.*
+*See [Encounters](encounters.md) for what you'll stumble into.*
+*See [Hidden Areas](hidden-areas.md) for the 5 secret zones.*
