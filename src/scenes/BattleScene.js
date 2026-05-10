@@ -372,7 +372,7 @@ export class BattleScene extends BaseScene {
     g.setDepth(-1)
     g.setScrollFactor(0)
 
-    const isIncident = mode === BATTLE_MODES.INCIDENT
+    const isIncident = mode === BATTLE_MODES.INCIDENT || mode === BATTLE_MODES.SCRIPTED
     const topColor    = isIncident ? BG_INCIDENT_TOP_COLOR    : BG_ENGINEER_TOP_COLOR
     const bottomColor = isIncident ? BG_INCIDENT_BOTTOM_COLOR : BG_ENGINEER_BOTTOM_COLOR
     const lineColor   = isIncident ? BG_INCIDENT_LINE_COLOR   : BG_ENGINEER_LINE_COLOR
