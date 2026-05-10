@@ -24,6 +24,7 @@ const SO_GREEN       = '#57AE78'   // accepted-answer badge
 const SO_RED         = '#E06C5E'   // negative score, cursed hints
 const SO_HEADER_TEXT = '#FFFFFF'   // white text on the orange header bar
 const SO_HEADER_FILL = 0xF48024   // header bar fill (hex integer for Phaser graphics)
+const FONT_SIZE             = '8px'
 const PANEL_INSET           = 4    // gap from screen edge to all panels
 const HEADER_H              = 56   // actual panel height of the header bar
 const FOOTER_H              = 52   // actual panel height of the footer bar
@@ -266,6 +267,7 @@ export class StackOverflowScene extends BaseScene {
         fontSize: FONT_SIZE,
         color: SO_MUTED,
         lineSpacing: 6,
+      }))
       this._footerText.setText('X: back')
       return
     }
