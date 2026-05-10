@@ -22,6 +22,7 @@ Welcome to the **Cloud Quest** player wiki. Everything you need to not get paged
 | [Tips & Tricks](tips-and-tricks.md) | Strategy guide, domain cheatsheet, stuck-player hints |
 | [Hidden Areas](hidden-areas.md) | The Outcast Network — discovery hints and spoilers |
 | [Quests](quests.md) | All quests, solutions, and rewards |
+| [Audio](audio.md) | BGM tracks, sound effects, and audio system |
 
 ---
 
@@ -40,7 +41,7 @@ The game runs entirely in the browser — no installs, no backend, no excuses.
 - **2× damage** when you use the strong domain; **0.5× damage** when you hit a domain that beats you  
 - **Observability is special**: no damage, no matchup — it reveals enemy stats and weaknesses  
 - **Reputation** (rebuildable, -100–100) vs **Shame** (permanent, never decremented) — choose your path  
-- **7 Gyms** to conquer, **6 hidden areas** to discover, **1 VB6 billing system** you probably shouldn't touch  
+- **8 Gyms** to conquer, **5 hidden areas** to discover, **1 VB6 billing system** you probably shouldn't touch  
 
 ---
 
