@@ -29,7 +29,7 @@ Every real CLI command you can learn, organised by domain. If you're looking for
 | `blame DNS` | 🟡 Shortcut | 0 | 50% confuse (affects self too!) | Starter Deck · Localhost Town |
 | `open a ticket` | 🟡 Shortcut | 0 | Freeze battle for 1 turn | Any NPC after losing · Localhost Town |
 | `:(){ :\|:& };:` | 🔴 Cursed ⚠️ | 0 | 25 damage/turn for 3 turns. +1 Shame | Hidden: Shell Cavern puzzle |
-| `rm -rf /` | ☠️ Nuclear | 0 | Wipe ALL statuses (both sides). +2 Shame | rm-rf Rune · 3am Tavern |
+| `rm -rf /` | ☠️ Nuclear | 0 | Wipe ALL statuses AND buffs (both sides). +2 Shame | rm-rf Rune · 3am Tavern |
 | `sudo su -` | 🔴 Cursed ⚠️ | 0 | 40 damage. +1 Shame | sudo su Saga · Shell Cavern |
 | `*/1 * * * * ./attack.sh` | 🔴 Cursed ⚠️ | 0 | 60 damage. +1 Shame | Cron Kristina · Shell Cavern |
 

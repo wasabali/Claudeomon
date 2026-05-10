@@ -152,14 +152,14 @@ You don't just beat the system — you **fork** it. THROTTLEMASTER offers you a 
 
 ## How to Reduce Shame
 
-*Planned — these items exist in the design but are not yet in the game data files:*
+Shame can be reduced — but only barely. Two rare items exist:
 
-| Item | Shame Reduction | Notes |
-|---|---|---|
-| *Coffee and an Apology* | *-1* | *Rare item. The only peace offering the industry respects.* |
-| *Published Post-Mortem* | *-1* | *Docs tab item. Admitting what went wrong, publicly.* |
+| Item | Tab | Shame Reduction | Notes |
+|---|---|---|---|
+| Coffee and an Apology | Tools | -1 | A lukewarm coffee and a sticky note. The apology is genuine. Mostly. |
+| Published Post-Mortem | Docs | -1 | Admitting what went wrong, publicly. Reduces 1 Shame Point per use. |
 
-> ⚠️ *These are the only planned methods to reduce Shame. Even with them, Shame is extremely hard to remove. Two items for -2 total versus the dozens of cursed technique uses it takes to reach Shadow Engineer. The math is not in your favour.*
+> ⚠️ These are the only methods to reduce Shame. Two items for -2 total versus the dozens of cursed technique uses it takes to reach Shadow Engineer. The math is not in your favour.
 
 ---
 
@@ -170,7 +170,7 @@ You don't just beat the system — you **fork** it. THROTTLEMASTER offers you a 
 | Range | -100 to 100 | 0+ (no cap) |
 | Starting Value | 50 | 0 |
 | Direction | Bidirectional | One-way up only |
-| Rebuildable? | ✅ Yes — quests, optimal play | ❌ No — only rare items (*Planned*) |
+| Rebuildable? | ✅ Yes — quests, optimal play | ⚠️ Rare items only (Coffee and an Apology, Published Post-Mortem) |
 | Affects | Shop prices, NPC trust, skill teaching | Content unlocks, endings, battle economy |
 | Reflects | Professional standing | Accumulated bad decisions |
 

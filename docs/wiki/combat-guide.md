@@ -151,10 +151,10 @@ Each of the 8 gyms has a unique battle mechanic that changes how the fight works
 
 | # | Gym | Domain | Leader | Mechanic | How It Works |
 |---|---|---|---|---|---|
-| 1 | The Legacy Terminal | Linux | Tux the Terminal Wizard | `legacy_only` | Blocks Cloud and Serverless skills — Linux or bust |
+| 1 | The Legacy Terminal | Linux | Tux the Terminal Wizard | `legacy_only` | Cloud and Serverless skills deal **0 damage** (non-damage effects still work); late-act skills are blocked |
 | 2 | 3am Incident Response | Cloud | Captain Nines | `sla_timer` | 6-turn SLA; breach costs 30 HP and 15 reputation |
 | 3 | The Broken Pipeline | IaC | Bjørn the Build Breaker | `flaky_pipeline` | 30% chance any skill simply fails (40% on replay) |
-| 4 | Cold Start Gauntlet | Serverless | Fatima the Function Witch | `cold_start` | You skip your first turn entirely |
+| 4 | Cold Start Gauntlet | Serverless | Fatima the Function Witch | `cold_start` | First non-Observability skill is blocked (Observability clears the flag without being blocked) |
 | 5 | Pod Crasher | Kubernetes | The Kube-rnetes Master | `respawn` | Leader respawns 3 times at 50% HP |
 | 6 | Entra Misconfiguration | Security | Ingrid the IAM Inspector | `rbac_deny` | 25% chance your skill is denied (RBAC check failed) |
 | 7 | Azure Bill Spiral | Observability | Oracle Alice | `cost_spiral` | Leader gains +5 HP and +3 attack per turn; spiral threshold at turn 8 |

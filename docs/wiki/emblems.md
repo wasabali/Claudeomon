@@ -8,7 +8,7 @@ You can view and polish your emblems in the **Emblem Case** scene. Polish them w
 
 ## All Emblems
 
-There are 9 emblems in Cloud Quest — one for each gym.
+There are 9 emblems in Cloud Quest. Eight are earned by beating gym leaders; the Container Emblem is earned outside the gym system.
 
 ---
 
@@ -20,7 +20,7 @@ There are 9 emblems in Cloud Quest — one for each gym.
 - **Passive Bonus:** Linux skills +5% effectiveness
 - **Grime:** *Terminal scrollback residue*
 
-Your first emblem. Earned by surviving a fight where Cloud and Serverless skills are completely blocked. Hope you like `grep`.
+Your first emblem. Earned by surviving a fight where Cloud and Serverless skills deal 0 damage (non-damage effects still work) and late-act skills are blocked. Hope you like `grep`.
 
 ---
 
@@ -56,7 +56,7 @@ Earned in the gym where 30% of your skills just... don't work. The Pipeline Embl
 - **Passive Bonus:** Serverless skills +5% effectiveness
 - **Grime:** *Cold start frost residue*
 
-You skip your entire first turn in this gym. The frost on this emblem is a permanent reminder of that helpless feeling.
+Your first non-Observability skill in this gym is blocked by cold start (Observability clears the flag without being blocked — open with a reveal!). The frost on this emblem is a permanent reminder of that helpless feeling.
 
 ---
 

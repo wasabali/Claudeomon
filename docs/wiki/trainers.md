@@ -13,11 +13,11 @@ The eight domain masters. Beat them for emblems, XP, and the right to say "I rea
 | Tux the Terminal Wizard | Linux | 80 | The Legacy Terminal | `legacy_only` — only legacy commands work | `grep "ERROR" /var/log/*` | Terminal Gym, Localhost Town |
 | Bjørn the Build Breaker | IaC | 80 | The Broken Pipeline | `flaky_pipeline` — 30% chance any skill fails | `az pipelines run` | Jira Dungeon 1, Pipeline Pass |
 | Captain Nines | Cloud | 90 | 3am Incident Response | `sla_timer` — SLA countdown pressure | `blue-green deploy` | Production Plains |
-| Fatima the Function Witch | Serverless | 80 | Cold Start Gauntlet | `cold_start` — first skill each turn has cold start penalty | `az functionapp deploy` | Pipeline Pass |
+| Fatima the Function Witch | Serverless | 80 | Cold Start Gauntlet | `cold_start` — first non-Observability skill is blocked (Observability clears it) | `az functionapp deploy` | Pipeline Pass |
 | Ingrid the IAM Inspector | Security | 90 | Entra Misconfiguration | `rbac_deny` — skills randomly denied by IAM policies | `ssh-keygen` | Security Vault Gym |
-| The Kube-rnetes Master | Kubernetes | 120 | Pod Crasher | `respawn` — defeated pods come back after 2 turns | `kubectl apply -f` | Kubernetes Colosseum |
-| The Solutions Oracle | Observability | 100 | Azure Bill Spiral | `review_board` — must justify every skill use | `az monitor alert create` | Architecture District |
-| The CTO | Cloud | — | The CTO Office | `all_domains` — uses skills from every domain | varies | Production Plains |
+| The Kube-rnetes Master | Kubernetes | 120 | Pod Crasher | `respawn` — leader immediately respawns at 50% HP (3 times) | `kubectl apply -f` | Kubernetes Colosseum |
+| The Solutions Oracle | Observability | 100 | Azure Bill Spiral | `cost_spiral` — HP and attack grow each turn | `az monitor alert create` | Architecture District |
+| The CTO | Cloud | 75 (Phase 1) + 65 (Phase 2) + 55 (Phase 3) | The CTO Office | `all_domains` — uses skills from every domain | varies | Production Plains |
 
 > 💡 Each gym has a unique **mechanic** that changes battle rules. Prepare accordingly! See [Combat Guide](combat-guide.md).
 

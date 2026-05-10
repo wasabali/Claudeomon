@@ -242,35 +242,35 @@ Incidents are **anonymous enemies** — you don't know their domain until you di
 | Zombie Process | Linux | 28 | 4 | 3 | `kill -9` | — |
 | 503 Service Unavailable | Cloud | 30 | 4 | 1 | `az webapp deploy` | — |
 | The Infinite Redirect | Cloud | 30 | 4 | 2 | `az webapp deploy` | — |
-| DNS Propagation | Linux | 30 | 4 | 3 | `grep logs` | — |
-| NullPointerException | Linux | 30 | 4 | 2 | `grep logs` | — |
-| Stale Ticket | Observability | 30 | 5 | 2 | `grep logs` | — |
-| SSL Certificate Expired | Security | 32 | 4 | 2 | `vault rotate` | — |
+| DNS Propagation | Linux | 30 | 4 | 3 | `grep "ERROR" /var/log/*` | — |
+| NullPointerException | Linux | 30 | 4 | 2 | `grep "ERROR" /var/log/*` | — |
+| Stale Ticket | Observability | 30 | 5 | 2 | `grep "ERROR" /var/log/*` | — |
+| SSL Certificate Expired | Security | 32 | 4 | 2 | `vault kv rotate` | — |
 | Merge Conflict | IaC | 32 | 4 | 2 | `git revert` | — |
 | Missing Acceptance Criteria | IaC | 34 | 5 | 2 | `terraform plan` | — |
 | Disk Full | Linux | 34 | 4 | 2 | `kill -9` | — |
 | Failed Pipeline | IaC | 35 | 4 | 2 | `az pipelines run` | — |
-| High CPU | Cloud | 35 | 4 | 2 | `scale out` | — |
+| High CPU | Cloud | 35 | 4 | 2 | `az scale out` | — |
 | Docker Image 4GB | Containers | 35 | 4 | 2 | `docker build` | — |
-| Leaked Secret | Security | 35 | 3 | 3 | `vault rotate` | — |
-| Blocked by QA | Observability | 36 | 4 | 2 | `grep logs` | — |
+| Leaked Secret | Security | 35 | 3 | 3 | `vault kv rotate` | — |
+| Blocked by QA | Observability | 36 | 4 | 2 | `grep "ERROR" /var/log/*` | — |
 | Flaky CI Pipeline | Cloud | 36 | 4 | 2 | `az pipelines run` | — |
-| Pending Pod | Kubernetes | 37 | 4 | 3 | `kubectl scale` | — |
+| Pending Pod | Kubernetes | 37 | 4 | 3 | `kubectl scale --replicas=10` | — |
 | CrashLoopBackOff | Kubernetes | 38 | 4 | 3 | `kubectl rollout restart` | ✅ |
 | Dependency Hell | Containers | 38 | 4 | 3 | `docker build` | — |
-| Cold Start Cascade | Serverless | 38 | 3 | 3 | `az func deploy` | — |
+| Cold Start Cascade | Serverless | 38 | 3 | 3 | `az functionapp deploy` | — |
 | Scope Creep | Cloud | 40 | 4 | 3 | `feature flag` | — |
-| OOM Kill | Containers | 40 | 4 | 3 | `kubectl scale` | ✅ |
-| Infinite Sprint | Serverless | 42 | 4 | 3 | `az func deploy` | — |
-| Memory Leak | Containers | 42 | 3 | 3 | `kubectl scale` | ✅ |
+| OOM Kill | Containers | 40 | 4 | 3 | `kubectl scale --replicas=10` | ✅ |
+| Infinite Sprint | Serverless | 42 | 4 | 3 | `az functionapp deploy` | — |
+| Memory Leak | Containers | 42 | 3 | 3 | `kubectl scale --replicas=10` | ✅ |
 | Config Drift | IaC | 44 | 4 | 3 | `terraform apply` | — |
 | Runaway Process | Linux | 44 | 3 | 3 | `kill -9` | — |
-| Production Incident | Cloud | 45 | 3 | 4 | `blue green deploy` | — |
+| Production Incident | Cloud | 45 | 3 | 4 | `blue-green deploy` | — |
 | Terraform State Lock | IaC | 45 | 3 | 4 | `terraform apply` | — |
-| RBAC Denied | Security | 46 | 3 | 4 | `chmod fix` | — |
-| Evicted Node | Kubernetes | 48 | 3 | 4 | `kubectl drain` | — |
-| The Phantom Alert | Observability | 25 | 5 | 2 | `grep logs` | — |
-| Cold Start Timeout | Serverless | 22 | 4 | 2 | `az func deploy` | — |
+| RBAC Denied | Security | 46 | 3 | 4 | `chmod 644` | — |
+| Evicted Node | Kubernetes | 48 | 3 | 4 | `kubectl drain node` | — |
+| The Phantom Alert | Observability | 25 | 5 | 2 | `grep "ERROR" /var/log/*` | — |
+| Cold Start Timeout | Serverless | 22 | 4 | 2 | `az functionapp deploy` | — |
 
 ### Cursed & Boss Encounters
 
@@ -300,9 +300,9 @@ Some incidents have a **second phase** that triggers after you defeat the surfac
 
 | Incident | Surface Domain / HP | Hidden Layer Domain / HP | Hidden Layer Fix |
 |---|---|---|---|
-| CrashLoopBackOff | Kubernetes / 38 | Security / 28 | `vault rotate` |
-| OOM Kill | Containers / 40 | Kubernetes / 25 | `kubectl apply` |
-| Memory Leak | Containers / 42 | Kubernetes / 28 | `kubectl apply` |
+| CrashLoopBackOff | Kubernetes / 38 | Security / 28 | `vault kv rotate` |
+| OOM Kill | Containers / 40 | Kubernetes / 25 | `kubectl apply -f` |
+| Memory Leak | Containers / 42 | Kubernetes / 28 | `kubectl apply -f` |
 
 **Tip:** When the surface layer falls, the hidden layer's symptom text appears automatically. Diagnose again — the domain has changed.
 
@@ -312,8 +312,8 @@ Some incidents have a **second phase** that triggers after you defeat the surfac
 
 When the SLA timer hits 0:
 
-- You take **HP damage** (varies by gym mechanic; default breach penalty: 30 HP)
-- You take **reputation penalty** (default: -15 rep)
+- You take **HP damage** (default: 20 HP; the 3am Incident Response gym uses 30 HP)
+- You take **reputation penalty** (default: -10 rep; the 3am Incident Response gym uses -15 rep)
 - If the incident is still alive, the battle ends as a **loss**
 
 The `PagerDuty acknowledge` skill pauses the SLA timer for 2 turns — use it to buy time when the clock is low. See [Tips & Tricks](tips-and-tricks.md) for more SLA strategies.

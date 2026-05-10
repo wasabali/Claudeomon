@@ -41,7 +41,7 @@ Incidents don't show their domain until you use an Observability skill. One turn
 | Nuclear | ×0 | −−− | +2 | Used a nuclear technique |
 
 ### Watch the SLA timer
-Incidents start with SLA timers (typically 3–5 turns). When the timer hits 0, you take **30 HP damage** and **-15 reputation** — and if the incident is still alive, you **lose**. `PagerDuty acknowledge` buys 2 extra turns. Don't ignore the clock.
+Incidents start with SLA timers (typically 3–5 turns). When the timer hits 0, you take **20 HP damage** and **-10 reputation** (the 3am Incident Response gym has harsher penalties: 30 HP / -15 rep). If the incident is still alive, you **lose**. `PagerDuty acknowledge` buys 2 extra turns. Don't ignore the clock.
 
 ### Build a balanced deck
 You can carry a maximum of **6 active skills**. Aim for:
@@ -59,14 +59,14 @@ This is the single biggest damage multiplier in the game. A 30-damage skill hitt
 
 | Gym | Leader | Mechanic | Strategy |
 |---|---|---|---|
-| Legacy Terminal | Tux the Terminal Wizard | Cloud and Serverless skills **blocked** | Bring Linux and IaC skills. Your `az webapp deploy` won't work here. |
-| 3am Incident Response | Ingrid Incident Commander | **SLA timer: 6 turns**, breach costs 30 HP and 15 rep | Use `PagerDuty acknowledge` early. Fast, high-damage skills. Don't waste turns. |
+| Legacy Terminal | Tux the Terminal Wizard | Cloud and Serverless skills deal **0 damage** (non-damage effects work) | Bring Linux and IaC skills. Your `az webapp deploy` won't deal damage here. Observability reveal skills still work. |
+| 3am Incident Response | Captain Nines | **SLA timer: 6 turns**, breach costs 30 HP and 15 rep | Use `PagerDuty acknowledge` early. Fast, high-damage skills. Don't waste turns. |
 | Broken Pipeline | Bjørn the Build Breaker | **30% chance** any skill fails (40% on replay) | Bring reliable, repeatable damage. Don't depend on one big skill. |
-| Cold Start Gauntlet | Freja the Function Queen | Skip first turn (cold start status) | Your first turn is wasted — plan accordingly. Open with a buff or diagnosis. |
-| Pod Crasher | Kube Master Konrad | Respawns **3 times** at 50% HP | Conserve resources. 4 total health bars to burn through. Don't blow your budget early. |
-| Entra Misconfiguration | Sigrun the Security Auditor | **25% chance** skills are denied (RBAC) | Bring extra skills. If one gets denied, you need a backup. |
-| Azure Bill Spiral | Fadi the FinOps Boss | HP grows **+5/turn**, attack grows **+3/turn**. Spirals at turn 8. | End it fast. Every turn the fight gets harder. Front-load your damage. |
-| CTO Office | Einar the CTO | Domain switches **every 2 turns**. Executive mode at 25% HP (×1.5 damage). | Keep versatile skills across multiple domains. Don't over-invest in one domain. |
+| Cold Start Gauntlet | Fatima the Function Witch | First non-Observability skill blocked (cold start) | Open with an Observability skill to clear the flag, then attack freely. |
+| Pod Crasher | The Kube-rnetes Master | Respawns **3 times** at 50% HP (immediately) | Conserve resources. 4 total health bars to burn through. Don't blow your budget early. |
+| Entra Misconfiguration | Ingrid the IAM Inspector | **25% chance** skills are denied (RBAC) | Bring extra skills. If one gets denied, you need a backup. |
+| Azure Bill Spiral | The Solutions Oracle | HP grows **+5/turn**, attack grows **+3/turn**. Spirals at turn 8. | End it fast. Every turn the fight gets harder. Front-load your damage. |
+| CTO Office | The CTO | Domain switches **every 2 turns**. Executive mode at 25% HP (×1.5 damage). 3 phases (75+65+55 HP). | Keep versatile skills across multiple domains. Don't over-invest in one domain. |
 
 ---
 

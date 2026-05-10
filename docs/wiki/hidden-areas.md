@@ -1,6 +1,6 @@
 # 🔐 Hidden Areas
 
-Cloud Quest has six hidden zones that don't appear on any in-game map. They can only be reached by doing things you're explicitly told not to do, or by reaching specific Shame thresholds.
+Cloud Quest has five hidden regions that don't appear on any in-game map. They can only be reached by doing things you're explicitly told not to do, or by reaching specific Shame thresholds.
 
 The world rewards curiosity and disobedience. If an NPC warns you three times not to do something — that's a tutorial.
 

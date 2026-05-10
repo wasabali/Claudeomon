@@ -35,7 +35,7 @@ Hidden areas branch off from specific trigger points. See [Hidden Areas](hidden-
 | Region | Domain | Act | Fast Travel | Description |
 |---|---|---|---|---|
 | 🏠 Localhost Town | — | 1 | ✅ | Starting town and tutorial area. Margaret's bakery, Professor Pedersen's lab, your apartment. Safe zone — no cursed encounters. |
-| 🏗️ Pipeline Pass | IaC | 1 | ✅ | The route between Localhost Town and the wider world. Home to Bjørn's gym and multiple field trainers. Connects north to Jira Dungeon. |
+| 🏗️ Pipeline Pass | IaC | 1 | ✅ | The route between Localhost Town and the wider world. Multiple field trainers and the Cold Start Gauntlet gym. Connects north to Jira Dungeon (which houses Bjørn's gym). |
 | ☁️ Azure Town | Cloud | 1 | ✅ | Azure-themed hub city. Marketplace, budget tutorials, and Captain Nines' gym. Gateway south from Localhost Town. |
 | 🏭 Production Plains | Cloud | 2 | ✅ | Where things get real. SLA pressure ramps up. Multiple gym leaders and field trainers patrol this area. East of Pipeline Pass. |
 | ⛵ Kubernetes Colosseum | Kubernetes | 2 | ✅ | The arena district. K8s battles, Helm Repository access, and the fearsome Kube-rnetes Master. South of Production Plains, east of Azure Town. |
@@ -47,16 +47,16 @@ Hidden areas branch off from specific trigger points. See [Hidden Areas](hidden-
 
 Eight gyms, eight domains, eight gym leaders who will make you regret not reading the docs.
 
-| Gym | Domain | Parent Region | Gym Name | Leader |
+| Gym | Domain | Region | Gym Name | Leader |
 |---|---|---|---|---|
 | Terminal Gym | Linux | Localhost Town | The Legacy Terminal | Tux the Terminal Wizard |
-| Pipeline Gym | IaC | Pipeline Pass | The Broken Pipeline | Bjørn the Build Breaker |
-| Security Vault | Security | Azure Town | Entra Misconfiguration | Ingrid the IAM Inspector |
-| Cloud Console | Cloud | Azure Town | Cloud Console | — |
-| Container Harbor | Containers | Kubernetes Colosseum | — | — |
-| Kube Arena | Kubernetes | Kubernetes Colosseum | Pod Crasher | The Kube-rnetes Master |
-| Serverless Shrine | Serverless | Production Plains | Cold Start Gauntlet | Fatima the Function Witch |
-| SRE Command Center | Observability | Production Plains | Azure Bill Spiral | The Solutions Oracle |
+| Jira Dungeon 1 | IaC | Pipeline Pass | The Broken Pipeline | Bjørn the Build Breaker |
+| Production Plains | Cloud | Production Plains | 3am Incident Response | Captain Nines |
+| Pipeline Pass | Serverless | Pipeline Pass | Cold Start Gauntlet | Fatima the Function Witch |
+| Kubernetes Colosseum | Kubernetes | Kubernetes Colosseum | Pod Crasher | The Kube-rnetes Master |
+| Security Vault Gym | Security | Azure Town | Entra Misconfiguration | Ingrid the IAM Inspector |
+| Architecture District | Observability | Architecture District | Azure Bill Spiral | The Solutions Oracle |
+| Production Plains | Cloud | Production Plains | The CTO Office | The CTO |
 
 > Each gym has sub-leaders guarding inner rooms. Beat them before you face the leader. See [Trainers](trainers.md) for the full roster.
 
@@ -119,11 +119,11 @@ Five secret zones await the bold, the reckless, and the over-shamed. Each is acc
 
 | Area | How to Access |
 |---|---|
-| Server Graveyard | SSH Key quest item from ghost note |
-| node_modules Maze | Use Mystery node_modules key item at a directory node |
-| /dev/null Void | Secret trigger in Architecture District |
-| Deprecated Azure Region | Story flag in Azure Town |
-| OldCorp Basement | Ignore 3 warnings on Jira Dungeon floor 3 |
+| Server Graveyard | SSH to decommissioned terminal |
+| node_modules Maze | Use Mystery node_modules junk item |
+| /dev/null Void | Pipe output 3 times in battle |
+| Deprecated Azure Region | Select greyed-out region at Azure Terminal |
+| OldCorp Basement | Open despite 3 warnings in Jira Dungeon |
 
 For full details on hidden area trainers, encounters, and loot, see [Hidden Areas](hidden-areas.md).
 

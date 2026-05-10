@@ -22,8 +22,8 @@ Cloud Quest is a GameBoy Color-style RPG built with Phaser 3. You battle inciden
 |---|---|
 | Arrow Keys | Move in the overworld |
 | Z / Enter | Confirm / Interact |
-| X / Backspace | Cancel / Back |
-| Hold Z while moving | Run (faster movement) |
+| X / Esc | Cancel / Back |
+| Hold Z while moving | Run (requires **sudo Running Shoes** key item) |
 
 In battle, navigate skill menus with arrow keys and confirm with Z or Enter.
 

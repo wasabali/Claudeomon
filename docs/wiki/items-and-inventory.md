@@ -21,8 +21,6 @@ Consumable items you'll burn through like conference swag.
 | Energy Drink (Monster) | Heal 50 HP | ✅ |
 | Hot Chocolate | Heal 40 HP | ✅ |
 | Full English Breakfast | Heal to full HP | ✅ |
-| Cold Coffee | Heal 5 HP | ✅ |
-| Scorched Server | Heal 20 HP (cursed — sold only at Suspicious Vending Machine) | ✅ |
 
 > 💡 Full English Breakfast is the best healing item in the game. Guard it with your life.
 
@@ -57,6 +55,7 @@ Consumable items you'll burn through like conference swag.
 | Item | Effect | Battle Use |
 |---|---|---|
 | On-Call Phone | Apply `on_call` status | ❌ (world use only) |
+| Coffee and an Apology | **-1 Shame Point** | ❌ (world use only) |
 
 ---
 
@@ -109,9 +108,8 @@ Passive reference items. Read once for an XP bonus — they don't stack. Some ha
 | Kristoffer's Performance Review | +10 XP (one-time read) |
 | Deprecated API Changelog | +5 XP (one-time read) |
 | Published Post-Mortem | **-1 Shame Point** |
-| Coffee and an Apology | **-1 Shame Point** |
 
-> ⚠️ Published Post-Mortem and Coffee and an Apology are the **only** ways to reduce Shame in the game. They are extremely rare. Choose your cursed techniques wisely.
+> ⚠️ Published Post-Mortem and Coffee and an Apology (in Tools tab) are the **only** ways to reduce Shame in the game. They are extremely rare. Choose your cursed techniques wisely.
 
 ---
 
@@ -123,6 +121,8 @@ Flavour items that clutter your inventory and your soul. Sell them to vendors fo
 |---|---|
 | Root Password (sticky note) | Found in Margaret's house. Useless. Horrifying. |
 | Mystery node_modules | 47,000 files. Can't delete. Use it to discover a [hidden area](hidden-areas.md)! |
+| Cold Coffee | Margaret's thanks. Heals 5 HP in battle — barely. |
+| Scorched Server | Still smoking. Cursed salvage. Heals 20 HP in battle. |
 | Stale PR | Open since 2019. Nobody will merge it. |
 | Broken Jenkins Plugin | Version 0.0.1-alpha-SNAPSHOT-RC2 |
 | USB Stick "BACKUP" | Contains a README.md that says TODO |
