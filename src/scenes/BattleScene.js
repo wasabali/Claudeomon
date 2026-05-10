@@ -54,6 +54,19 @@ const OPPONENT_PORTRAIT_X   = ENEMY_HP_BAR_X - PORTRAIT_SIZE - 8
 const OPPONENT_PORTRAIT_Y   = ENEMY_HP_BAR_Y
 
 // ---------------------------------------------------------------------------
+// Battle background constants
+// ---------------------------------------------------------------------------
+const BG_GRID_SPACING          = 120
+const BG_INCIDENT_TOP_COLOR    = 0x140608
+const BG_INCIDENT_BOTTOM_COLOR = 0x0a0406
+const BG_INCIDENT_LINE_COLOR   = 0x3a0a0a
+const BG_INCIDENT_GRID_COLOR   = 0x1a0606
+const BG_ENGINEER_TOP_COLOR    = 0x080e1a
+const BG_ENGINEER_BOTTOM_COLOR = 0x050a12
+const BG_ENGINEER_LINE_COLOR   = 0x0f2040
+const BG_ENGINEER_GRID_COLOR   = 0x0a1428
+
+// ---------------------------------------------------------------------------
 // BattleScene
 // Phaser rendering layer for all battle encounters.
 // Delegates ALL logic to BattleEngine and SkillEngine — no damage math here.
@@ -359,10 +372,13 @@ export class BattleScene extends BaseScene {
     g.setDepth(-1)
     g.setScrollFactor(0)
 
-    // Top half — enemy side
-    const topColor    = mode === BATTLE_MODES.INCIDENT ? 0x140608 : 0x080e1a
-    const bottomColor = mode === BATTLE_MODES.INCIDENT ? 0x0a0406 : 0x050a12
+    const isIncident = mode === BATTLE_MODES.INCIDENT
+    const topColor    = isIncident ? BG_INCIDENT_TOP_COLOR    : BG_ENGINEER_TOP_COLOR
+    const bottomColor = isIncident ? BG_INCIDENT_BOTTOM_COLOR : BG_ENGINEER_BOTTOM_COLOR
+    const lineColor   = isIncident ? BG_INCIDENT_LINE_COLOR   : BG_ENGINEER_LINE_COLOR
+    const gridColor   = isIncident ? BG_INCIDENT_GRID_COLOR   : BG_ENGINEER_GRID_COLOR
 
+    // Top half — enemy side
     g.fillStyle(topColor, 1)
     g.fillRect(0, 0, CONFIG.WIDTH, Math.floor(CONFIG.HEIGHT * 0.6))
 
@@ -371,17 +387,15 @@ export class BattleScene extends BaseScene {
     g.fillRect(0, Math.floor(CONFIG.HEIGHT * 0.6), CONFIG.WIDTH, Math.ceil(CONFIG.HEIGHT * 0.4))
 
     // Horizon separator line
-    const lineColor = mode === BATTLE_MODES.INCIDENT ? 0x3a0a0a : 0x0f2040
     g.lineStyle(2, lineColor, 1)
     g.lineBetween(0, Math.floor(CONFIG.HEIGHT * 0.6), CONFIG.WIDTH, Math.floor(CONFIG.HEIGHT * 0.6))
 
     // Subtle grid lines for the tech/terminal aesthetic
-    const gridColor = mode === BATTLE_MODES.INCIDENT ? 0x1a0606 : 0x0a1428
     g.lineStyle(1, gridColor, 1)
-    for (let x = 0; x < CONFIG.WIDTH; x += 120) {
+    for (let x = 0; x < CONFIG.WIDTH; x += BG_GRID_SPACING) {
       g.lineBetween(x, 0, x, CONFIG.HEIGHT)
     }
-    for (let y = 0; y < CONFIG.HEIGHT; y += 120) {
+    for (let y = 0; y < CONFIG.HEIGHT; y += BG_GRID_SPACING) {
       g.lineBetween(0, y, CONFIG.WIDTH, y)
     }
   }
@@ -478,9 +492,10 @@ export class BattleScene extends BaseScene {
         const isCritical = (event.multiplier ?? 1) >= 2
         this.playSfx(isCritical ? 'sfx_damage_critical' : 'sfx_damage_hit')
         this._refreshHUD()
+        const critSuffix = isCritical ? ' Critical hit!' : ''
         const dmgText = event.target === 'opponent'
-          ? `Dealt ${event.value} damage!${isCritical ? ' Critical hit!' : ''}`
-          : `Took ${event.value} damage!${isCritical ? ' Critical hit!' : ''}`
+          ? `Dealt ${event.value} damage!${critSuffix}`
+          : `Took ${event.value} damage!${critSuffix}`
         this.dialog.show(dmgText, callback)
         break
       }
@@ -605,6 +620,8 @@ export class BattleScene extends BaseScene {
         break
 
       case 'telegraph':
+        // Telegraph updates the UI silently — no player acknowledgment needed.
+        // The opponent's next move is shown in the HUD near the enemy info block.
         if (this._battleState.mode === BATTLE_MODES.ENGINEER) {
           if (this._telegraphText) {
             this._telegraphText.setText(`Next: ${event.value}`)
