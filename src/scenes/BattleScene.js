@@ -39,14 +39,17 @@ const HP_BAR_W         = Math.floor(CONFIG.WIDTH * 0.45)
 const HP_BAR_H         = 16
 const BUDGET_BAR_W     = Math.floor(CONFIG.WIDTH * 0.35)
 const BUDGET_BAR_H     = 16
-const LOG_X            = 16
-const LOG_Y            = CONFIG.HEIGHT - 240
+// Player area Y anchor — used for portrait placement above the dialog box.
+const PLAYER_AREA_Y    = CONFIG.HEIGHT - 240
+// Telegraph text — sits below the enemy domain label, grouped with enemy info.
+const TELEGRAPH_X      = ENEMY_HP_BAR_X
+const TELEGRAPH_Y      = ENEMY_HP_BAR_Y + 76
 // Portrait layout — 80×80px images next to HP bars.
-// Player portrait sits above the battle log (bottom-left), anchored to LOG_Y.
+// Player portrait sits above the player area (bottom-left), anchored to PLAYER_AREA_Y.
 // Opponent portrait sits to the left of the enemy name bar (top-center).
 const PORTRAIT_SIZE         = CONFIG.PORTRAIT_SIZE
 const PLAYER_PORTRAIT_X     = PLAYER_HP_BAR_X
-const PLAYER_PORTRAIT_Y     = LOG_Y - PORTRAIT_SIZE - 8
+const PLAYER_PORTRAIT_Y     = PLAYER_AREA_Y - PORTRAIT_SIZE - 8
 const OPPONENT_PORTRAIT_X   = ENEMY_HP_BAR_X - PORTRAIT_SIZE - 8
 const OPPONENT_PORTRAIT_Y   = ENEMY_HP_BAR_Y
 
@@ -101,10 +104,10 @@ export class BattleScene extends BaseScene {
     this._cursedConfirmMenu = null
     this._taunts     = data.taunts ?? null
 
+    this._buildBackground(mode)
     this._buildHUD(mode, opponent)
     this._buildOpponentSprite(opponent)
     this._buildSkillMenu()
-    this._buildLogBox()
     this._setupInput()
     this.setupPauseKey()
 
@@ -149,13 +152,13 @@ export class BattleScene extends BaseScene {
       ...textStyle, color: '#9bc5ff',
     })
 
-    // In ENGINEER mode, show telegraphed move (stored as instance var for live updates)
+    // In ENGINEER mode, show telegraphed move below the enemy domain text
     if (mode === BATTLE_MODES.ENGINEER) {
       const telegraphLabel = this._battleState.telegraphedMove
-        ? `Preparing: ${this._battleState.telegraphedMove}`
+        ? `Next: ${this._battleState.telegraphedMove}`
         : ''
-      this._telegraphText = this.add.text(16, 72, telegraphLabel, {
-        ...textStyle, color: '#ffe066',
+      this._telegraphText = this.add.text(TELEGRAPH_X, TELEGRAPH_Y, telegraphLabel, {
+        ...textStyle, color: '#ffe066', fontSize: '16px',
       })
     } else {
       this._telegraphText = null
@@ -331,8 +334,7 @@ export class BattleScene extends BaseScene {
   _onFlee() {
     if (this._battleState.mode === BATTLE_MODES.ENGINEER) {
       this._animating = true
-      this._showLog("Can't flee a trainer battle!")
-      this.time.delayedCall(800, () => {
+      this.dialog.show("Can't flee a trainer battle!", () => {
         this._animating = false
         this._refreshSkillMenu()
       })
@@ -349,19 +351,39 @@ export class BattleScene extends BaseScene {
   }
 
   // -------------------------------------------------------------------------
-  // Log box — displays last event dialog
+  // Battle background — tech-themed gradient with grid lines
+  // Rendered at depth -1 so all HUD elements appear on top.
   // -------------------------------------------------------------------------
-  _buildLogBox() {
-    this._logText = this.add.text(LOG_X, LOG_Y, '', {
-      fontFamily:  CONFIG.FONT,
-      fontSize:    '18px',
-      color:       '#f8f8f8',
-      wordWrap:    { width: CONFIG.WIDTH - 32 },
-    })
-  }
+  _buildBackground(mode) {
+    const g = this.add.graphics()
+    g.setDepth(-1)
+    g.setScrollFactor(0)
 
-  _showLog(text) {
-    if (this._logText) this._logText.setText(text)
+    // Top half — enemy side
+    const topColor    = mode === BATTLE_MODES.INCIDENT ? 0x140608 : 0x080e1a
+    const bottomColor = mode === BATTLE_MODES.INCIDENT ? 0x0a0406 : 0x050a12
+
+    g.fillStyle(topColor, 1)
+    g.fillRect(0, 0, CONFIG.WIDTH, Math.floor(CONFIG.HEIGHT * 0.6))
+
+    // Bottom half — player side (slightly different shade)
+    g.fillStyle(bottomColor, 1)
+    g.fillRect(0, Math.floor(CONFIG.HEIGHT * 0.6), CONFIG.WIDTH, Math.ceil(CONFIG.HEIGHT * 0.4))
+
+    // Horizon separator line
+    const lineColor = mode === BATTLE_MODES.INCIDENT ? 0x3a0a0a : 0x0f2040
+    g.lineStyle(2, lineColor, 1)
+    g.lineBetween(0, Math.floor(CONFIG.HEIGHT * 0.6), CONFIG.WIDTH, Math.floor(CONFIG.HEIGHT * 0.6))
+
+    // Subtle grid lines for the tech/terminal aesthetic
+    const gridColor = mode === BATTLE_MODES.INCIDENT ? 0x1a0606 : 0x0a1428
+    g.lineStyle(1, gridColor, 1)
+    for (let x = 0; x < CONFIG.WIDTH; x += 120) {
+      g.lineBetween(x, 0, x, CONFIG.HEIGHT)
+    }
+    for (let y = 0; y < CONFIG.HEIGHT; y += 120) {
+      g.lineBetween(0, y, CONFIG.WIDTH, y)
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -427,6 +449,7 @@ export class BattleScene extends BaseScene {
   // -------------------------------------------------------------------------
   _animateEvents(events) {
     this._animating = true
+    this._skillMenu?.hide()
     let index = 0
 
     const next = () => {
@@ -448,34 +471,29 @@ export class BattleScene extends BaseScene {
     switch (event.type) {
       case 'skill_used':
         this.playSfx('sfx_confirm')
-        this._showLog(`Used: ${event.skillId}`)
-        this.time.delayedCall(300, callback)
+        this.dialog.show(`Used: ${event.skillId}`, callback)
         break
 
       case 'damage': {
         const isCritical = (event.multiplier ?? 1) >= 2
         this.playSfx(isCritical ? 'sfx_damage_critical' : 'sfx_damage_hit')
-        if (event.target === 'opponent') {
-          this._showLog(`Dealt ${event.value} damage!`)
-        } else {
-          this._showLog(`Took ${event.value} damage!`)
-        }
         this._refreshHUD()
-        this.time.delayedCall(400, callback)
+        const dmgText = event.target === 'opponent'
+          ? `Dealt ${event.value} damage!${isCritical ? ' Critical hit!' : ''}`
+          : `Took ${event.value} damage!${isCritical ? ' Critical hit!' : ''}`
+        this.dialog.show(dmgText, callback)
         break
       }
 
       case 'heal':
         this.playSfx('sfx_heal')
-        this._showLog(`Restored ${event.value} HP!`)
         this._refreshHUD()
-        this.time.delayedCall(400, callback)
+        this.dialog.show(`Restored ${event.value} HP!`, callback)
         break
 
       case 'domain_reveal':
-        this._showLog(`Domain revealed: ${event.value}!`)
         this._enemyDomainText?.setText(`[${event.value}]`)
-        this.time.delayedCall(500, callback)
+        this.dialog.show(`Domain revealed: ${event.value}!`, callback)
         break
 
       case 'sla_tick':
@@ -486,9 +504,8 @@ export class BattleScene extends BaseScene {
 
       case 'sla_breach':
         this.playSfx('sfx_sla_breach')
-        this._showLog('SLA BREACH! Penalty applied.')
         if (this._slaText) this._slaText.setColor('#ff0000')
-        this.time.delayedCall(600, callback)
+        this.dialog.show('SLA BREACH! Penalty applied.', callback)
         break
 
       case 'status_tick':
@@ -499,97 +516,84 @@ export class BattleScene extends BaseScene {
 
       case 'reputation':
         this.playSfx('sfx_reputation_change')
-        this._showLog(event.value < 0
-          ? `Reputation -${Math.abs(event.value)}. Shame +${event.shameDelta ?? 0}.`
-          : `Reputation +${event.value}.`)
         if (event.shameDelta > 0) this.playSfx('sfx_shame')
-        this.time.delayedCall(400, callback)
+        {
+          const repText = event.value < 0
+            ? `Reputation -${Math.abs(event.value)}. Shame +${event.shameDelta ?? 0}.`
+            : `Reputation +${event.value}.`
+          this.dialog.show(repText, callback)
+        }
         break
 
       case 'xp_gain':
-        this._showLog(`+${event.value} XP`)
-        this.time.delayedCall(500, callback)
+        this.dialog.show(`+${event.value} XP`, callback)
         break
 
       case 'teach_skill':
-        this._showLog(`Learned: ${event.value}!`)
-        this.time.delayedCall(800, callback)
+        this.dialog.show(`Learned: ${event.value}!`, callback)
         break
 
       case 'teach_hint':
-        this._showLog(`Hint: study ${event.value} next.`)
-        this.time.delayedCall(600, callback)
+        this.dialog.show(`Hint: study ${event.value} next.`, callback)
         break
 
       case 'technical_debt':
-        this._showLog(`Technical debt: ${event.value} stack${event.value !== 1 ? 's' : ''}.`)
         this._refreshHUD()
-        this.time.delayedCall(500, callback)
+        this.dialog.show(`Technical debt: ${event.value} stack${event.value !== 1 ? 's' : ''}.`, callback)
         break
 
       case 'trainer_disgusted':
-        this._showLog('Trainer leaves in disgust. No teaching.')
-        this.time.delayedCall(600, callback)
+        this.dialog.show('Trainer leaves in disgust. No teaching.', callback)
         break
 
       case 'warn_npcs':
-        this._showLog('Trainer warns all NPCs about you.')
-        this.time.delayedCall(600, callback)
+        this.dialog.show('Trainer warns all NPCs about you.', callback)
         break
-
 
       case 'budget_drain':
         this.playSfx('sfx_budget_drain')
-        this._showLog(`Budget drained by ${event.value}!`)
         this._refreshHUD()
-        this.time.delayedCall(400, callback)
+        this.dialog.show(`Budget drained by ${event.value}!`, callback)
         break
 
       case 'budget_gain':
-        this._showLog(event.text ?? `Budget +${event.value}`)
         this._refreshHUD()
-        this.time.delayedCall(400, callback)
+        this.dialog.show(event.text ?? `Budget +${event.value}`, callback)
         break
 
       case 'escalation':
-        this._showLog('Technical debt increased! The incident is escalating.')
-        this.time.delayedCall(500, callback)
+        this.dialog.show('Technical debt increased! The incident is escalating.', callback)
         break
 
       case 'scripted_escape':
-        this._showLog(event.value ?? 'The enemy disconnected.')
-        this.time.delayedCall(1000, callback)
+        this.dialog.show(event.value ?? 'The enemy disconnected.', callback)
         break
 
       case 'boss_outcome': {
         GameState.story.flags = GameState.story.flags || {}
         GameState.story.flags.lastBossOutcome = event.value
         markDirty()
-        this._showLog(`Outcome: ${event.value}`)
-        this.time.delayedCall(600, callback)
+        this.dialog.show(`Outcome: ${event.value}`, callback)
         break
       }
 
       case 'layer_transition':
-        this._showLog('Root cause revealed! A deeper layer emerges...')
         this._enemyDomainText?.setText('[???]')
-        this.time.delayedCall(800, callback)
+        this.dialog.show('Root cause revealed! A deeper layer emerges...', callback)
         break
 
       case 'boss_phase_transition': {
         const phase = event.value
         const title = phase.title ? `${phase.name}: "${phase.title}"` : phase.name
-        this._showLog(title)
         this._enemyNameText?.setText(phase.name ?? '???')
         this._enemyDomainText?.setText(`[${phase.domain ?? '???'}]`)
         this._refreshHUD()
-        this.time.delayedCall(1000, callback)
+        this.dialog.show(title, callback)
         break
       }
 
       case 'executive_mode':
-        this._showLog('Executive Mode: ACTIVATED.\nDamage increased!')
-        this.time.delayedCall(800, callback)
+        this.dialog.show('Executive Mode: ACTIVATED.\nDamage increased!', callback)
         break
 
       case 'battle_end':
@@ -603,25 +607,22 @@ export class BattleScene extends BaseScene {
       case 'telegraph':
         if (this._battleState.mode === BATTLE_MODES.ENGINEER) {
           if (this._telegraphText) {
-            this._telegraphText.setText(`Preparing: ${event.value}`)
+            this._telegraphText.setText(`Next: ${event.value}`)
           }
         }
-        this.time.delayedCall(400, callback)
+        callback()
         break
 
       case 'dialog':
-        this._showLog(event.text ?? '')
-        this.time.delayedCall(800, callback)
+        this.dialog.show(event.text ?? '', callback)
         break
 
       case 'shame':
-        this._showLog(`+${event.value} Shame.`)
-        this.time.delayedCall(400, callback)
+        this.dialog.show(`+${event.value} Shame.`, callback)
         break
 
       case 'skill_blocked':
-        this._showLog('Cannot use that skill!')
-        this.time.delayedCall(400, callback)
+        this.dialog.show('Cannot use that skill!', callback)
         break
 
       default:
@@ -760,8 +761,8 @@ export class BattleScene extends BaseScene {
     if (finalLevelUp) this.playSfx('sfx_level_up')
 
     markDirty()
-    this._showLog(result === 'win' ? 'Victory!' : 'Defeated...')
-    this.time.delayedCall(1200, () => {
+    const endMsg = result === 'win' ? 'Victory!' : 'Defeated...'
+    this.dialog.show(endMsg, () => {
       // CTO boss defeat → set flag and route to credits
       if (result === 'win' && opponent.isBoss && opponent.id === 'the_cto') {
         GameState.story.flags.cto_defeated = true
@@ -796,8 +797,7 @@ export class BattleScene extends BaseScene {
   // _onBattleEscape — scripted encounters: no XP, no loss, no win
   // -------------------------------------------------------------------------
   _onBattleEscape() {
-    this._showLog('The enemy escaped...')
-    this.time.delayedCall(1200, () => {
+    this.dialog.show('The enemy escaped...', () => {
       this.fadeToScene(this._returnScene ?? 'WorldScene')
     })
   }
