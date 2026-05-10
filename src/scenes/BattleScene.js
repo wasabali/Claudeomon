@@ -154,16 +154,19 @@ export class BattleScene extends BaseScene {
   _buildHUD(mode, opponent) {
     const textStyle = { fontFamily: CONFIG.FONT, fontSize: '18px', color: '#ffffff' }
 
+    // HUD depth — must exceed DialogBox container depth (100) so bars are always visible.
+    const HUD_DEPTH = 200
+
     // Enemy name + HP
-    this._enemyNameText = this.add.text(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y - 2, opponent.name ?? '???', textStyle)
-    this._enemyHpBarBg  = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 24, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0)
-    this._enemyHpBar    = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 24, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0)
+    this._enemyNameText = this.add.text(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y - 2, opponent.name ?? '???', textStyle).setDepth(HUD_DEPTH)
+    this._enemyHpBarBg  = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 24, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0).setDepth(HUD_DEPTH)
+    this._enemyHpBar    = this.add.rectangle(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 24, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0).setDepth(HUD_DEPTH)
 
     // In ENGINEER mode, show domain; in INCIDENT mode show '???'
     const domainLabel = mode === BATTLE_MODES.ENGINEER ? opponent.domain : '???'
     this._enemyDomainText = this.add.text(ENEMY_HP_BAR_X, ENEMY_HP_BAR_Y + 46, `[${domainLabel}]`, {
       ...textStyle, color: '#9bc5ff',
-    })
+    }).setDepth(HUD_DEPTH)
 
     // In ENGINEER mode, show telegraphed move below the enemy domain text
     if (mode === BATTLE_MODES.ENGINEER) {
@@ -172,27 +175,27 @@ export class BattleScene extends BaseScene {
         : ''
       this._telegraphText = this.add.text(TELEGRAPH_X, TELEGRAPH_Y, telegraphLabel, {
         ...textStyle, color: '#ffe066', fontSize: '16px',
-      })
+      }).setDepth(HUD_DEPTH)
     } else {
       this._telegraphText = null
     }
 
     // Player HP
-    this.add.text(PLAYER_HP_BAR_X, PLAYER_HP_BAR_Y - 24, 'HP', textStyle)
-    this._playerHpBarBg = this.add.rectangle(PLAYER_HP_BAR_X + 36, PLAYER_HP_BAR_Y, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0)
-    this._playerHpBar   = this.add.rectangle(PLAYER_HP_BAR_X + 36, PLAYER_HP_BAR_Y, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0)
-    this._playerHpText  = this.add.text(PLAYER_HP_BAR_X + HP_BAR_W + 48, PLAYER_HP_BAR_Y - 6, this._hpLabel(), textStyle)
+    this.add.text(PLAYER_HP_BAR_X, PLAYER_HP_BAR_Y - 24, 'HP', textStyle).setDepth(HUD_DEPTH)
+    this._playerHpBarBg = this.add.rectangle(PLAYER_HP_BAR_X + 36, PLAYER_HP_BAR_Y, HP_BAR_W, HP_BAR_H, 0x440000).setOrigin(0, 0).setDepth(HUD_DEPTH)
+    this._playerHpBar   = this.add.rectangle(PLAYER_HP_BAR_X + 36, PLAYER_HP_BAR_Y, HP_BAR_W, HP_BAR_H, 0x00cc44).setOrigin(0, 0).setDepth(HUD_DEPTH)
+    this._playerHpText  = this.add.text(PLAYER_HP_BAR_X + HP_BAR_W + 48, PLAYER_HP_BAR_Y - 6, this._hpLabel(), textStyle).setDepth(HUD_DEPTH)
 
     // Budget meter
-    this.add.text(BUDGET_METER_X, BUDGET_METER_Y - 24, '$', textStyle)
-    this._budgetBarBg = this.add.rectangle(BUDGET_METER_X + 30, BUDGET_METER_Y, BUDGET_BAR_W, BUDGET_BAR_H, 0x333300).setOrigin(0, 0)
-    this._budgetBar   = this.add.rectangle(BUDGET_METER_X + 30, BUDGET_METER_Y, BUDGET_BAR_W, BUDGET_BAR_H, 0xffe066).setOrigin(0, 0)
+    this.add.text(BUDGET_METER_X, BUDGET_METER_Y - 24, '$', textStyle).setDepth(HUD_DEPTH)
+    this._budgetBarBg = this.add.rectangle(BUDGET_METER_X + 30, BUDGET_METER_Y, BUDGET_BAR_W, BUDGET_BAR_H, 0x333300).setOrigin(0, 0).setDepth(HUD_DEPTH)
+    this._budgetBar   = this.add.rectangle(BUDGET_METER_X + 30, BUDGET_METER_Y, BUDGET_BAR_W, BUDGET_BAR_H, 0xffe066).setOrigin(0, 0).setDepth(HUD_DEPTH)
 
     // SLA timer (INCIDENT and SCRIPTED modes)
     if (mode === BATTLE_MODES.INCIDENT || mode === BATTLE_MODES.SCRIPTED) {
       this._slaText = this.add.text(SLA_TIMER_X, SLA_TIMER_Y, this._slaLabel(), {
         ...textStyle, fontSize: '22px', color: '#ff6666',
-      }).setOrigin(1, 0)
+      }).setOrigin(1, 0).setDepth(HUD_DEPTH)
     }
 
     // Battle portraits — 80×80px static images (Kenney Micro Roguelike, CC0).
@@ -203,13 +206,13 @@ export class BattleScene extends BaseScene {
       this.add.image(PLAYER_PORTRAIT_X, PLAYER_PORTRAIT_Y, playerPortraitKey)
         .setOrigin(0, 0)
         .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
-        .setDepth(1)
+        .setDepth(HUD_DEPTH)
     }
     if (this.textures.exists(opponentPortraitKey)) {
       this.add.image(OPPONENT_PORTRAIT_X, OPPONENT_PORTRAIT_Y, opponentPortraitKey)
         .setOrigin(0, 0)
         .setDisplaySize(PORTRAIT_SIZE, PORTRAIT_SIZE)
-        .setDepth(1)
+        .setDepth(HUD_DEPTH)
     }
   }
 
