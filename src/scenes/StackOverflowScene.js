@@ -318,7 +318,7 @@ export class StackOverflowScene extends BaseScene {
         // rm -rf gate: only visible at shame 5+
         if (skill.id === 'rm_rf' && GameState.player.shamePoints < 5) return null
         const topScore   = thread.answers.length > 0
-          ? thread.answers.reduce((m, a) => Math.max(m, a.score), 0)
+          ? thread.answers.reduce((m, a) => Math.max(m, a.score), -Infinity)
           : null
         const hasAccepted = thread.answers.some(a => a.isAccepted)
         return {
