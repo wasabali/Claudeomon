@@ -1,113 +1,135 @@
 # 🧑‍💻 Trainers
 
-All named trainers in Cloud Quest. Beat them for emblems, XP, and skill unlocks.
+Every named character who'll battle you, teach you, or judge your life choices. From the friendly tutorial gym leader to the shadowy engineers lurking at 3am — here they all are.
 
 ---
 
 ## 🏆 Gym Leaders
 
-| Name | Location | Domain | HP | Difficulty | Signature Skill | Teach Condition |
+The eight domain masters. Beat them for emblems, XP, and the right to say "I read the docs" with a straight face.
+
+| Leader | Domain | HP | Gym | Mechanic | Signature Skill | Location |
 |---|---|---|---|---|---|---|
-| Tux the Terminal Wizard | Terminal Gym, Localhost Town | Linux | 80 | Tutorial | `grep "ERROR" /var/log/*` | Complete tutorial battle |
-| Bjørn the Build Breaker | Pipeline Dojo, Pipeline Pass | IaC | 80 | ★★ | `az pipelines run` | Beat Gym 1 |
-| Captain Nines | Uptime Arena, Production Plains | Cloud | 90 | ★★★ | `blue-green deploy` | Beat Gym 2 |
-| Scrum Siri | Sprint Sanctum, Jira Dungeon | Observability | 85 | ★★★ | `az monitor alert create` | Beat Gym 3 |
-| Docker Dag | Container Yard, Helm Repository | Containers | 100 | ★★★★ | `docker build` | Beat Gym 4 |
-| The Kube-rnetes Master | Cluster Ring, Kubernetes Colosseum | Kubernetes | 120 | ★★★★ | `kubectl apply -f` | Beat Gym 5 |
-| Ingrid the IAM Inspector | Security Vault | Security | 90 | ★★★★ | `ssh-keygen` | Beat Gym 6 |
-| The Solutions Oracle | Whiteboard Summit, Architecture District | Observability | 100 | ★★★★★ | `az monitor alert create` | Beat Gym 7 |
+| Tux the Terminal Wizard | Linux | 80 | The Legacy Terminal | `legacy_only` — only legacy commands work | `grep "ERROR" /var/log/*` | Terminal Gym, Localhost Town |
+| Bjørn the Build Breaker | IaC | 80 | The Broken Pipeline | `flaky_pipeline` — 30% chance any skill fails | `az pipelines run` | Jira Dungeon 1, Pipeline Pass |
+| Captain Nines | Cloud | 90 | 3am Incident Response | `sla_timer` — SLA countdown pressure | `blue-green deploy` | Production Plains |
+| Fatima the Function Witch | Serverless | 80 | Cold Start Gauntlet | `cold_start` — first skill each turn has cold start penalty | `az functionapp deploy` | Pipeline Pass |
+| Ingrid the IAM Inspector | Security | 90 | Entra Misconfiguration | `rbac_deny` — skills randomly denied by IAM policies | `ssh-keygen` | Security Vault Gym |
+| The Kube-rnetes Master | Kubernetes | 120 | Pod Crasher | `respawn` — defeated pods come back after 2 turns | `kubectl apply -f` | Kubernetes Colosseum |
+| The Solutions Oracle | Observability | 100 | Azure Bill Spiral | `review_board` — must justify every skill use | `az monitor alert create` | Architecture District |
+| The CTO | Cloud | — | The CTO Office | `all_domains` — uses skills from every domain | varies | Production Plains |
+
+> 💡 Each gym has a unique **mechanic** that changes battle rules. Prepare accordingly! See [Combat Guide](combat-guide.md).
 
 ---
 
-## 🎖️ Sub-Leaders
+## 🎖️ Gym Sub-Leaders
 
-Sub-leaders guard inner rooms before the gym leader. Beat them to unlock the final door.
+Sub-leaders guard the inner rooms before you reach the gym leader. Think of them as the warm-up act that's somehow harder than you expected.
 
-| Name | Location | Domain | HP | Signature |
+| Sub-Leader | Domain | HP | Gym | Teaches |
 |---|---|---|---|---|
-| SLA Signe | Uptime Arena ante-room | Observability | 200 | Pause SLA timer |
-| Story Point Søren | Sprint Sanctum gate | IaC | 190 | Sprint overflow debuff |
-| Layer Lars | Container Yard gate | Containers | 210 | Layer squash attack |
-| Replica Set Ragnhild | Cluster Ring ante-room | Kubernetes | 230 | Scale to zero |
-| Architect Aleksander | Whiteboard Summit gate | Observability | 250 | Whiteboard stun |
-| Logging Lena | Architecture District patrol | Observability | 180 | Log flood DoT |
-| Alert Anders | Production Plains checkpoint | Observability | 200 | Alert fatigue debuff |
-| Pipeline Per | Jira Dungeon floor 2 | IaC | 200 | YAML syntax error |
-| Trigger Trude | Jira Dungeon floor 2 | Serverless | 190 | Event storm |
-| Manifest Magnus | Jira Dungeon floor 3 | Kubernetes | 220 | Manifest conflict |
-| Policy Pål | Security Vault lobby | Security | 210 | IAM deny |
-| Metrics Maja | Production Plains | Observability | 175 | Metric reveal |
-| Deploy Diana | Azure Town edge | Cloud | 185 | Rapid deploy |
-| Incident Ivan | Production Plains late | Cloud | 230 | SLA countdown (3 turns) |
+| Logging Lena | Linux | 50 | Terminal Gym | `tail -f /var/log/syslog` |
+| Alert Anders | Cloud | 60 | 3am Incident Response | `az monitor alert create` |
+| Pipeline Per | IaC | 55 | Broken Pipeline | `az pipelines run` |
+| Trigger Trude | Serverless | 55 | Cold Start Gauntlet | `set trigger` |
+| Manifest Magnus | Kubernetes | 70 | Pod Crasher | `kubectl apply -f` |
+| Policy Pål | Security | 60 | Entra Misconfiguration | `az role assignment create` |
+| Metrics Maja | Observability | 60 | Azure Bill Spiral | `az monitor metrics list` |
+| Deploy Diana | Cloud | 80 | CTO Office | `blue-green deploy` |
+| Incident Ivan | Observability | 80 | CTO Office | `canary release` |
+| SLA Signe | Cloud | 60 | 3am Incident Response | — |
+| Story Point Søren | Observability | 55 | Sprint Sanctum | — |
+| Layer Lars | Containers | 70 | Container Yard | — |
+| Replica Set Ragnhild | Kubernetes | 65 | Cluster Ring | — |
+| Architect Aleksander | Observability | 70 | Whiteboard Summit | — |
 
 ---
 
 ## 🌍 Field Trainers
 
-Trainers you encounter in the overworld — not in gyms. Beat them for skills and lore.
+Trainers you encounter in the overworld — not in gyms. They teach valuable skills and occasionally share questionable life advice.
 
-| Name | Location | Domain | HP | Notes |
+| Trainer | Domain | HP | Teaches | Location |
 |---|---|---|---|---|
-| Ola the Ops Guy | Localhost Town | Linux | 120 | First trainer encounter; teaches `systemctl restart` |
-| Fatima the Function Witch | Pipeline Pass | Serverless | 200 | Teaches Serverless fundamentals |
-| Helm Hansen | Helm Repository | Kubernetes | 240 | Teaches `helm install`, `helm upgrade`, `kubectl logs -f` |
-| Lambda Lars | Staging Valley | Serverless | 180 | Teaches `az functionapp function invoke` |
-| Docker Diana | Container Yard | Containers | 190 | Teaches `docker run`, `az acr push` |
-| Terraform Tore | Architecture District | IaC | 280 | Teaches `terraform plan` |
-| Firewall Frida | Security Vault approach | Security | 260 | Teaches `az network nsg rule create` |
-| Grafana Gerd | Azure Town | Observability | 160 | Teaches `az monitor metrics list --detailed` |
-| CI Carl | Pipeline Pass | IaC | 170 | Teaches `git commit -m` |
-| Cloud Costas | Azure Town | Cloud | 220 | Teaches `az vm create` |
-| NFS Nora | Localhost Town outskirts | Linux | 140 | Teaches `mount /dev/sdb1 /mnt` |
-| DevOps Dave | Pipeline Pass | IaC | 200 | Gives flaky test quest; teaches `az devops configure` |
-| Scale Set Sven | Staging Valley | Cloud | 210 | Teaches scaling patterns |
+| Ola the Ops Guy | Linux | 60 | `systemctl restart` | Localhost Town |
+| Helm Hansen | Containers | 100 | `helm upgrade --install` | Helm Repository |
+| Lambda Lars | Serverless | 70 | `az functionapp deploy` | Staging Valley |
+| Docker Diana | Containers | 75 | `docker compose up` | node_modules Maze |
+| Terraform Tore | IaC | 80 | `terraform plan` | Staging Valley |
+| Firewall Frida | Security | 65 | `az network nsg rule create` | Security Vault Gym |
+| Grafana Gerd | Observability | 70 | `az monitor metrics list --detailed` | Architecture District |
+| CI Carl | IaC | 50 | `git commit -m` | Pipeline Pass |
+| Cloud Costas | Cloud | 85 | `az vm create` | Azure Town |
+| NFS Nora | Linux | 75 | `mount /dev/sdb1 /mnt` | Terminal Gym |
+| DevOps Dave | IaC | 65 | `az devops configure` | Pipeline Pass |
+| Scale Set Sven | Cloud | 95 | `az scale out` | Production Plains |
+
+> 💡 Some gym leaders (Scrum Siri, Docker Dag) also appear as field encounters in overworld areas before you reach their gym. See the Gym Leaders table above for their full stats.
 
 ---
 
-## 🍺 Cursed Trainers (Three AM Tavern)
+## 👥 World NPCs
 
-Unlocked by Shame level. All teach cursed or nuclear techniques.
+Non-battleable characters. They give quests, sell items, or exist purely to make you feel inadequate.
 
-| Name | Shame Req. | Domain | HP | Teaches | Note |
-|---|---|---|---|---|---|
-| The Force Pusher | 1 | IaC | 180 | `git push --force` | First cursed trainer |
-| Merge Magda | 1 | IaC | 200 | `merge without review` | Appears with Force Pusher |
-| Hardcode Henrik | 1 | Security | 190 | `hardcode the secret` | Appears early |
-| The Root Whisperer | 2 | Security | 250 | `sudo chmod 777 /`, `ufw disable` (Shame 3) | Unlocks two cursed skills |
-| kubectl Karen | 2 | Kubernetes | 270 | `kubectl delete ns prod` | Hot take energy |
-| The Rebase Reverend | 2 | IaC | 230 | `git rebase -i HEAD~999` | Sermonizes while battling |
-| Hotfix Håkon | 2 | Cloud | 240 | `deploy directly to prod` | Hidden until Shame ≥ 2 |
-| Skip-Tests Sigrid | 4 | IaC | 260 | `git commit --no-verify` | Hidden until Shame ≥ 4 |
-| The Downtime Dealer | 6 | Cloud | 300 | `restart prod without notice` | Hidden until Shame ≥ 6 |
-| rm-rf Rune | 8 | Linux | 320 | `rm -rf /` | Hidden until Shame ≥ 8 |
+| NPC | Location | Role |
+|---|---|---|
+| Old Margaret | Localhost Town | Quest giver. Teaches `az webapp restart`. Her bakery is your first mission. |
+| Professor Pedersen | Localhost Town | Starter Deck selection. Lore exposition. Will talk for hours if you let him. |
+| Random Intern | Localhost Town | Asks you questions you can't answer. Somehow already has more cloud certs than you. |
 
 ---
 
-## 👥 The CTO (Non-combat NPC + Opponent)
+## 💀 Cursed Trainers
 
-The CTO is both a quest giver and a late-game opponent. Teaches the full legacy IT skill suite:
-`budget review meeting`, `schedule vendor call`, `run license audit`, `run Excel macro`, `migrate to SharePoint`, `query Access DB`, `create Outlook rule`, `cost alert triggered`.
+<details>
+<summary>⚠️ SPOILER WARNING — Click to reveal the 3am Tavern roster and hidden area trainers</summary>
 
-Appears first in Azure Town. Final battle is optional (Act 3, post-credits path).
+### 3am Tavern Regulars
 
----
+The Tavern opens when your Shame hits 1. More trainers appear as your Shame grows. They teach powerful but reputation-destroying techniques.
 
-## 💀 Outcast / Hidden Trainers
-
-Found only in [hidden areas](hidden-areas.md). Not shown on normal maps.
-
-| Name | Hidden Area | Domain | Shame Req. | Teaches |
+| Trainer | Domain | Location | Shame Required | Teaches |
 |---|---|---|---|---|
-| Deprecated Dagfinn | Server Graveyard | IaC / Cloud | 0 (area gated) | `terraform apply`, `az group delete --yes` |
-| Privileged Petra | node_modules Maze | Containers | 0 (area gated) | `docker run --privileged`, `curl \| sudo bash` |
-| The Null Pointer | /dev/null Void | Observability | 0 (area gated) | `history -c` |
-| West-EU-2 Wilhelm | Deprecated Azure Region | Cloud | 0 (area gated) | `az feature register --namespace Microsoft.Legacy` |
-| YOLO Yaml Ylva | Kubernetes Colosseum inner ring | Kubernetes | ≥ 3 | `kubectl apply -f /dev/stdin` |
-| sudo su Saga | Terminal Gym deep passage | Linux | ≥ 2 | `sudo su -` |
-| .env Erik | Security Vault hidden corridor | Security | ≥ 3 | `git add .env && git commit` |
-| Cron Kristina | Server Graveyard east | Linux | ≥ 3 | `*/1 * * * * ./attack.sh` |
-| Legacy Leif | Deprecated Azure Region | Cloud | ≥ 5 | `java -jar app-2006-FINAL-v2-REAL.jar` |
+| The Force Pusher | IaC | 3am Tavern | 1 | `git push --force` |
+| Merge Magda | IaC | 3am Tavern | 1 | `merge without review` |
+| Hardcode Henrik | Security | 3am Tavern | 1 | `hardcode the secret` |
+| Hotfix Håkon | Cloud | 3am Tavern | 2 | `deploy directly to prod` |
+| The Root Whisperer | Security | 3am Tavern | 2 | `sudo chmod 777 /` |
+| kubectl Karen | Kubernetes | 3am Tavern | 2 | `kubectl delete pod --all` |
+| The Rebase Reverend | IaC | 3am Tavern | 2 | `git rebase -i HEAD~999` |
+| YOLO Yaml Ylva | Kubernetes | Kubernetes Colosseum | 3 | `kubectl apply -f /dev/stdin` |
+| Skip-Tests Sigrid | IaC | 3am Tavern | 4 | `git commit --no-verify` |
+| The Downtime Dealer | Cloud | 3am Tavern | 6 | `restart prod without notice` |
+| rm-rf Rune | Linux | 3am Tavern | 8 | `rm -rf /` |
+
+### Hidden Area Trainers
+
+These trainers are found in [hidden areas](hidden-areas.md) — no Shame required to meet them, but the areas themselves are gated behind special triggers.
+
+| Trainer | Domain | Location | Teaches |
+|---|---|---|---|
+| Deprecated Dagfinn | Linux | Server Graveyard | `terraform destroy` |
+| Privileged Petra | Containers | node_modules Maze | `curl example.com \| sudo bash` |
+| The Null Pointer | Observability | /dev/null Void | `history -c` |
+| West-EU-2 Wilhelm | Cloud | Deprecated Azure Region | `az feature register --namespace Microsoft.Legacy` |
+| Legacy Leif | Cloud | Deprecated Azure Region | `java -jar app-2006-FINAL-v2-REAL.jar` |
+
+### Cursed Trainers in Regular Gyms
+
+Some cursed trainers hide within normal gyms — you'll only find them if you have enough Shame.
+
+| Trainer | Domain | Location | Shame Required | Teaches |
+|---|---|---|---|---|
+| sudo su Saga | Linux | Terminal Gym | 2 | `sudo su -` |
+| .env Erik | Security | Security Vault Gym | 3 | `git add .env && git commit` |
+| Cron Kristina | Linux | Server Graveyard | 3 | `*/1 * * * * ./attack.sh` |
+
+</details>
 
 ---
 
-*See [World Map](world-map.md) for locations. See [Combat Guide](combat-guide.md) for gym mechanics.*
+*See [World Map](world-map.md) for locations.*
+*See [Skills Reference](skills-reference.md) for what each skill does.*
+*See [Combat Guide](combat-guide.md) for gym battle mechanics.*
