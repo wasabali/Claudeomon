@@ -15,11 +15,15 @@ import { getAll as getAllSkills } from '#data/skills.js'
 //   Z        — open selected thread (list mode)
 //   X        — back (detail → list, list → return scene)
 
-const SO_DARK         = '#0f380f'
-const SO_MID          = '#306230'
-const SO_LIGHT        = '#8bac0f'
-const SO_RED          = '#ff4d4d'
-const FONT_SIZE             = '16px'
+// Stack Overflow authentic colour palette
+const SO_ORANGE      = '#F48024'   // brand orange — header, selected row, comments heading
+const SO_BLUE        = '#6CBBF7'   // question title blue (SO dark-mode link colour)
+const SO_WHITE       = '#E7E8EB'   // body text, unselected rows
+const SO_MUTED       = '#9DAAB0'   // authors, tags, separators, footer, locked rows
+const SO_GREEN       = '#57AE78'   // accepted-answer badge
+const SO_RED         = '#E06C5E'   // negative score, cursed hints
+const SO_HEADER_TEXT = '#FFFFFF'   // white text on the orange header bar
+const SO_HEADER_FILL = 0xF48024   // header bar fill (hex integer for Phaser graphics)
 const PANEL_INSET           = 4    // gap from screen edge to all panels
 const HEADER_H              = 56   // actual panel height of the header bar
 const FOOTER_H              = 52   // actual panel height of the footer bar
@@ -60,16 +64,24 @@ export class StackOverflowScene extends BaseScene {
     // Footer bar at the bottom
     this._footerPanel = this._addPanel(PANEL_INSET, CONFIG.HEIGHT - PANEL_INSET - FOOTER_H, CONFIG.WIDTH - PANEL_INSET * 2, FOOTER_H)
 
+    // Orange header bar — matches Stack Overflow's brand header colour
+    this._headerOverlay = this.add.rectangle(
+      PANEL_INSET, PANEL_INSET,
+      CONFIG.WIDTH - PANEL_INSET * 2, HEADER_H,
+      SO_HEADER_FILL,
+    )
+    this._headerOverlay.setOrigin(0, 0)
+
     this._headerText = this.add.text(CONTENT_X, PANEL_INSET + CONTENT_Y_PAD, 'STACKOVERFLOW', {
       fontFamily: CONFIG.FONT,
       fontSize: FONT_SIZE,
-      color: SO_DARK,
+      color: SO_HEADER_TEXT,
     })
 
     this._footerText = this.add.text(CONTENT_X, CONFIG.HEIGHT - PANEL_INSET - FOOTER_H + CONTENT_Y_PAD, '', {
       fontFamily: CONFIG.FONT,
       fontSize: FONT_SIZE,
-      color: SO_MID,
+      color: SO_MUTED,
     })
 
     this._bindInput()
@@ -199,32 +211,32 @@ export class StackOverflowScene extends BaseScene {
     const MAX_CHARS = 80
 
     // Question header
-    lines.push({ text: `Q: ${thread.questionTitle}`, color: SO_DARK })
-    lines.push({ text: `Asked by: ${thread.askedBy}`, color: SO_LIGHT })
-    lines.push({ text: `Tags: ${thread.tags.join(' ')}`, color: SO_LIGHT })
-    lines.push({ text: '────────────────────────', color: SO_MID })
+    lines.push({ text: `Q: ${thread.questionTitle}`, color: SO_BLUE })
+    lines.push({ text: `Asked by: ${thread.askedBy}`, color: SO_MUTED })
+    lines.push({ text: `Tags: ${thread.tags.join(' ')}`, color: SO_MUTED })
+    lines.push({ text: '────────────────────────', color: SO_MUTED })
 
     // Answers
     for (const answer of thread.answers) {
       const badge = answer.isAccepted ? '✓ ACCEPTED' : 'ANSWER'
-      const scoreColor = answer.score < 0 ? SO_RED : (answer.isAccepted ? SO_DARK : SO_MID)
+      const scoreColor = answer.score < 0 ? SO_RED : (answer.isAccepted ? SO_GREEN : SO_WHITE)
       lines.push({ text: `${badge} (Score: ${answer.score})`, color: scoreColor })
       for (const l of wrap(answer.text, MAX_CHARS)) {
-        lines.push({ text: l, color: SO_MID })
+        lines.push({ text: l, color: SO_WHITE })
       }
-      lines.push({ text: `— ${answer.author}`, color: SO_LIGHT })
+      lines.push({ text: `— ${answer.author}`, color: SO_MUTED })
       if (answer.isCursedHint) {
         lines.push({ text: '💀 [CURSED TECHNIQUE HINT]', color: SO_RED })
       }
-      lines.push({ text: '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄', color: SO_MID })
+      lines.push({ text: '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄', color: SO_MUTED })
     }
 
     // Comments
     if (thread.comments.length > 0) {
-      lines.push({ text: `COMMENTS (${thread.comments.length})`, color: SO_DARK })
+      lines.push({ text: `COMMENTS (${thread.comments.length})`, color: SO_ORANGE })
       for (const comment of thread.comments) {
         for (const l of wrap(`${comment.text} — ${comment.author}`, MAX_CHARS)) {
-          lines.push({ text: `  ${l}`, color: SO_LIGHT })
+          lines.push({ text: `  ${l}`, color: SO_MUTED })
         }
       }
     }
@@ -252,9 +264,8 @@ export class StackOverflowScene extends BaseScene {
       this.contentObjects.push(this.add.text(CONTENT_X, CONTENT_Y_START, 'No commands discovered yet.\nBeat trainers to learn skills.', {
         fontFamily: CONFIG.FONT,
         fontSize: FONT_SIZE,
-        color: SO_MID,
+        color: SO_MUTED,
         lineSpacing: 6,
-      }))
       this._footerText.setText('X: back')
       return
     }
@@ -268,8 +279,8 @@ export class StackOverflowScene extends BaseScene {
       const label = row.unlocked
         ? `${prefix}${lockIcon}${row.displayName}${cursedMark}`
         : `${prefix}${lockIcon}[LOCKED]`
-      const color = !row.unlocked ? SO_LIGHT
-        : (row.isCursed ? SO_RED : (isSelected ? SO_DARK : SO_MID))
+      const color = !row.unlocked ? SO_MUTED
+        : (row.isCursed ? SO_RED : (isSelected ? SO_ORANGE : SO_WHITE))
 
       this.contentObjects.push(this.add.text(CONTENT_X, CONTENT_Y_START + i * ROW_H, label, {
         fontFamily: CONFIG.FONT,
